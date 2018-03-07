@@ -78,11 +78,11 @@ public class DatabaseResetEntry implements PersistentObject {
   }
 
   public Date getStartTime() {
-    return startTime;
+    return NeutronDateUtils.freshDate(startTime);
   }
 
   public void setStartTime(Date startTime) {
-    this.startTime = startTime;
+    this.startTime = NeutronDateUtils.freshDate(startTime);
   }
 
   public Date getEndTime() {
