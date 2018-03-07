@@ -86,7 +86,7 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  * <h3>Command Line:</h3>
  * 
  * <pre>
- * {@code java gov.ca.cwds.jobs.ClientIndexerJob -c config/local.yaml -l /Users/mylittlepony/client_indexer_time.txt}
+ * {@code java gov.ca.cwds.jobs.ClientIndexerJob -c config/local.yaml -l /Users/mylittlepony/client.time}
  * </pre>
  * 
  * @author CWDS API Team

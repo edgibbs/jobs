@@ -69,6 +69,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   private volatile boolean doneJob = false;
 
   /**
+   * Flag any/all validation errors.
+   */
+  private volatile boolean validationErrors = false;
+
+  /**
    * Official start time.
    */
   private long startTime = System.currentTimeMillis();
@@ -432,6 +437,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public String[] getAffectedDocumentIds() {
     return affectedDocumentIds.toArray(new String[0]);
+  }
+
+  public boolean isValidationErrors() {
+    return validationErrors;
+  }
+
+  public void failValidation() {
+    this.validationErrors = true;
   }
 
 }

@@ -80,4 +80,8 @@ public interface AtomValidateDocument extends AtomShared {
     getLogger().info("total hits: {}", totalHits);
   }
 
+  default void failValidation() {
+    getFlightLog().failValidation();
+  }
+
 }

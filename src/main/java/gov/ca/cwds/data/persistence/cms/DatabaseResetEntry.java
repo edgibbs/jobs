@@ -17,6 +17,7 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
@@ -85,11 +86,11 @@ public class DatabaseResetEntry implements PersistentObject {
   }
 
   public Date getEndTime() {
-    return endTime;
+    return NeutronDateUtils.freshDate(endTime);
   }
 
   public void setEndTime(Date endTime) {
-    this.endTime = endTime;
+    this.endTime = NeutronDateUtils.freshDate(endTime);
   }
 
   public String getRefreshStatus() {
