@@ -50,12 +50,12 @@ public class SchemaResetRocket
 
   @Override
   public Date launch(Date lastRunDate) {
-    LOGGER.warn("REFRESH TEST SCHEMA!!!");
+    LOGGER.warn("RESET TEST SCHEMA!!!");
 
     try {
       refreshSchema();
     } catch (Exception e) {
-      CheeseRay.checked(LOGGER, e, "SCHEMA REFRESH ERROR!! {}", e.getMessage());
+      CheeseRay.checked(LOGGER, e, "SCHEMA RESET ERROR!! {}", e.getMessage());
     }
 
     return lastRunDate;
@@ -68,7 +68,7 @@ public class SchemaResetRocket
    */
   protected void refreshSchema() throws NeutronCheckedException {
     if (!isLargeDataSet()) {
-      LOGGER.warn("\n\n\n   ********** REFRESH SCHEMA!! ********** \n\n\n");
+      LOGGER.warn("\n\n\n   ********** RESET SCHEMA!! ********** \n\n\n");
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
       getOrCreateTransaction(); // HACK
 
@@ -76,7 +76,7 @@ public class SchemaResetRocket
       final String targetTransactionalSchema =
           ((String) session.getSessionFactory().getProperties().get("hibernate.default_schema"))
               .replaceFirst("CWSRS", "CWSNS").replaceAll("\"", "");
-      LOGGER.info("CALL SCHEMA REFRESH: target schema: {}", targetTransactionalSchema);
+      LOGGER.info("CALL SCHEMA RESET: target schema: {}", targetTransactionalSchema);
 
       final ProcedureCall proc = session.createStoredProcedureCall("CWSTMP.SPREFDBS");
       proc.registerStoredProcedureParameter("SCHEMANM", String.class, ParameterMode.IN);
@@ -91,12 +91,12 @@ public class SchemaResetRocket
       LOGGER.info("refresh schema proc: status: {}, msg: {}", returnStatus, returnMsg);
 
       if (StringUtils.isNotBlank(returnStatus) && returnStatus.charAt(0) != '0') {
-        CheeseRay.runtime(LOGGER, "SCHEMA REFRESH ERROR! {}", returnMsg);
+        CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", returnMsg);
       } else {
-        LOGGER.warn("SCHEMA REFRESH STARTED!!!");
+        LOGGER.warn("SCHEMA RESET STARTED!!!");
       }
     } else {
-      LOGGER.warn("SAFETY! REFRESH PROHIBITED ON LARGE DATA SETS!");
+      LOGGER.warn("SAFETY! RESET PROHIBITED ON LARGE DATA SETS!");
     }
   }
 
