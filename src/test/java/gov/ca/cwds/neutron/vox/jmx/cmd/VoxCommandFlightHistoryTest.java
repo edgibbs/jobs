@@ -52,7 +52,7 @@ public class VoxCommandFlightHistoryTest {
   @Test
   public void run_Args__() throws Exception {
     when(mbean.history()).thenReturn("some history");
-    String actual = target.run();
+    final String actual = target.run();
     assertThat(actual, is(notNullValue()));
   }
 

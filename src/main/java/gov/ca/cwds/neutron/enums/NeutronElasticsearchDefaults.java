@@ -28,7 +28,6 @@ public enum NeutronElasticsearchDefaults {
     this.value = value;
   }
 
-  @SuppressWarnings("javadoc")
   public String getValue() {
     return value;
   }

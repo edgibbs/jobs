@@ -54,7 +54,7 @@ public class VoxCommandFetchLogsTest extends Goddard {
   @Test
   public void run_Args__() throws Exception {
     when(mbean.logs()).thenReturn("some history");
-    String actual = target.run();
+    final String actual = target.run();
     assertThat(actual, is(notNullValue()));
   }
 
