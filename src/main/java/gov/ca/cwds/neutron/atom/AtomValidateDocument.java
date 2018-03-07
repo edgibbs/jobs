@@ -23,11 +23,12 @@ public interface AtomValidateDocument extends AtomShared {
     }
   }
 
-  default void processDocumentHits(final SearchHits hits) throws NeutronCheckedException {
+  default boolean processDocumentHits(final SearchHits hits) throws NeutronCheckedException {
     int docId = 0;
     String json;
     ElasticSearchPerson person;
     final Logger logger = getLogger();
+    boolean ret = false;
 
     try {
       for (SearchHit hit : hits.getHits()) {
@@ -41,10 +42,14 @@ public interface AtomValidateDocument extends AtomShared {
         logger.trace("person: {}", person);
 
         validateDocument(person);
+        ret = true;
       }
     } catch (IOException e) {
-      throw CheeseRay.checked(logger, e, "ERROR READING DOCUMENT! doc id: {}", docId);
+      // Do NOT re-throw and kill a job over a validation issue.
+      getLogger().error("ERROR READING DOCUMENT! doc id: {}", docId, e);
     }
+
+    return ret;
   }
 
   default boolean validateDocument(final ElasticSearchPerson person)

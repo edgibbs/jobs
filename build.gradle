@@ -29,7 +29,7 @@ project.ext {
     powerMockVersion = "1.7.3"
 }
 
-version = 0.43
+version = 0.44
 
 repositories {
     mavenCentral()
@@ -83,11 +83,7 @@ dependencies {
 	compile group: 'org.weakref', name: 'jmxutils', version: '1.19'
 	compile 'org.quartz-scheduler:quartz:2.3.0'
 	compile 'com.google.code.gson:gson:2.8.2'
-	
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
-
-	// Maven certificate problem.
-	// compile 'io.earcam:io.earcam.unexceptional:0.3.0'
 
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
@@ -110,6 +106,8 @@ dependencies {
 	testCompile 'io.exemplary.guice:guice-behave:1.0.0'
 	
 	testCompile 'com.github.tlrx:elasticsearch-test:1.2.1'
+	
+	// LOCAL ANALYSIS:
 	// testCompile group: 'org.elasticsearch.test', name: 'framework', version: 'elasticsearchVersion'
     // testCompile 'org.jacoco:jacoco:0.8.0'
 }
