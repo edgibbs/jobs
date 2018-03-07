@@ -26,9 +26,9 @@ import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
@@ -72,11 +72,6 @@ public class ClientCountyRocket extends ClientIndexerJob
   @Override
   public String getInitialLoadViewName() {
     return "CLIENT_T";
-  }
-
-  @Override
-  public String getMQTName() {
-    return "REFRESH_ALL_MQTS";
   }
 
   @Override
@@ -131,8 +126,8 @@ public class ClientCountyRocket extends ClientIndexerJob
       processStatement(p, con);
     } catch (Exception e) {
       fail();
-      throw JobLogs.runtime(LOGGER, e, "PROC ERROR ON RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
-          e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "PROC ERROR ON RANGE! {}-{} : {}", p.getLeft(),
+          p.getRight(), e.getMessage());
     }
   }
 
@@ -165,14 +160,14 @@ public class ClientCountyRocket extends ClientIndexerJob
 
       final Integer origOut = (Integer) proc.getOutputParameterValue("RETCODE");
       if (origOut == null) {
-        throw JobLogs.runtime(getLogger(), "RETCODE IS NULL???");
+        throw CheeseRay.runtime(getLogger(), "RETCODE IS NULL???");
       }
 
       final int retcode = origOut.intValue();
       LOGGER.info("Client county proc: retcode: {}", retcode);
 
       if (retcode != 0) {
-        throw JobLogs.runtime(getLogger(), "PROC FAILED! {}", retcode);
+        throw CheeseRay.runtime(getLogger(), "PROC FAILED! {}", retcode);
       }
     }
   }

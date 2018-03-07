@@ -12,10 +12,4 @@ public class NeutronLongCmdLineNameTest {
     assertThat(NeutronLongCmdLineName.class, notNullValue());
   }
 
-  @Test
-  public void instantiation() throws Exception {
-    NeutronLongCmdLineName target = new NeutronLongCmdLineName();
-    assertThat(target, notNullValue());
-  }
-
 }

@@ -576,11 +576,11 @@ public class FlightPlan implements ApiMarker {
   }
 
   public Date getOverrideLastEndTime() {
-    return overrideLastEndTime;
+    return NeutronDateUtils.freshDate(overrideLastEndTime);
   }
 
   public void setOverrideLastEndTime(Date overrideLastEndTime) {
-    this.overrideLastEndTime = overrideLastEndTime;
+    this.overrideLastEndTime = NeutronDateUtils.freshDate(overrideLastEndTime);
   }
 
 }

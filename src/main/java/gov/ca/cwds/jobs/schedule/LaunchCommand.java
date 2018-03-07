@@ -361,7 +361,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       instance = injector.getInstance(LaunchCommand.class);
       instance.commonFlightPlan = flightPlan;
     } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e, "COMMAND CENTER FAILURE! {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "LAUNCH COMMAND FAILURE! {}", e.getMessage());
     }
 
     return instance;
@@ -381,7 +381,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     if (!isTestMode() && (!isSchedulerMode() || fatalError || shutdownRequested)) {
       // Shutdown all remaining resources, even those not attached to this rocket.
       final int exitCode = this.fatalError ? -1 : 0;
-      LOGGER.warn("\n>>>>>>>>>> SHUT DOWN COMMAND CENTER! Exit code: {}", exitCode);
+      LOGGER.warn("\n>>>>>>>>>> SHUT DOWN LAUNCH COMMAND! Exit code: {}", exitCode);
       System.exit(exitCode); // NOSONAR
     }
   }
@@ -405,7 +405,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    * @throws NeutronCheckedException on launch error
    */
   protected static synchronized LaunchCommand startSchedulerMode() throws NeutronCheckedException {
-    LOGGER.info("STARTING COMMAND CENTER ...");
+    LOGGER.info("STARTING LAUNCH COMMAND ...");
 
     // HACK: inject a mock scheduler instead.
     if (standardFlightPlan.isSimulateLaunch()) {
@@ -427,7 +427,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       // Intentionally catch a Throwable, not an Exception.
       // Forcibly close orphaned resources, if necessary, by system exit.
       instance.fatalError = true;
-      throw CheeseRay.checked(LOGGER, e, "COMMAND CENTER CRITICAL ERROR!: {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "CRITICAL START ERROR!: {}", e.getMessage());
     }
 
     LOGGER.info("LAUNCH COMMAND STARTED!");
@@ -455,7 +455,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
     System.setProperty("LAUNCH_DIR",
         StringUtils.isNotBlank(standardFlightPlan.getLastRunLoc())
-            ? NeutronStringUtils.filePath(standardFlightPlan.getLastRunLoc())
+            ? NeutronStringUtils.filePath(standardFlightPlan.getLastRunLoc()).get()
             : "./jobrunner/");
 
     LaunchCommand.settings.setSchedulerMode(false);
