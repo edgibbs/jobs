@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.function.Function;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
@@ -217,17 +218,20 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     assertThat(actual, is(notNullValue()));
   }
 
-  // @Test
-  // public void startContinuousMode_Args__StringArray() throws Exception {
-  // LaunchCommand actual = LaunchCommand.startSchedulerMode();
-  // assertThat(actual, is(notNullValue()));
-  // }
-
   @Test
   public void runStandalone_Args__Class__StringArray() throws Exception {
     final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
     final String[] args = new String[] {"-S", "-l", "/var/lib/jenkins/SuperRocket/LastRuntime.time",
         "-c", "config/local.yaml"};
+    LaunchCommand.launchOneWayTrip(klass, args);
+  }
+
+  @Test
+  @Ignore
+  public void runStandalone_Args2__Class__StringArray() throws Exception {
+    final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
+    final String[] args = new String[] {"-l", "/var/lib/jenkins/SuperRocket/LastRuntime.time", "-c",
+        "config/local.yaml"};
     LaunchCommand.launchOneWayTrip(klass, args);
   }
 
@@ -242,7 +246,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
       throws Exception {
     final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
     final Date now = new Date();
-    StandardFlightSchedule sched = StandardFlightSchedule.REFERRAL;
+    final StandardFlightSchedule sched = StandardFlightSchedule.REFERRAL;
     target.handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
   }
 
@@ -266,7 +270,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void buildCommandCenter_Args__FlightPlan() throws Exception {
-    FlightPlan standardFlightPlan = flightPlan;
+    final FlightPlan standardFlightPlan = flightPlan;
     LaunchCommand actual = LaunchCommand.buildCommandCenter(standardFlightPlan);
     assertThat(actual, is(notNullValue()));
   }

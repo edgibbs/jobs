@@ -12,6 +12,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
@@ -52,8 +53,8 @@ public class Mach1TestRocket extends BasePersonRocket<TestNormalizedEntity, Test
 
   @Inject
   public Mach1TestRocket(final BaseDaoImpl<TestNormalizedEntity> jobDao,
-      final ElasticsearchDao esDao, @LastRunFile final String lastRunFile,
-      final ObjectMapper mapper) {
+      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper) {
     super(jobDao, esDao, lastRunFile, mapper, null);
   }
 

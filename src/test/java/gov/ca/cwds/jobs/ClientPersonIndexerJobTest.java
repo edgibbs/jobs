@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
@@ -47,8 +48,8 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void useTransformThread_A$() throws Exception {
-    boolean actual = target.useTransformThread();
-    boolean expected = false;
+    final boolean actual = target.useTransformThread();
+    final boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -58,8 +59,8 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     // NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime);
     // target.writeLastSuccessfulRunTime(datetime);
     // target.getFlightPlan().setOverrideLastRunTime(lastRunTime);
-    String actual = target.getPrepLastChangeSQL();
-    // String expected =
+    final String actual = target.getPrepLastChangeSQL();
+    // final String expected =
     // "\"INSERT INTO GT_ID (IDENTIFIER)\\nSELECT DISTINCT CLT.IDENTIFIER \\nFROM CLIENT_T clt
     // \\nWHERE CLT.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' \\nUNION SELECT DISTINCT
     // cla.FKCLIENT_T AS IDENTIFIER \\nFROM CL_ADDRT cla \\nWHERE CLA.IBMSNAP_LOGMARKER >
@@ -74,7 +75,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void extract_A$ResultSet() throws Exception {
-    EsClientPerson actual = target.extract(rs);
+    final EsClientPerson actual = target.extract(rs);
     // EsClientPerson expected = null;
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, is(notNullValue()));
@@ -88,43 +89,43 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void getDenormalizedClass_A$() throws Exception {
-    Object actual = target.getDenormalizedClass();
-    Object expected = EsClientPerson.class;
+    final Object actual = target.getDenormalizedClass();
+    final Object expected = EsClientPerson.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getInitialLoadViewName_A$() throws Exception {
-    String actual = target.getInitialLoadViewName();
-    String expected = "MQT_CLIENT_ADDRESS";
+    final String actual = target.getInitialLoadViewName();
+    final String expected = "MQT_CLIENT_ADDRESS";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getMQTName_A$() throws Exception {
-    String actual = target.getMQTName();
-    String expected = "MQT_CLIENT_ADDRESS";
+    final String actual = target.getMQTName();
+    final String expected = "MQT_CLIENT_ADDRESS";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getJdbcOrderBy_A$() throws Exception {
-    String actual = target.getJdbcOrderBy();
-    String expected = " ORDER BY X.CLT_IDENTIFIER ";
+    final String actual = target.getJdbcOrderBy();
+    final String expected = " ORDER BY X.CLT_IDENTIFIER ";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void normalizeAndQueueIndex_A$List() throws Exception {
-    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+    final List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
     target.normalizeAndQueueIndex(grpRecs);
   }
 
   @Test
   public void getInitialLoadQuery_A$String() throws Exception {
-    String dbSchemaName = null;
-    String actual = target.getInitialLoadQuery(dbSchemaName);
-    String expected =
+    final String dbSchemaName = null;
+    final String actual = target.getInitialLoadQuery(dbSchemaName);
+    final String expected =
         "SELECT x.* FROM null.MQT_CLIENT_ADDRESS x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId'  AND x.CLT_SENSTV_IND = 'N'  ORDER BY X.CLT_IDENTIFIER  FOR READ ONLY WITH UR ";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -142,27 +143,34 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void validateAddresses_A$ReplicatedClient$ElasticSearchPerson() throws Exception {
-    ReplicatedClient client = new ReplicatedClient();
-    ElasticSearchPerson person = new ElasticSearchPerson();
-    boolean actual = target.validateAddresses(client, person);
-    boolean expected = true;
+    final ReplicatedClient client = new ReplicatedClient();
+    final ElasticSearchPerson person = new ElasticSearchPerson();
+    final boolean actual = target.validateAddresses(client, person);
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void validateDocument_A$ElasticSearchPerson() throws Exception {
-    ElasticSearchPerson person = new ElasticSearchPerson();
+    final ElasticSearchPerson person = new ElasticSearchPerson();
+    person.setId(DEFAULT_CLIENT_ID);
+
+    final ReplicatedClient rep = new ReplicatedClient();
+    rep.setCommonLastName("Young");
+    rep.setCommonFirstName("Angus");
+    rep.setCommonMiddleName("McKinnon");
+    rep.setBirthCity("Glasgow");
+
+    dao = mock(ReplicatedClientDao.class);
+    // TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
+    // sessionFactory, flightRecorder, flightPlan);
+    // target.setTxn(transaction);
+    when(dao.find(any())).thenReturn(rep);
+
     boolean actual = target.validateDocument(person);
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
-
-  // @Test(expected = NeutronCheckedException.class)
-  // public void validateDocument_A$ElasticSearchPerson_T$NeutronCheckedException() throws Exception
-  // {
-  // ElasticSearchPerson person = new ElasticSearchPerson();
-  // target.validateDocument(person);
-  // }
 
   @Test
   public void threadRetrieveByJdbc_A$() throws Exception {
@@ -171,38 +179,38 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void isInitialLoadJdbc_A$() throws Exception {
-    boolean actual = target.isInitialLoadJdbc();
-    boolean expected = true;
+    final boolean actual = target.isInitialLoadJdbc();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getPartitionRanges_A$() throws Exception {
-    List actual = target.getPartitionRanges();
-    List expected = new ArrayList<>();
+    final List actual = target.getPartitionRanges();
+    final List expected = new ArrayList<>();
     expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void mustDeleteLimitedAccessRecords_A$() throws Exception {
-    boolean actual = target.mustDeleteLimitedAccessRecords();
-    boolean expected = true;
+    final boolean actual = target.mustDeleteLimitedAccessRecords();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void normalize_A$List() throws Exception {
-    List<EsClientPerson> recs = new ArrayList<EsClientPerson>();
-    List<ReplicatedClient> actual = target.normalize(recs);
-    List<ReplicatedClient> expected = new ArrayList<>();
+    final List<EsClientPerson> recs = new ArrayList<EsClientPerson>();
+    final List<ReplicatedClient> actual = target.normalize(recs);
+    final List<ReplicatedClient> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void nextThreadNumber_A$() throws Exception {
-    int actual = target.nextThreadNumber();
-    int expected = 1;
+    final int actual = target.nextThreadNumber();
+    final int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -216,7 +224,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test(expected = NeutronCheckedException.class)
   public void main_A$StringArray_T$Exception() throws Exception {
-    String[] args = new String[] {};
+    final String[] args = new String[] {};
     ClientPersonIndexerJob.main(args);
   }
 
