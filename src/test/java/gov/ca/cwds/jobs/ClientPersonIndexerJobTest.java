@@ -191,6 +191,29 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   }
 
   @Test
+  public void validateDocument_A$ElasticSearchPerson__explode() throws Exception {
+    final ElasticSearchPerson person = new ElasticSearchPerson();
+    person.setId(DEFAULT_CLIENT_ID);
+
+    final ReplicatedClient rep = new ReplicatedClient();
+    rep.setCommonLastName("Young");
+    rep.setCommonFirstName("Angus");
+    rep.setCommonMiddleName("McKinnon");
+    rep.setBirthCity("Glasgow");
+
+    dao = mock(ReplicatedClientDao.class);
+    when(dao.find(any())).thenThrow(SQLException.class);
+
+    final TestClientPersonIndexerJob target = new TestClientPersonIndexerJob(dao, esDao,
+        lastRunFile, mapper, sessionFactory, null, flightPlan);
+    target.setTxn(transaction);
+
+    final boolean actual = target.validateDocument(person);
+    final boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
   public void threadRetrieveByJdbc_A$() throws Exception {
     target.threadRetrieveByJdbc();
   }
