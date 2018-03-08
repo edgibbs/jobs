@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,13 +170,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * @param person person document
    * @return true if addresses pass validation
    */
-  public boolean validateAddresses(final ReplicatedClient client,
-      final ElasticSearchPerson person) {
+  public boolean validateAddresses(ReplicatedClient client, ElasticSearchPerson person) {
     final String clientId = person.getId();
     final Map<String, ReplicatedAddress> repAddresses = client.getClientAddresses().stream()
         .filter(a -> a.getEffEndDt() == null).flatMap(ca -> ca.getAddresses().stream())
         .collect(Collectors.toMap(ReplicatedAddress::getId, a -> a));
-
     final Map<String, ElasticSearchPersonAddress> docAddresses = person.getAddresses().stream()
         .collect(Collectors.toMap(ElasticSearchPersonAddress::getId, a -> a));
 
@@ -210,9 +209,9 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       getOrCreateTransaction();
       final ReplicatedClient client = getJobDao().find(clientId);
 
-      return client.getCommonFirstName().equals(person.getFirstName())
-          && client.getCommonLastName().equals(person.getLastName())
-          && client.getCommonMiddleName().equals(person.getMiddleName())
+      return StringUtils.equals(client.getCommonFirstName(), person.getFirstName())
+          && StringUtils.equals(client.getCommonLastName(), person.getLastName())
+          && StringUtils.equals(client.getCommonMiddleName(), person.getMiddleName())
           && validateAddresses(client, person);
     } catch (Exception e) {
       LOGGER.error("CLIENT VALIDATION ERROR!", e);
