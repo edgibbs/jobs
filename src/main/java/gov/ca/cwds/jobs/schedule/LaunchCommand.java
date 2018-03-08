@@ -338,7 +338,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
   public static void setSysPropsFromEnvVars() {
     for (String propName : DB_PROPERTY_LIST) {
       // Get from Env Variables by Prop Name.
-      String envVarValue = System.getenv(propName);
+      final String envVarValue = System.getenv(propName);
       if (envVarValue != null) {
         System.setProperty(propName, envVarValue);
       }
