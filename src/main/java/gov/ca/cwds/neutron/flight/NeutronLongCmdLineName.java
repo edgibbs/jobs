@@ -2,10 +2,6 @@ package gov.ca.cwds.neutron.flight;
 
 public class NeutronLongCmdLineName {
 
-  private NeutronLongCmdLineName() {
-    // 'cause SonarQube says so ...
-  }
-
   public static final String CMD_LINE_ES_CONFIG_PEOPLE = "config-people";
   public static final String CMD_LINE_ES_CONFIG_PEOPLE_SUMMARY = "config-people-summary";
 
@@ -34,5 +30,9 @@ public class NeutronLongCmdLineName {
   public static final String CMD_LINE_BUCKET_TOTAL = "total-buckets";
   public static final String CMD_LINE_MIN_ID = "min_id";
   public static final String CMD_LINE_MAX_ID = "max_id";
+
+  private NeutronLongCmdLineName() {
+    // 'cause SonarQube says so ...
+  }
 
 }
