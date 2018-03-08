@@ -589,11 +589,11 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
   protected void sizeQueues(final Date lastRun) {
     // Configure queue sizes for last run or initial load.
     if (determineInitialLoad(lastRun)) {
+      queueNormalize = new LinkedBlockingDeque<>(50000);
+      queueIndex = new LinkedBlockingDeque<>(75000);
+    } else {
       queueNormalize = new LinkedBlockingDeque<>(8000);
       queueIndex = new LinkedBlockingDeque<>(16000);
-    } else {
-      queueNormalize = new LinkedBlockingDeque<>(50000);
-      queueIndex = new LinkedBlockingDeque<>(125000);
     }
   }
 

@@ -881,8 +881,8 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   }
 
   @Test
-  public void sizeQueues_A$Date_1() throws Exception {
-    when(flightPlan.determineInitialLoad(any(Date.class))).thenReturn(false);
+  public void sizeQueues_A$Date_initial_load() throws Exception {
+    when(flightPlan.determineInitialLoad(any(Date.class))).thenReturn(true);
     final Date lastRun = new Date();
     target.sizeQueues(lastRun);
   }
