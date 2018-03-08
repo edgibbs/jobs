@@ -69,14 +69,4 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
     this.replicatedEntity.setReplicationDate(NeutronDateUtils.freshDate(replicationDate));
   }
 
-  // @Override
-  // public int hashCode() {
-  // return HashCodeBuilder.reflectionHashCode(this, false);
-  // }
-  //
-  // @Override
-  // public boolean equals(Object obj) {
-  // return EqualsBuilder.reflectionEquals(this, obj, false);
-  // }
-
 }
