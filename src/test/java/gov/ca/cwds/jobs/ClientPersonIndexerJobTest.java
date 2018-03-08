@@ -159,7 +159,9 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     dao = mock(ReplicatedClientDao.class);
     when(dao.find(any())).thenReturn(rep);
 
-    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
+    final TestClientPersonIndexerJob target = new TestClientPersonIndexerJob(dao, esDao,
+        lastRunFile, mapper, sessionFactory, null, flightPlan);
+    target.setTxn(transaction);
     final boolean actual = target.validateAddresses(rep, person);
     final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
@@ -179,9 +181,11 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     dao = mock(ReplicatedClientDao.class);
     when(dao.find(any())).thenReturn(rep);
 
-    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
-    boolean actual = target.validateDocument(person);
-    boolean expected = false;
+    final TestClientPersonIndexerJob target = new TestClientPersonIndexerJob(dao, esDao,
+        lastRunFile, mapper, sessionFactory, null, flightPlan);
+    target.setTxn(transaction);
+    final boolean actual = target.validateDocument(person);
+    final boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
