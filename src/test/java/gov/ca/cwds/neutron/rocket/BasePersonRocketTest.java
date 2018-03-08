@@ -84,8 +84,8 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getViewName_Args__() throws Exception {
-    String actual = target.getInitialLoadViewName();
-    String expected = "VW_NUTTIN";
+    final String actual = target.getInitialLoadViewName();
+    final String expected = "VW_NUTTIN";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -102,8 +102,8 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getIdColumn_Args__() throws Exception {
-    String actual = target.getIdColumn();
-    String expected = "IDENTIFIER";
+    final String actual = target.getIdColumn();
+    final String expected = "IDENTIFIER";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -185,7 +185,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getOptionalElementName_Args__() throws Exception {
-    String actual = target.getOptionalElementName();
+    final String actual = target.getOptionalElementName();
   }
 
   @Test
@@ -198,20 +198,18 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void threadNormalize_Args__() throws Exception {
-    target.getFlightLog().start();
     try {
       for (int i = 0; i < 100; i++) {
-        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, String.valueOf(i),
-            String.valueOf(i + 3), String.valueOf(i + 7)));
-        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
-        target.queueNormalize.push(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "7", "8", "9"));
-        target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));
-        target.queueNormalize.push(new TestDenormalizedEntity("xyz1234567", "4", "5", "6"));
+        target.queueNormalize.putLast(new TestDenormalizedEntity(DEFAULT_CLIENT_ID,
+            String.valueOf(i), String.valueOf(i + 3), String.valueOf(i + 7)));
+        target.queueNormalize.putLast(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "4", "5", "6"));
+        target.queueNormalize.putLast(new TestDenormalizedEntity(DEFAULT_CLIENT_ID, "7", "8", "9"));
+        target.queueNormalize.putLast(new TestDenormalizedEntity("xyz1234567", "1", "2", "3"));
+        target.queueNormalize.putLast(new TestDenormalizedEntity("xyz1234567", "4", "5", "6"));
       }
-      target.catchYourBreath();
-      target.getFlightLog().start();
 
       runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 2500L);
+      target.getFlightLog().start();
       target.threadNormalize();
       target.catchYourBreath();
     } catch (Exception e) {
@@ -498,7 +496,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getInitialLoadViewName_Args__() throws Exception {
-    String actual = target.getInitialLoadViewName();
+    final String actual = target.getInitialLoadViewName();
     assertThat(actual, notNullValue());
   }
 
@@ -512,7 +510,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void getJdbcOrderBy_Args__() throws Exception {
     final String actual = target.getJdbcOrderBy();
-    String expected = null;
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -700,29 +698,29 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void getLegacySourceTable_Args__() throws Exception {
     final String actual = target.getLegacySourceTable();
-    String expected = "CRAP_T";
+    final String expected = "CRAP_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getDBSchemaName_Args__() throws Exception {
     final String actual = target.getDBSchemaName();
-    String expected = "CWSRS1";
+    final String expected = "CWSRS1";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test(expected = NeutronCheckedException.class)
   public void isDB2OnZOS_Args__() throws Exception {
     when(con.getMetaData()).thenThrow(NeutronRuntimeException.class);
-    boolean actual = target.isDB2OnZOS();
-    boolean expected = true;
+    final boolean actual = target.isDB2OnZOS();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void isDB2OnZOS_Args__error() throws Exception {
-    boolean actual = target.isDB2OnZOS();
-    boolean expected = true;
+    final boolean actual = target.isDB2OnZOS();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -739,10 +737,10 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void testLoadRecsForDeletion() {
     final List<TestNormalizedEntity> deletionRecs = new ArrayList<>();
-    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     deletionRecs.add(entity);
 
-    NativeQuery<TestNormalizedEntity> nq = mock(NativeQuery.class);
+    final NativeQuery<TestNormalizedEntity> nq = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(nq);
     when(nq.list()).thenReturn(deletionRecs);
 
@@ -774,11 +772,10 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(results.next()).thenReturn(true, rsNext).thenReturn(false);
 
     final TestNormalizedEntity[] entities = new TestNormalizedEntity[10];
-    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     entity.setFirstName("Fred");
     entity.setLastName("Meyer");
     Arrays.fill(entities, 0, entities.length, entity);
-
     when(results.get()).thenReturn(entities);
 
     final String minId = "1";
@@ -808,7 +805,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(results.next()).thenReturn(true).thenReturn(false);
 
     final TestNormalizedEntity[] entities = new TestNormalizedEntity[1];
-    TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
+    final TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     entity.setFirstName("Fred");
     entity.setLastName("Meyer");
     entities[0] = entity;
@@ -823,9 +820,9 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void testNormalizeLoop() throws Exception {
     final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
-    int cntr = 0;
-    Object lastId = new Object();
-    TestDenormalizedEntity x = new TestDenormalizedEntity("xyz9876543");
+    final int cntr = 0;
+    final Object lastId = new Object();
+    final TestDenormalizedEntity x = new TestDenormalizedEntity("xyz9876543");
     grpRecs.add(x);
 
     TestDenormalizedEntity entity = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);
@@ -855,7 +852,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getQueueIndex() throws Exception {
-    LinkedBlockingDeque actual = target.getQueueIndex();
+    final LinkedBlockingDeque<TestNormalizedEntity> actual = target.getQueueIndex();
     assertThat(actual, notNullValue());
   }
 
