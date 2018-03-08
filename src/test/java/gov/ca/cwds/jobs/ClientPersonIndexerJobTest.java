@@ -172,8 +172,12 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   public void validateDocument_A$ElasticSearchPerson() throws Exception {
     final ElasticSearchPerson person = new ElasticSearchPerson();
     person.setId(DEFAULT_CLIENT_ID);
+    person.setLastName("Young");
+    person.setFirstName("Angus");
+    person.setMiddleName("McKinnon");
 
     final ReplicatedClient rep = new ReplicatedClient();
+    rep.setId(DEFAULT_CLIENT_ID);
     rep.setCommonLastName("Young");
     rep.setCommonFirstName("Angus");
     rep.setCommonMiddleName("McKinnon");
@@ -186,7 +190,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
         lastRunFile, mapper, sessionFactory, null, flightPlan);
     target.setTxn(transaction);
     final boolean actual = target.validateDocument(person);
-    final boolean expected = false;
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -194,6 +198,9 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   public void validateDocument_A$ElasticSearchPerson__explode() throws Exception {
     final ElasticSearchPerson person = new ElasticSearchPerson();
     person.setId(DEFAULT_CLIENT_ID);
+    person.setLastName("Young");
+    person.setFirstName("Angus");
+    person.setMiddleName("McKinnon");
 
     final ReplicatedClient rep = new ReplicatedClient();
     rep.setCommonLastName("Young");
