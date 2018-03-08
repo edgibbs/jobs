@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -203,8 +204,8 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void getPartitionRanges_A$() throws Exception {
-    final List actual = target.getPartitionRanges();
-    final List expected = new ArrayList<>();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
     expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
