@@ -318,12 +318,12 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
       addThread(useTransformThread(), this::threadNormalize, threads);
       addThread(true, this::threadRetrieveByJdbc, threads);
 
-      // Start 'em up.
+      // Start threads.
       for (Thread t : threads) {
         t.start();
       }
 
-      // Wait for 'em to finish.
+      // Wait for threads to finish.
       for (Thread t : threads) {
         t.join();
       }
