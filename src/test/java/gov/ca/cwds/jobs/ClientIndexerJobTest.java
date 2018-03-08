@@ -29,7 +29,6 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
  * 
  * @author CWDS API Team
  */
-@SuppressWarnings("javadoc")
 public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddress> {
 
   ReplicatedClientDao dao;
@@ -52,7 +51,6 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void instantiation() throws Exception {
-    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
     assertThat(target, notNullValue());
   }
 
@@ -169,7 +167,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    final List actual = target.getPartitionRanges();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual.size(), is(equalTo(64)));
   }
 
@@ -224,7 +222,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     rep.setBirthCity("Glasgow");
 
     dao = mock(ReplicatedClientDao.class);
-    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
+    final TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
         sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
     when(dao.find(any())).thenReturn(rep);
@@ -248,8 +246,8 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {
-    final List actual = target.getPartitionRanges();
-    final List expected = new ArrayList<>();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
     expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }

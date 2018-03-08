@@ -31,6 +31,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   @Before
   public void setup() throws Exception {
     super.setup();
+
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
     target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
@@ -144,6 +145,9 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   @Test
   public void validateAddresses_A$ReplicatedClient$ElasticSearchPerson() throws Exception {
     final ElasticSearchPerson person = new ElasticSearchPerson();
+    person.setLastName("Young");
+    person.setFirstName("Angus");
+    person.setMiddleName("McKinnon");
     person.setId(DEFAULT_CLIENT_ID);
 
     final ReplicatedClient rep = new ReplicatedClient();
@@ -155,6 +159,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     dao = mock(ReplicatedClientDao.class);
     when(dao.find(any())).thenReturn(rep);
 
+    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
     final boolean actual = target.validateAddresses(rep, person);
     final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
@@ -174,6 +179,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     dao = mock(ReplicatedClientDao.class);
     when(dao.find(any())).thenReturn(rep);
 
+    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
     boolean actual = target.validateDocument(person);
     boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
