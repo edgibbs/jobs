@@ -11,10 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -453,10 +453,8 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     setSysPropsFromEnvVars();
     standardFlightPlan = parseCommandLine(args);
 
-    System.setProperty("LAUNCH_DIR",
-        StringUtils.isNotBlank(standardFlightPlan.getLastRunLoc())
-            ? NeutronStringUtils.filePath(standardFlightPlan.getLastRunLoc()).get()
-            : "./jobrunner/");
+    final Optional<String> opt = NeutronStringUtils.filePath(standardFlightPlan.getLastRunLoc());
+    System.setProperty("LAUNCH_DIR", opt.isPresent() ? opt.get() : "./jobrunner/");
 
     LaunchCommand.settings.setSchedulerMode(false);
     LaunchCommand.settings.setInitialMode(!standardFlightPlan.isLastRunMode());
