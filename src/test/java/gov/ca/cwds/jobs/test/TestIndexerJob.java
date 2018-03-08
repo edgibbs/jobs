@@ -18,6 +18,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
+import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -68,7 +69,8 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
 
   @Override
   public TestNormalizedEntity normalizeSingle(List<TestDenormalizedEntity> recs) {
-    return new TestNormalizedEntity((String) recs.get(0).getPrimaryKey());
+    return recs.isEmpty() ? new TestNormalizedEntity(Goddard.DEFAULT_CLIENT_ID)
+        : new TestNormalizedEntity((String) recs.get(0).getPrimaryKey());
   }
 
   @Override

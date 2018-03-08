@@ -210,6 +210,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
       runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 30500L);
       target.getFlightLog().start();
+      target.getFlightLog().doneRetrieve();
       target.threadNormalize();
       target.catchYourBreath();
     } catch (Exception e) {
