@@ -262,7 +262,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       if (addressActive) {
         String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
         final ElasticSearchSystemCode addressType = new ElasticSearchSystemCode();
-        SystemCode addressTypeSystemCode =
+        final SystemCode addressTypeSystemCode =
             SystemCodeCache.global().getSystemCode(repClientAddress.getAddressType());
         if (addressTypeSystemCode != null) {
           addressType.setDescription(addressTypeSystemCode.getShortDescription());
@@ -290,7 +290,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
           final ElasticSearchSystemCode stateCode = new ElasticSearchSystemCode();
           esAddress.setStateSystemCode(stateCode);
-          SystemCode stateSysCode = SystemCodeCache.global().getSystemCode(repAddress.getStateCd());
+          final SystemCode stateSysCode =
+              SystemCodeCache.global().getSystemCode(repAddress.getStateCd());
           if (stateSysCode != null) {
             stateCode.setDescription(stateSysCode.getShortDescription());
             stateCode.setId(stateSysCode.getSystemId().toString());
@@ -300,7 +301,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
           final ElasticSearchSystemCode countyCode = new ElasticSearchSystemCode();
           esAddress.setCountySystemCode(countyCode);
-          SystemCode countySysCode =
+          final SystemCode countySysCode =
               SystemCodeCache.global().getSystemCode(repAddress.getGovernmentEntityCd());
           if (countySysCode != null) {
             countyCode.setDescription(countySysCode.getShortDescription());
@@ -427,26 +428,29 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   }
 
   // ==================================
-  // ApiClientCountyAware
+  // ApiClientCountyAware:
   // ==================================
 
   @Override
   public List<ElasticSearchSystemCode> getClientCounties() {
     if (this.clientCounties == null || this.clientCounties.isEmpty()) {
-      return new ArrayList<ElasticSearchSystemCode>();
+      return new ArrayList<>();
     }
 
-    final List<ElasticSearchSystemCode> clientCounties =
-        new ArrayList<>(this.clientCounties.size());
+    final List<ElasticSearchSystemCode> ret = new ArrayList<>(this.clientCounties.size());
     for (Short county : this.clientCounties) {
       final ElasticSearchSystemCode countySysCode = new ElasticSearchSystemCode();
       countySysCode.setId(county.toString());
       countySysCode.setDescription(SystemCodeCache.global().getSystemCodeShortDescription(county));
-      clientCounties.add(countySysCode);
+      ret.add(countySysCode);
     }
 
-    return clientCounties;
+    return ret;
   }
+
+  // ==================================
+  // IDENTITY:
+  // ==================================
 
   @Override
   public int hashCode() {

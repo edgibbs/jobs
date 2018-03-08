@@ -208,7 +208,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
         target.queueNormalize.putLast(new TestDenormalizedEntity("xyz1234567", "4", "5", "6"));
       }
 
-      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 30500L);
+      runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 3500L);
       target.getFlightLog().start();
       target.getFlightLog().doneRetrieve();
       target.threadNormalize();
@@ -878,6 +878,20 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     deletionResults.add(DEFAULT_CLIENT_ID);
     final BulkProcessor bp = mock(BulkProcessor.class);
     target.deleteRestricted(deletionResults, bp);
+  }
+
+  @Test
+  public void sizeQueues_A$Date_1() throws Exception {
+    when(flightPlan.determineInitialLoad(any(Date.class))).thenReturn(false);
+    final Date lastRun = new Date();
+    target.sizeQueues(lastRun);
+  }
+
+  @Test
+  public void sizeQueues_A$Date_last_run() throws Exception {
+    when(flightPlan.determineInitialLoad(any(Date.class))).thenReturn(false);
+    final Date lastRun = new Date();
+    target.sizeQueues(lastRun);
   }
 
 }

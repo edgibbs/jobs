@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.util.shrinkray;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -12,9 +13,18 @@ public final class NeutronStringUtils {
   }
 
   public static Optional<String> filePath(String path) {
-    return StringUtils.isNotEmpty(path)
-        ? Optional.<String>of(Paths.get(path).getParent().toString())
-        : Optional.<String>empty();
+    Optional<String> ret = Optional.<String>empty();
+    if (StringUtils.isNotEmpty(path)) {
+      final Path thePath = Paths.get(path);
+      final Path parent = thePath.getParent();
+      if (parent != null) {
+        ret = Optional.<String>of(parent.toString());
+      } else {
+        ret = Optional.<String>of(thePath.toString());
+      }
+    }
+
+    return ret;
   }
 
 }
