@@ -404,7 +404,6 @@ public class EsRelationship
    */
   protected void parseBiDirectionalRelationship(final ElasticSearchPersonRelationship rel) {
     if (this.relCode != null && this.relCode.intValue() != 0) {
-
       CmsRelationship relationship;
       final Map<Short, CmsRelationship> mapRelationCodes =
           RelationshipTypeCache.getInstance().getMapRelationCodes();

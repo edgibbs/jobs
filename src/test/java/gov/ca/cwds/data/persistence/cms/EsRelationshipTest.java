@@ -6,7 +6,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
@@ -67,7 +66,21 @@ public class EsRelationshipTest extends Goddard<ReplicatedRelationships, EsRelat
 
   @Test
   public void parseBiDirectionalRelationship_A$ElasticSearchPersonRelationship() throws Exception {
-    final ElasticSearchPersonRelationship rel = mock(ElasticSearchPersonRelationship.class);
+    final ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
+    rel.setRelatedPersonId(DEFAULT_CLIENT_ID);
+
+    target.setRelCode((short) 199);
+    target.setReverseRelationship(false);
+    target.parseBiDirectionalRelationship(rel);
+  }
+
+  @Test
+  public void parseBiDirectionalRelationship_reverse_relationship() throws Exception {
+    final ElasticSearchPersonRelationship rel = new ElasticSearchPersonRelationship();
+    rel.setRelatedPersonId(DEFAULT_CLIENT_ID);
+
+    target.setRelCode((short) 199);
+    target.setReverseRelationship(true);
     target.parseBiDirectionalRelationship(rel);
   }
 
