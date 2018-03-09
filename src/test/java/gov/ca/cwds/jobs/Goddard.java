@@ -34,6 +34,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -286,6 +288,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(nq.setCacheMode(any(CacheMode.class))).thenReturn(nq);
     when(nq.setFetchSize(any(Integer.class))).thenReturn(nq);
     when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
+
+    final ScrollableResults scrollableResults = mock(ScrollableResults.class);
+    when(nq.scroll(any(ScrollMode.class))).thenReturn(scrollableResults);
 
     // Flight track:
     flightRecord = new FlightLog();

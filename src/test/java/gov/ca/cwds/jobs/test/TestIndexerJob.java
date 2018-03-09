@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.test;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -220,6 +221,15 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
     }
 
     throw new NeutronCheckedException("THE BOMB!");
+  }
+
+  @Override
+  public void prepareDocument(BulkProcessor bp, TestNormalizedEntity t) throws IOException {
+    if (blowup) {
+      throw new IOException("THE BOMB!");
+    }
+
+    super.prepareDocument(bp, t);
   }
 
 }
