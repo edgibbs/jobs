@@ -13,14 +13,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedReporterDao;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
+import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 
 /**
  * Test for {@link ReporterIndexerJob}.
  * 
  * @author CWDS API Team
  */
-@SuppressWarnings("javadoc")
 public class ReporterIndexerJobTest
     extends Goddard<ReplicatedSubstituteCareProvider, ReplicatedSubstituteCareProvider> {
 
@@ -64,8 +65,8 @@ public class ReporterIndexerJobTest
 
   @Test
   public void getPartitionRanges_Args() throws Exception {
-    final List actual = target.getPartitionRanges();
-    final List expected = new ArrayList<>();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
     expected.add(Pair.of("aaaaaaaaaa", "9999999999"));
     assertThat(actual, is(equalTo(expected)));
   }
@@ -73,14 +74,57 @@ public class ReporterIndexerJobTest
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    final List actual = target.getPartitionRanges();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual.size(), is(equalTo(64)));
   }
 
   @Test
   public void main_Args__StringArray() throws Exception {
     final String[] args = new String[] {"-c", "config/local.yaml", "-l",
-        "/Users/CWS-NS3/client_indexer_time.txt", "-S"};
+        "/Users/dsmith/client_indexer_time.txt", "-S"};
+    ReporterIndexerJob.main(args);
+  }
+
+  @Test
+  public void getPrepLastChangeSQL_A$() throws Exception {
+    String actual = target.getPrepLastChangeSQL();
+    String expected =
+        "INSERT INTO GT_ID (IDENTIFIER)\n SELECT DISTINCT R.FKREFERL_T\n FROM REPTR_T R \n WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000'";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isViewNormalizer_A$() throws Exception {
+    boolean actual = target.isViewNormalizer();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getDenormalizedClass_A$() throws Exception {
+    Object actual = target.getDenormalizedClass();
+    Object expected = ReplicatedReporter.class;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getIdColumn_A$() throws Exception {
+    String actual = target.getIdColumn();
+    String expected = "FKREFERL_T";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPartitionRanges_A$() throws Exception {
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
+    expected.add(pair);
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test(expected = NeutronCheckedException.class)
+  public void main_A$StringArray() throws Exception {
+    String[] args = new String[] {};
     ReporterIndexerJob.main(args);
   }
 

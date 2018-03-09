@@ -29,6 +29,7 @@ import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
+import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 
 public class LaunchPadTest extends Goddard {
 
@@ -253,7 +254,7 @@ public class LaunchPadTest extends Goddard {
 
       final String actual = target.logs();
       assertThat(actual, is(notNullValue()));
-      Thread.sleep(100);
+      NeutronThreadUtils.catchYourBreath();
 
     } catch (Exception e) {
       // Weird behavior with temporary folder.
