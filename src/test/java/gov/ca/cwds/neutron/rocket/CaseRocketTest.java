@@ -90,8 +90,8 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
       return blowup;
     }
 
-    public void setBlowup(boolean blowup) {
-      this.blowup = blowup;
+    public void plantBomb() {
+      this.blowup = true;
     }
 
     @Override
@@ -228,7 +228,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test(expected = NeutronRuntimeException.class)
   public void getPrepLastChangeSQL_Args__explode() throws Exception {
-    target.blowup = true;
+    target.plantBomb();
     final String actual = target.getPrepLastChangeSQL();
     final String expected =
         "INSERT INTO GT_ID (IDENTIFIER) \nWITH DRIVER AS ( \n SELECT DISTINCT CAS1.FKCHLD_CLT AS IDENTIFIER \n FROM  CASE_T CAS1  \n WHERE CAS1.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' \nUNION SELECT DISTINCT CCL2.FKCLIENT_T AS IDENTIFIER  \n FROM CASE_T CAS2 \n JOIN CHLD_CLT CCL2 ON CCL2.FKCLIENT_T = CAS2.FKCHLD_CLT   \n JOIN CLIENT_T CLC2 ON CLC2.IDENTIFIER = CCL2.FKCLIENT_T  \n WHERE CCL2.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000'  \nUNION SELECT DISTINCT CAS3.FKCHLD_CLT AS IDENTIFIER  \n FROM CASE_T CAS3  \n JOIN CLIENT_T CLC3 ON CLC3.IDENTIFIER = CAS3.FKCHLD_CLT \n WHERE CLC3.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' \nUNION SELECT DISTINCT CAS4.FKCHLD_CLT AS IDENTIFIER  \n FROM CASE_T CAS4  \n JOIN CLN_RELT CLR4  ON CLR4.FKCLIENT_T = CAS4.FKCHLD_CLT \n WHERE CLR4.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' \nUNION SELECT DISTINCT CLR5.FKCLIENT_0 AS IDENTIFIER  \n FROM CASE_T CAS5 \n JOIN CLN_RELT CLR5 ON CLR5.FKCLIENT_T = CAS5.FKCHLD_CLT \n JOIN CLIENT_T CLP5 ON CLP5.IDENTIFIER = CLR5.FKCLIENT_0  \n WHERE CLP5.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' \nUNION SELECT DISTINCT CLR6.FKCLIENT_T AS IDENTIFIER  \n FROM CASE_T CAS6 \n JOIN CLN_RELT CLR6 ON CLR6.FKCLIENT_T = CAS6.FKCHLD_CLT \n JOIN CLIENT_T CLP6 ON CLP6.IDENTIFIER = CLR6.FKCLIENT_0  \n WHERE CLP6.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' \n) \nSELECT DISTINCT CAS1.FKCHLD_CLT AS CLIENT_ID \nFROM DRIVER d1 \nJOIN CASE_T CAS1   ON CAS1.FKCHLD_CLT = d1.IDENTIFIER \nUNION SELECT DISTINCT REL2.FKCLIENT_0  AS CLIENT_ID \nFROM DRIVER d2 \nJOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.IDENTIFIER \nJOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \nUNION SELECT DISTINCT REL3.FKCLIENT_T  AS CLIENT_ID \nFROM DRIVER d3 \nJOIN CLN_RELT REL3 ON REL3.FKCLIENT_0 = d3.IDENTIFIER \nJOIN CASE_T   CAS3 ON CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \nUNION SELECT DISTINCT REL4.FKCLIENT_T  AS CLIENT_ID \nFROM DRIVER d4 \nJOIN CLN_RELT REL4 ON REL4.FKCLIENT_T = d4.IDENTIFIER \nJOIN CASE_T   CAS4 ON CAS4.FKCHLD_CLT = REL4.FKCLIENT_0 \nUNION SELECT DISTINCT REL5.FKCLIENT_0  AS CLIENT_ID \nFROM DRIVER d5 \nJOIN CLN_RELT REL5 ON REL5.FKCLIENT_0 = d5.IDENTIFIER \nJOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T ";
@@ -324,7 +324,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test(expected = Exception.class)
   public void pullNextRange_Args__Pair_bomb_assembly() throws Exception {
-    target.blowup = true;
+    target.plantBomb();
     final int actual = target.pullNextRange(pair);
     final int expected = 0;
     assertThat(actual, is(equalTo(expected)));
@@ -346,6 +346,17 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test
   public void fetchLastRunResults_Args__Date__Set() throws Exception {
+    final Date lastRunDt = new Date();
+    final Set<String> deletionResults = new HashSet<>();
+    final List<ReplicatedPersonCases> actual =
+        target.fetchLastRunResults(lastRunDt, deletionResults);
+    final List<ReplicatedPersonCases> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test(expected = Exception.class)
+  public void fetchLastRunResults_Args__Date__Set__explode() throws Exception {
+    target.plantBomb();
     final Date lastRunDt = new Date();
     final Set<String> deletionResults = new HashSet<>();
     final List<ReplicatedPersonCases> actual =
