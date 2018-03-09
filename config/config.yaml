@@ -1,6 +1,10 @@
 elasticsearch.host: 10.10.15.61
 elasticsearch.port: 9300
 elasticsearch.cluster: elasticsearch
+elasticsearch.additional.nodes:
+  - 10.10.15.61:9300
+  - 10.10.15.61:9300
+
 elasticsearch.alias: people
 #elasticsearch.alias: people-small
 elasticsearch.doctype: person

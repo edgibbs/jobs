@@ -1,16 +1,13 @@
 package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.util.Properties;
 import java.util.function.Function;
 
+import gov.ca.cwds.rest.ElasticUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.quartz.ListenerManager;
@@ -81,7 +78,6 @@ import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.inject.NsSessionFactory;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.elastic.XPackUtils;
 import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
@@ -420,37 +416,14 @@ public class HyperCube extends NeutronGuiceModule {
   // ELASTICSEARCH:
   // =========================
 
-  protected TransportClient makeTransportClient(final ElasticsearchConfiguration config,
-      boolean enableXPack) {
-    TransportClient ret;
-    if (enableXPack) {
-      LOGGER.warn("ENABLE X-PACK");
-      final Settings.Builder settings =
-          Settings.builder().put("cluster.name", config.getElasticsearchCluster());
-      ret = XPackUtils.secureClient(config.getUser(), config.getPassword(), settings);
-    } else {
-      LOGGER.warn("DISABLE X-PACK");
-      ret = new PreBuiltTransportClient(
-          Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
-    }
-    return ret;
-  }
-
   protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
       throws NeutronCheckedException {
     TransportClient client = null;
     LOGGER.debug("Create NEW ES client");
     try {
-      client = makeTransportClient(config,
-          StringUtils.isNotBlank(config.getUser()) && StringUtils.isNotBlank(config.getPassword()));
-      client.addTransportAddress(
-          new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-              Integer.parseInt(config.getElasticsearchPort())));
+      client = ElasticUtils.buildElasticsearchClient(config);
       return client;
     } catch (Exception e) {
-      if (client != null) {
-        client.close();
-      }
       throw CheeseRay.checked(LOGGER, e,
           "ERROR initializing Elasticsearch client for people index: {}", e.getMessage(), e);
     }
@@ -499,8 +472,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Named("elasticsearch.dao.people-summary")
   public ElasticsearchDao makeElasticsearchDaoPeopleSummary(
       @Named("elasticsearch.client.people-summary") Client client,
-      @Named("elasticsearch.config.people-summary") ElasticsearchConfiguration config)
-      throws NeutronCheckedException {
+      @Named("elasticsearch.config.people-summary") ElasticsearchConfiguration config) {
     return new ElasticsearchDao(client, config);
   }
 

@@ -163,23 +163,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
-  public void makeTransportClient_Args__ElasticsearchConfiguration__boolean() throws Exception {
-    ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    boolean es55 = false;
-    TransportClient actual = target.makeTransportClient(config, es55);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
   public void elasticsearchClient_Args__() throws Exception {
-    Client actual = target.elasticsearchClientPeople();
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test
-  public void elasticsearchClient_Args__boom() throws Exception {
-    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    final TransportClient transportClient = target.makeTransportClient(config, false);
     Client actual = target.elasticsearchClientPeople();
     assertThat(actual, is(notNullValue()));
   }
