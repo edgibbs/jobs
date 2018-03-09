@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
+@SuppressWarnings("serial")
 public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
@@ -209,6 +211,15 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
 
   public void plantBomb() {
     this.blowup = true;
+  }
+
+  @Override
+  public Date determineLastSuccessfulRunTime() throws NeutronCheckedException {
+    if (!blowup) {
+      return super.determineLastSuccessfulRunTime();
+    }
+
+    throw new NeutronCheckedException("THE BOMB!");
   }
 
 }

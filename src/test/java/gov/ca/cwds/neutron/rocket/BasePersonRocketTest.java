@@ -34,7 +34,6 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.junit.Before;
@@ -890,7 +889,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepareUpsertRequestNoChecked_A$ElasticSearchPerson$Object() throws Exception {
-    ElasticSearchPerson esp = new ElasticSearchPerson();
+    final ElasticSearchPerson esp = new ElasticSearchPerson();
     esp.setId(DEFAULT_CLIENT_ID);
 
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
@@ -905,12 +904,15 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepareUpsertRequest_A$ElasticSearchPerson$Object() throws Exception {
-    ElasticSearchPerson esp = new ElasticSearchPerson();
+    final ElasticSearchPerson esp = new ElasticSearchPerson();
     esp.setId(DEFAULT_CLIENT_ID);
 
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    UpdateRequest actual = target.prepareUpsertRequest(esp, t);
-    UpdateRequest expected = null;
+    final UpdateRequest request = target.prepareUpsertRequest(esp, t);
+
+    final String actual = request.upsertRequest().toString().replaceAll("\\s+", "");
+    final String expected =
+        "index{[null][person][abc1234567],source[{\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"id\":\"abc1234567\"}]}";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -966,11 +968,12 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     final TestDenormalizedEntity theLastId = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);
     grpRecs.add(theLastId);
 
-    int inCntr = 0;
-    int actual = target.normalizeLoop(grpRecs, theLastId, inCntr);
     NeutronThreadUtils.catchYourBreath();
 
-    int expected = 0;
+    int inCntr = 0;
+    int actual = target.normalizeLoop(grpRecs, theLastId, inCntr);
+
+    int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1032,21 +1035,23 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepareDocumentTrapException_A$BulkProcessor$Object() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
+    final BulkProcessor bp = mock(BulkProcessor.class);
     final TestNormalizedEntity p = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     target.prepareDocumentTrapException(bp, p);
   }
 
   @Test
   public void deleteRestricted_A$Set$BulkProcessor() throws Exception {
-    Set<String> deletionResults = mock(Set.class);
-    BulkProcessor bp = mock(BulkProcessor.class);
+    final Set<String> deletionResults = new HashSet<>();
+    deletionResults.add(DEFAULT_CLIENT_ID);
+
+    final BulkProcessor bp = mock(BulkProcessor.class);
     target.deleteRestricted(deletionResults, bp);
   }
 
   @Test
   public void fetchLastRunResults_A$Date$Set() throws Exception {
-    Date lastRunDate = new Date();
+    final Date lastRunDate = new Date();
     final Set<String> deletionResults = mock(Set.class);
     List<TestNormalizedEntity> actual = target.fetchLastRunResults(lastRunDate, deletionResults);
     List<TestNormalizedEntity> expected = new ArrayList<>();
@@ -1069,7 +1074,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
       fail("Expected exception was not thrown!");
     } catch (NeutronCheckedException e) {
     }
-
   }
 
   @Test
@@ -1084,7 +1088,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   public void launch_A$Date() throws Exception {
     Date lastSuccessfulRunTime = new Date();
     Date actual = target.launch(lastSuccessfulRunTime);
-    Date expected = null;
+    Date expected = lastSuccessfulRunTime;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1092,6 +1096,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   public void launch_A$Date_T$NeutronCheckedException() throws Exception {
     Date lastSuccessfulRunTime = new Date();
     try {
+      target.plantBomb();
       target.launch(lastSuccessfulRunTime);
       fail("Expected exception was not thrown!");
     } catch (NeutronCheckedException e) {
@@ -1102,14 +1107,15 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   public void extractLastRunRecsFromTable_A$Date() throws Exception {
     Date lastRunTime = new Date();
     List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
-    List<TestNormalizedEntity> expected = null;
+    List<TestNormalizedEntity> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void loadRecsForDeletion_A$Class$Session$Date$Set() throws Exception {
+    when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
+
     Class<?> entityClass = target.getDenormalizedClass();
-    Session session = mock(Session.class);
     Date lastRunTime = new Date();
     Set<String> deletionResults = mock(Set.class);
     target.loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
@@ -1159,9 +1165,9 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void pullBucketRange_A$String$String() throws Exception {
-    String minId = null;
-    String maxId = null;
-    List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
+    String minId = "a";
+    String maxId = "z";
+    final List<TestNormalizedEntity> actual = target.pullBucketRange(minId, maxId);
     List<TestNormalizedEntity> expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
