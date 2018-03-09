@@ -36,6 +36,8 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
   private boolean blowUpNameThread = false;
   private boolean shouldDelete = false;
 
+  private boolean blowup = false;
+
   @Inject
   public TestIndexerJob(final TestNormalizedEntityDao dao, final ElasticsearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
@@ -95,7 +97,7 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
 
   @Override
   public void done() {
-    if (isFakeMarkDone()) {
+    if (isBlowup() || isFakeMarkDone()) {
       throw new NeutronRuntimeException("fake error");
     }
 
@@ -199,6 +201,14 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
 
   public void setShouldDelete(boolean shouldDelete) {
     this.shouldDelete = shouldDelete;
+  }
+
+  public boolean isBlowup() {
+    return blowup;
+  }
+
+  public void plantBomb() {
+    this.blowup = true;
   }
 
 }

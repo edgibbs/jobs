@@ -766,6 +766,12 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     target.runMultiThreadIndexing();
   }
 
+  @Test(expected = Exception.class)
+  public void test_runMultiThreadIndexing__explode() throws Exception {
+    target.plantBomb();
+    target.runMultiThreadIndexing();
+  }
+
   @Test
   public void test_threadRetrieveByJdbc_A$() throws Exception {
     target.threadRetrieveByJdbc();
