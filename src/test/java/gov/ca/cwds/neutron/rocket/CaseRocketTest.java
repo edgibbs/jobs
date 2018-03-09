@@ -52,6 +52,8 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
     private static final long serialVersionUID = 1L;
 
+    private boolean blowup = false;
+
     public TestCaseRocket(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
         ReplicatedClientDao clientDao, StaffPersonDao staffPersonDao, String lastRunFile,
         ObjectMapper mapper, FlightPlan flightPlan) {
@@ -61,6 +63,24 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     // Map<String, StaffPerson>
     public void addStaffWorker(StaffPerson worker) {
       getStaffWorkers().put(worker.getId(), worker);
+    }
+
+    @Override
+    protected int assemblePieces(List<FocusChildParent> listFocusChildParents,
+        List<Pair<String, String>> listCaseClients, Map<String, EsCaseRelatedPerson> mapCases,
+        Map<String, ReplicatedClient> mapClients, Map<String, Set<String>> mapClientCases)
+        throws NeutronCheckedException {
+      final List<Pair<String, String>> bucketList = blowup ? mock(List.class) : listCaseClients;
+      return super.assemblePieces(listFocusChildParents, bucketList, mapCases, mapClients,
+          mapClientCases);
+    }
+
+    public boolean isBlowup() {
+      return blowup;
+    }
+
+    public void setBlowup(boolean blowup) {
+      this.blowup = blowup;
     }
 
   }
@@ -268,8 +288,16 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test
   public void pullNextRange_Args__Pair() throws Exception {
-    int actual = target.pullNextRange(pair);
-    int expected = 0;
+    final int actual = target.pullNextRange(pair);
+    final int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test(expected = Exception.class)
+  public void pullNextRange_Args__Pair_bomb_assembly() throws Exception {
+    target.blowup = true;
+    final int actual = target.pullNextRange(pair);
+    final int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -296,12 +324,6 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     final List<ReplicatedPersonCases> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
-
-  // @Test
-  // public void main_Args__StringArray() throws Exception {
-  // String[] args = new String[] {};
-  // CaseRocket.main(args);
-  // }
 
   @Test
   public void test_useTransformThread_A$() throws Exception {
@@ -429,13 +451,13 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test
   public void test_readCaseClients_A$PreparedStatement$List() throws Exception {
-    final List list = new ArrayList();
+    final List<Pair<String, String>> list = new ArrayList<>();
     target.readCaseClients(prepStmt, list);
   }
 
   @Test
   public void test_readCaseClients_A$PreparedStatement$List_T$SQLException() throws Exception {
-    final List list = new ArrayList();
+    final List<Pair<String, String>> list = new ArrayList<>();
     try {
       when(rs.getString(any(String.class))).thenThrow(SQLException.class);
       target.readCaseClients(prepStmt, list);
@@ -671,7 +693,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
     final Map<String, EsCaseRelatedPerson> mapCases = new HashMap<String, EsCaseRelatedPerson>();
     final Map<String, ReplicatedClient> mapClients = new HashMap<String, ReplicatedClient>();
-    final Map mapClientCases = new HashMap();
+    final Map<String, Set<String>> mapClientCases = new HashMap<>();
     final int actual = target.assemblePieces(listFocusChildParents, listCaseClients, mapCases,
         mapClients, mapClientCases);
     final int expected = 0;
@@ -714,5 +736,11 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     final ReplicatedClientDao actual = target.getClientDao();
     assertThat(actual, is(notNullValue()));
   }
+
+  // @Test
+  // public void main_Args__StringArray() throws Exception {
+  // String[] args = new String[] {};
+  // CaseRocket.main(args);
+  // }
 
 }
