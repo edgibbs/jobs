@@ -946,8 +946,10 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   }
 
   @Test
+  @Ignore
   public void normalizeLoop_A$List$Object$int() throws Exception {
     runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 3500L);
+
     final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
     final TestDenormalizedEntity theLastId = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);
     grpRecs.add(theLastId);
