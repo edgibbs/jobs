@@ -714,7 +714,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     try {
       recordsProcessed = assemblePieces(listFocusChildParents, listCaseClients, mapCasesById,
           mapClients, new HashMap<>(HASH_SIZE_LARGE));
-    } catch (NeutronCheckedException e) {
+    } catch (Exception e) {
       fail();
       throw CheeseRay.checked(LOGGER, e, "ERROR ASSEMBLING RANGE! {} - {}: {}", keyRange.getLeft(),
           keyRange.getRight(), e.getMessage());

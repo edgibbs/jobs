@@ -71,7 +71,17 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
         List<Pair<String, String>> listCaseClients, Map<String, EsCaseRelatedPerson> mapCases,
         Map<String, ReplicatedClient> mapClients, Map<String, Set<String>> mapClientCases)
         throws NeutronCheckedException {
-      final List<Pair<String, String>> bucketList = blowup ? mock(List.class) : listCaseClients;
+      List<Pair<String, String>> bucketList;
+      if (blowup) {
+        bucketList = mock(List.class);
+        when(bucketList.iterator()).thenThrow(new IllegalArgumentException("BOMB!"));
+        when(bucketList.stream()).thenThrow(new IllegalArgumentException("BOMB!"));
+        when(bucketList.isEmpty()).thenThrow(new IllegalArgumentException("BOMB!"));
+        when(bucketList.toArray()).thenThrow(new IllegalArgumentException("BOMB!"));
+      } else {
+        bucketList = listCaseClients;
+      }
+
       return super.assemblePieces(listFocusChildParents, bucketList, mapCases, mapClients,
           mapClientCases);
     }
