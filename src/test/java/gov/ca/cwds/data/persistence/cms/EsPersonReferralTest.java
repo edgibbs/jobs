@@ -485,7 +485,6 @@ public class EsPersonReferralTest extends Goddard<ReplicatedPersonReferrals, EsP
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
-
   }
 
   @Test
@@ -502,7 +501,6 @@ public class EsPersonReferralTest extends Goddard<ReplicatedPersonReferrals, EsP
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
-
   }
 
   @Test
@@ -669,7 +667,6 @@ public class EsPersonReferralTest extends Goddard<ReplicatedPersonReferrals, EsP
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
-
   }
 
   @Test
@@ -686,7 +683,6 @@ public class EsPersonReferralTest extends Goddard<ReplicatedPersonReferrals, EsP
       fail("Expected exception was not thrown!");
     } catch (SQLException e) {
     }
-
   }
 
   @Test
