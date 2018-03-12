@@ -10,7 +10,7 @@ import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 
 /**
- * Drops and creates a Elasticsearch People index, if requested.
+ * Drops and creates a Elasticsearch People Summary index, if requested.
  * 
  * @author CWDS API Team
  */

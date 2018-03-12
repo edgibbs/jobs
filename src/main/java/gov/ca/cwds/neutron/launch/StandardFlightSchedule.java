@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.launch;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -226,6 +227,7 @@ public enum StandardFlightSchedule {
    */
   public static List<StandardFlightSchedule> getInitialLoadRockets() {
     return Arrays.asList(values()).stream().sequential()
+        .sorted(Comparator.comparingInt(StandardFlightSchedule::getInitialLoadOrder))
         .filter(StandardFlightSchedule::isRunInitialLoad).collect(Collectors.toList());
   }
 

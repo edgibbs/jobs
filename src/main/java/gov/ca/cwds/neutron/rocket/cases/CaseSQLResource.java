@@ -218,7 +218,7 @@ public class CaseSQLResource implements ApiMarker {
           + "FROM DRIVER d5 \n"
           + "JOIN CLN_RELT REL5 ON REL5.FKCLIENT_0 = d5.IDENTIFIER \n"
           + "JOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T "
-          + "WHERE REL5.CLNTRELC NOT IN (244,271,275) AND REL5.END_DT IS NULL \n";
+          + "WHERE REL5.CLNTRELC NOT IN (244,271,275) AND REL5.END_DT IS NULL ";
   //@formatter:on
 
   /**

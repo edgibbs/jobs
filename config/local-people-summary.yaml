@@ -1,7 +1,6 @@
 elasticsearch.host: localhost
 elasticsearch.port: 9300
 elasticsearch.cluster: elasticsearch
-#elasticsearch.alias: people-summary-small
 elasticsearch.alias: people-summary
 elasticsearch.doctype: person-summary
 

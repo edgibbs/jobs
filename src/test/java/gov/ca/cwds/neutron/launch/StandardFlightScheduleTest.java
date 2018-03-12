@@ -30,15 +30,15 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void buildInitialLoadJobChainListener_Args__() throws Exception {
-    JobChainingJobListener actual = StandardFlightSchedule.buildInitialLoadJobChainListener();
+    final JobChainingJobListener actual = StandardFlightSchedule.buildInitialLoadJobChainListener();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getInitialLoadRockets_Args__() throws Exception {
-    List<StandardFlightSchedule> actual = StandardFlightSchedule.getInitialLoadRockets();
+    final List<StandardFlightSchedule> actual = StandardFlightSchedule.getInitialLoadRockets();
 
-    List<StandardFlightSchedule> expected = new ArrayList<>();
+    final List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.RESET_PEOPLE_INDEX);
     expected.add(StandardFlightSchedule.RESET_PEOPLE_SUMMARY_INDEX);
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);
@@ -61,9 +61,9 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void getLastChangeRockets_Args__() throws Exception {
-    List<StandardFlightSchedule> actual = StandardFlightSchedule.getLastChangeRockets();
+    final List<StandardFlightSchedule> actual = StandardFlightSchedule.getLastChangeRockets();
 
-    List<StandardFlightSchedule> expected = new ArrayList<>();
+    final List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);
     expected.add(StandardFlightSchedule.CLIENT);
     expected.add(StandardFlightSchedule.REPORTER);
@@ -126,7 +126,7 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void getNestedElement_Args__() throws Exception {
-    StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
+    final StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
     final String actual = target.getNestedElement();
     final String expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -134,7 +134,7 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void lookupByJobName_Args__String() throws Exception {
-    String key = StandardFlightSchedule.CASES.getRocketName();
+    final String key = StandardFlightSchedule.CASES.getRocketName();
     final StandardFlightSchedule actual = StandardFlightSchedule.lookupByRocketName(key);
     final StandardFlightSchedule expected = StandardFlightSchedule.CASES;
     assertThat(actual, is(equalTo(expected)));
@@ -142,7 +142,7 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void lookupByClass_Args__Class() throws Exception {
-    Class<?> key = StandardFlightSchedule.CLIENT.getRocketClass();
+    final Class<?> key = StandardFlightSchedule.CLIENT.getRocketClass();
     final StandardFlightSchedule actual = StandardFlightSchedule.lookupByRocketClass(key);
     final StandardFlightSchedule expected = StandardFlightSchedule.CLIENT;
     assertThat(actual, is(equalTo(expected)));
