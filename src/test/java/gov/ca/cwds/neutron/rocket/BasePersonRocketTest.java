@@ -921,7 +921,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void prepareUpsertRequest_A$ElasticSearchPerson$Object_T$NeutronCheckedException()
       throws Exception {
-    ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
+    final ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     try {
       target.prepareUpsertRequest(esp, t);
@@ -933,7 +933,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void addThread_A$Runnable$List() throws Exception {
     Runnable target_ = null;
-    List<Thread> threads = new ArrayList<Thread>();
+    final List<Thread> threads = new ArrayList<Thread>();
     target.addThread(target_, threads);
   }
 
@@ -964,7 +964,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void bulkPrepare_A$BulkProcessor$int() throws Exception {
-    BulkProcessor bp = mock(BulkProcessor.class);
+    final BulkProcessor bp = mock(BulkProcessor.class);
     int cntr = 0;
     int actual = target.bulkPrepare(bp, cntr);
     int expected = 0;
@@ -998,58 +998,58 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void doLastRun_A$Date() throws Exception {
-    Date lastRunDt = new Date();
-    Date actual = target.doLastRun(lastRunDt);
-    Date expected = new Date(target.getFlightLog().getStartTime());
+    final Date lastRunDt = new Date();
+    final Date actual = target.doLastRun(lastRunDt);
+    final Date expected = new Date(target.getFlightLog().getStartTime());
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void determineInitialLoad_A$Date() throws Exception {
-    Date lastRun = new Date();
-    boolean actual = target.determineInitialLoad(lastRun);
-    boolean expected = false;
+    final Date lastRun = new Date();
+    final boolean actual = target.determineInitialLoad(lastRun);
+    final boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void launch_A$Date() throws Exception {
-    Date lastSuccessfulRunTime = new Date();
-    Date actual = target.launch(lastSuccessfulRunTime);
+    final Date lastSuccessfulRunTime = new Date();
+    final Date actual = target.launch(lastSuccessfulRunTime);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test(expected = Exception.class)
   public void launch_A$Date_T$NeutronCheckedException() throws Exception {
-    Date lastSuccessfulRunTime = new Date();
+    final Date lastSuccessfulRunTime = new Date();
     target.plantBomb();
     target.launch(lastSuccessfulRunTime);
   }
 
   @Test
   public void extractLastRunRecsFromTable_A$Date() throws Exception {
-    Date lastRunTime = new Date();
-    List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
-    List<TestNormalizedEntity> expected = new ArrayList<>();
+    final Date lastRunTime = new Date();
+    final List<TestNormalizedEntity> actual = target.extractLastRunRecsFromTable(lastRunTime);
+    final List<TestNormalizedEntity> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void loadRecsForDeletion_A$Class$Session$Date$Set() throws Exception {
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
-    Class<?> entityClass = target.getDenormalizedClass();
-    Date lastRunTime = new Date();
-    Set<String> deletionResults = mock(Set.class);
+    final Class<?> entityClass = target.getDenormalizedClass();
+    final Date lastRunTime = new Date();
+    final Set<String> deletionResults = mock(Set.class);
     target.loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
   }
 
   @Test
   public void extractLastRunRecsFromView_A$Date$Set() throws Exception {
-    Date lastRunTime = new Date();
-    Set<String> deletionResults = mock(Set.class);
-    List<TestNormalizedEntity> actual =
+    final Date lastRunTime = new Date();
+    final Set<String> deletionResults = mock(Set.class);
+    final List<TestNormalizedEntity> actual =
         target.extractLastRunRecsFromView(lastRunTime, deletionResults);
-    List<TestNormalizedEntity> expected = new ArrayList<>();
+    final List<TestNormalizedEntity> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 

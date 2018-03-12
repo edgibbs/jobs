@@ -33,7 +33,6 @@ public enum NeutronIntegerDefaults {
     this.value = value;
   }
 
-  @SuppressWarnings("javadoc")
   public int getValue() {
     return value;
   }

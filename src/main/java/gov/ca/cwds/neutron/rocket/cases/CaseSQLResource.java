@@ -25,26 +25,22 @@ public class CaseSQLResource implements ApiMarker {
        + "SELECT DISTINCT CAS1.FKCHLD_CLT AS CLIENT_ID \n"
           + "FROM DRIVER d1 \n"
           + "JOIN CASE_T CAS1   ON CAS1.FKCHLD_CLT = d1.IDENTIFIER \n"
-          + "UNION \n"
-       + "SELECT DISTINCT REL2.FKCLIENT_0  AS CLIENT_ID \n"
+       + "UNION SELECT DISTINCT REL2.FKCLIENT_0  AS CLIENT_ID \n"
           + "FROM DRIVER d2 \n"
           + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.IDENTIFIER \n"
           + "JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \n"
-          + "UNION \n"
-       + "SELECT DISTINCT REL3.FKCLIENT_T  AS CLIENT_ID \n"
+       + "UNION SELECT DISTINCT REL3.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d3 \n"
           + "JOIN CLN_RELT REL3 ON REL3.FKCLIENT_0 = d3.IDENTIFIER \n"
           + "JOIN CASE_T   CAS3 ON CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \n"
-          + "UNION \n"
-       + "SELECT DISTINCT REL4.FKCLIENT_T  AS CLIENT_ID \n"
+       + "UNION SELECT DISTINCT REL4.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d4 \n"
           + "JOIN CLN_RELT REL4 ON REL4.FKCLIENT_T = d4.IDENTIFIER \n"
           + "JOIN CASE_T   CAS4 ON CAS4.FKCHLD_CLT = REL4.FKCLIENT_0 \n"
-          + "UNION \n"
-       + "SELECT DISTINCT REL5.FKCLIENT_0  AS CLIENT_ID \n"
+       + "UNION SELECT DISTINCT REL5.FKCLIENT_0  AS CLIENT_ID \n"
           + "FROM DRIVER d5 \n"
           + "JOIN CLN_RELT REL5 ON REL5.FKCLIENT_0 = d5.IDENTIFIER \n"
-          + "JOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T ";  
+          + "JOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T ";
   //@formatter:on
 
   //@formatter:off
@@ -80,7 +76,7 @@ public class CaseSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String SELECT_CLIENT_CASE =
-      "SELECT DISTINCT rc.FKCLIENT_T AS CLIENT_ID, rc.FKREFERL_T AS CASE_ID FROM GT_REFR_CLT rc WITH UR ";
+      "SELECT DISTINCT rc.FKCLIENT_T AS CLIENT_ID, rc.FKREFERL_T AS CASE_ID FROM GT_REFR_CLT rc ORDER BY 1,2 WITH UR ";
   //@formatter:on
 
   //@formatter:off
