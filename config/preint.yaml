@@ -1,10 +1,9 @@
+# The old "elasticsearch.host" and "elasticsearch.port" will still work but not required when "elasticsearch.nodes" is provided.
 elasticsearch.host: elasticsearch.preint.cwds.io
 elasticsearch.port: 9300
 elasticsearch.cluster: es-preint
-elasticsearch.additional.nodes:
-  - elasticsearch.preint.cwds.io:9300
-  - elasticsearch.preint.cwds.io:9300
-
+#Comma "," separated List of host:port pairs. Example: host1:port1,host2:port2
+elasticsearch.nodes: lasticsearch.preint.cwds.io:9300,elasticsearch.preint.cwds.io:9300
 # elasticsearch.alias: people_05-23-2017
 elasticsearch.alias: people
 elasticsearch.doctype: person
