@@ -8,6 +8,10 @@
     },
     "phones": {
       "type": "nested"
+    },
+    "type.value": {
+      "type": "string",
+      "analyzer": "keyword"
     }
   }
 }
