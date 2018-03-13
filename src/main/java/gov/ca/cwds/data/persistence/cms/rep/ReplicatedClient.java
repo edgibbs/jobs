@@ -415,9 +415,10 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       final SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId);
 
       // INT-615: Caribbean race incorrectly returned as Hispanic.
-      if (systemCode != null && systemCode.getSystemId().shortValue() != RACE_CARIBBEAN) {
+      if (systemCode != null) {
         description = systemCode.getShortDescription();
-        isHispanicCode = HISPANIC_CODE_OTHER_ID.equals(systemCode.getOtherCd());
+        isHispanicCode = HISPANIC_CODE_OTHER_ID.equals(systemCode.getOtherCd())
+            && systemCode.getSystemId().shortValue() != RACE_CARIBBEAN;
       }
 
       final ElasticSearchSystemCode esCode = new ElasticSearchSystemCode();
