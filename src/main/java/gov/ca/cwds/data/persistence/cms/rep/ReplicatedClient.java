@@ -113,6 +113,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private static final String HISPANIC_CODE_OTHER_ID = "02";
 
+  private static final short RACE_CARIBBEAN = 3162;
+
   /**
    * A client can have multiple active addresses, typically one active address per address type.
    */
@@ -403,13 +405,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     return racesEthnicity;
   }
 
-  /**
-   * TODO: INT-615: Caribbean race incorrectly returning as a Hispanic race.
-   * 
-   * @param codeId legacy system code id
-   * @param raceCodes list of race codes
-   * @param hispanicCodes list of hispanic codes
-   */
   private static void addRaceAndEthnicity(Short codeId,
       final List<ElasticSearchSystemCode> raceCodes,
       final List<ElasticSearchSystemCode> hispanicCodes) {
@@ -418,7 +413,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       boolean isHispanicCode = false;
 
       final SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId);
-      if (systemCode != null) {
+
+      // INT-615: Caribbean race incorrectly returned as Hispanic.
+      if (systemCode != null && systemCode.getSystemId().shortValue() != RACE_CARIBBEAN) {
         description = systemCode.getShortDescription();
         isHispanicCode = HISPANIC_CODE_OTHER_ID.equals(systemCode.getOtherCd());
       }
