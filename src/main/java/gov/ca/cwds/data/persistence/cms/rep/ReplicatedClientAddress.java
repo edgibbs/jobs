@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -78,6 +79,19 @@ public class ReplicatedClientAddress extends BaseClientAddress implements CmsRep
     if (address != null) {
       addresses.add(address);
     }
+  }
+
+  /**
+   * Is this client address record active?
+   * 
+   * <p>
+   * Active = end date is not null OR end date exceeds current date/time.
+   * </p>
+   * 
+   * @return true if active
+   */
+  public boolean isActive() {
+    return getEffEndDt() == null || getEffEndDt().after(new Date());
   }
 
   @Override

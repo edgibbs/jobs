@@ -327,9 +327,10 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    return clientAddresses.stream().flatMap(ca -> ca.getAddresses().stream())
-        .flatMap(adr -> Arrays.stream(adr.getPhones())).collect(Collectors.toList())
-        .toArray(new ApiPhoneAware[0]);
+    // INT-1413: Display active phone numbers only.
+    return clientAddresses.stream().filter(ReplicatedClientAddress::isActive)
+        .flatMap(ca -> ca.getAddresses().stream()).flatMap(adr -> Arrays.stream(adr.getPhones()))
+        .collect(Collectors.toList()).toArray(new ApiPhoneAware[0]);
   }
 
   // =======================
@@ -402,6 +403,13 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     return racesEthnicity;
   }
 
+  /**
+   * TODO: INT-615: Caribbean race incorrectly returning as a Hispanic race.
+   * 
+   * @param codeId legacy system code id
+   * @param raceCodes list of race codes
+   * @param hispanicCodes list of hispanic codes
+   */
   private static void addRaceAndEthnicity(Short codeId,
       final List<ElasticSearchSystemCode> raceCodes,
       final List<ElasticSearchSystemCode> hispanicCodes) {
