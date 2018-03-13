@@ -40,7 +40,7 @@ public enum StandardFlightSchedule {
   RESET_PEOPLE_INDEX(IndexResetPeopleRocket.class, // rocket class
       "reset_people_index", // rocket name
       1, // initial load order
-      200000000, // start delay seconds. N/A.
+      0, // start delay seconds. N/A.
       10000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
       false, // run in last change mode
@@ -52,7 +52,7 @@ public enum StandardFlightSchedule {
    */
   RESET_PEOPLE_SUMMARY_INDEX(IndexResetPeopleSummaryRocket.class, // rocket class
       "reset_people_summary_index", // rocket name
-      2, // initial load order
+      50, // initial load order
       200000000, // start delay seconds. N/A.
       10000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
@@ -201,8 +201,10 @@ public enum StandardFlightSchedule {
     final JobChainingJobListener ret =
         new JobChainingJobListener(NeutronSchedulerConstants.GRP_FULL_LOAD);
 
-    final StandardFlightSchedule[] arr =
-        Arrays.copyOf(StandardFlightSchedule.values(), StandardFlightSchedule.values().length);
+    final StandardFlightSchedule[] rawArr =
+        getInitialLoadRockets().toArray(new StandardFlightSchedule[0]);
+
+    final StandardFlightSchedule[] arr = Arrays.copyOf(rawArr, rawArr.length);
     Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
 
     StandardFlightSchedule sched;
@@ -210,11 +212,12 @@ public enum StandardFlightSchedule {
 
     for (int i = 0; i < len; i++) {
       sched = arr[i];
-      LOGGER.info("intial load order: {}", sched.getRocketName());
-      ret.addJobChainLink(new JobKey(sched.rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD),
-          i != (len - 1)
-              ? new JobKey(arr[i + 1].rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-              : new JobKey("exit_initial_load", NeutronSchedulerConstants.GRP_FULL_LOAD));
+      final String first = sched.getRocketName();
+      final String second = i != (len - 1) ? arr[i + 1].rocketName : "exit_initial_load";
+      LOGGER.info("intial load order: {} => {}", first, second);
+
+      ret.addJobChainLink(new JobKey(first, NeutronSchedulerConstants.GRP_FULL_LOAD),
+          new JobKey(second, NeutronSchedulerConstants.GRP_FULL_LOAD));
     }
 
     return ret;

@@ -67,7 +67,7 @@ public class NeutronRocket implements InterruptableJob {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     final String rocketName = context.getTrigger().getJobKey().getName();
     NeutronThreadUtils.nameThread(rocketName, this);
-    LOGGER.warn("\n>>>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
+    LOGGER.info("\n>>>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
 
     try (final BasePersonRocket flight = rocket) {
       flightLog = rocket.getFlightLog();
@@ -99,22 +99,18 @@ public class NeutronRocket implements InterruptableJob {
     LOGGER.warn("ABORT FLIGHT!");
   }
 
-  @SuppressWarnings("javadoc")
   public FlightLog getFlightLog() {
     return flightLog;
   }
 
-  @SuppressWarnings("javadoc")
   public void setFlightLog(FlightLog track) {
     this.flightLog = track;
   }
 
-  @SuppressWarnings("rawtypes")
   public BasePersonRocket getRocket() {
     return rocket;
   }
 
-  @SuppressWarnings("javadoc")
   public int getInstanceNumber() {
     return instanceNumber;
   }
