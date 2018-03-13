@@ -9,22 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import gov.ca.cwds.dao.ApiClientCaseAware;
 import gov.ca.cwds.dao.ApiClientCountyAware;
 import gov.ca.cwds.dao.ApiClientRaceAndEthnicityAware;
@@ -112,6 +108,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   private static final long serialVersionUID = 1L;
 
   private static final String HISPANIC_CODE_OTHER_ID = "02";
+  private static final Short CARIBBEAN_RACE_CODE = 3162;
 
   /**
    * A client can have multiple active addresses, typically one active address per address type.
@@ -215,7 +212,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   }
 
   public void setSafetyAlerts(Map<String, ElasticSearchSafetyAlert> safetyAlerts) {
+    if (safetyAlerts != null) {
     this.safetyAlerts = safetyAlerts;
+    }
   }
 
   public void addSafetyAlert(ElasticSearchSafetyAlert safetyAlert) {
@@ -412,7 +411,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       final SystemCode systemCode = SystemCodeCache.global().getSystemCode(codeId);
       if (systemCode != null) {
         description = systemCode.getShortDescription();
-        isHispanicCode = HISPANIC_CODE_OTHER_ID.equals(systemCode.getOtherCd());
+        isHispanicCode = (HISPANIC_CODE_OTHER_ID.equals(systemCode.getOtherCd()) && (!CARIBBEAN_RACE_CODE.equals(codeId)));        
       }
 
       final ElasticSearchSystemCode esCode = new ElasticSearchSystemCode();
