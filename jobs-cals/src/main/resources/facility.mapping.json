@@ -9,9 +9,13 @@
     "phones": {
       "type": "nested"
     },
-    "type.value": {
-      "type": "string",
-      "analyzer": "keyword"
+    "type": {
+      "properties": {
+        "value": {
+          "type": "string",
+          "index": "not_analyzed"
+        }
+      }
     }
   }
 }
