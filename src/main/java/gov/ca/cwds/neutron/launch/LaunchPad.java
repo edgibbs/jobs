@@ -130,12 +130,15 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       }
 
       final String rocketClass = flightSchedule.getRocketClass().getName();
+
+      // Job detail.
       jd = newJob(NeutronRocket.class)
           .withIdentity(rocketName,
               LaunchCommand.isInitialMode() ? NeutronSchedulerConstants.GRP_FULL_LOAD
                   : NeutronSchedulerConstants.GRP_LST_CHG)
           .usingJobData(NeutronSchedulerConstants.ROCKET_CLASS, rocketClass).storeDurably().build();
 
+      // Schedule triggers.
       if (!LaunchCommand.isInitialMode()) {
         scheduler.scheduleJob(jd,
             newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
@@ -147,12 +150,10 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
         LOGGER.info("Scheduled trigger {}", rocketName);
       } else {
         // HACK: cleaner way?
-        if (flightSchedule.getInitialLoadOrder() == 1) {
+        if (flightSchedule.getInitialLoadOrder() == 0) {
           final Trigger trigger =
               newTrigger().withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
-                  .startAt(
-                      DateTime.now().plusSeconds(flightSchedule.getStartDelaySeconds()).toDate())
-                  .build();
+                  .startAt(DateTime.now().toDate()).build();
           scheduler.scheduleJob(jd, trigger);
         } else {
           scheduler.addJob(jd, false, false);

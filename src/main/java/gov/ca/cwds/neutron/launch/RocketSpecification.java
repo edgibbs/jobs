@@ -4,7 +4,7 @@ import gov.ca.cwds.data.std.ApiMarker;
 
 /**
  * Intrinsic, immutable rocket specifications for a given rocket type. A rocket's specs define
- * intrinsic settings that drive flight path and behavior.
+ * built-in settings that drive flight path and behavior.
  * 
  * @author CWDS API Team
  */

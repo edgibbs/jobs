@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Properties;
 import java.util.function.Function;
 
-import gov.ca.cwds.rest.ElasticUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -100,6 +99,7 @@ import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.vox.XRaySpex;
+import gov.ca.cwds.rest.ElasticUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;

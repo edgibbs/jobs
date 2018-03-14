@@ -16,21 +16,42 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
- * Entity bean for view CWSTMP.DBREFSTA.
+ * Entity bean for table CWSTMP.DBREFSTA.
  * 
+ * <p>
+ * Status column:
+ * </p>
+ * 
+ * <table summary="Run Status">
+ * <tr>
+ * <th align="justify">Code</th>
+ * <th align="justify">Meaning</th>
+ * </tr>
+ * <tr>
+ * <td align="justify">R</td>
+ * <td align="justify">running</td>
+ * </tr>
+ * <tr>
+ * <td>F</td>
+ * <td>failed</td>
+ * </tr>
+ * <tr>
+ * <td>S</td>
+ * <td>succeeded</td>
+ * </tr>
+ * </table>
+ *
  * @author CWDS API Team
  */
 @Entity
-@Table(name = "DBREFSTA")
+@Table(schema = "CWSTMP", name = "DBREFSTA")
 //@formatter:off
-@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.DatabaseResetEntry.findAllUpdatedAfter",
-    query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + " SELECT r.SCHEMA_NM, r.START_TS, r.END_TS, r.REF_STATUS \n"
+@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.DatabaseResetEntry.findLastRun",
+    query = "SELECT r.SCHEMA_NM, r.START_TS, r.END_TS, r.REF_STATUS \n"
         + " FROM ( \n"
         + "     SELECT r1.SCHEMA_NM, MAX(r1.START_TS) AS LAST_START \n"
         + "     FROM CWSTMP.DBREFSTA r1 \n"
@@ -60,7 +81,24 @@ public class DatabaseResetEntry implements PersistentObject {
   protected Date endTime;
 
   /**
-   * status: R = running, F = failed, S = succeeded
+   * <table summary="Run Status">
+   * <tr>
+   * <th align="justify">Code</th>
+   * <th align="justify">Meaning</th>
+   * </tr>
+   * <tr>
+   * <td align="justify">R</td>
+   * <td align="justify">running</td>
+   * </tr>
+   * <tr>
+   * <td>F</td>
+   * <td>failed</td>
+   * </tr>
+   * <tr>
+   * <td>S</td>
+   * <td>succeeded</td>
+   * </tr>
+   * </table>
    */
   @Column(name = "REF_STATUS")
   protected String refreshStatus;
@@ -101,14 +139,14 @@ public class DatabaseResetEntry implements PersistentObject {
     this.refreshStatus = refreshStatus;
   }
 
+  // =====================
+  // IDENTITY:
+  // =====================
+
   @Override
   public Serializable getPrimaryKey() {
     return new VarargPrimaryKey(schemaName, DomainChef.cookTimestamp(startTime));
   }
-
-  // =====================
-  // IDENTITY:
-  // =====================
 
   @Override
   public String toString() {
