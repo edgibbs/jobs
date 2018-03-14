@@ -67,8 +67,7 @@ public class ReferralHistoryIndexerJob
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?"
-          + "\nAND c.IBMSNAP_OPERATION IN ('I','U') " // don't update a deleted Client document
-          ;
+          + "\nAND c.IBMSNAP_OPERATION IN ('I','U') "; // don't update a deleted Client document
   //@formatter:on
 
   /**
@@ -104,11 +103,11 @@ public class ReferralHistoryIndexerJob
       + "     WHERE RPT.IBMSNAP_LOGMARKER > 'XYZ' \n"
       + " ), \n"
       + " hoard AS (\n"
-      + "     SELECT DISTINCT s1.REFERRAL_ID FROM STEP1 s1 UNION \n"
-      + "     SELECT DISTINCT s2.REFERRAL_ID FROM STEP2 s2 UNION \n"
-      + "     SELECT DISTINCT s3.REFERRAL_ID FROM STEP3 s3 UNION \n"
-      + "     SELECT DISTINCT s4.REFERRAL_ID FROM STEP4 s4 UNION \n"
-      + "     SELECT DISTINCT s5.REFERRAL_ID FROM STEP5 s5 \n"
+      + "           SELECT DISTINCT s1.REFERRAL_ID FROM STEP1 s1 \n"
+      + "     UNION SELECT DISTINCT s2.REFERRAL_ID FROM STEP2 s2 \n"
+      + "     UNION SELECT DISTINCT s3.REFERRAL_ID FROM STEP3 s3 \n"
+      + "     UNION SELECT DISTINCT s4.REFERRAL_ID FROM STEP4 s4 \n"
+      + "     UNION SELECT DISTINCT s5.REFERRAL_ID FROM STEP5 s5 \n"
       + " ) \n"
       + " SELECT DISTINCT rc2.FKREFERL_T \n"
       + " FROM hoard h \n"
