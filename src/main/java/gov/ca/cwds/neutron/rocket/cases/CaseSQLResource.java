@@ -6,6 +6,10 @@ import gov.ca.cwds.neutron.rocket.CaseRocket;
 /**
  * SQL statements for the Cases rocket.
  * 
+ * <p>
+ * Omit relationship types "unknown" and "no relation".
+ * </p>
+ * 
  * @author CWDS API Team
  * @see CaseRocket
  */
@@ -29,22 +33,22 @@ public class CaseSQLResource implements ApiMarker {
           + "FROM DRIVER d2 \n"
           + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.IDENTIFIER \n"
           + "JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \n"
-          + "WHERE REL2.CLNTRELC NOT IN (244,271,275) AND REL2.END_DT IS NULL \n"
+          + "WHERE REL2.CLNTRELC NOT IN (271,300) AND REL2.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL3.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d3 \n"
           + "JOIN CLN_RELT REL3 ON REL3.FKCLIENT_0 = d3.IDENTIFIER \n"
           + "JOIN CASE_T   CAS3 ON CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \n"
-          + "WHERE REL3.CLNTRELC NOT IN (244,271,275) AND REL3.END_DT IS NULL \n"
+          + "WHERE REL3.CLNTRELC NOT IN (271,300) AND REL3.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL4.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d4 \n"
           + "JOIN CLN_RELT REL4 ON REL4.FKCLIENT_T = d4.IDENTIFIER \n"
           + "JOIN CASE_T   CAS4 ON CAS4.FKCHLD_CLT = REL4.FKCLIENT_0 \n"
-          + "WHERE REL4.CLNTRELC NOT IN (244,271,275) AND REL4.END_DT IS NULL \n"
+          + "WHERE REL4.CLNTRELC NOT IN (271,300) AND REL4.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL5.FKCLIENT_0  AS CLIENT_ID \n"
           + "FROM DRIVER d5 \n"
           + "JOIN CLN_RELT REL5 ON REL5.FKCLIENT_0 = d5.IDENTIFIER \n"
           + "JOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T "
-          + "WHERE REL5.CLNTRELC NOT IN (244,271,275) AND REL5.END_DT IS NULL ";
+          + "WHERE REL5.CLNTRELC NOT IN (271,300) AND REL5.END_DT IS NULL ";
   //@formatter:on
 
   //@formatter:off
@@ -63,7 +67,7 @@ public class CaseSQLResource implements ApiMarker {
           + " FROM CLN_RELT REL2, CASE_T CAS2 \n"
           + " WHERE CAS2.FKCHLD_CLT = REL2.FKCLIENT_0  \n"
           + "   AND REL2.FKCLIENT_T IN (SELECT gt2.IDENTIFIER FROM GT_ID gt2) \n"
-          + "   AND REL2.CLNTRELC NOT IN (244,271,275) AND REL2.END_DT IS NULL \n"
+          + "   AND REL2.CLNTRELC NOT IN (271,300) AND REL2.END_DT IS NULL \n"
           + " UNION \n"
           + " SELECT CAS3.IDENTIFIER    AS CASE_ID, \n"
           + "        REL3.FKCLIENT_0    AS THIS_CLIENT_ID, \n"
@@ -71,7 +75,7 @@ public class CaseSQLResource implements ApiMarker {
           + " FROM CLN_RELT REL3, CASE_T CAS3 \n"
           + " WHERE CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \n"
           + "   AND REL3.FKCLIENT_0 IN (SELECT gt3.IDENTIFIER FROM GT_ID gt3) \n"
-          + "   AND REL3.CLNTRELC NOT IN (244,271,275) AND REL3.END_DT IS NULL \n"
+          + "   AND REL3.CLNTRELC NOT IN (271,300) AND REL3.END_DT IS NULL \n"
           + ") \n"
         + "SELECT DISTINCT d1.THIS_CLIENT_ID AS CLIENT_ID, d1.CASE_ID, 'X' AS SENSTV_IND \n"
         + "FROM DRIVER D1 \n"
@@ -182,19 +186,19 @@ public class CaseSQLResource implements ApiMarker {
             + " FROM CASE_T CAS4  \n"
             + " JOIN CLN_RELT CLR4  ON CLR4.FKCLIENT_T = CAS4.FKCHLD_CLT \n"
             + " WHERE CLR4.IBMSNAP_LOGMARKER > 'XYZ' \n"
-            + "   AND CLR4.CLNTRELC NOT IN (244,271,275) AND CLR4.END_DT IS NULL \n"
+            + "   AND CLR4.CLNTRELC NOT IN (271,300) AND CLR4.END_DT IS NULL \n"
           + "UNION SELECT DISTINCT CLR5.FKCLIENT_0 AS IDENTIFIER  \n"
             + " FROM CASE_T CAS5 \n"
             + " JOIN CLN_RELT CLR5 ON CLR5.FKCLIENT_T = CAS5.FKCHLD_CLT \n"
             + " JOIN CLIENT_T CLP5 ON CLP5.IDENTIFIER = CLR5.FKCLIENT_0  \n"
             + " WHERE CLP5.IBMSNAP_LOGMARKER > 'XYZ' \n"
-            + "   AND CLR5.CLNTRELC NOT IN (244,271,275) AND CLR5.END_DT IS NULL \n"
+            + "   AND CLR5.CLNTRELC NOT IN (271,300) AND CLR5.END_DT IS NULL \n"
           + "UNION SELECT DISTINCT CLR6.FKCLIENT_T AS IDENTIFIER  \n"
             + " FROM CASE_T CAS6 \n"
             + " JOIN CLN_RELT CLR6 ON CLR6.FKCLIENT_T = CAS6.FKCHLD_CLT \n"
             + " JOIN CLIENT_T CLP6 ON CLP6.IDENTIFIER = CLR6.FKCLIENT_0  \n"
             + " WHERE CLP6.IBMSNAP_LOGMARKER > 'XYZ' \n"
-            + "   AND CLR6.CLNTRELC NOT IN (244,271,275) AND CLR6.END_DT IS NULL \n"
+            + "   AND CLR6.CLNTRELC NOT IN (271,300) AND CLR6.END_DT IS NULL \n"
        + ") \n"
        + "SELECT DISTINCT CAS1.FKCHLD_CLT AS CLIENT_ID \n"
           + "FROM DRIVER d1 \n"
@@ -203,22 +207,22 @@ public class CaseSQLResource implements ApiMarker {
           + "FROM DRIVER d2 \n"
           + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.IDENTIFIER \n"
           + "JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \n"
-          + "WHERE REL2.CLNTRELC NOT IN (244,271,275) AND REL2.END_DT IS NULL \n"
+          + "WHERE REL2.CLNTRELC NOT IN (271,300) AND REL2.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL3.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d3 \n"
           + "JOIN CLN_RELT REL3 ON REL3.FKCLIENT_0 = d3.IDENTIFIER \n"
           + "JOIN CASE_T   CAS3 ON CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \n"
-          + "WHERE REL3.CLNTRELC NOT IN (244,271,275) AND REL3.END_DT IS NULL \n"
+          + "WHERE REL3.CLNTRELC NOT IN (271,300) AND REL3.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL4.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d4 \n"
           + "JOIN CLN_RELT REL4 ON REL4.FKCLIENT_T = d4.IDENTIFIER \n"
           + "JOIN CASE_T   CAS4 ON CAS4.FKCHLD_CLT = REL4.FKCLIENT_0 \n"
-          + "WHERE REL4.CLNTRELC NOT IN (244,271,275) AND REL4.END_DT IS NULL \n"
+          + "WHERE REL4.CLNTRELC NOT IN (271,300) AND REL4.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL5.FKCLIENT_0  AS CLIENT_ID \n"
           + "FROM DRIVER d5 \n"
           + "JOIN CLN_RELT REL5 ON REL5.FKCLIENT_0 = d5.IDENTIFIER \n"
           + "JOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T "
-          + "WHERE REL5.CLNTRELC NOT IN (244,271,275) AND REL5.END_DT IS NULL ";
+          + "WHERE REL5.CLNTRELC NOT IN (271,300) AND REL5.END_DT IS NULL ";
   //@formatter:on
 
   /**
