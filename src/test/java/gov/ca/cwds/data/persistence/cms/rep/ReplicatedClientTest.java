@@ -253,6 +253,16 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   }
   
   @Test
+  public void shouldSetHispanicOriginCodeToYes() throws Exception {
+    final List<Short> clientRaces = new ArrayList<>();
+    clientRaces.add((short) 3162);
+    target.setClientRaces(clientRaces);
+    target.setHispanicOriginCode("Y");
+    final ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
+    assertThat(actual.getHispanicOriginCode(), is(equalTo("Y")));
+  }
+  
+  @Test
   public void getAkas_Args__() throws Exception {
     final Map<String, ElasticSearchPersonAka> actual = target.getAkas();
     final Map<String, ElasticSearchPersonAka> expected = new HashMap<>();
