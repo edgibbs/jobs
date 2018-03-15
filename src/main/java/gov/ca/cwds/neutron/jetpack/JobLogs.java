@@ -96,16 +96,17 @@ public class JobLogs {
   }
 
   /**
-   * Format message and return a runtime {@link NeutronRuntimeException}.
+   * Format message and return a runtime {@link NeutronCheckedException}.
    * 
    * @param log class logger
    * @param e any Throwable
    * @param pattern MessageFormat pattern
    * @param args error message, excluding throwable message
-   * @return NeutronException checked exception
+   * @return NeutronCheckedException checked exception
    */
   public static NeutronCheckedException buildCheckedException(final Logger log, Throwable e,
       String pattern, Object... args) {
+    NeutronCheckedException ret;
     final boolean hasArgs = args == null || args.length == 0;
     final boolean hasPattern = !StringUtils.isEmpty(pattern);
     final Logger logger = log != null ? log : LOGGER;
@@ -115,8 +116,15 @@ public class JobLogs {
     final String pat = hasPattern ? pattern : StringUtils.join(objs, "{}");
     final String msg = hasPattern && hasArgs ? MessageFormat.format(pat, objs) : "";
 
-    logger.error(msg, e);
-    return new NeutronCheckedException(msg, e);
+    if (e != null) {
+      logger.error(msg, e);
+      ret = new NeutronCheckedException(msg, e);
+    } else {
+      logger.error(msg);
+      ret = new NeutronCheckedException(msg);
+    }
+
+    return ret;
   }
 
   public static NeutronCheckedException checked(final Logger log, Throwable e, String pattern,

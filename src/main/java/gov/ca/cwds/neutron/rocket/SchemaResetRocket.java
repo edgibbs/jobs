@@ -56,7 +56,9 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
     try {
       refreshSchema();
+      done();
     } catch (Exception e) {
+      fail();
       CheeseRay.checked(LOGGER, e, "SCHEMA RESET ERROR!! {}", e.getMessage());
     }
 
@@ -112,18 +114,20 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
               schemaRefreshTimeoutSeconds);
 
           if (accumulatedWaitTimeSeconds >= schemaRefreshTimeoutSeconds) {
-            String errorMsg = "Schema refresh operation timed out after '"
-                + (accumulatedWaitTimeSeconds / 60) + "' minutes";
-            LOGGER.info("Schema refresh operation timed out after: {} seconds",
+            final StringBuilder buf = new StringBuilder();
+            buf.append("Schema refresh operation timed out after '")
+                .append(accumulatedWaitTimeSeconds / 60).append("' minutes");
+
+            LOGGER.error("Schema refresh operation timed out after {} seconds",
                 accumulatedWaitTimeSeconds);
-            throw CheeseRay.checked(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
+            throw new IllegalStateException(buf.toString());
           }
         }
 
-        LOGGER.warn("SCHEMA RESET COMPLETED!");
+        LOGGER.warn("DB2 SCHEMA RESET COMPLETED!");
       }
     } else {
-      LOGGER.warn("SAFETY! RESET PROHIBITED ON LARGE DATA SETS!");
+      LOGGER.warn("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
     }
   }
 
