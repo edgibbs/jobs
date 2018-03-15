@@ -35,7 +35,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
  * @author CWDS API Team
  */
 public class SchemaResetRocket
-    extends BasePersonRocket<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
+    extends BasePersonRocket<DatabaseResetEntry, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 
@@ -51,7 +51,7 @@ public class SchemaResetRocket
    * @param flightPlan command line options
    */
   @Inject
-  public SchemaResetRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
+  public SchemaResetRocket(final DbResetStatusDao dao,
       final ObjectMapper mapper, @LastRunFile String lastRunFile, FlightPlan flightPlan) {
     super(dao, null, lastRunFile, mapper, flightPlan);
     LOGGER.warn("CONSTRUCTOR");
@@ -110,11 +110,11 @@ public class SchemaResetRocket
         CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", returnMsg);
       } else {
     	    // if schema refresh operation does not finish in 120 minutes, we timeout with an exception
-        int schemaRefreshTimeoutSeconds = 120 * 60; 
-        int waitTimeSeconds = 60; 
+        int schemaRefreshTimeoutSeconds = 2 * 60; 
+        int waitTimeSeconds = 5; 
         int accumulatedWaitTimeSeconds = 0;
           
-        while (!waitForSchemaRefreshCompletion(waitTimeSeconds)) {      
+        while (!schemaRefreshCompleted(waitTimeSeconds)) {      
         	  accumulatedWaitTimeSeconds = accumulatedWaitTimeSeconds + waitTimeSeconds;
           if (accumulatedWaitTimeSeconds >= schemaRefreshTimeoutSeconds) {
         	    String errorMsg = "Schema refresh operation timed out after '" + accumulatedWaitTimeSeconds/60 + "' minutes";
@@ -139,12 +139,12 @@ public class SchemaResetRocket
     LaunchCommand.launchOneWayTrip(SchemaResetRocket.class, args);
   }
   
-  private boolean waitForSchemaRefreshCompletion(int waitTimeSeconds) {
+  private boolean schemaRefreshCompleted(int waitTimeSeconds) {
       try {
           TimeUnit.SECONDS.sleep(waitTimeSeconds);
       } catch (InterruptedException e) {
     	    String errorMsg = "Schema refresh operation wait interrupted";
-  	    CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
+  	    CheeseRay.runtime(LOGGER, e, "SCHEMA RESET ERROR! {}", errorMsg);
       }
       
       boolean completed = false;
