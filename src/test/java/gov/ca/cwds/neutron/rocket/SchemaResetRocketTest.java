@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
@@ -44,6 +45,7 @@ public class SchemaResetRocketTest extends Goddard {
   }
 
   @Test
+  @Ignore
   public void launch_A$Date() throws Exception {
     final Date theDate = new Date();
     final Date lastRunDate = theDate;
@@ -53,11 +55,13 @@ public class SchemaResetRocketTest extends Goddard {
   }
 
   @Test
+  @Ignore
   public void refreshSchema_A$() throws Exception {
     target.refreshSchema();
   }
 
   @Test
+  @Ignore
   public void refreshSchema_A$_T$NeutronCheckedException() throws Exception {
     try {
       when(dao.getSessionFactory()).thenThrow(SQLException.class);
@@ -68,6 +72,7 @@ public class SchemaResetRocketTest extends Goddard {
   }
 
   @Test
+  @Ignore
   public void main_A$StringArray_T$Exception() throws Exception {
     String[] args = new String[] {};
 
