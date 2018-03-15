@@ -2,6 +2,7 @@ package gov.ca.cwds.data.persistence.cms;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +17,7 @@ import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
@@ -63,7 +65,8 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
         + " WITH UR",
     resultClass = DatabaseResetEntry.class, readOnly = true)
 //@formatter:on
-public class DatabaseResetEntry implements PersistentObject {
+public class DatabaseResetEntry
+    implements PersistentObject, ApiGroupNormalizer<DatabaseResetEntry> {
 
   private static final long serialVersionUID = 1L;
 
@@ -161,6 +164,21 @@ public class DatabaseResetEntry implements PersistentObject {
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  @Override
+  public Class<DatabaseResetEntry> getNormalizationClass() {
+    return null;
+  }
+
+  @Override
+  public Serializable getNormalizationGroupKey() {
+    return null;
+  }
+
+  @Override
+  public DatabaseResetEntry normalize(Map<Object, DatabaseResetEntry> arg0) {
+    return null;
   }
 
 }

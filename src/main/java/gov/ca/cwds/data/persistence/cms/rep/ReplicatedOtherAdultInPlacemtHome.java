@@ -48,9 +48,6 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 public class ReplicatedOtherAdultInPlacemtHome extends BaseOtherAdultInPlacemtHome
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedOtherAdultInPlacemtHome> {
 
-  /**
-   * Default.
-   */
   private static final long serialVersionUID = 1L;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
