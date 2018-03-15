@@ -101,10 +101,11 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       LOGGER.info("refresh schema proc: status: {}, msg: {}", returnStatus, returnMsg);
 
       if (StringUtils.isNotBlank(returnStatus) && returnStatus.charAt(0) != '0') {
+        fail();
         CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", returnMsg);
       } else {
         // if schema refresh operation does not finish in 120 minutes, we timeout with an exception
-        int schemaRefreshTimeoutSeconds = 1 * 10;
+        int schemaRefreshTimeoutSeconds = 1 * 60;
         int waitTimeSeconds = 5;
         int accumulatedWaitTimeSeconds = 0;
 
@@ -115,8 +116,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
           if (accumulatedWaitTimeSeconds >= schemaRefreshTimeoutSeconds) {
             final StringBuilder buf = new StringBuilder();
-            buf.append("Schema refresh operation timed out after '")
-                .append(accumulatedWaitTimeSeconds / 60).append("' minutes");
+            buf.append("Schema refresh operation timed out after ")
+                .append(accumulatedWaitTimeSeconds / 60).append(" minutes");
 
             LOGGER.error("Schema refresh operation timed out after {} seconds",
                 accumulatedWaitTimeSeconds);
@@ -129,16 +130,6 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     } else {
       LOGGER.warn("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
     }
-  }
-
-  /**
-   * Rocket entry point.
-   * 
-   * @param args command line arguments
-   * @throws Exception on launch error
-   */
-  public static void main(String... args) throws Exception {
-    LaunchCommand.launchOneWayTrip(SchemaResetRocket.class, args);
   }
 
   private boolean schemaRefreshCompleted(int waitTimeSeconds) {
@@ -164,6 +155,16 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   private String findSchemaRefreshStatus() {
     return dao.findBySchemaStartTime(getDbSchema()).getRefreshStatus();
+  }
+
+  /**
+   * Rocket entry point.
+   * 
+   * @param args command line arguments
+   * @throws Exception on launch error
+   */
+  public static void main(String... args) throws Exception {
+    LaunchCommand.launchOneWayTrip(SchemaResetRocket.class, args);
   }
 
 }
