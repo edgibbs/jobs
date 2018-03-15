@@ -67,7 +67,7 @@ public class NeutronRocket implements InterruptableJob {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     final String rocketName = context.getTrigger().getJobKey().getName();
     NeutronThreadUtils.nameThread(rocketName, this);
-    LOGGER.info("\n>>>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
+    LOGGER.info("\n\t>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
 
     try (final BasePersonRocket flight = rocket) {
       flightLog = rocket.getFlightLog();
@@ -90,7 +90,7 @@ public class NeutronRocket implements InterruptableJob {
       flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
       LOGGER.info("FLIGHT SUMMARY: {}\n{}", rocketName, flightLog);
-      MDC.remove("rocketLog");
+      MDC.remove("rocketLog"); // remove the logging context, no matter what happens
     }
   }
 
