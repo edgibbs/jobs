@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.ParameterMode;
 
@@ -11,6 +12,7 @@ import org.hibernate.procedure.ProcedureCall;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.dao.cms.DbResetStatusDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -32,6 +34,7 @@ public class SchemaResetRocket
   private static final long serialVersionUID = 1L;
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(SchemaResetRocket.class);
+  private DbResetStatusDao dao;
 
   /**
    * Construct rocket with all required dependencies.
@@ -61,6 +64,17 @@ public class SchemaResetRocket
     return lastRunDate;
   }
 
+  public String getDbSchema() {
+    final Session session = getJobDao().getSessionFactory().getCurrentSession();
+    getOrCreateTransaction(); // HACK
+
+    final String targetTransactionalSchema =
+        ((String) session.getSessionFactory().getProperties().get("hibernate.default_schema"))
+            .replaceFirst("CWSRS", "CWSNS").replaceAll("\"", "");
+    LOGGER.info("CALL SCHEMA RESET: target schema: {}", targetTransactionalSchema);
+    return targetTransactionalSchema;
+  }
+
   /**
    * Refresh a DB2 test schema by calling a stored procedure.
    * 
@@ -69,21 +83,16 @@ public class SchemaResetRocket
   protected void refreshSchema() throws NeutronCheckedException {
     if (!isLargeDataSet()) {
       LOGGER.warn("\n\n\n   ********** RESET SCHEMA!! ********** \n\n\n");
-      final Session session = getJobDao().getSessionFactory().getCurrentSession();
-      getOrCreateTransaction(); // HACK
 
-      // Target the NS schema, not RS.
-      final String targetTransactionalSchema =
-          ((String) session.getSessionFactory().getProperties().get("hibernate.default_schema"))
-              .replaceFirst("CWSRS", "CWSNS").replaceAll("\"", "");
-      LOGGER.info("CALL SCHEMA RESET: target schema: {}", targetTransactionalSchema);
+      final Session session = getJobDao().getSessionFactory().getCurrentSession();
+      getOrCreateTransaction();
 
       final ProcedureCall proc = session.createStoredProcedureCall("CWSTMP.SPREFDBS");
       proc.registerStoredProcedureParameter("SCHEMANM", String.class, ParameterMode.IN);
       proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
       proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
 
-      proc.setParameter("SCHEMANM", targetTransactionalSchema);
+      proc.setParameter("SCHEMANM", getDbSchema());
       proc.execute();
 
       final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
@@ -93,7 +102,21 @@ public class SchemaResetRocket
       if (StringUtils.isNotBlank(returnStatus) && returnStatus.charAt(0) != '0') {
         CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", returnMsg);
       } else {
-        LOGGER.warn("SCHEMA RESET STARTED!!!");
+        // if schema refresh operation does not finish in 120 minutes, we timeout with an exception
+        int schemaRefreshTimeoutSeconds = 120 * 60;
+        int waitTimeSeconds = 60;
+        int accumulatedWaitTimeSeconds = 0;
+
+        while (!waitForSchemaRefreshCompletion(waitTimeSeconds)) {
+          accumulatedWaitTimeSeconds = accumulatedWaitTimeSeconds + waitTimeSeconds;
+          if (accumulatedWaitTimeSeconds >= schemaRefreshTimeoutSeconds) {
+            String errorMsg = "Schema refresh operation timed out after '"
+                + accumulatedWaitTimeSeconds / 60 + "' minutes";
+            CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
+          }
+        }
+
+        LOGGER.warn("SCHEMA RESET COMPLETERD!");
       }
     } else {
       LOGGER.warn("SAFETY! RESET PROHIBITED ON LARGE DATA SETS!");
@@ -108,6 +131,31 @@ public class SchemaResetRocket
    */
   public static void main(String... args) throws Exception {
     LaunchCommand.launchOneWayTrip(SchemaResetRocket.class, args);
+  }
+
+  private boolean waitForSchemaRefreshCompletion(int waitTimeSeconds) {
+    try {
+      TimeUnit.SECONDS.sleep(waitTimeSeconds);
+    } catch (InterruptedException e) {
+      String errorMsg = "Schema refresh operation wait interrupted";
+      CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
+    }
+
+    boolean completed = false;
+    String status = findSchemaRefreshStatus();
+
+    if (status.equalsIgnoreCase("S")) {
+      completed = true;
+    } else if (status.equalsIgnoreCase("F")) {
+      String errorMsg = "Schema refresh operation failed.";
+      CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
+    }
+
+    return completed;
+  }
+
+  private String findSchemaRefreshStatus() {
+    return dao.findBySchemaStartTime(getDbSchema()).getRefreshStatus();
   }
 
 }
