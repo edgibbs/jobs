@@ -104,23 +104,22 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         fail();
         CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", returnMsg);
       } else {
-        // if schema refresh operation does not finish in 120 minutes, we timeout with an exception
-        int schemaRefreshTimeoutSeconds = 1 * 60;
-        int waitTimeSeconds = 5;
-        int accumulatedWaitTimeSeconds = 0;
+        // if schema refresh operation does not finish in 90 minutes, we timeout with an exception
+        int schemaRefreshTimeoutSeconds = 90 * 60;
+        int pollPeriodInSeconds = 5;
+        int secondsWaited = 0;
 
-        while (!schemaRefreshCompleted(waitTimeSeconds)) {
-          accumulatedWaitTimeSeconds += waitTimeSeconds;
-          LOGGER.info("seconds waited: {}, timeout: {}", accumulatedWaitTimeSeconds,
+        while (!schemaRefreshCompleted(pollPeriodInSeconds)) {
+          secondsWaited += pollPeriodInSeconds;
+          LOGGER.info("seconds waited: {}, timeout: {}", secondsWaited,
               schemaRefreshTimeoutSeconds);
 
-          if (accumulatedWaitTimeSeconds >= schemaRefreshTimeoutSeconds) {
+          if (secondsWaited >= schemaRefreshTimeoutSeconds) {
             final StringBuilder buf = new StringBuilder();
-            buf.append("Schema refresh operation timed out after ")
-                .append(accumulatedWaitTimeSeconds / 60).append(" minutes");
+            buf.append("Schema refresh operation timed out after ").append(secondsWaited / 60)
+                .append(" minutes");
 
-            LOGGER.error("Schema refresh operation timed out after {} seconds",
-                accumulatedWaitTimeSeconds);
+            LOGGER.error("Schema refresh operation timed out after {} seconds", secondsWaited);
             throw new IllegalStateException(buf.toString());
           }
         }
@@ -146,8 +145,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     if (status.equalsIgnoreCase("S")) {
       completed = true;
     } else if (status.equalsIgnoreCase("F")) {
-      String errorMsg = "Schema refresh operation failed.";
-      CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
+      throw new IllegalStateException("Schema refresh operation failed.");
     }
 
     return completed;
