@@ -77,7 +77,7 @@ public class SchemaResetRocket
       final String targetTransactionalSchema =
               ((String) session.getSessionFactory().getProperties().get("hibernate.default_schema"))
                   .replaceFirst("CWSRS", "CWSNS").replaceAll("\"", "");
-      LOGGER.info("CALL SCHEMA RESET: target schema: {}", getDbSchema());
+      LOGGER.info("CALL SCHEMA RESET: target schema: {}", targetTransactionalSchema);
 	return targetTransactionalSchema;
 	  
   }
