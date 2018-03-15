@@ -102,16 +102,21 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", returnMsg);
       } else {
         // if schema refresh operation does not finish in 120 minutes, we timeout with an exception
-        int schemaRefreshTimeoutSeconds = 2 * 60;
+        int schemaRefreshTimeoutSeconds = 1 * 10;
         int waitTimeSeconds = 5;
         int accumulatedWaitTimeSeconds = 0;
 
         while (!schemaRefreshCompleted(waitTimeSeconds)) {
-          accumulatedWaitTimeSeconds = accumulatedWaitTimeSeconds + waitTimeSeconds;
+          accumulatedWaitTimeSeconds += waitTimeSeconds;
+          LOGGER.info("seconds waited: {}, timeout: {}", accumulatedWaitTimeSeconds,
+              schemaRefreshTimeoutSeconds);
+
           if (accumulatedWaitTimeSeconds >= schemaRefreshTimeoutSeconds) {
             String errorMsg = "Schema refresh operation timed out after '"
-                + accumulatedWaitTimeSeconds / 60 + "' minutes";
-            CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
+                + (accumulatedWaitTimeSeconds / 60) + "' minutes";
+            LOGGER.info("Schema refresh operation timed out after: {} seconds",
+                accumulatedWaitTimeSeconds);
+            throw CheeseRay.checked(LOGGER, "SCHEMA RESET ERROR! {}", errorMsg);
           }
         }
 
