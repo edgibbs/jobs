@@ -29,6 +29,7 @@ import com.google.inject.name.Named;
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
+import gov.ca.cwds.dao.cms.DbResetStatusDao;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
@@ -50,6 +51,7 @@ import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
@@ -322,6 +324,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(ReplicatedPersonCasesDao.class);
     bind(ReplicatedSafetyAlertsDao.class);
     bind(StaffPersonDao.class);
+    bind(DbResetStatusDao.class);
 
     // PostgreSQL:
     // OPTION: only connect to Postgres if needed.
@@ -364,7 +367,7 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
         .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
         .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
-        .addAnnotatedClass(StaffPerson.class);
+        .addAnnotatedClass(StaffPerson.class).addAnnotatedClass(DatabaseResetEntry.class);
     return additionalDaos(config).buildSessionFactory();
   }
 

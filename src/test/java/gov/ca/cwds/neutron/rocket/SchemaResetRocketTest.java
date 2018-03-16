@@ -15,13 +15,14 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import gov.ca.cwds.dao.cms.DbResetStatusDao;
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 
 public class SchemaResetRocketTest extends Goddard {
 
-  ReplicatedOtherAdultInPlacemtHomeDao dao;
+	DbResetStatusDao dao;
   SchemaResetRocket target;
 
   @Override
@@ -29,7 +30,7 @@ public class SchemaResetRocketTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
 
-    dao = mock(ReplicatedOtherAdultInPlacemtHomeDao.class);
+    dao = mock(DbResetStatusDao.class);
     when(dao.getSessionFactory()).thenReturn(sessionFactory);
     target = new SchemaResetRocket(dao, mapper, lastRunFile, flightPlan);
   }

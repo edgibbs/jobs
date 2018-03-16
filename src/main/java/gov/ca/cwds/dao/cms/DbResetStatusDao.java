@@ -1,7 +1,5 @@
 package gov.ca.cwds.dao.cms;
 
-import java.util.Collection;
-
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hibernate.type.StringType;
@@ -19,8 +17,7 @@ import gov.ca.cwds.inject.CmsSessionFactory;
  * @see CmsSessionFactory
  * @see SessionFactory
  */
-public class DbResetStatusDao extends BaseDaoImpl<DatabaseResetEntry>
- {
+public class DbResetStatusDao extends BaseDaoImpl<DatabaseResetEntry> {
 
   /**
    * Constructor
@@ -31,19 +28,19 @@ public class DbResetStatusDao extends BaseDaoImpl<DatabaseResetEntry>
   public DbResetStatusDao(@CmsSessionFactory SessionFactory sessionFactory) {
     super(sessionFactory);
   }
-  
+
   /**
    * Find by Schema Start Time Stamp
    * 
-   * @param refreshStatus - the status of the refresh job
+   * @param schemaName - target schema
    * @return max start time stamp
    */
   @SuppressWarnings("unchecked")
-  public DatabaseResetEntry findBySchemaStartTime(String refreshStatus) {
-	    final Query<DatabaseResetEntry> query = this.getSessionFactory().getCurrentSession()
-	        .getNamedQuery("gov.ca.cwds.data.persistence.cms.DatabaseResetEntry.findLastRun");
-	    query.setParameter("refreshStatus", refreshStatus, StringType.INSTANCE);
-	    return query.getSingleResult();
-	  }
+  public DatabaseResetEntry findBySchemaStartTime(String schemaName) {
+    final Query<DatabaseResetEntry> query = this.getSessionFactory().getCurrentSession()
+        .getNamedQuery("gov.ca.cwds.data.persistence.cms.DatabaseResetEntry.findLastRun");
+    query.setParameter("schema_name", schemaName, StringType.INSTANCE);
+    return query.getSingleResult();
+  }
 
 }
