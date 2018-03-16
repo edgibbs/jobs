@@ -21,9 +21,9 @@ import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Test Elasticsearch mass search capability for automatic validation.
@@ -90,7 +90,7 @@ public class SanityCheckRocket
     try {
       launchScheduler.stopScheduler(false);
     } catch (Exception e) {
-      JobLogs.runtime(LOGGER, e, "FAILED TO STOP SCHEDULER! {}", e.getMessage());
+      CheeseRay.runtime(LOGGER, e, "FAILED TO STOP SCHEDULER! {}", e.getMessage());
     }
 
     return lastSuccessfulRunTime;

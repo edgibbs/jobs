@@ -24,8 +24,8 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
-import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 import gov.ca.cwds.data.persistence.cms.RelationshipTypeCache;
+import gov.ca.cwds.data.persistence.cms.ReplicatedRelationships;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
@@ -33,7 +33,6 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -186,7 +185,7 @@ public class RelationshipIndexerJob
 
     // NOTE: Assumes that records are sorted by group key.
     while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
-      JobLogs.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
+      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalizeAndQueueIndex(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.

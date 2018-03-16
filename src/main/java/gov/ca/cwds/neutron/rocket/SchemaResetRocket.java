@@ -52,8 +52,6 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   @Override
   public Date launch(Date lastRunDate) {
-    LOGGER.warn("RESET TEST SCHEMA!!!");
-
     try {
       refreshSchema();
       done();
@@ -83,7 +81,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
    */
   protected void refreshSchema() throws NeutronCheckedException {
     if (!isLargeDataSet()) {
-      LOGGER.warn("\n\n\n   ********** RESET SCHEMA!! ********** \n\n\n");
+      LOGGER.warn("\n\n\n\t   ********** RESET SCHEMA!! ********** \n\n\n");
 
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
       getOrCreateTransaction();
@@ -106,7 +104,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       } else {
         // if schema refresh operation does not finish in 90 minutes, we timeout with an exception
         int schemaRefreshTimeoutSeconds = 90 * 60;
-        int pollPeriodInSeconds = 5;
+        int pollPeriodInSeconds = 60;
         int secondsWaited = 0;
 
         while (!schemaRefreshCompleted(pollPeriodInSeconds)) {
@@ -136,7 +134,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       TimeUnit.SECONDS.sleep(waitTimeSeconds);
     } catch (InterruptedException e) {
       String errorMsg = "Schema refresh operation wait interrupted";
-      CheeseRay.runtime(LOGGER, e, "SCHEMA RESET ERROR! {}", errorMsg);
+      CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR! {}", errorMsg);
     }
 
     boolean completed = false;

@@ -13,9 +13,9 @@ import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Miscellaneous DB2 utilities for Neutron rockets.
@@ -113,7 +113,7 @@ public final class NeutronDB2Utils {
 
       ret = meta.getDatabaseProductVersion().startsWith("DSN");
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "UNABLE TO DETERMINE DB2 PLATFORM! {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "UNABLE TO DETERMINE DB2 PLATFORM! {}", e.getMessage());
     }
 
     return ret;

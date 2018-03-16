@@ -25,7 +25,7 @@ import gov.ca.cwds.jobs.facility.FacilityRowMapper;
 import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.jobs.util.jdbc.JdbcJobReader;
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -62,7 +62,7 @@ public class JdbcJobReaderTest extends Goddard {
       try {
         return c.prepareStatement("select * from test order by a");
       } catch (SQLException e) {
-        throw JobLogs.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT!", e.getMessage());
+        throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT!", e.getMessage());
       }
     };
   }

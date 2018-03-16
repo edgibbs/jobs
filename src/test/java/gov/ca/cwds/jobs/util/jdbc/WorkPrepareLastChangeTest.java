@@ -17,9 +17,9 @@ import org.junit.Test;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 public class WorkPrepareLastChangeTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
 
@@ -63,7 +63,7 @@ public class WorkPrepareLastChangeTest extends Goddard<ReplicatedPersonCases, Es
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw JobLogs.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+        throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
       }
     });
     target.execute(con);
@@ -80,7 +80,7 @@ public class WorkPrepareLastChangeTest extends Goddard<ReplicatedPersonCases, Es
       try {
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw JobLogs.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
+        throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT", e.getMessage());
       }
     });
     target.execute(con);
