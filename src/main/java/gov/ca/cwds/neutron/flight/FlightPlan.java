@@ -325,9 +325,11 @@ public class FlightPlan implements ApiMarker {
     ret.addOption(NeutronCmdLineOption.ES_CONFIG_PEOPLE.getOpt());
     ret.addOption(NeutronCmdLineOption.ES_CONFIG_PEOPLE_SUMMARY.getOpt());
     ret.addOption(NeutronCmdLineOption.INDEX_NAME.getOpt());
-    ret.addOption(NeutronCmdLineOption.LAST_START_TIME.getOpt());
     ret.addOption(NeutronCmdLineOption.THREADS.getOpt());
     ret.addOption(NeutronCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
+
+    ret.addOption(NeutronCmdLineOption.LAST_START_TIME.getOpt());
+    ret.addOption(NeutronCmdLineOption.LAST_END_TIME.getOpt());
 
     ret.addOption(NeutronCmdLineOption.FULL_LOAD.getOpt());
     ret.addOption(NeutronCmdLineOption.REFRESH_MQT.getOpt());

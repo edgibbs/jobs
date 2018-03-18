@@ -54,8 +54,9 @@ public final class NeutronDB2Utils {
    */
   public static String prepLastChangeSQL(String sql, Date lastRunStartDate, Date lastRunEndDate) {
     final String strStartDate = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunStartDate);
+    final String strEndDate = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunEndDate);
     return sql.replaceAll("XYZ", strStartDate).replaceAll("LAST_RUN_START", strStartDate)
-        .replaceAll("LAST_RUN_END", NeutronJdbcUtils.makeTimestampStringLookBack(lastRunEndDate))
+        .replaceAll("LAST_RUN_END", strEndDate)
         .replaceAll("'CURRENT TIMESTAMP'", "CURRENT TIMESTAMP");
   }
 
