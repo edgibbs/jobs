@@ -340,6 +340,7 @@ public class FlightPlan implements ApiMarker {
     ret.addOption(NeutronCmdLineOption.MAX_ID.getOpt());
 
     // RUN MODE: mutually exclusive choice.
+    // Either provide many last run files in base directory or provide a single last run file.
     final OptionGroup group = new OptionGroup();
     group.setRequired(true);
     group.addOption(NeutronCmdLineOption.LAST_RUN_FILE.getOpt());
