@@ -577,7 +577,8 @@ public class ReferralHistoryIndexerJob
       }
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR IN THREADED RETRIEVAL! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "REFERRALS: ERROR IN THREADED RETRIEVAL! {}",
+          e.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -613,7 +614,7 @@ public class ReferralHistoryIndexerJob
 
   /**
    * Referrals is an <strong>enormous</strong> task and fetches partition ranges from a file instead
-   * of bloating a Java class.
+   * of a bloated Java class.
    * 
    * @see ReferralJobRanges
    */
