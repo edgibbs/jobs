@@ -79,28 +79,28 @@ public class ReferralHistoryIndexerJob
       + " WITH step1 AS (\n"
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
       + "     FROM ALLGTN_T ALG \n"
-      + "     WHERE ALG.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE ALG.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " step2 AS (\n"
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID \n"
       + "     FROM CLIENT_T C \n"
       + "     JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)\n"
-      + "     WHERE C.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE C.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ),\n"
       + " step3 AS (\n"
       + "     SELECT RCT.FKREFERL_T AS REFERRAL_ID \n"
       + "     FROM REFR_CLT RCT \n"
-      + "     WHERE RCT.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE RCT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " step4 AS (\n"
       + "     SELECT RFL.IDENTIFIER AS REFERRAL_ID \n"
       + "     FROM REFERL_T RFL \n"
-      + "     WHERE RFL.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE RFL.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " step5 AS (\n"
       + "     SELECT RPT.FKREFERL_T AS REFERRAL_ID \n"
       + "     FROM REPTR_T RPT \n"
-      + "     WHERE RPT.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE RPT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " hoard AS (\n"
       + "           SELECT DISTINCT s1.REFERRAL_ID FROM STEP1 s1 \n"
@@ -600,7 +600,7 @@ public class ReferralHistoryIndexerJob
   public String getPrepLastChangeSQL() {
     try {
       return NeutronDB2Utils.prepLastChangeSQL(INSERT_REFERRAL_LAST_CHG,
-          determineLastSuccessfulRunTime());
+          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
     } catch (NeutronCheckedException e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL: {}", e.getMessage());
     }

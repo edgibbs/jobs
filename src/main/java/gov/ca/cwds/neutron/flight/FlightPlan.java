@@ -57,7 +57,7 @@ public class FlightPlan implements ApiMarker {
    * Last time rocket was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time
    * stamp given in last run time file is ignored.
    */
-  private Date overrideLastRunTime;
+  private Date overrideLastStartTime;
 
   /**
    * Optional end date for standalone last change runs. Pseudo code:
@@ -129,7 +129,8 @@ public class FlightPlan implements ApiMarker {
    * @param esConfigPeopleSummaryLoc location of Elasticsearch configuration file for people summary
    *        index
    * @param indexName Name of index to use. If not provided, then use alias from ES config.
-   * @param lastRunTime Last run time to use
+   * @param lastStartTime override last start time\
+   * @param lastEndTime override Last end time
    * @param lastRunLoc location of last run file
    * @param lastRunMode is last run mode or not
    * @param startBucket starting bucket number
@@ -143,13 +144,15 @@ public class FlightPlan implements ApiMarker {
    * @param simulateLaunch simulate launch (test mode!)
    */
   public FlightPlan(String esConfigPeopleLoc, String esConfigPeopleSummaryLoc, String indexName,
-      Date lastRunTime, String lastRunLoc, boolean lastRunMode, long startBucket, long endBucket,
-      long threadCount, boolean loadSealedAndSensitive, boolean rangeGiven, String baseDirectory,
-      boolean refreshMqt, boolean dropIndex, boolean simulateLaunch) {
+      Date lastStartTime, Date lastEndTime, String lastRunLoc, boolean lastRunMode,
+      long startBucket, long endBucket, long threadCount, boolean loadSealedAndSensitive,
+      boolean rangeGiven, String baseDirectory, boolean refreshMqt, boolean dropIndex,
+      boolean simulateLaunch) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
-    this.overrideLastRunTime = NeutronDateUtils.freshDate(lastRunTime);
+    this.overrideLastStartTime = NeutronDateUtils.freshDate(lastStartTime);
+    this.overrideLastEndTime = NeutronDateUtils.freshDate(lastEndTime);
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
@@ -172,7 +175,8 @@ public class FlightPlan implements ApiMarker {
     this.esConfigPeopleLoc = flightPlan.esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = flightPlan.esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.isBlank(flightPlan.indexName) ? null : flightPlan.indexName;
-    this.overrideLastRunTime = flightPlan.overrideLastRunTime;
+    this.overrideLastStartTime = flightPlan.overrideLastStartTime;
+    this.overrideLastEndTime = flightPlan.overrideLastEndTime;
     this.lastRunLoc = flightPlan.lastRunLoc;
     this.lastRunMode = flightPlan.lastRunMode;
     this.startBucket = flightPlan.startBucket;
@@ -229,8 +233,8 @@ public class FlightPlan implements ApiMarker {
    * 
    * @return Last run time
    */
-  public Date getOverrideLastRunTime() {
-    return overrideLastRunTime != null ? new Date(overrideLastRunTime.getTime()) : null;
+  public Date getOverrideLastRunStartTime() {
+    return overrideLastStartTime != null ? new Date(overrideLastStartTime.getTime()) : null;
   }
 
   /**
@@ -321,7 +325,7 @@ public class FlightPlan implements ApiMarker {
     ret.addOption(NeutronCmdLineOption.ES_CONFIG_PEOPLE.getOpt());
     ret.addOption(NeutronCmdLineOption.ES_CONFIG_PEOPLE_SUMMARY.getOpt());
     ret.addOption(NeutronCmdLineOption.INDEX_NAME.getOpt());
-    ret.addOption(NeutronCmdLineOption.LAST_RUN_TIME.getOpt());
+    ret.addOption(NeutronCmdLineOption.LAST_START_TIME.getOpt());
     ret.addOption(NeutronCmdLineOption.THREADS.getOpt());
     ret.addOption(NeutronCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
 
@@ -330,7 +334,6 @@ public class FlightPlan implements ApiMarker {
     ret.addOption(NeutronCmdLineOption.DROP_INDEX.getOpt());
 
     ret.addOption(NeutronCmdLineOption.BUCKET_RANGE.getOpt());
-    ret.addOption(NeutronCmdLineOption.BUCKET_TOTAL.getOpt()); // Obsolete
     ret.addOption(NeutronCmdLineOption.MIN_ID.getOpt());
     ret.addOption(NeutronCmdLineOption.MAX_ID.getOpt());
 
@@ -391,7 +394,8 @@ public class FlightPlan implements ApiMarker {
     String lastRunLoc = null;
     String baseDirectory = null;
 
-    Date lastRunTime = null;
+    Date lastStartTime = null;
+    Date lastEndTime = null;
     long threadCount = 0L;
 
     boolean lastRunMode = true;
@@ -426,9 +430,14 @@ public class FlightPlan implements ApiMarker {
             indexName = opt.getValue().trim();
             break;
 
-          case NeutronLongCmdLineName.CMD_LINE_LAST_RUN_TIME:
-            String lastRunTimeStr = opt.getValue().trim();
-            lastRunTime = createDate(lastRunTimeStr);
+          case NeutronLongCmdLineName.CMD_LINE_LAST_START_TIME:
+            lastRunMode = true;
+            lastStartTime = createDate(opt.getValue().trim());
+            break;
+
+          case NeutronLongCmdLineName.CMD_LINE_LAST_END_TIME:
+            lastRunMode = true;
+            lastEndTime = createDate(opt.getValue().trim());
             break;
 
           case NeutronLongCmdLineName.CMD_LINE_LAST_RUN_FILE:
@@ -436,7 +445,6 @@ public class FlightPlan implements ApiMarker {
             break;
 
           case NeutronLongCmdLineName.CMD_LINE_BASE_DIRECTORY:
-            lastRunMode = true;
             baseDirectory = opt.getValue().trim();
             break;
 
@@ -481,9 +489,10 @@ public class FlightPlan implements ApiMarker {
       throw CheeseRay.checked(LOGGER, e, "INVALID ARGS", e.getMessage(), e);
     }
 
-    return new FlightPlan(esConfigPeopleLoc, esConfigPeopleSummaryLoc, indexName, lastRunTime,
-        lastRunLoc, lastRunMode, bucketRange.getLeft(), bucketRange.getRight(), threadCount,
-        loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex, simulateLaunch);
+    return new FlightPlan(esConfigPeopleLoc, esConfigPeopleSummaryLoc, indexName, lastStartTime,
+        lastEndTime, lastRunLoc, lastRunMode, bucketRange.getLeft(), bucketRange.getRight(),
+        threadCount, loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex,
+        simulateLaunch);
   }
 
   public void setStartBucket(long startBucket) {
@@ -503,12 +512,12 @@ public class FlightPlan implements ApiMarker {
   }
 
   private static Date createDate(String timestamp) throws java.text.ParseException {
-    Date date = null;
-    String trimTimestamp = StringUtils.trim(timestamp);
+    Date ret = null;
+    final String trimTimestamp = StringUtils.trim(timestamp);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
-      date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(trimTimestamp);
+      ret = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(trimTimestamp);
     }
-    return date;
+    return ret;
   }
 
   public boolean isRangeGiven() {
@@ -536,7 +545,7 @@ public class FlightPlan implements ApiMarker {
   }
 
   public void setOverrideLastRunTime(Date lastRunTime) {
-    this.overrideLastRunTime = NeutronDateUtils.freshDate(lastRunTime);
+    this.overrideLastStartTime = NeutronDateUtils.freshDate(lastRunTime);
   }
 
   public boolean isRefreshMqt() {

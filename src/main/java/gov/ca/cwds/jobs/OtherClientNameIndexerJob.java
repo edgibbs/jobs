@@ -86,7 +86,7 @@ public class OtherClientNameIndexerJob
   public String getPrepLastChangeSQL() {
     try {
       return NeutronDB2Utils.prepLastChangeSQL(INSERT_CLIENT_LAST_CHG,
-          determineLastSuccessfulRunTime());
+          determineLastSuccessfulRunTime(), null);
     } catch (NeutronCheckedException e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL: {}", e.getMessage());
     }

@@ -7,9 +7,11 @@ public class NeutronLongCmdLineName {
 
   public static final String CMD_LINE_INDEX_NAME = "index-name";
 
-  public static final String CMD_LINE_LAST_RUN_TIME = "last-run-time";
-  public static final String CMD_LINE_LAST_RUN_FILE = "last-run-file";
+  public static final String CMD_LINE_LAST_START_TIME = "last-start-time";
   public static final String CMD_LINE_LAST_END_TIME = "last-end-time";
+
+  public static final String CMD_LINE_LAST_RUN_FILE = "last-run-file";
+  public static final String CMD_LINE_LAST_RUN_RANGE = "last-run-range";
 
   public static final String CMD_LINE_BASE_DIRECTORY = "base-directory";
 
@@ -32,7 +34,7 @@ public class NeutronLongCmdLineName {
   public static final String CMD_LINE_MAX_ID = "max_id";
 
   private NeutronLongCmdLineName() {
-    // 'cause SonarQube says so ...
+    // Because SonarQube says so ...
   }
 
 }

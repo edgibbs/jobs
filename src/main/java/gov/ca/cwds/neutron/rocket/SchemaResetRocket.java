@@ -57,7 +57,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       done();
     } catch (Exception e) {
       fail();
-      CheeseRay.checked(LOGGER, e, "SCHEMA RESET ERROR!! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR!! {}", e.getMessage());
     }
 
     return lastRunDate;
@@ -70,7 +70,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     final String targetTransactionalSchema =
         ((String) session.getSessionFactory().getProperties().get("hibernate.default_schema"))
             .replaceFirst("CWSRS", "CWSNS").replaceAll("\"", "");
-    LOGGER.info("CALL SCHEMA RESET: target schema: {}", targetTransactionalSchema);
+    LOGGER.info("CALL DB2 SCHEMA RESET: target schema: {}", targetTransactionalSchema);
     return targetTransactionalSchema;
   }
 
@@ -81,7 +81,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
    */
   protected void refreshSchema() throws NeutronCheckedException {
     if (!isLargeDataSet()) {
-      LOGGER.warn("\n\n\n\t   ********** RESET SCHEMA!! ********** \n\n\n");
+      LOGGER.warn("\n\n\n\t   ********** RESET DB2 SCHEMA!! ********** \n\n\n");
 
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
       getOrCreateTransaction();
@@ -96,15 +96,15 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
       final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
       final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
-      LOGGER.info("refresh schema proc: status: {}, msg: {}", returnStatus, returnMsg);
+      LOGGER.info("reset schema proc: status: {}, msg: {}", returnStatus, returnMsg);
 
       if (StringUtils.isNotBlank(returnStatus) && returnStatus.charAt(0) != '0') {
         fail();
-        CheeseRay.runtime(LOGGER, "SCHEMA RESET ERROR! {}", returnMsg);
+        throw CheeseRay.checked(LOGGER, "DB2 SCHEMA RESET ERROR! {}", returnMsg);
       } else {
-        // if schema refresh operation does not finish in 90 minutes, we timeout with an exception
-        int schemaRefreshTimeoutSeconds = 90 * 60;
-        int pollPeriodInSeconds = 60;
+        // If schema reset operation does not finish in 90 minutes, we timeout with an exception
+        final int schemaRefreshTimeoutSeconds = 90 * 60;
+        final int pollPeriodInSeconds = 60;
         int secondsWaited = 0;
 
         while (!schemaRefreshCompleted(pollPeriodInSeconds)) {
@@ -114,10 +114,10 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
           if (secondsWaited >= schemaRefreshTimeoutSeconds) {
             final StringBuilder buf = new StringBuilder();
-            buf.append("Schema refresh operation timed out after ").append(secondsWaited / 60)
+            buf.append("DB2 schema reset operation timed out after ").append(secondsWaited / 60)
                 .append(" minutes");
 
-            LOGGER.error("Schema refresh operation timed out after {} seconds", secondsWaited);
+            LOGGER.error("DB2 schema reset operation timed out after {} seconds", secondsWaited);
             throw new IllegalStateException(buf.toString());
           }
         }
@@ -125,7 +125,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         LOGGER.warn("DB2 SCHEMA RESET COMPLETED!");
       }
     } else {
-      LOGGER.warn("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
+      LOGGER.error("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
+      fail();
     }
   }
 
@@ -133,8 +134,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     try {
       TimeUnit.SECONDS.sleep(waitTimeSeconds);
     } catch (InterruptedException e) {
-      String errorMsg = "Schema refresh operation wait interrupted";
-      CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR! {}", errorMsg);
+      String errorMsg = "DB2 schema reset operation timeout!";
+      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR! {}", errorMsg);
     }
 
     boolean completed = false;
@@ -143,7 +144,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     if (status.equalsIgnoreCase("S")) {
       completed = true;
     } else if (status.equalsIgnoreCase("F")) {
-      throw new IllegalStateException("Schema refresh operation failed.");
+      throw new IllegalStateException("DB2 SCHEMA RESET OPERATION FAILED!");
     }
 
     return completed;

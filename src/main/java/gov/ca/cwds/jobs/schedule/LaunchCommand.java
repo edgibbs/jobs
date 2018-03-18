@@ -183,11 +183,11 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     // If timestamp file doesn't exist, create it.
     final File f = new File(timeFileLoc); // NOSONAR
     final boolean fileExists = f.exists();
-    final boolean overrideLastRunTime = flightPlan.getOverrideLastRunTime() != null;
+    final boolean overrideLastRunTime = flightPlan.getOverrideLastRunStartTime() != null;
 
     if (!fileExists || settings.isInitialMode()) {
       FileUtils.writeStringToFile(f,
-          fmt.format(overrideLastRunTime ? flightPlan.getOverrideLastRunTime() : now));
+          fmt.format(overrideLastRunTime ? flightPlan.getOverrideLastRunStartTime() : now));
     }
   }
 

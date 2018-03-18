@@ -81,7 +81,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   public String getPrepLastChangeSQL() {
     try {
       final String sql = NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
-          determineLastSuccessfulRunTime());
+          determineLastSuccessfulRunTime(), null);
       LOGGER.info("LAST CHANGE SQL: {}", sql);
       return sql;
     } catch (NeutronCheckedException e) {

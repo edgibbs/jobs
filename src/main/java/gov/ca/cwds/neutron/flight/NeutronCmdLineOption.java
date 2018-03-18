@@ -27,20 +27,27 @@ public enum NeutronCmdLineOption {
    * indexes and name them with Guice annotations.
    * </p>
    */
-  ES_CONFIG_PEOPLE_SUMMARY(FlightPlan.makeOpt("p", NeutronLongCmdLineName.CMD_LINE_ES_CONFIG_PEOPLE_SUMMARY,
-      "ElasticSearch configuration file [index: people-summary]", false, 1, String.class, ',')),
+  ES_CONFIG_PEOPLE_SUMMARY(
+      FlightPlan.makeOpt("p", NeutronLongCmdLineName.CMD_LINE_ES_CONFIG_PEOPLE_SUMMARY,
+          "ElasticSearch configuration file [index: people-summary]", false, 1, String.class, ',')),
 
   /**
    * ElasticSearch index name to create or use. If not provided then ES Config alias is used.
    */
-  INDEX_NAME(FlightPlan.makeOpt("i", NeutronLongCmdLineName.CMD_LINE_INDEX_NAME, "ElasticSearch index name",
-      false, 1, String.class, ',')),
+  INDEX_NAME(FlightPlan.makeOpt("i", NeutronLongCmdLineName.CMD_LINE_INDEX_NAME,
+      "ElasticSearch index name", false, 1, String.class, ',')),
 
   /**
-   * Last run time in format 'yyyy-MM-dd HH:mm:ss'
+   * Last run start time in format 'yyyy-MM-dd HH:mm:ss'
    */
-  LAST_RUN_TIME(FlightPlan.makeOpt("a", NeutronLongCmdLineName.CMD_LINE_LAST_RUN_TIME,
-      "last run time (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
+  LAST_START_TIME(FlightPlan.makeOpt("a", NeutronLongCmdLineName.CMD_LINE_LAST_START_TIME,
+      "last run start time (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
+
+  /**
+   * Last run end time in format 'yyyy-MM-dd HH:mm:ss'
+   */
+  LAST_END_TIME(FlightPlan.makeOpt("E", NeutronLongCmdLineName.CMD_LINE_LAST_END_TIME,
+      "last run end time (yyyy-MM-dd HH:mm:ss)", false, 1, String.class, ',')),
 
   /**
    * Last run date file (yyyy-MM-dd HH:mm:ss)
@@ -51,20 +58,14 @@ public enum NeutronCmdLineOption {
   /**
    * Alternate input file
    */
-  BASE_DIRECTORY(FlightPlan.makeOpt("b", NeutronLongCmdLineName.CMD_LINE_BASE_DIRECTORY, "base directory",
-      false, 1, String.class, ',')),
+  BASE_DIRECTORY(FlightPlan.makeOpt("b", NeutronLongCmdLineName.CMD_LINE_BASE_DIRECTORY,
+      "base directory", false, 1, String.class, ',')),
 
   /**
    * Bucket range (-r 20-24).
    */
-  BUCKET_RANGE(FlightPlan.makeOpt("r", NeutronLongCmdLineName.CMD_LINE_BUCKET_RANGE, "bucket range (-r 20-24)",
-      false, 2, Integer.class, '-')),
-
-  /**
-   * Total buckets.
-   */
-  BUCKET_TOTAL(FlightPlan.makeOpt("B", NeutronLongCmdLineName.CMD_LINE_BUCKET_TOTAL, "total buckets", false, 1,
-      Integer.class, ',')),
+  BUCKET_RANGE(FlightPlan.makeOpt("r", NeutronLongCmdLineName.CMD_LINE_BUCKET_RANGE,
+      "bucket range (-r 20-24)", false, 2, Integer.class, '-')),
 
   /**
    * Number of threads (optional).
@@ -75,27 +76,28 @@ public enum NeutronCmdLineOption {
   /**
    * Minimum key, inclusive.
    */
-  MIN_ID(FlightPlan.makeOpt("m", NeutronLongCmdLineName.CMD_LINE_MIN_ID, "minimum identifier, inclusive", false,
-      1, String.class, ',')),
+  MIN_ID(FlightPlan.makeOpt("m", NeutronLongCmdLineName.CMD_LINE_MIN_ID,
+      "minimum identifier, inclusive", false, 1, String.class, ',')),
 
   /**
    * Maximum key, inclusive.
    */
-  MAX_ID(FlightPlan.makeOpt("x", NeutronLongCmdLineName.CMD_LINE_MAX_ID, "maximum identifier, exclusive", false,
-      1, String.class, ',')),
+  MAX_ID(FlightPlan.makeOpt("x", NeutronLongCmdLineName.CMD_LINE_MAX_ID,
+      "maximum identifier, exclusive", false, 1, String.class, ',')),
 
   /**
    * Indicate if sealed and sensitive data should be loaded
    */
-  LOAD_SEALED_SENSITIVE(FlightPlan.makeOpt("s", NeutronLongCmdLineName.CMD_LINE_LOAD_SEALED_AND_SENSITIVE,
-      "true or false - load sealed and sensitive data, default is false", false, 1, Boolean.class,
-      ',')),
+  LOAD_SEALED_SENSITIVE(
+      FlightPlan.makeOpt("s", NeutronLongCmdLineName.CMD_LINE_LOAD_SEALED_AND_SENSITIVE,
+          "true or false - load sealed and sensitive data, default is false", false, 1,
+          Boolean.class, ',')),
 
   /**
    * Run full (initial) load.
    */
-  FULL_LOAD(FlightPlan.makeOpt("F", NeutronLongCmdLineName.CMD_LINE_INITIAL_LOAD, "Run full (initial) load",
-      false, 0, Boolean.class, ',')),
+  FULL_LOAD(FlightPlan.makeOpt("F", NeutronLongCmdLineName.CMD_LINE_INITIAL_LOAD,
+      "Run full (initial) load", false, 0, Boolean.class, ',')),
 
   /**
    * Refresh materialized query tables for full (initial) load.
