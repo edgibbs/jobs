@@ -18,7 +18,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.jobs.util.JobWriter;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -80,7 +80,7 @@ public class ElasticJobWriter<T extends PersistentObject> implements JobWriter<T
       esDao.close();
     } catch (InterruptedException | IOException e) { // NOSONAR
       Thread.interrupted();
-      JobLogs.checked(LOGGER, e, "ERROR ON DESTROY! {}", e.getMessage());
+      CheeseRay.checked(LOGGER, e, "ERROR ON DESTROY! {}", e.getMessage());
     }
   }
 }

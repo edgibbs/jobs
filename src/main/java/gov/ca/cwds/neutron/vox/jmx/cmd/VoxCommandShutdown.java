@@ -1,9 +1,9 @@
 package gov.ca.cwds.neutron.vox.jmx.cmd;
 
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
 public class VoxCommandShutdown extends VoxJMXCommandClient {
@@ -27,7 +27,7 @@ public class VoxCommandShutdown extends VoxJMXCommandClient {
       getMbean().shutdown();
     } catch (NeutronCheckedException e) {
       LOGGER.error("FAILED TO SHUTDOWN DOWN COMMAND CENTER! {}", e.getMessage(), e);
-      ret = JobLogs.stackToString(e);
+      ret = CheeseRay.stackToString(e);
     }
 
     return ret;

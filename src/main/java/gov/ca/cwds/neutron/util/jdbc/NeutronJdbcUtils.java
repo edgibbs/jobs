@@ -86,8 +86,10 @@ public final class NeutronJdbcUtils {
   }
 
   public static String makeTimestampStringLookBack(final Date date) {
-    return new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat())
-        .format(NeutronDateUtils.lookBack(date));
+    return date != null
+        ? new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat())
+            .format(NeutronDateUtils.lookBack(date))
+        : "CURRENT TIMESTAMP";
   }
 
   /**

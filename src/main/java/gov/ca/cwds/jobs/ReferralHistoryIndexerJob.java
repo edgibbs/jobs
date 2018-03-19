@@ -67,7 +67,7 @@ public class ReferralHistoryIndexerJob
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?"
-          + "\nAND c.IBMSNAP_OPERATION IN ('I','U') "; // don't update a deleted Client document
+          + "\n  AND  c.IBMSNAP_OPERATION IN ('I','U') "; // don't update a deleted Client document
   //@formatter:on
 
   /**
@@ -79,28 +79,28 @@ public class ReferralHistoryIndexerJob
       + " WITH step1 AS (\n"
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID\n"
       + "     FROM ALLGTN_T ALG \n"
-      + "     WHERE ALG.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE ALG.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " step2 AS (\n"
       + "     SELECT ALG.FKREFERL_T AS REFERRAL_ID \n"
       + "     FROM CLIENT_T C \n"
       + "     JOIN ALLGTN_T ALG ON (C.IDENTIFIER = ALG.FKCLIENT_0 OR C.IDENTIFIER = ALG.FKCLIENT_T)\n"
-      + "     WHERE C.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE C.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ),\n"
       + " step3 AS (\n"
       + "     SELECT RCT.FKREFERL_T AS REFERRAL_ID \n"
       + "     FROM REFR_CLT RCT \n"
-      + "     WHERE RCT.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE RCT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " step4 AS (\n"
       + "     SELECT RFL.IDENTIFIER AS REFERRAL_ID \n"
       + "     FROM REFERL_T RFL \n"
-      + "     WHERE RFL.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE RFL.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " step5 AS (\n"
       + "     SELECT RPT.FKREFERL_T AS REFERRAL_ID \n"
       + "     FROM REPTR_T RPT \n"
-      + "     WHERE RPT.IBMSNAP_LOGMARKER > 'XYZ' \n"
+      + "     WHERE RPT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ), \n"
       + " hoard AS (\n"
       + "           SELECT DISTINCT s1.REFERRAL_ID FROM STEP1 s1 \n"
@@ -120,11 +120,13 @@ public class ReferralHistoryIndexerJob
         "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND, "
       + "c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
       + "FROM GT_REFR_CLT RC \n"
-      + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T";
+      + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T \n"
+      + "WITH UR ";
   //@formatter:on
 
   //@formatter:off
-  protected static final String SELECT_ALLEGATION = "SELECT \n"
+  protected static final String SELECT_ALLEGATION = 
+        "SELECT \n"
       + " RC.FKREFERL_T         AS REFERRAL_ID,\n" 
       + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
       + " ALG.ALG_DSPC          AS ALLEGATION_DISPOSITION,\n"
@@ -176,7 +178,8 @@ public class ReferralHistoryIndexerJob
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T \n"
       + "LEFT JOIN REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
-      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
+      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER \n"
+      + "WITH UR ";
    //@formatter:on
 
   /**
@@ -577,7 +580,8 @@ public class ReferralHistoryIndexerJob
       }
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR IN THREADED RETRIEVAL! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "REFERRALS: ERROR IN THREADED RETRIEVAL! {}",
+          e.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -600,7 +604,7 @@ public class ReferralHistoryIndexerJob
   public String getPrepLastChangeSQL() {
     try {
       return NeutronDB2Utils.prepLastChangeSQL(INSERT_REFERRAL_LAST_CHG,
-          determineLastSuccessfulRunTime());
+          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
     } catch (NeutronCheckedException e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL: {}", e.getMessage());
     }
@@ -613,7 +617,7 @@ public class ReferralHistoryIndexerJob
 
   /**
    * Referrals is an <strong>enormous</strong> task and fetches partition ranges from a file instead
-   * of bloating a Java class.
+   * of a bloated Java class.
    * 
    * @see ReferralJobRanges
    */

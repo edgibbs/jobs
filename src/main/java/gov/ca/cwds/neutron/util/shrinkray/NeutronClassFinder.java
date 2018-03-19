@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
 public class NeutronClassFinder {
 
@@ -18,7 +18,7 @@ public class NeutronClassFinder {
     try {
       return Class.forName(className);
     } catch (ClassNotFoundException e) {
-      throw JobLogs.checked(LOGGER, e, "CLASS NAME NOT FOUND!: {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "CLASS NAME NOT FOUND!: {}", e.getMessage());
     }
   }
 

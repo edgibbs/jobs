@@ -13,9 +13,9 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.flight.FlightSummary;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
@@ -75,7 +75,7 @@ public class ExitInitialLoadRocket
 
         LaunchCommand.getInstance().shutdown();
       } catch (Exception e) {
-        JobLogs.checked(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
+        CheeseRay.checked(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
       }
     }
 

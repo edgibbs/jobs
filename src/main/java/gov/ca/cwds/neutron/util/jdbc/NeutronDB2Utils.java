@@ -13,9 +13,9 @@ import com.ibm.db2.jcc.DB2SystemMonitor;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
 
 /**
  * Miscellaneous DB2 utilities for Neutron rockets.
@@ -44,21 +44,26 @@ public final class NeutronDB2Utils {
   }
 
   /**
-   * DB2's optimizer is not very bright. Timestamps in query plans run fine as a String through
-   * hard-parsed SQL but not in prepared statements.
+   * DB2's optimizer is confused by variable timestamp precision. Timestamps in query plans run fine
+   * as a String through hard-parsed SQL but not in prepared statements.
    * 
    * @param sql last change SQL
-   * @param lastRunDate last successful run date
+   * @param lastRunStartDate last run start date
+   * @param lastRunEndDate last run end date
    * @return DB2 timestamp string
    */
-  public static String prepLastChangeSQL(String sql, Date lastRunDate) {
-    return sql.replaceAll("XYZ", NeutronJdbcUtils.makeTimestampStringLookBack(lastRunDate));
+  public static String prepLastChangeSQL(String sql, Date lastRunStartDate, Date lastRunEndDate) {
+    final String strStartDate = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunStartDate);
+    final String strEndDate = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunEndDate);
+    return sql.replaceAll("XYZ", strStartDate).replaceAll("LAST_RUN_START", strStartDate)
+        .replaceAll("LAST_RUN_END", strEndDate)
+        .replaceAll("'CURRENT TIMESTAMP'", "CURRENT TIMESTAMP");
   }
 
   /**
-   * DB2's ORDER BY clause does <strong>NOT</strong> enforce result set order across platforms!\
-   * Unfortunately, character sets differ by operating system, which changes CHAR sort order and
-   * make ORDER BY and WHERE clauses problematic.
+   * DB2's ORDER BY clause does <strong>NOT</strong> enforce result set order across platforms!
+   * Since character sets differ by operating system, CHAR sort order differs and makes ORDER BY and
+   * WHERE clauses problematic.
    * 
    * <p>
    * SELECT statements using range partitions depend on sort order.
@@ -113,7 +118,7 @@ public final class NeutronDB2Utils {
 
       ret = meta.getDatabaseProductVersion().startsWith("DSN");
     } catch (Exception e) {
-      throw JobLogs.checked(LOGGER, e, "UNABLE TO DETERMINE DB2 PLATFORM! {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "UNABLE TO DETERMINE DB2 PLATFORM! {}", e.getMessage());
     }
 
     return ret;

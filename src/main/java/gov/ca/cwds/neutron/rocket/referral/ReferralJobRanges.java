@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
@@ -73,7 +73,7 @@ public class ReferralJobRanges {
           IOUtils.readLines(this.getClass().getResourceAsStream("/referral_ranges.tsv")).stream()) {
         ret = lines.sequential().map(this::splitLine).collect(Collectors.toList());
       } catch (Exception e) {
-        throw JobLogs.checked(LOGGER, e, "FAILED TO LOAD REFERRAL RANGES!");
+        throw CheeseRay.checked(LOGGER, e, "FAILED TO LOAD REFERRAL RANGES!");
       }
 
       ret = limitRange(rocket, ret);

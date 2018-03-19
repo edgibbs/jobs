@@ -624,9 +624,9 @@ public class ReferralHistoryIndexerJobTest
     addMe.setReferralId("abc1234567");
     listReadyToNorm.add(addMe);
 
-    int actual =
+    final int actual =
         target.mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
-    int expected = 0;
+    final int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -637,8 +637,8 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void isInitialLoadJdbc_Args__() throws Exception {
-    boolean actual = target.isInitialLoadJdbc();
-    boolean expected = true;
+    final boolean actual = target.isInitialLoadJdbc();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -651,9 +651,9 @@ public class ReferralHistoryIndexerJobTest
 
   @Test
   public void buildMonitor_Args__Connection() throws Exception {
-    Connection con = mock(Connection.class);
-    DB2SystemMonitor actual = target.buildMonitor(con);
-    DB2SystemMonitor expected = null;
+    final Connection con = mock(Connection.class);
+    final DB2SystemMonitor actual = target.buildMonitor(con);
+    final DB2SystemMonitor expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -678,30 +678,30 @@ public class ReferralHistoryIndexerJobTest
   public void getClientSeedQuery_Args__() throws Exception {
     final String actual = target.getClientSeedQuery();
     final String expected =
-        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?\nAND c.IBMSNAP_OPERATION IN ('I','U') ";
+        "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND)\nSELECT rc.FKREFERL_T, rc.FKCLIENT_T, c.SENSTV_IND\nFROM REFR_CLT rc\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?\n  AND  c.IBMSNAP_OPERATION IN ('I','U') ";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void releaseLocalMemory_Args__List__Map__List__List() throws Exception {
-    List<EsPersonReferral> listAllegations = new ArrayList<EsPersonReferral>();
-    Map<String, EsPersonReferral> mapReferrals = new HashMap<String, EsPersonReferral>();
-    List<MinClientReferral> listClientReferralKeys = new ArrayList<MinClientReferral>();
-    List<EsPersonReferral> listReadyToNorm = new ArrayList<EsPersonReferral>();
+    final List<EsPersonReferral> listAllegations = new ArrayList<EsPersonReferral>();
+    final Map<String, EsPersonReferral> mapReferrals = new HashMap<String, EsPersonReferral>();
+    final List<MinClientReferral> listClientReferralKeys = new ArrayList<MinClientReferral>();
+    final List<EsPersonReferral> listReadyToNorm = new ArrayList<EsPersonReferral>();
     target.releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys,
         listReadyToNorm);
   }
 
   @Test
   public void isMonitorDb2_Args__() throws Exception {
-    boolean actual = target.isMonitorDb2();
-    boolean expected = false;
+    final boolean actual = target.isMonitorDb2();
+    final boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void setMonitorDb2_Args__boolean() throws Exception {
-    boolean monitorDb2 = false;
+    final boolean monitorDb2 = false;
     target.setMonitorDb2(monitorDb2);
   }
 

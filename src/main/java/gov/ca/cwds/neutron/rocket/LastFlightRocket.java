@@ -111,7 +111,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    * @return appropriate date to detect changes
    */
   protected Date calcLastRunDate(final Date lastSuccessfulRunTime, final FlightPlan opts) {
-    final Date lastSuccessfulRunTimeOverride = opts.getOverrideLastRunTime();
+    final Date lastSuccessfulRunTimeOverride = opts.getOverrideLastRunStartTime();
     final Calendar cal = Calendar.getInstance();
     cal.setTime((lastSuccessfulRunTimeOverride != null) ? lastSuccessfulRunTimeOverride
         : lastSuccessfulRunTime);
@@ -137,7 +137,11 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    * @throws NeutronCheckedException I/O or parse error
    */
   public Date determineLastSuccessfulRunTime() throws NeutronCheckedException {
-    Date ret = null;
+    Date ret = getFlightPlan().getOverrideLastRunStartTime();
+    if (ret != null) {
+      return ret;
+    }
+
     try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
       ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
           .parse(br.readLine().trim()); // NOSONAR

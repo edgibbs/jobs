@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
 /**
  * A DAO for Elasticsearch.
@@ -138,7 +138,7 @@ public class Elasticsearch5xDao implements Closeable, ApiMarker {
         Thread.sleep(2000); // NOSONAR
       }
     } catch (InterruptedException | IOException e) {
-      throw JobLogs.checked(LOGGER, e, "CREATE INDEX FAILED! {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "CREATE INDEX FAILED! {}", e.getMessage());
     }
   }
 

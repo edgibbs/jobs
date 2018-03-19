@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.jobs.util.jdbc.RowMapper;
-import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
 /**
  * @author CWDS Elasticsearch Team
@@ -43,7 +43,7 @@ public class FacilityRowMapper implements RowMapper<FacilityRow> {
         descriptor.getWriteMethod().invoke(object, value);
       }
     } catch (Exception e) {
-      throw JobLogs.runtime(LOGGER, e, e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, e.getMessage());
     }
   }
 
