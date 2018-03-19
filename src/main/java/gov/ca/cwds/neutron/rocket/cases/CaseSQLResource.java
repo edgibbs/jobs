@@ -7,8 +7,234 @@ import gov.ca.cwds.neutron.rocket.CaseRocket;
  * SQL statements for the Cases rocket.
  * 
  * <p>
- * Omit relationship types "unknown" and "no relation".
+ * Case History only displays cases for <strong>active</strong> relationship types.
  * </p>
+ * 
+ * <table summary="Relationships">
+ * <tr>
+ * <th align="justify">Legacy code id</th>
+ * <th align="justify">Relationship</th>
+ * </tr>
+ * <tr>
+ * <td align="justify">179</td>
+ * <td align="justify">Brother/Brother</td>
+ * </tr>
+ * <tr>
+ * <td>180</td>
+ * <td>Brother/Brother (Half)</td>
+ * </tr>
+ * <tr>
+ * <td>181</td>
+ * <td>Brother/Brother (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>182</td>
+ * <td>Brother/Sister</td>
+ * </tr>
+ * <tr>
+ * <td>183</td>
+ * <td>Brother/Sister (Half)</td>
+ * </tr>
+ * <tr>
+ * <td>184</td>
+ * <td>Brother/Sister (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>188</td>
+ * <td>Daughter/Father (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>189</td>
+ * <td>Daughter/Father (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>190</td>
+ * <td>Daughter/Father (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>192</td>
+ * <td>Daughter/Father (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>193</td>
+ * <td>Daughter/Father (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>194</td>
+ * <td>Daughter/Mother (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>195</td>
+ * <td>Daughter/Mother (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>196</td>
+ * <td>Daughter/Mother (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>198</td>
+ * <td>Daughter/Mother (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>199</td>
+ * <td>Daughter/Mother (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>203</td>
+ * <td>Father/Daughter (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>204</td>
+ * <td>Father/Daughter (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>205</td>
+ * <td>Father/Daughter (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>207</td>
+ * <td>Father/Daughter (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>208</td>
+ * <td>Father/Daughter (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>209</td>
+ * <td>Father/Son (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>210</td>
+ * <td>Father/Son (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>211</td>
+ * <td>Father/Son (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>213</td>
+ * <td>Father/Son (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>214</td>
+ * <td>Father/Son (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>242</td>
+ * <td>Indian Child/Indian Custodian</td>
+ * </tr>
+ * <tr>
+ * <td>243</td>
+ * <td>Indian Custodian/Indian Child</td>
+ * </tr>
+ * <tr>
+ * <td>245</td>
+ * <td>Mother/Daughter (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>246</td>
+ * <td>Mother/Daughter (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>247</td>
+ * <td>Mother/Daughter (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>5620</td>
+ * <td>Mother/Daughter (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>249</td>
+ * <td>Mother/Daughter (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>250</td>
+ * <td>Mother/Son (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>251</td>
+ * <td>Mother/Son (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>252</td>
+ * <td>Mother/Son (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>6361</td>
+ * <td>Mother/Son (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>254</td>
+ * <td>Mother/Son (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>276</td>
+ * <td>Sister/Brother</td>
+ * </tr>
+ * <tr>
+ * <td>277</td>
+ * <td>Sister/Brother (Half)</td>
+ * </tr>
+ * <tr>
+ * <td>278</td>
+ * <td>Sister/Brother (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>279</td>
+ * <td>Sister/Sister</td>
+ * </tr>
+ * <tr>
+ * <td>280</td>
+ * <td>Sister/Sister (Half)</td>
+ * </tr>
+ * <tr>
+ * <td>281</td>
+ * <td>Sister/Sister (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>283</td>
+ * <td>Son/Father (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>284</td>
+ * <td>Son/Father (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>285</td>
+ * <td>Son/Father (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>287</td>
+ * <td>Son/Father (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>288</td>
+ * <td>Son/Father (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>289</td>
+ * <td>Son/Mother (Adoptive)</td>
+ * </tr>
+ * <tr>
+ * <td>290</td>
+ * <td>Son/Mother (Alleged)</td>
+ * </tr>
+ * <tr>
+ * <td>291</td>
+ * <td>Son/Mother (Birth)</td>
+ * </tr>
+ * <tr>
+ * <td>6360</td>
+ * <td>Son/Mother (Presumed)</td>
+ * </tr>
+ * <tr>
+ * <td>293</td>
+ * <td>Son/Mother (Step)</td>
+ * </tr>
+ * <tr>
+ * <td>301</td>
+ * <td>Ward/Guardian</td>
+ * </tr>
  * 
  * @author CWDS API Team
  * @see CaseRocket
@@ -16,6 +242,9 @@ import gov.ca.cwds.neutron.rocket.CaseRocket;
 public class CaseSQLResource implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
+
+  private static final String INCLUDED_RELATIONSHIPS =
+      "179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361";
 
   //@formatter:off
   public static final String PREP_AFFECTED_CLIENTS_FULL =
@@ -33,25 +262,25 @@ public class CaseSQLResource implements ApiMarker {
           + "FROM DRIVER d2 \n"
           + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.IDENTIFIER \n"
           + "JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \n"
-          + "WHERE REL2.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL2.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "AND REL2.END_DT IS NULL "
        + "UNION SELECT DISTINCT REL3.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d3 \n"
           + "JOIN CLN_RELT REL3 ON REL3.FKCLIENT_0 = d3.IDENTIFIER \n"
           + "JOIN CASE_T   CAS3 ON CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \n"
-          + "WHERE REL3.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL3.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "AND REL3.END_DT IS NULL "
        + "UNION SELECT DISTINCT REL4.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d4 \n"
           + "JOIN CLN_RELT REL4 ON REL4.FKCLIENT_T = d4.IDENTIFIER \n"
           + "JOIN CASE_T   CAS4 ON CAS4.FKCHLD_CLT = REL4.FKCLIENT_0 \n"
-          + "WHERE REL4.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL4.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "AND REL4.END_DT IS NULL "
        + "UNION SELECT DISTINCT REL5.FKCLIENT_0  AS CLIENT_ID \n"
           + "FROM DRIVER d5 \n"
           + "JOIN CLN_RELT REL5 ON REL5.FKCLIENT_0 = d5.IDENTIFIER \n"
           + "JOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T \n"
-          + "WHERE REL5.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL5.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "AND REL5.END_DT IS NULL ";
   //@formatter:on
 
@@ -71,7 +300,7 @@ public class CaseSQLResource implements ApiMarker {
           + " FROM CLN_RELT REL2, CASE_T CAS2 \n"
           + " WHERE CAS2.FKCHLD_CLT = REL2.FKCLIENT_0  \n"
           + "   AND REL2.FKCLIENT_T IN (SELECT gt2.IDENTIFIER FROM GT_ID gt2) \n"
-          + "   AND REL2.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "   AND REL2.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "   AND REL2.END_DT IS NULL \n"
           + " UNION ALL \n"
           + " SELECT CAS3.IDENTIFIER    AS CASE_ID, \n"
@@ -80,7 +309,7 @@ public class CaseSQLResource implements ApiMarker {
           + " FROM CLN_RELT REL3, CASE_T CAS3 \n"
           + " WHERE CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \n"
           + "   AND REL3.FKCLIENT_0 IN (SELECT gt3.IDENTIFIER FROM GT_ID gt3) \n"
-          + "   AND REL3.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "   AND REL3.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "   AND REL3.END_DT IS NULL \n"
           + ") \n"
         + "SELECT DISTINCT d1.THIS_CLIENT_ID AS CLIENT_ID, d1.CASE_ID, 'X' AS SENSTV_IND \n"
@@ -192,21 +421,21 @@ public class CaseSQLResource implements ApiMarker {
             + " FROM CASE_T CAS4  \n"
             + " JOIN CLN_RELT CLR4  ON CLR4.FKCLIENT_T = CAS4.FKCHLD_CLT \n"
             + " WHERE CLR4.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-            + "   AND CLR4.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+            + "   AND CLR4.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
             + "   AND CLR4.END_DT IS NULL \n"
           + "UNION SELECT DISTINCT CLR5.FKCLIENT_0 AS IDENTIFIER  \n"
             + " FROM CASE_T CAS5 \n"
             + " JOIN CLN_RELT CLR5 ON CLR5.FKCLIENT_T = CAS5.FKCHLD_CLT \n"
             + " JOIN CLIENT_T CLP5 ON CLP5.IDENTIFIER = CLR5.FKCLIENT_0  \n"
             + " WHERE CLP5.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-            + "   AND CLR5.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+            + "   AND CLR5.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
             + "   AND CLR5.END_DT IS NULL \n"
           + "UNION SELECT DISTINCT CLR6.FKCLIENT_T AS IDENTIFIER  \n"
             + " FROM CASE_T CAS6 \n"
             + " JOIN CLN_RELT CLR6 ON CLR6.FKCLIENT_T = CAS6.FKCHLD_CLT \n"
             + " JOIN CLIENT_T CLP6 ON CLP6.IDENTIFIER = CLR6.FKCLIENT_0  \n"
             + " WHERE CLP6.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-            + "   AND CLR6.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+            + "   AND CLR6.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
             + "   AND CLR6.END_DT IS NULL \n"
        + ") \n"
        + "SELECT DISTINCT CAS1.FKCHLD_CLT AS CLIENT_ID \n"
@@ -216,25 +445,25 @@ public class CaseSQLResource implements ApiMarker {
           + "FROM DRIVER d2 \n"
           + "JOIN CLN_RELT REL2 ON REL2.FKCLIENT_T = d2.IDENTIFIER \n"
           + "JOIN CASE_T   CAS2 ON CAS2.FKCHLD_CLT = REL2.FKCLIENT_0 \n"
-          + "WHERE REL2.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL2.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "  AND REL2.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL3.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d3 \n"
           + "JOIN CLN_RELT REL3 ON REL3.FKCLIENT_0 = d3.IDENTIFIER \n"
           + "JOIN CASE_T   CAS3 ON CAS3.FKCHLD_CLT = REL3.FKCLIENT_T  \n"
-          + "WHERE REL3.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL3.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "  AND REL3.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL4.FKCLIENT_T  AS CLIENT_ID \n"
           + "FROM DRIVER d4 \n"
           + "JOIN CLN_RELT REL4 ON REL4.FKCLIENT_T = d4.IDENTIFIER \n"
           + "JOIN CASE_T   CAS4 ON CAS4.FKCHLD_CLT = REL4.FKCLIENT_0 \n"
-          + "WHERE REL4.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL4.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "  AND REL4.END_DT IS NULL \n"
        + "UNION SELECT DISTINCT REL5.FKCLIENT_0  AS CLIENT_ID \n"
           + "FROM DRIVER d5 \n"
           + "JOIN CLN_RELT REL5 ON REL5.FKCLIENT_0 = d5.IDENTIFIER \n"
           + "JOIN CASE_T   CAS5 ON CAS5.FKCHLD_CLT = REL5.FKCLIENT_T "
-          + "WHERE REL5.CLNTRELC IN (179,180,181,182,183,184,188,189,190,192,193,194,195,196,198,199,203,204,205,207,208,209,210,211,213,214,242,243,245,246,247,249,250,251,252,254,276,277,278,279,280,281,283,284,285,287,288,289,290,291,293,301,5620,6360,6361) \n"
+          + "WHERE REL5.CLNTRELC IN (" + INCLUDED_RELATIONSHIPS + ") \n"
           + "  AND REL5.END_DT IS NULL ";
   //@formatter:on
 
