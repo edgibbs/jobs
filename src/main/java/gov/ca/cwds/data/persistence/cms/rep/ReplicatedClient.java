@@ -254,7 +254,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @JsonIgnore
   @Override
   public List<ElasticSearchPersonAddress> getElasticSearchPersonAddresses() {
-    Map<String, ElasticSearchPersonAddress> esClientAddresses = new HashMap<>();
+    final Map<String, ElasticSearchPersonAddress> esClientAddresses = new HashMap<>();
 
     for (ReplicatedClientAddress repClientAddress : this.clientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
@@ -294,6 +294,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
           final ElasticSearchSystemCode stateCode = new ElasticSearchSystemCode();
           esAddress.setStateSystemCode(stateCode);
+
           final SystemCode stateSysCode =
               SystemCodeCache.global().getSystemCode(repAddress.getStateCd());
           if (stateSysCode != null) {
@@ -305,6 +306,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
           final ElasticSearchSystemCode countyCode = new ElasticSearchSystemCode();
           esAddress.setCountySystemCode(countyCode);
+
           final SystemCode countySysCode =
               SystemCodeCache.global().getSystemCode(repAddress.getGovernmentEntityCd());
           if (countySysCode != null) {
@@ -331,9 +333,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    return clientAddresses.stream().flatMap(ca -> ca.getAddresses().stream())
-        .flatMap(adr -> Arrays.stream(adr.getPhones())).collect(Collectors.toList())
-        .toArray(new ApiPhoneAware[0]);
+    return clientAddresses.stream().filter(ReplicatedClientAddress::isActive)
+        .flatMap(ca -> ca.getAddresses().stream()).flatMap(adr -> Arrays.stream(adr.getPhones()))
+        .collect(Collectors.toList()).toArray(new ApiPhoneAware[0]);
   }
 
   // =======================

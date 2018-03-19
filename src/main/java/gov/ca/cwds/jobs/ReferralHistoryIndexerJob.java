@@ -178,8 +178,7 @@ public class ReferralHistoryIndexerJob
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T \n"
       + "LEFT JOIN REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
-      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER \n"
-      + "WITH UR ";
+      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
    //@formatter:on
 
   /**
@@ -500,7 +499,6 @@ public class ReferralHistoryIndexerJob
     final String threadName =
         "extract_" + nextThreadNum.incrementAndGet() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
-    LOGGER.info("BEGIN");
     getFlightLog().markRangeStart(p);
 
     allocateThreadMemory(); // allocate thread local memory, if not done prior.
@@ -541,7 +539,6 @@ public class ReferralHistoryIndexerJob
 
     int cntr = mapReduce(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
     getFlightLog().markRangeComplete(p);
-    LOGGER.info("DONE");
     return cntr;
   }
 
