@@ -67,7 +67,7 @@ public class ReferralHistoryIndexerJob
           + "\nFROM REFR_CLT rc"
           + "\nJOIN CLIENT_T c on c.IDENTIFIER = rc.FKCLIENT_T"
           + "\nWHERE rc.FKCLIENT_T BETWEEN ? AND ?"
-          + "\nAND c.IBMSNAP_OPERATION IN ('I','U') "; // don't update a deleted Client document
+          + "\n  AND  c.IBMSNAP_OPERATION IN ('I','U') "; // don't update a deleted Client document
   //@formatter:on
 
   /**
@@ -120,11 +120,13 @@ public class ReferralHistoryIndexerJob
         "SELECT rc.FKCLIENT_T, rc.FKREFERL_T, rc.SENSTV_IND, "
       + "c.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n" 
       + "FROM GT_REFR_CLT RC \n"
-      + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T";
+      + "JOIN CLIENT_T C ON C.IDENTIFIER = RC.FKCLIENT_T \n"
+      + "WITH UR ";
   //@formatter:on
 
   //@formatter:off
-  protected static final String SELECT_ALLEGATION = "SELECT \n"
+  protected static final String SELECT_ALLEGATION = 
+        "SELECT \n"
       + " RC.FKREFERL_T         AS REFERRAL_ID,\n" 
       + " ALG.IDENTIFIER        AS ALLEGATION_ID,\n"
       + " ALG.ALG_DSPC          AS ALLEGATION_DISPOSITION,\n"
@@ -176,7 +178,8 @@ public class ReferralHistoryIndexerJob
       + "FROM (SELECT DISTINCT rc1.FKREFERL_T FROM GT_REFR_CLT rc1) RC \n"
       + "JOIN REFERL_T          RFL  ON RFL.IDENTIFIER = RC.FKREFERL_T \n"
       + "LEFT JOIN REPTR_T      RPT  ON RPT.FKREFERL_T = RFL.IDENTIFIER \n"
-      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER ";
+      + "LEFT JOIN STFPERST     STP  ON RFL.FKSTFPERST = STP.IDENTIFIER \n"
+      + "WITH UR ";
    //@formatter:on
 
   /**
