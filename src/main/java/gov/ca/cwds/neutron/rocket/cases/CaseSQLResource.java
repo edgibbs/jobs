@@ -235,6 +235,7 @@ import gov.ca.cwds.neutron.rocket.CaseRocket;
  * <td>301</td>
  * <td>Ward/Guardian</td>
  * </tr>
+ * </table>
  * 
  * @author CWDS API Team
  * @see CaseRocket
