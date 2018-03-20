@@ -656,7 +656,7 @@ public abstract class BaseEsClient
     // Client Address:
     if (StringUtils.isNotBlank(getClaId())
         && CmsReplicationOperation.D != getClaReplicationOperation()) {
-      ReplicatedClientAddress rca = new ReplicatedClientAddress();
+      final ReplicatedClientAddress rca = new ReplicatedClientAddress();
       rca.setId(getClaId());
       rca.setAddressType(getClaAddressType());
       rca.setBkInmtId(getClaBkInmtId());
@@ -676,7 +676,7 @@ public abstract class BaseEsClient
       // Address proper:
       if (StringUtils.isNotBlank(getAdrId())
           && CmsReplicationOperation.D != getAdrReplicationOperation()) {
-        ReplicatedAddress adr = new ReplicatedAddress();
+        final ReplicatedAddress adr = new ReplicatedAddress();
         adr.setId(getAdrId());
         adr.setAddressDescription(getAdrAddressDescription());
         adr.setCity(getAdrCity());
@@ -688,14 +688,14 @@ public abstract class BaseEsClient
         adr.setPostDirCd(getAdrPostDirCd());
         adr.setPreDirCd(getAdrPreDirCd());
 
-        // NOTE: no way to figure out phone type from "primary phone". Land line? Cell? dunno.
+        // NOTE: no way to figure out phone type from "primary phone". Home? Work? Cell? dunno.
         adr.setPrimaryExtension(getAdrPrimaryExtension());
         adr.setPrimaryNumber(getAdrPrimaryNumber());
 
         adr.setEmergencyExtension(getAdrEmergencyExtension());
         adr.setEmergencyNumber(getAdrEmergencyNumber());
 
-        // This is *likely* a cell phone but not guaranteed.
+        // This is *likely* a cell phone but *not guaranteed*.
         adr.setMessageExtension(getAdrMessageExtension());
         adr.setMessageNumber(getAdrMessageNumber());
 
@@ -1212,16 +1212,16 @@ public abstract class BaseEsClient
     return NeutronDateUtils.freshDate(claEffectiveEndDate);
   }
 
-  public void setClaEffectiveEndDate(Date claEffectiveEndDate) {
-    this.claEffectiveEndDate = NeutronDateUtils.freshDate(claEffectiveEndDate);
+  public void setClaEffectiveEndDate(Date date) {
+    this.claEffectiveEndDate = NeutronDateUtils.freshDate(date);
   }
 
   public Date getClaEffectiveStartDate() {
     return NeutronDateUtils.freshDate(claEffectiveStartDate);
   }
 
-  public void setClaEffectiveStartDate(Date claEffectiveStartDate) {
-    this.claEffectiveStartDate = NeutronDateUtils.freshDate(claEffectiveStartDate);
+  public void setClaEffectiveStartDate(Date date) {
+    this.claEffectiveStartDate = NeutronDateUtils.freshDate(date);
   }
 
   public String getAdrId() {
