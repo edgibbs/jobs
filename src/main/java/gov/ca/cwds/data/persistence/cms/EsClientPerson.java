@@ -506,10 +506,11 @@ public class EsClientPerson extends BaseEsClient
       return null;
     }
 
-    ElasticSearchSafetyAlert alert = new ElasticSearchSafetyAlert();
+    final ElasticSearchSafetyAlert alert = new ElasticSearchSafetyAlert();
     alert.setId(this.safetyAlertId);
 
-    ElasticSearchSafetyAlert.Activation activation = new ElasticSearchSafetyAlert.Activation();
+    final ElasticSearchSafetyAlert.Activation activation =
+        new ElasticSearchSafetyAlert.Activation();
     alert.setActivation(activation);
 
     activation.setActivationReasonDescription(SystemCodeCache.global()
@@ -518,7 +519,7 @@ public class EsClientPerson extends BaseEsClient
         ? this.safetyAlertActivationReasonCode.toString()
         : null);
 
-    ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
+    final ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
     activation.setActivationCounty(activationCounty);
     activationCounty.setDescription(SystemCodeCache.global()
         .getSystemCodeShortDescription(this.safetyAlertActivationCountyCode));
@@ -529,11 +530,11 @@ public class EsClientPerson extends BaseEsClient
     activation.setActivationDate(DomainChef.cookDate(this.safetyAlertActivationDate));
     activation.setActivationExplanation(this.safetyAlertActivationExplanation);
 
-    ElasticSearchSafetyAlert.Deactivation deactivation =
+    final ElasticSearchSafetyAlert.Deactivation deactivation =
         new ElasticSearchSafetyAlert.Deactivation();
     alert.setDeactivation(deactivation);
 
-    ElasticSearchSystemCode deactivationCounty = new ElasticSearchSystemCode();
+    final ElasticSearchSystemCode deactivationCounty = new ElasticSearchSystemCode();
     deactivation.setDeactivationCounty(deactivationCounty);
 
     deactivationCounty.setDescription(SystemCodeCache.global()

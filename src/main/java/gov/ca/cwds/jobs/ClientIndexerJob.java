@@ -152,7 +152,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * @param grpRecs records for same client id
    */
   protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
-    grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
+    grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
         .collect(Collectors.groupingBy(EsClientAddress::getNormalizationGroupKey)).entrySet()
         .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
   }
