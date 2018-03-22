@@ -4,6 +4,9 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -18,8 +21,12 @@ public class FlightSummary implements ApiMarker {
    */
   private final StandardFlightSchedule flightSchedule;
 
+  @JsonProperty("first_start")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private Date firstStart = new Date();
 
+  @JsonProperty("last_end")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private Date lastEnd = new Date();
 
   private Map<FlightStatus, Integer> status = new EnumMap<>(FlightStatus.class);
@@ -56,6 +63,8 @@ public class FlightSummary implements ApiMarker {
    * Running count of errors during bulk indexing.
    */
   private int bulkError;
+
+  private boolean validationErrors;
 
   public FlightSummary(final StandardFlightSchedule flightSchedule) {
     this.flightSchedule = flightSchedule;
@@ -192,6 +201,14 @@ public class FlightSummary implements ApiMarker {
         + rowsNormalized + "\n\trecsBulkPrepared=" + bulkPrepared + "\n\trecsBulkDeleted="
         + bulkDeleted + "\n\trecsBulkBefore=" + bulkBefore + "\n\trecsBulkAfter=" + bulkAfter
         + "\n\trecsBulkError=" + bulkError + "\n]";
+  }
+
+  public boolean isValidationErrors() {
+    return validationErrors;
+  }
+
+  public void setValidationErrors(boolean validationErrors) {
+    this.validationErrors = validationErrors;
   }
 
 }
