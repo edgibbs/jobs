@@ -70,7 +70,7 @@ public class FlightSummary implements ApiMarker {
     this.flightSchedule = flightSchedule;
   }
 
-  public void accumulate(final FlightLog flightLog) {
+  public synchronized void accumulate(final FlightLog flightLog) {
     totalRuns++;
     this.bulkDeleted += flightLog.getCurrentBulkDeleted();
     this.bulkPrepared += flightLog.getCurrentBulkPrepared();
