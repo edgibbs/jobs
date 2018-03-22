@@ -6,11 +6,13 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
+import gov.ca.cwds.utils.JsonUtils;
 
 public class FlightSummary implements ApiMarker {
 
@@ -29,41 +31,63 @@ public class FlightSummary implements ApiMarker {
   @JsonInclude(JsonInclude.Include.ALWAYS)
   private Date lastEnd = new Date();
 
+  @JsonProperty("status")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private Map<FlightStatus, Integer> status = new EnumMap<>(FlightStatus.class);
 
+  @JsonProperty("total_runs")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int totalRuns;
 
+  @JsonProperty("sent_to_index_queue")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int recsSentToIndexQueue;
 
+  @JsonProperty("sent_to_elasticsearch")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int recsSentToBulkProcessor;
 
+  @JsonProperty("rows_normalized")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int rowsNormalized;
 
   /**
    * Running count of records prepared for bulk indexing.
    */
+  @JsonProperty("bulk_prepared")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int bulkPrepared;
 
   /**
    * Running count of records prepared for bulk deletion.
    */
+  @JsonProperty("bulk_deleted")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int bulkDeleted;
 
   /**
    * Running count of records before bulk indexing.
    */
+  @JsonProperty("bulk_before")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int bulkBefore;
 
   /**
    * Running count of records after bulk indexing.
    */
+  @JsonProperty("bulk_after")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int bulkAfter;
 
   /**
    * Running count of errors during bulk indexing.
    */
+  @JsonProperty("bulk_after")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private int bulkError;
 
+  @JsonProperty("validation_errors")
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private boolean validationErrors;
 
   public FlightSummary(final StandardFlightSchedule flightSchedule) {
@@ -201,6 +225,10 @@ public class FlightSummary implements ApiMarker {
         + rowsNormalized + "\n\trecsBulkPrepared=" + bulkPrepared + "\n\trecsBulkDeleted="
         + bulkDeleted + "\n\trecsBulkBefore=" + bulkBefore + "\n\trecsBulkAfter=" + bulkAfter
         + "\n\trecsBulkError=" + bulkError + "\n]";
+  }
+
+  public String toJson() throws JsonProcessingException {
+    return JsonUtils.to(this);
   }
 
   public boolean isValidationErrors() {
