@@ -31,7 +31,7 @@ public class FlightSummary implements ApiMarker {
   @JsonInclude(JsonInclude.Include.ALWAYS)
   private Date lastEnd = new Date();
 
-  @JsonProperty("status")
+  @JsonProperty("status_history")
   @JsonInclude(JsonInclude.Include.ALWAYS)
   private Map<FlightStatus, Integer> status = new EnumMap<>(FlightStatus.class);
 
