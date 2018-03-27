@@ -198,8 +198,8 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   public String history() {
     LOGGER.warn("SHOW ROCKET FLIGHT HISTORY! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
-    buf.append('{').append(flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream()
-        .map(FlightLog::toJson).collect(Collectors.joining(", "))).append('}');
+    buf.append("{[").append(flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream()
+        .map(FlightLog::toJson).collect(Collectors.joining(","))).append("]}");
     return buf.toString();
   }
 
