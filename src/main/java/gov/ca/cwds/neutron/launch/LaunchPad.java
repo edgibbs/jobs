@@ -180,6 +180,10 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
     }
   }
 
+  // =======================
+  // STATUS/HISTORY/LOG:
+  // =======================
+
   /**
    * {@inheritDoc}
    */
