@@ -64,7 +64,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
   }
 
   @Override
-  public synchronized void summarizeFlight(StandardFlightSchedule flightSchedule,
+  public synchronized FlightSummary summarizeFlight(StandardFlightSchedule flightSchedule,
       FlightLog flightLog) {
     FlightSummary summary = flightSummaries.get(flightSchedule);
     if (summary == null) {
@@ -73,6 +73,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
     }
 
     summary.accumulate(flightLog);
+    return summary;
   }
 
   @Override

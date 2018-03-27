@@ -75,7 +75,7 @@ public class ExitInitialLoadRocket
 
         LaunchCommand.getInstance().shutdown();
       } catch (Exception e) {
-        CheeseRay.checked(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
+        CheeseRay.checked(LOGGER, e, "ELASTICSEARCH INDEX MANAGEMENT ERROR! {}", e.getMessage());
       }
     }
 

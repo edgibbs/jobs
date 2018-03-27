@@ -221,7 +221,8 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
         final PrintWriter w = new PrintWriter(sw)) {
       lines.sequential().forEach(w::println);
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR READING LOGS! {}", flightSchedule.getRocketName());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR READING LOGS ON DEMAND! {}",
+          flightSchedule.getRocketName());
     }
 
     return sw.toString();

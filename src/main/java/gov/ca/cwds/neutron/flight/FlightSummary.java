@@ -14,6 +14,11 @@ import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.utils.JsonUtils;
 
+/**
+ * Summarizes a rocket's flight.
+ * 
+ * @author CWDS API Team
+ */
 public class FlightSummary implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
@@ -82,7 +87,7 @@ public class FlightSummary implements ApiMarker {
   /**
    * Running count of errors during bulk indexing.
    */
-  @JsonProperty("bulk_after")
+  @JsonProperty("bulk_error")
   @JsonInclude(JsonInclude.Include.ALWAYS)
   private int bulkError;
 
