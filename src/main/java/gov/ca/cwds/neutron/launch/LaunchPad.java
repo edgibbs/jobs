@@ -193,11 +193,12 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Show rocket's flight history")
+  @Managed(description = "Show rocket's flight log history")
   public String history() {
     LOGGER.warn("SHOW ROCKET FLIGHT HISTORY! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
-    flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream().forEach(buf::append);
+    flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream().map(FlightLog::toJson)
+        .forEach(buf::append);
     return buf.toString();
   }
 

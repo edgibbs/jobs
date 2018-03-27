@@ -68,6 +68,10 @@ public final class VoxCommandInstruction implements ApiMarker {
     return ret;
   }
 
+  // =======================
+  // ACCESSORS:
+  // =======================
+
   public String getRocket() {
     return rocket;
   }
@@ -107,6 +111,10 @@ public final class VoxCommandInstruction implements ApiMarker {
   public void setArgs(String args) {
     this.args = args;
   }
+
+  // =======================
+  // IDENTITY:
+  // =======================
 
   @Override
   public String toString() {

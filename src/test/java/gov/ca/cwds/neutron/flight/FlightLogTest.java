@@ -307,6 +307,7 @@ public class FlightLogTest extends Goddard {
     final String expected =
         "{\"rocket_name\":\"client\",\"validation_errors\":false,\"start_time\":1522185484650,\"end_time\":0,\"initial_load\":false,\"last_change_since\":null,\"status\":\"NOT_STARTED\",\"initial_load_ranges_started\":[],\"initial_load_ranges_completed\":[],\"affected_document_ids\":[],\"running\":true,\"failed\":false,\"retrieve_done\":false,\"transform_done\":false,\"index_done\":false,\"current_queued_to_index\":0,\"current_normalized\":0,\"current_bulk_deleted\":0,\"current_bulk_prepared\":0,\"current_bulk_error\":0,\"current_bulk_after\":0}";
     assertTrue(actual.startsWith(expected.substring(0, 30)));
+    System.out.println(actual);
   }
 
   @Test
