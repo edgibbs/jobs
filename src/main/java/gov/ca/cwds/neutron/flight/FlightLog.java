@@ -13,12 +13,16 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
+import gov.ca.cwds.utils.JsonUtils;
+import io.dropwizard.jackson.JsonSnakeCase;
 
 /**
  * Track rocket flight progress and record counts.
@@ -30,6 +34,7 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
  * 
  * @author CWDS API Team
  */
+@JsonSnakeCase
 public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private static final long serialVersionUID = 1L;
@@ -37,6 +42,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   /**
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.
    */
+  @JsonInclude(JsonInclude.Include.ALWAYS)
   private String rocketName;
 
   /**
@@ -131,9 +137,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
 
   /**
-   * Last change only. Log ES documents created or modified by this rocket.
+   * Last change only. Log Elasticsearch documents created or modified by this rocket.
    */
   private final Queue<String> affectedDocumentIds = new CircularFifoQueue<>();
+
+  // =======================
+  // CONSTRUCTORS:
+  // =======================
 
   public FlightLog() {
     // default ctor
@@ -144,39 +154,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   // =======================
-  // AtomJobControl:
+  // STATUS:
   // =======================
-
-  public void start() {
-    if (this.status == FlightStatus.NOT_STARTED) {
-      this.status = FlightStatus.RUNNING;
-      startTime = System.currentTimeMillis();
-    }
-  }
-
-  @Override
-  public void fail() {
-    if (this.status != FlightStatus.FAILED) {
-      this.status = FlightStatus.FAILED;
-      this.endTime = System.currentTimeMillis();
-
-      this.fatalError = true;
-      this.doneJob = true;
-    }
-  }
-
-  @Override
-  public void done() {
-    if (this.status != FlightStatus.FAILED) {
-      this.status = FlightStatus.SUCCEEDED;
-    }
-
-    this.endTime = System.currentTimeMillis();
-    this.doneRetrieve = true;
-    this.doneIndex = true;
-    this.doneTransform = true;
-    this.doneJob = true;
-  }
 
   /**
    * {@inheritDoc}
@@ -218,6 +197,41 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return this.doneIndex;
   }
 
+  // =======================
+  // ACTIONS:
+  // =======================
+
+  public void start() {
+    if (this.status == FlightStatus.NOT_STARTED) {
+      this.status = FlightStatus.RUNNING;
+      startTime = System.currentTimeMillis();
+    }
+  }
+
+  @Override
+  public void fail() {
+    if (this.status != FlightStatus.FAILED) {
+      this.status = FlightStatus.FAILED;
+      this.endTime = System.currentTimeMillis();
+
+      this.fatalError = true;
+      this.doneJob = true;
+    }
+  }
+
+  @Override
+  public void done() {
+    if (this.status != FlightStatus.FAILED) {
+      this.status = FlightStatus.SUCCEEDED;
+    }
+
+    this.endTime = System.currentTimeMillis();
+    this.doneRetrieve = true;
+    this.doneIndex = true;
+    this.doneTransform = true;
+    this.doneJob = true;
+  }
+
   /**
    * {@inheritDoc}
    */
@@ -237,7 +251,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   // =======================
-  // PRINT:
+  // PRETTY PRINT:
   // =======================
 
   private String pad(Integer padme) {
@@ -283,6 +297,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     buf.append("\n]");
     return buf.toString();
+  }
+
+  public String toJson() throws JsonProcessingException {
+    return JsonUtils.to(this);
   }
 
   // =======================

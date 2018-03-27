@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,7 +25,7 @@ public class FlightSummary implements ApiMarker {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Runtime rocket name. Distinguish this rocket's threads from other running threads.
+   * Runtime rocket name and settings.
    */
   private final StandardFlightSchedule flightSchedule;
 
@@ -125,6 +126,7 @@ public class FlightSummary implements ApiMarker {
     }
   }
 
+  @JsonIgnore
   public Map<FlightStatus, Integer> getStatus() {
     return status;
   }
@@ -133,6 +135,7 @@ public class FlightSummary implements ApiMarker {
     this.status = status;
   }
 
+  @JsonIgnore
   public int getTotalRuns() {
     return totalRuns;
   }
@@ -141,6 +144,7 @@ public class FlightSummary implements ApiMarker {
     this.totalRuns = totalRuns;
   }
 
+  @JsonIgnore
   public int getRecsSentToIndexQueue() {
     return recsSentToIndexQueue;
   }
@@ -149,6 +153,7 @@ public class FlightSummary implements ApiMarker {
     this.recsSentToIndexQueue = recsSentToIndexQueue;
   }
 
+  @JsonIgnore
   public int getRecsSentToBulkProcessor() {
     return recsSentToBulkProcessor;
   }
@@ -157,6 +162,7 @@ public class FlightSummary implements ApiMarker {
     this.recsSentToBulkProcessor = recsSentToBulkProcessor;
   }
 
+  @JsonIgnore
   public int getRowsNormalized() {
     return rowsNormalized;
   }
@@ -165,6 +171,7 @@ public class FlightSummary implements ApiMarker {
     this.rowsNormalized = rowsNormalized;
   }
 
+  @JsonIgnore
   public int getBulkPrepared() {
     return bulkPrepared;
   }
@@ -173,6 +180,7 @@ public class FlightSummary implements ApiMarker {
     this.bulkPrepared = recsBulkPrepared;
   }
 
+  @JsonIgnore
   public int getBulkDeleted() {
     return bulkDeleted;
   }
@@ -181,6 +189,7 @@ public class FlightSummary implements ApiMarker {
     this.bulkDeleted = recsBulkDeleted;
   }
 
+  @JsonIgnore
   public int getBulkBefore() {
     return bulkBefore;
   }
@@ -189,6 +198,7 @@ public class FlightSummary implements ApiMarker {
     this.bulkBefore = recsBulkBefore;
   }
 
+  @JsonIgnore
   public int getBulkAfter() {
     return bulkAfter;
   }
@@ -197,6 +207,7 @@ public class FlightSummary implements ApiMarker {
     this.bulkAfter = recsBulkAfter;
   }
 
+  @JsonIgnore
   public int getBulkError() {
     return bulkError;
   }
@@ -205,6 +216,7 @@ public class FlightSummary implements ApiMarker {
     this.bulkError = recsBulkError;
   }
 
+  @JsonIgnore
   public Date getFirstStart() {
     return NeutronDateUtils.freshDate(firstStart);
   }
@@ -213,6 +225,7 @@ public class FlightSummary implements ApiMarker {
     this.firstStart = NeutronDateUtils.freshDate(firstStart);
   }
 
+  @JsonIgnore
   public Date getLastEnd() {
     return NeutronDateUtils.freshDate(lastEnd);
   }
@@ -236,6 +249,7 @@ public class FlightSummary implements ApiMarker {
     return JsonUtils.to(this);
   }
 
+  @JsonIgnore
   public boolean isValidationErrors() {
     return validationErrors;
   }
