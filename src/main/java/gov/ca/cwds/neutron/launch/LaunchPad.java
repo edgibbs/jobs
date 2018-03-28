@@ -222,7 +222,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Show flight log")
+  @Managed(description = "Show rocket's last flight log")
   public String logs() {
     LOGGER.warn("SHOW FLIGHT LOG! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
@@ -238,8 +238,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
         final PrintWriter w = new PrintWriter(sw)) {
       lines.sequential().forEach(w::println);
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR READING LOGS ON DEMAND! {}",
-          flightSchedule.getRocketName());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR READING LOGS! {}", flightSchedule.getRocketName());
     }
 
     return sw.toString();

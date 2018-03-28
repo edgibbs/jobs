@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,6 +14,7 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.utils.JsonUtils;
 
 /**
@@ -31,10 +33,12 @@ public class FlightSummary implements ApiMarker {
 
   @JsonProperty("first_start")
   @JsonInclude(JsonInclude.Include.ALWAYS)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DomainChef.TIMESTAMP_ISO8601_FORMAT)
   private Date firstStart = new Date();
 
   @JsonProperty("last_end")
   @JsonInclude(JsonInclude.Include.ALWAYS)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DomainChef.TIMESTAMP_ISO8601_FORMAT)
   private Date lastEnd = new Date();
 
   @JsonProperty("status_history")
