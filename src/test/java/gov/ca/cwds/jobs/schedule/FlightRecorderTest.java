@@ -52,7 +52,7 @@ public class FlightRecorderTest {
   @Test
   public void getHistory_Args__Class() throws Exception {
     final Class<?> klazz = StandardFlightSchedule.INTAKE_SCREENING.getRocketClass();
-    List<FlightLog> actual = target.getHistory(klazz);
+    List<FlightLog> actual = target.getFlightLogHistory(klazz);
     assertThat(actual, is(notNullValue()));
   }
 

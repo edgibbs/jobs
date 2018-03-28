@@ -24,7 +24,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
 
   private static final int KEEP_LAST_FLIGHTS = 200;
 
-  private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightHistory =
+  private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightLogHistory =
       new ConcurrentHashMap<>();
 
   private final Map<Class<?>, FlightLog> lastFlightLogs = new ConcurrentHashMap<>();
@@ -34,17 +34,17 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
 
   @Override
   public Map<Class<?>, CircularFifoQueue<FlightLog>> getFlightLogHistory() {
-    return flightHistory;
+    return flightLogHistory;
   }
 
   @Override
   public void logFlight(Class<?> klazz, FlightLog flightLog) {
     lastFlightLogs.put(klazz, flightLog);
 
-    if (!flightHistory.containsKey(klazz)) {
-      flightHistory.put(klazz, new CircularFifoQueue<>(KEEP_LAST_FLIGHTS));
+    if (!flightLogHistory.containsKey(klazz)) {
+      flightLogHistory.put(klazz, new CircularFifoQueue<>(KEEP_LAST_FLIGHTS));
     }
-    flightHistory.get(klazz).add(flightLog);
+    flightLogHistory.get(klazz).add(flightLog);
   }
 
   @Override
@@ -58,8 +58,8 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
   }
 
   @Override
-  public List<FlightLog> getHistory(final Class<?> klazz) {
-    return flightHistory.containsKey(klazz) ? new ArrayList<>(flightHistory.get(klazz))
+  public List<FlightLog> getFlightLogHistory(final Class<?> klazz) {
+    return flightLogHistory.containsKey(klazz) ? new ArrayList<>(flightLogHistory.get(klazz))
         : new ArrayList<>();
   }
 

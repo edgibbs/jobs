@@ -184,6 +184,17 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   // STATUS/HISTORY/LOG:
   // =======================
 
+  @Managed(description = "Show rocket flight statistics across flights")
+  @Override
+  public String summary() {
+    try {
+      return flightRecorder.getFlightSummary(this.flightSchedule).toJson();
+    } catch (Exception e) {
+      LOGGER.error("UNABLE TO SHOW FLIGHT SUMMARY! {}", e.getMessage(), e);
+      return CheeseRay.stackToString(e);
+    }
+  }
+
   /**
    * {@inheritDoc}
    */
@@ -202,8 +213,8 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   public String history() {
     LOGGER.warn("SHOW ROCKET FLIGHT HISTORY! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
-    buf.append("{[").append(flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream()
-        .map(FlightLog::toJson).collect(Collectors.joining(","))).append("]}");
+    buf.append("{[").append(flightRecorder.getFlightLogHistory(this.flightSchedule.getRocketClass())
+        .stream().map(FlightLog::toJson).collect(Collectors.joining(","))).append("]}");
     return buf.toString();
   }
 
