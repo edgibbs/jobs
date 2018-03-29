@@ -352,7 +352,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected SessionFactory makeCmsSessionFactory() {
     LOGGER.info("make CMS session factory");
-    Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
+    final Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
         .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
         .addAnnotatedClass(EsClientPerson.class).addAnnotatedClass(EsRelationship.class)
         .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
