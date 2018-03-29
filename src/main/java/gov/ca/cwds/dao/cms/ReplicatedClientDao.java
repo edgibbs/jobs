@@ -38,6 +38,7 @@ public class ReplicatedClientDao extends BaseDaoImpl<ReplicatedClient>
     super(sessionFactory);
   }
 
+  @SuppressWarnings("unchecked")
   public List<ReplicatedClient> findByTemp() {
     final String namedQueryName = this.makeNamedQueryName("findByTemp");
     final Session session = this.getSessionFactory().getCurrentSession();

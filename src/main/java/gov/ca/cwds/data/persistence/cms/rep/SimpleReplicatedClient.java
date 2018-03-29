@@ -1,6 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
+import gov.ca.cwds.data.es.SimpleElasticSearchSystemCode;
 
 public class SimpleReplicatedClient extends ReplicatedClient {
 
@@ -8,8 +9,8 @@ public class SimpleReplicatedClient extends ReplicatedClient {
 
   @Override
   protected ElasticSearchSystemCode makeJsonAddress() {
-    // return new SimpleElasticSearchSystemCode();
-    return new ElasticSearchSystemCode();
+    return new SimpleElasticSearchSystemCode();
+    // return new ElasticSearchSystemCode();
   };
 
 }
