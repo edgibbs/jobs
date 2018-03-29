@@ -395,7 +395,7 @@ public class FlightSummaryTest {
   public void toJson_A$() throws Exception {
     String actual = target.toJson();
     String expected =
-        ",\"status_history\":{},\"total_runs\":0,\"sent_to_index_queue\":0,\"sent_to_elasticsearch\":0,\"rows_normalized\":0,\"bulk_prepared\":0,\"bulk_deleted\":0,\"bulk_before\":0,\"bulk_after\":0,\"bulk_error\":0,\"validation_errors\":false}";
+        "\"rows_normalized\":0,\"bulk_prepared\":0,\"bulk_deleted\":0,\"bulk_before\":0,\"bulk_after\":0,\"bulk_error\":0,";
     assertTrue(actual.contains(expected));
   }
 
