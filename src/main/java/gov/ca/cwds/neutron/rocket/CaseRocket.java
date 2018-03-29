@@ -191,8 +191,11 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   private String buildAffectedClientsSQL() {
-    return getFlightPlan().isLastRunMode() ? getPrepLastChangeSQL()
+    String ret;
+    ret = getFlightPlan().isLastRunMode() ? getPrepLastChangeSQL()
         : CaseSQLResource.PREP_AFFECTED_CLIENTS_FULL;
+    LOGGER.info("Case History affected clients SQL:\n {}", ret);
+    return ret;
   }
 
   // =====================
