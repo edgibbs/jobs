@@ -45,14 +45,14 @@ public class FlightRecorderTest {
   public void getLastTrack_Args__Class() throws Exception {
     final Class<?> klazz = StandardFlightSchedule.INTAKE_SCREENING.getRocketClass();
     final FlightLog actual = target.getLastFlightLog(klazz);
-    FlightLog expected = null;
+    final FlightLog expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getHistory_Args__Class() throws Exception {
     final Class<?> klazz = StandardFlightSchedule.INTAKE_SCREENING.getRocketClass();
-    List<FlightLog> actual = target.getFlightLogHistory(klazz);
+    final List<FlightLog> actual = target.getFlightLogHistory(klazz);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -67,7 +67,7 @@ public class FlightRecorderTest {
   public void getFlightSummary_Args__DefaultFlightSchedule() throws Exception {
     final StandardFlightSchedule flightSchedule = StandardFlightSchedule.INTAKE_SCREENING;
     final FlightSummary actual = target.getFlightSummary(flightSchedule);
-    FlightSummary expected = null;
+    final FlightSummary expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

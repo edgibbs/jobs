@@ -98,7 +98,7 @@ public class FlightSummary implements ApiMarker {
 
   @JsonProperty("validation_errors")
   @JsonInclude(JsonInclude.Include.ALWAYS)
-  private boolean validationErrors;
+  private int validationErrors;
 
   public FlightSummary(final StandardFlightSchedule flightSchedule) {
     this.flightSchedule = flightSchedule;
@@ -112,6 +112,11 @@ public class FlightSummary implements ApiMarker {
     this.bulkAfter += flightLog.getCurrentBulkAfter();
 
     this.rowsNormalized += flightLog.getCurrentNormalized();
+
+
+    if (flightLog.isValidationErrors()) {
+      this.validationErrors++;
+    }
 
     final Date startTime = new Date(flightLog.getStartTime());
     if (firstStart.before(startTime)) {
@@ -246,7 +251,7 @@ public class FlightSummary implements ApiMarker {
         + "\n\trecsSentToBulkProcessor=" + recsSentToBulkProcessor + "\n\trowsNormalized="
         + rowsNormalized + "\n\trecsBulkPrepared=" + bulkPrepared + "\n\trecsBulkDeleted="
         + bulkDeleted + "\n\trecsBulkBefore=" + bulkBefore + "\n\trecsBulkAfter=" + bulkAfter
-        + "\n\trecsBulkError=" + bulkError + "\n]";
+        + "\n\trecsBulkError=" + bulkError + "\n\tvalidation errors=" + validationErrors + "\n]";
   }
 
   public String toJson() throws JsonProcessingException {
@@ -254,11 +259,11 @@ public class FlightSummary implements ApiMarker {
   }
 
   @JsonIgnore
-  public boolean isValidationErrors() {
+  public int getValidationErrors() {
     return validationErrors;
   }
 
-  public void setValidationErrors(boolean validationErrors) {
+  public void setValidationErrors(int validationErrors) {
     this.validationErrors = validationErrors;
   }
 

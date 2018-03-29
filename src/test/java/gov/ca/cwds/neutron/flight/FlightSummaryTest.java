@@ -401,14 +401,14 @@ public class FlightSummaryTest {
 
   @Test
   public void isValidationErrors_A$() throws Exception {
-    boolean actual = target.isValidationErrors();
-    boolean expected = false;
+    final int actual = target.getValidationErrors();
+    final int expected = 0;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void setValidationErrors_A$boolean() throws Exception {
-    boolean validationErrors = false;
+    final int validationErrors = 1;
     target.setValidationErrors(validationErrors);
   }
 
