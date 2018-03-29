@@ -6,8 +6,6 @@ public class NeutronElasticSearchPerson extends ElasticSearchPerson {
 
   private static final long serialVersionUID = 1L;
 
-  private boolean oldAddressType;
-
   public NeutronElasticSearchPerson() {
     super();
   }

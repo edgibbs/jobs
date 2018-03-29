@@ -16,6 +16,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.CreationException;
@@ -294,7 +295,10 @@ public class HyperCube extends NeutronGuiceModule {
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
     // Singleton:
-    bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
+    final ObjectMapper om = ObjectMapperUtils.createObjectMapper();
+    om.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+    om.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+    bind(ObjectMapper.class).toInstance(om);
 
     // Command Center:
     bind(AtomFlightRecorder.class).to(FlightRecorder.class).asEagerSingleton();
