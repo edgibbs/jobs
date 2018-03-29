@@ -567,10 +567,12 @@ public abstract class BaseEsClient
     ret.adrReplicationDate = rs.getDate("ADR_IBMSNAP_LOGMARKER");
   }
 
+  protected abstract ReplicatedClient makeReplicatedClient();
+
   @Override
   public ReplicatedClient normalize(Map<Object, ReplicatedClient> map) {
     final boolean isClientAdded = map.containsKey(this.cltId);
-    final ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
+    final ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : makeReplicatedClient();
 
     if (!isClientAdded) {
       // Populate core client attributes.

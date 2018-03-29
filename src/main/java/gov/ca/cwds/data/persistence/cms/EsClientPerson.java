@@ -235,6 +235,11 @@ public class EsClientPerson extends BaseEsClient
   }
 
   @Override
+  protected ReplicatedClient makeReplicatedClient() {
+    return new ReplicatedClient();
+  }
+
+  @Override
   public Class<ReplicatedClient> getNormalizationClass() {
     return ReplicatedClient.class;
   }
