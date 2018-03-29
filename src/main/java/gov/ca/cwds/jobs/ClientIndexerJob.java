@@ -218,7 +218,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
         }
       }
 
-      LOGGER.warn("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
+      LOGGER.info("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
           docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),
           person.getAddresses().size());
     } catch (Exception e) {

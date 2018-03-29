@@ -193,7 +193,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       }
     }
 
-    LOGGER.warn("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
+    LOGGER.info("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
         docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),
         person.getAddresses().size());
 
@@ -215,7 +215,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
           && StringUtils.equals(client.getCommonMiddleName(), person.getMiddleName())
           && validateAddresses(client, person);
     } catch (Exception e) {
-      LOGGER.error("CLIENT VALIDATION ERROR!", e);
+      LOGGER.error("PEOPLE SUMMARY VALIDATION ERROR!", e);
       return false;
     }
   }

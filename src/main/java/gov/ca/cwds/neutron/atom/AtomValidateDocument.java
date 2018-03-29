@@ -1,7 +1,5 @@
 package gov.ca.cwds.neutron.atom;
 
-import java.io.IOException;
-
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -44,7 +42,7 @@ public interface AtomValidateDocument extends AtomShared {
         validateDocument(person);
         ret = true;
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       // Do NOT re-throw and kill a job over a validation issue.
       getLogger().error("ERROR READING DOCUMENT! doc id: {}", docId, e);
     }
