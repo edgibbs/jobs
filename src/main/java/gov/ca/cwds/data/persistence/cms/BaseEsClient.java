@@ -567,6 +567,11 @@ public abstract class BaseEsClient
     ret.adrReplicationDate = rs.getDate("ADR_IBMSNAP_LOGMARKER");
   }
 
+  /**
+   * Factory method generates a subclass instance.
+   * 
+   * @return instance of ReplicatedClient or subclass
+   */
   protected abstract ReplicatedClient makeReplicatedClient();
 
   @Override

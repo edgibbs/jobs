@@ -3,6 +3,12 @@ package gov.ca.cwds.data.persistence.cms.rep;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.es.SimpleElasticSearchSystemCode;
 
+/**
+ * Substitute {@link SimpleElasticSearchSystemCode} for {@link ElasticSearchSystemCode} to overcome
+ * People mapping change to addresses.type.
+ * 
+ * @author CWDS API Team
+ */
 public class SimpleReplicatedClient extends ReplicatedClient {
 
   private static final long serialVersionUID = 1L;
@@ -10,7 +16,6 @@ public class SimpleReplicatedClient extends ReplicatedClient {
   @Override
   protected ElasticSearchSystemCode makeJsonAddress() {
     return new SimpleElasticSearchSystemCode();
-    // return new ElasticSearchSystemCode();
   };
 
 }
