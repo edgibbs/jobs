@@ -323,7 +323,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     try {
       return JsonUtils.to(this);
     } catch (JsonProcessingException e) {
-      throw CheeseRay.runtime(LOGGER, e, "UNABLED UNSCHEDULE LAUNCH! rocket: {}", rocketName);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED SERIALIZE TO JSON! rocket: {}", rocketName);
     }
   }
 
