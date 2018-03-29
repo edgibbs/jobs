@@ -74,6 +74,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
+import gov.ca.cwds.data.persistence.cms.rep.SimpleReplicatedClient;
 import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -364,10 +365,11 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(ReplicatedReporter.class)
         .addAnnotatedClass(ReplicatedServiceProvider.class)
         .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
-        .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
-        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
-        .addAnnotatedClass(StaffPerson.class).addAnnotatedClass(DatabaseResetEntry.class);
+        .addAnnotatedClass(SimpleReplicatedClient.class).addAnnotatedClass(ReplicatedClient.class)
+        .addAnnotatedClass(ReplicatedClientAddress.class).addAnnotatedClass(ReplicatedAddress.class)
+        .addAnnotatedClass(SystemCode.class).addAnnotatedClass(EsSafetyAlert.class)
+        .addAnnotatedClass(SystemMeta.class).addAnnotatedClass(StaffPerson.class)
+        .addAnnotatedClass(DatabaseResetEntry.class);
     return additionalDaos(config).buildSessionFactory();
   }
 
