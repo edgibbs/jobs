@@ -28,7 +28,7 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
  * 
  * #145240149: find ALL client/address records affected by changes.
  *
- * REFRESH TABLE cwsrsq.ES_REL_CLN_RELT_CLIENT ;
+ * REFRESH TABLE CWSRSQ.ES_REL_CLN_RELT_CLIENT ;
  * 
  * @author CWDS API Team
  */

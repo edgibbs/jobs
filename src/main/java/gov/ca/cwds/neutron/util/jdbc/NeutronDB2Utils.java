@@ -137,8 +137,8 @@ public final class NeutronDB2Utils {
           (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
               .unwrap(Class.forName("com.ibm.db2.jcc.t4.b")); // NOSONAR
       final DB2Connection db2Con = nativeCon;
-      LOGGER.debug("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
-          nativeCon.enableRowsetSupport_);
+      // LOGGER.debug("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
+      // nativeCon.enableRowsetSupport_);
 
       ret = db2Con.getDB2SystemMonitor();
       ret.enable(true);
