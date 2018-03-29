@@ -298,6 +298,8 @@ public class HyperCube extends NeutronGuiceModule {
     final ObjectMapper om = ObjectMapperUtils.createObjectMapper();
     om.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
     om.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+    om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    om.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
     bind(ObjectMapper.class).toInstance(om);
 
     // Command Center:

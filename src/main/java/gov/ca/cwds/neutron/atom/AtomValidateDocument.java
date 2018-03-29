@@ -15,7 +15,7 @@ public interface AtomValidateDocument extends AtomShared {
 
   default ElasticSearchPerson readPerson(String json) throws NeutronCheckedException {
     try {
-      return ElasticSearchPerson.MAPPER.readValue(json, ElasticSearchPerson.class);
+      return getMapper().readValue(json, ElasticSearchPerson.class);
     } catch (Exception e) {
       throw CheeseRay.checked(getLogger(), e, "ERROR READING PERSON DOC! {}", e.getMessage(), e);
     }
