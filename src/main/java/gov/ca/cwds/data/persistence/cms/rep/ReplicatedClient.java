@@ -271,7 +271,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       if (addressActive) {
         final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
 
-        // Choose type appropriate for index mapping.
+        // Choose appropriate system code type for index target index.
         final ElasticSearchSystemCode addressType = makeJsonAddress();
         final SystemCode addressTypeSystemCode =
             SystemCodeCache.global().getSystemCode(repClientAddress.getAddressType());

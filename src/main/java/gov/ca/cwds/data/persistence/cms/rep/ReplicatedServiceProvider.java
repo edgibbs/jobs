@@ -34,7 +34,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
         + "trim(z.STREET_NO) STREET_NO, trim(z.SUFX_TLDSC) SUFX_TLDSC, z.ZIP_NM, "
         + "z.LST_UPD_ID, z.LST_UPD_TS, z.ZIP_SFX_NO, z.ARCASS_IND, trim(z.EMAIL_ADDR) EMAIL_ADDR"
         + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER FROM {h-schema}SVC_PVRT z "
-        + "WHERE z.IDENTIFIER BETWEEN :min_id AND z.IDENTIFIER :max_id "
+        + "WHERE z.IDENTIFIER BETWEEN :min_id AND :max_id "
         + "FOR READ ONLY WITH UR",
     resultClass = ReplicatedServiceProvider.class, readOnly = true)
 @NamedNativeQuery(
