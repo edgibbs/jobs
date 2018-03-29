@@ -14,7 +14,7 @@ public class SimpleReplicatedClient extends ReplicatedClient {
   private static final long serialVersionUID = 1L;
 
   @Override
-  protected ElasticSearchSystemCode makeJsonAddress() {
+  protected ElasticSearchSystemCode makeJsonAddressType() {
     return new SimpleElasticSearchSystemCode();
   };
 

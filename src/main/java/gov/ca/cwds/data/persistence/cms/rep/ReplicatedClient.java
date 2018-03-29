@@ -248,7 +248,13 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     this.openCaseId = openCaseId;
   }
 
-  protected ElasticSearchSystemCode makeJsonAddress() {
+  /**
+   * Override to substitute an alternative System Code implementation, such as a simple String or
+   * Short.
+   * 
+   * @return ElasticSearchSystemCode instance
+   */
+  protected ElasticSearchSystemCode makeJsonAddressType() {
     return new ElasticSearchSystemCode();
   };
 
@@ -272,7 +278,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
         final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
 
         // Choose appropriate system code type for index target index.
-        final ElasticSearchSystemCode addressType = makeJsonAddress();
+        final ElasticSearchSystemCode addressType = makeJsonAddressType();
         final SystemCode addressTypeSystemCode =
             SystemCodeCache.global().getSystemCode(repClientAddress.getAddressType());
 
