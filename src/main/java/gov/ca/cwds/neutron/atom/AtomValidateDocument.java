@@ -8,6 +8,7 @@ import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
+import gov.ca.cwds.data.es.NeutronElasticSearchPerson;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
@@ -15,7 +16,7 @@ public interface AtomValidateDocument extends AtomShared {
 
   default ElasticSearchPerson readPerson(String json) throws NeutronCheckedException {
     try {
-      return getMapper().readValue(json, ElasticSearchPerson.class);
+      return getMapper().readValue(json, NeutronElasticSearchPerson.class);
     } catch (Exception e) {
       throw CheeseRay.checked(getLogger(), e, "ERROR READING PERSON DOC! {}", e.getMessage(), e);
     }

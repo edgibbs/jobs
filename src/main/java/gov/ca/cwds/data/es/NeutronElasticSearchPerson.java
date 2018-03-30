@@ -2,6 +2,8 @@ package gov.ca.cwds.data.es;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class NeutronElasticSearchPerson extends ElasticSearchPerson {
 
   private static final long serialVersionUID = 1L;
@@ -17,7 +19,10 @@ public class NeutronElasticSearchPerson extends ElasticSearchPerson {
       List<ElasticSearchPersonScreening> screenings) {
     super(id, firstName, lastName, middleName, nameSuffix, gender, birthDate, ssn, sourceType,
         sourceJson, highlight, addresses, phones, languages, screenings);
-    // TODO Auto-generated constructor stub
   }
+
+  @JsonIgnore
+  @Override
+  public void setAddresses(List<ElasticSearchPersonAddress> addresses) {}
 
 }
