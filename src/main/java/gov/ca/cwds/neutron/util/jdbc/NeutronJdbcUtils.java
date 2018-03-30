@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.util.jdbc;
 
+import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -22,7 +24,6 @@ import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.jobs.util.jdbc.WorkPrepareLastChange;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
-import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
@@ -62,8 +63,7 @@ public final class NeutronJdbcUtils {
     String trimTimestamp = StringUtils.trim(timestamp);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
       try {
-        return new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat())
-            .parse(trimTimestamp);
+        return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).parse(trimTimestamp);
       } catch (Exception e) {
         throw new NeutronRuntimeException(e);
       }
@@ -74,22 +74,18 @@ public final class NeutronJdbcUtils {
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();
     buf.append("TIMESTAMP('")
-        .append(new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat())
-            .format(date))
+        .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date))
         .append("')");
     return buf.toString();
   }
 
   public static String makeSimpleTimestampString(final Date date) {
-    return new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat())
-        .format(date);
+    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date);
   }
 
   public static String makeTimestampStringLookBack(final Date date) {
-    return date != null
-        ? new SimpleDateFormat(NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT.getFormat())
-            .format(NeutronDateUtils.lookBack(date))
-        : "CURRENT TIMESTAMP";
+    return date != null ? new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat())
+        .format(NeutronDateUtils.lookBack(date)) : "CURRENT TIMESTAMP";
   }
 
   /**

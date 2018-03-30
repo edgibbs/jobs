@@ -27,7 +27,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 //@formatter:off
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findBucketRange",
-    query = "select z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
+    query = "SELECT z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
         + "z.FAX_NO, TRIM(z.FIRST_NM) FIRST_NM, z.FRG_ADRT_B, TRIM(z.LAST_NM) LAST_NM, "
         + "TRIM(z.MID_INI_NM) MID_INI_NM, TRIM(z.NMPRFX_DSC) NMPRFX_DSC, z.PRM_TEL_NO, z.PRM_EXT_NO, z.STATE_C, "
         + "TRIM(z.STREET_NM) STREET_NM, TRIM(z.STREET_NO) STREET_NO, TRIM(z.SUFX_TLDSC) SUFX_TLDSC, "
@@ -41,7 +41,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     resultClass = ReplicatedCollateralIndividual.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfter",
-    query = "select z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
+    query = "SELECT z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
         + "z.FAX_NO, TRIM(z.FIRST_NM) FIRST_NM, z.FRG_ADRT_B, TRIM(z.LAST_NM) LAST_NM, "
         + "TRIM(z.MID_INI_NM) MID_INI_NM, TRIM(z.NMPRFX_DSC) NMPRFX_DSC, z.PRM_TEL_NO, z.PRM_EXT_NO, z.STATE_C, "
         + "TRIM(z.STREET_NM) STREET_NM, TRIM(z.STREET_NO) STREET_NO, TRIM(z.SUFX_TLDSC) SUFX_TLDSC, "
@@ -56,7 +56,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     resultClass = ReplicatedCollateralIndividual.class)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfterWithUnlimitedAccess",
-    query = "select z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
+    query = "SELECT z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
         + "z.FAX_NO, TRIM(z.FIRST_NM) FIRST_NM, z.FRG_ADRT_B, TRIM(z.LAST_NM) LAST_NM, "
         + "TRIM(z.MID_INI_NM) MID_INI_NM, TRIM(z.NMPRFX_DSC) NMPRFX_DSC, z.PRM_TEL_NO, z.PRM_EXT_NO, z.STATE_C, "
         + "TRIM(z.STREET_NM) STREET_NM, TRIM(z.STREET_NO) STREET_NO, TRIM(z.SUFX_TLDSC) SUFX_TLDSC, "
@@ -71,7 +71,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     resultClass = ReplicatedCollateralIndividual.class)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findPartitionedBuckets",
-    query = "select z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
+    query = "SELECT z.IDENTIFIER, TRIM(z.BADGE_NO) BADGE_NO, TRIM(z.CITY_NM) CITY_NM, TRIM(z.EMPLYR_NM) EMPLYR_NM, "
         + "z.FAX_NO, TRIM(z.FIRST_NM) FIRST_NM, z.FRG_ADRT_B, TRIM(z.LAST_NM) LAST_NM, "
         + "TRIM(z.MID_INI_NM) MID_INI_NM, TRIM(z.NMPRFX_DSC) NMPRFX_DSC, z.PRM_TEL_NO, z.PRM_EXT_NO, z.STATE_C, "
         + "TRIM(z.STREET_NM) STREET_NM, TRIM(z.STREET_NO) STREET_NO, TRIM(z.SUFX_TLDSC) SUFX_TLDSC, "

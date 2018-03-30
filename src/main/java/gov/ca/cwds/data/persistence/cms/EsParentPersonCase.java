@@ -11,7 +11,7 @@ import org.hibernate.annotations.NamedNativeQuery;
  * Entity bean for parent person cases.
  * 
  * <p>
- * Per Jira INT-1271, view VW_LST_PARENT_CASE_HIST is obsolete.
+ * Per Jira INT-1271, view VW_LST_PARENT_CASE_HIST is <strong>obsolete</strong>.
  * </p>
  * 
  * @author CWDS API Team

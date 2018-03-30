@@ -10,6 +10,11 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightSummary;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
+/**
+ * Flight Recorder interface.
+ * 
+ * @author CWDS API Team
+ */
 public interface AtomFlightRecorder extends ApiMarker {
 
   Map<Class<?>, CircularFifoQueue<FlightLog>> getFlightLogHistory();
@@ -20,9 +25,9 @@ public interface AtomFlightRecorder extends ApiMarker {
 
   FlightLog getLastFlightLog(StandardFlightSchedule sched);
 
-  List<FlightLog> getHistory(final Class<?> klazz);
+  List<FlightLog> getFlightLogHistory(final Class<?> klazz);
 
-  void summarizeFlight(StandardFlightSchedule flightSchedule, FlightLog flightLog);
+  FlightSummary summarizeFlight(StandardFlightSchedule flightSchedule, FlightLog flightLog);
 
   FlightSummary getFlightSummary(StandardFlightSchedule flightSchedule);
 

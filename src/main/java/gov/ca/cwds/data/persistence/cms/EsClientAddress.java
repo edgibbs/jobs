@@ -15,6 +15,7 @@ import org.hibernate.annotations.NamedNativeQuery;
 
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.data.persistence.cms.rep.SimpleReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
@@ -28,7 +29,7 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
  * 
  * #145240149: find ALL client/address records affected by changes.
  *
- * REFRESH TABLE cwsrsq.ES_REL_CLN_RELT_CLIENT ;
+ * REFRESH TABLE CWSRSQ.ES_REL_CLN_RELT_CLIENT ;
  * 
  * @author CWDS API Team
  */
@@ -78,6 +79,11 @@ public class EsClientAddress extends BaseEsClient
     final EsClientAddress ret = new EsClientAddress();
     BaseEsClient.extract(ret, rs);
     return ret;
+  }
+
+  @Override
+  protected ReplicatedClient makeReplicatedClient() {
+    return new SimpleReplicatedClient();
   }
 
   @Override

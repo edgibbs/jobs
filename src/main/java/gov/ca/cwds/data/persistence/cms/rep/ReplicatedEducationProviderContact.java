@@ -44,8 +44,8 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
         + "z.FIRST_NME, z.MIDDLE_NM, z.LAST_NME, z.NM_PREFIX, z.SUFFX_TITL, "
         + "z.TITLDESC, z.EMAILADR, z.DOE_IND, z.LST_UPD_ID, z.LST_UPD_TS, z.FKED_PVDRT, "
         + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-        + "from ( select mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
-        + "from ( select row_number() over (order by 1) as rn, x.* "
+        + "from ( SELECT mod(y.rn, CAST(:total_buckets AS INTEGER)) + 1 as bucket, y.* "
+        + "from ( SELECT row_number() over (order by 1) as rn, x.* "
         + "from {h-schema}EDPRVCNT x ) y ) z where z.bucket = :bucket_num FOR READ ONLY WITH UR",
     resultClass = ReplicatedEducationProviderContact.class, readOnly = true)
 @Entity

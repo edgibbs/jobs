@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
@@ -109,7 +110,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       final FlightPlan plan =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
       final FlightLog flightLog = this.launchDirector.launch(flightSchedule.getRocketClass(), plan);
-      return flightLog.toString();
+      return flightLog.toJson();
     } catch (Exception e) {
       LOGGER.error("FAILED TO LAUNCH ON DEMAND! {}", e.getMessage(), e);
       return CheeseRay.stackToString(e);
@@ -175,7 +176,22 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       LOGGER.warn("UNSCHEDULE LAUNCH! {}", rocketName);
       scheduler.unscheduleJob(triggerKey);
     } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e, "UNABLED UNSCHEDULE LAUNCH! rocket: {}", rocketName);
+      throw CheeseRay.checked(LOGGER, e, "UNSCHEDULED LAUNCH! rocket: {}", rocketName);
+    }
+  }
+
+  // =======================
+  // STATUS/HISTORY/LOG:
+  // =======================
+
+  @Managed(description = "Show rocket flight statistics across flights")
+  @Override
+  public String summary() {
+    try {
+      return flightRecorder.getFlightSummary(this.flightSchedule).toJson();
+    } catch (Exception e) {
+      LOGGER.error("UNABLE TO SHOW FLIGHT SUMMARY! {}", e.getMessage(), e);
+      return CheeseRay.stackToString(e);
     }
   }
 
@@ -186,18 +202,19 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Managed(description = "Show rocket's last flight status")
   public String status() {
     LOGGER.warn("SHOW ROCKET STATUS! {}", rocketName);
-    return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toString();
+    return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toJson();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Show rocket's flight history")
+  @Managed(description = "Show rocket's flight log history")
   public String history() {
     LOGGER.warn("SHOW ROCKET FLIGHT HISTORY! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
-    flightRecorder.getHistory(this.flightSchedule.getRocketClass()).stream().forEach(buf::append);
+    buf.append("{[").append(flightRecorder.getFlightLogHistory(this.flightSchedule.getRocketClass())
+        .stream().map(FlightLog::toJson).collect(Collectors.joining(","))).append("]}");
     return buf.toString();
   }
 
@@ -205,7 +222,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
    * {@inheritDoc}
    */
   @Override
-  @Managed(description = "Show flight log")
+  @Managed(description = "Show rocket's last flight log")
   public String logs() {
     LOGGER.warn("SHOW FLIGHT LOG! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
@@ -306,6 +323,8 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
   protected void threadShutdownLaunchCommand() {
     try {
+      Thread.currentThread().setName("shutdown");
+      LOGGER.warn("SHUTDOWN THREAD STARTING!");
       Thread.sleep(2000);
       LaunchCommand.getInstance().shutdown();
     } catch (InterruptedException | NeutronCheckedException e) {

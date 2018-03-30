@@ -190,7 +190,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return ret;
   }
 
-  private String buildAffectedClientsSQL() {
+  protected String buildAffectedClientsSQL() {
     return getFlightPlan().isLastRunMode() ? getPrepLastChangeSQL()
         : CaseSQLResource.PREP_AFFECTED_CLIENTS_FULL;
   }
@@ -685,7 +685,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       con.setAutoCommit(false);
       NeutronDB2Utils.enableParallelism(con);
 
-      try (final PreparedStatement stmtInsClient = con.prepareStatement(buildAffectedClientsSQL());
+      final String sqlAffectedClients = buildAffectedClientsSQL();
+      LOGGER.info("Case History affected clients SQL:\n {}", sqlAffectedClients);
+
+      try (final PreparedStatement stmtInsClient = con.prepareStatement(sqlAffectedClients);
           final PreparedStatement stmtInsClientCase =
               con.prepareStatement(CaseSQLResource.INSERT_CLIENT_CASE);
           final PreparedStatement stmtSelClient =
@@ -752,7 +755,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       }
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR IN CASES MAIN THREAD! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }
@@ -769,7 +772,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       pullNextRange(Pair.of("a", "b"));
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR FETCHING LAST RUN RESULTS! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }

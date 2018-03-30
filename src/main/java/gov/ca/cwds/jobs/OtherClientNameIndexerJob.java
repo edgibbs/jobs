@@ -46,7 +46,7 @@ public class OtherClientNameIndexerJob
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OtherClientNameIndexerJob.class);
 
-//@formatter:off
+  //@formatter:off
   private static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n" 
     + "SELECT CLT.IDENTIFIER AS CLIENT_ID\n"
@@ -57,7 +57,7 @@ public class OtherClientNameIndexerJob
     + "SELECT CLT.IDENTIFIER\n"
     + "FROM CLIENT_T CLT \n"
     + "WHERE CLT.IBMSNAP_LOGMARKER > 'XYZ' ";
-//@formatter:on
+  //@formatter:on
 
   private transient ReplicatedOtherClientNameDao denormDao;
 

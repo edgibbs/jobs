@@ -60,7 +60,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
     query = "SELECT DISTINCT " 
         + EsPersonReferral.COLUMNS
         + " FROM {h-schema}VW_LST_REFERRAL_HIST r \n"
-        + "WHERE (1=1 OR current timestamp < :after) \n"
+        + "WHERE (1=1 OR CURRENT TIMESTAMP < :after) \n"
         + "ORDER BY CLIENT_ID, REFERRAL_ID, ALLEGATION_ID, VICTIM_ID \n"
         + "WITH UR ",
     resultClass = EsPersonReferral.class, readOnly = true)
@@ -69,7 +69,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
     query = "SELECT DISTINCT " 
         + EsPersonReferral.COLUMNS
         + " FROM {h-schema}VW_LST_REFERRAL_HIST r \n" 
-        + "WHERE (1=1 OR current timestamp < :after) \n"
+        + "WHERE (1=1 OR CURRENT TIMESTAMP < :after) \n"
         + "AND r.LIMITED_ACCESS_CODE = 'N' \n"
         + "ORDER BY CLIENT_ID, REFERRAL_ID, ALLEGATION_ID, VICTIM_ID \n"
         + "WITH UR ",
@@ -81,7 +81,7 @@ public class EsPersonReferral
 
   //@formatter:off
   protected static final String COLUMNS =
-      "r.CLIENT_ID,r.CLIENT_SENSITIVITY_IND,r.REFERRAL_ID,r.START_DATE,r.END_DATE,r.REFERRAL_RESPONSE_TYPE,"
+        "r.CLIENT_ID,r.CLIENT_SENSITIVITY_IND,r.REFERRAL_ID,r.START_DATE,r.END_DATE,r.REFERRAL_RESPONSE_TYPE,"
       + "r.LIMITED_ACCESS_CODE,r.LIMITED_ACCESS_DATE,r.LIMITED_ACCESS_DESCRIPTION,r.LIMITED_ACCESS_GOVERNMENT_ENT,"
       + "r.REFERRAL_LAST_UPDATED,r.REFERRAL_COUNTY,"
       + "r.REPORTER_ID,r.REPORTER_FIRST_NM,r.REPORTER_LAST_NM,r.REPORTER_LAST_UPDATED,"

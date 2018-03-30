@@ -44,9 +44,10 @@ public enum VoxCommandType {
   private final Class<? extends VoxCommandAction> klass;
   private final String key;
 
-  private static final Map<String, VoxCommandType> typeMap = new HashMap<>();
+  private static final Map<String, VoxCommandType> typeMap;
 
   static {
+    typeMap = new HashMap<>();
     for (VoxCommandType e : VoxCommandType.values()) {
       typeMap.put(e.key, e);
     }

@@ -65,11 +65,11 @@ public class AtomValidateDocumentTest
     target.processDocumentHits(hits);
   }
 
-  @Test(expected = NeutronCheckedException.class)
-  public void processDocumentHits_Args__SearchHits_T__NeutronException() throws Exception {
-    when(hits.getHits()).thenThrow(NeutronCheckedException.class);
-    target.processDocumentHits(hits);
-  }
+  // @Test(expected = NeutronCheckedException.class)
+  // public void processDocumentHits_Args__SearchHits_T__NeutronException() throws Exception {
+  // when(hits.getHits()).thenThrow(NeutronCheckedException.class);
+  // target.processDocumentHits(hits);
+  // }
 
   @Test
   public void validateDocument_Args__ElasticSearchPerson() throws Exception {

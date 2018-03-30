@@ -33,7 +33,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     resultClass = ReplicatedClientRelationship.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientRelationship.findAllUpdatedAfter",
-    query = "select z.ABSENT_CD, z.CLNTRELC, z.END_DT, z.FKCLIENT_0, z.FKCLIENT_T, z.IDENTIFIER, z.SAME_HM_CD, z.START_DT "
+    query = "SELECT z.ABSENT_CD, z.CLNTRELC, z.END_DT, z.FKCLIENT_0, z.FKCLIENT_T, z.IDENTIFIER, z.SAME_HM_CD, z.START_DT "
         + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
         + "from {h-schema}CLN_RELT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR",
     resultClass = ReplicatedClientRelationship.class)

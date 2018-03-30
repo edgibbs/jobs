@@ -26,6 +26,7 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
+import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
@@ -52,14 +53,15 @@ public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIn
    * @param dao Intake Screening DAO
    * @param viewDao view Dao
    * @param esDao ElasticSearch DAO
+   * @param lastRunFile take a guess
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
    */
   @Inject
   public IntakeScreeningJob(final IntakeParticipantDao dao, final EsIntakeScreeningDao viewDao,
-      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao, final ObjectMapper mapper,
-      FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
+      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan);
     this.viewDao = viewDao;
   }
 

@@ -65,7 +65,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 // @formatter:off
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findAllUpdatedAfter",
-    query = "select z.IDENTIFIER, z.ADPTN_STCD, TRIM(z.ALN_REG_NO) ALN_REG_NO, z.BIRTH_DT, "
+    query = "SELECT z.IDENTIFIER, z.ADPTN_STCD, TRIM(z.ALN_REG_NO) ALN_REG_NO, z.BIRTH_DT, "
         + "TRIM(z.BR_FAC_NM) BR_FAC_NM, z.B_STATE_C, z.B_CNTRY_C, z.CHLD_CLT_B, "
         + "TRIM(z.COM_FST_NM) COM_FST_NM, TRIM(z.COM_LST_NM) COM_LST_NM, "
         + "TRIM(z.COM_MID_NM) COM_MID_NM, z.CONF_EFIND, z.CONF_ACTDT, z.CREATN_DT, "
@@ -82,7 +82,8 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "z.MTERM_DT, z.FTERM_DT, z.ZIPPY_IND, TRIM(z.DEATH_PLC) DEATH_PLC, "
         + "z.TR_MBVRT_B, z.TRBA_CLT_B, z.SOC158_IND, z.DTH_DT_IND, "
         + "TRIM(z.EMAIL_ADDR) EMAIL_ADDR, z.ADJDEL_IND, z.ETH_UD_CD, "
-        + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+        + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, "
+        + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
         + "from {h-schema}CLIENT_T z \n" 
         + "WHERE z.IBMSNAP_LOGMARKER >= :after \n"
         + "FOR READ ONLY WITH UR",
@@ -247,6 +248,16 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     this.openCaseId = openCaseId;
   }
 
+  /**
+   * Override to substitute an alternative System Code implementation, such as a simple String or
+   * Short.
+   * 
+   * @return ElasticSearchSystemCode instance
+   */
+  protected ElasticSearchSystemCode makeJsonAddressType() {
+    return new ElasticSearchSystemCode();
+  };
+
   // =================================
   // ApiMultipleClientAddressAware:
   // =================================
@@ -261,11 +272,13 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
 
       /*
-       * We index only active addresses.
+       * Only index active addresses.
        */
       if (addressActive) {
         final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
-        final ElasticSearchSystemCode addressType = new ElasticSearchSystemCode();
+
+        // Choose appropriate system code type for index target index.
+        final ElasticSearchSystemCode addressType = makeJsonAddressType();
         final SystemCode addressTypeSystemCode =
             SystemCodeCache.global().getSystemCode(repClientAddress.getAddressType());
 

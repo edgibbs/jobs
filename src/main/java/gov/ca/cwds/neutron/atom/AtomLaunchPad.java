@@ -45,6 +45,8 @@ public interface AtomLaunchPad extends ApiMarker {
    */
   String history();
 
+  String summary();
+
   /**
    * Display this rocket's logs.
    * 

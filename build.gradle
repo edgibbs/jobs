@@ -23,6 +23,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 
 project.ext {
+    // coreApiVersion = "1.6.2_557-RC"
     coreApiVersion = "1.6.1_435-RC"
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.0"
@@ -31,7 +32,7 @@ project.ext {
     powerMockVersion = "1.7.3"
 }
 
-version = 0.44
+version = 0.45
 
 repositories {
     mavenLocal()

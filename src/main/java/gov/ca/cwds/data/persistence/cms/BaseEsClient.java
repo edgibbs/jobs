@@ -412,6 +412,9 @@ public abstract class BaseEsClient
   @Column(name = "ADR_UNIT_NO")
   protected String adrUnitNumber;
 
+  @Column(name = "ADR_LST_UPD_TS")
+  protected Date adrLastUpdatedTime;
+
   // ================================
   // CLIENT_CNTY: (client county)
   // ================================
@@ -561,16 +564,24 @@ public abstract class BaseEsClient
     ret.adrStreetSuffixCd = rs.getShort("ADR_ST_SFX_C");
     ret.adrUnitDesignationCd = rs.getShort("ADR_UNT_DSGC");
     ret.adrUnitNumber = ifNull(rs.getString("ADR_UNIT_NO"));
+    ret.adrLastUpdatedTime = rs.getTimestamp("ADR_LST_UPD_TS");
 
     ret.adrReplicationOperation =
         CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION"));
     ret.adrReplicationDate = rs.getDate("ADR_IBMSNAP_LOGMARKER");
   }
 
+  /**
+   * Factory method generates a subclass instance.
+   * 
+   * @return instance of ReplicatedClient or subclass
+   */
+  protected abstract ReplicatedClient makeReplicatedClient();
+
   @Override
   public ReplicatedClient normalize(Map<Object, ReplicatedClient> map) {
     final boolean isClientAdded = map.containsKey(this.cltId);
-    final ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : new ReplicatedClient();
+    final ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : makeReplicatedClient();
 
     if (!isClientAdded) {
       // Populate core client attributes.
@@ -713,6 +724,7 @@ public abstract class BaseEsClient
         adr.setReplicationOperation(getAdrReplicationOperation());
         adr.setLastUpdatedId(getClaLastUpdatedId());
         adr.setLastUpdatedTime(getClaLastUpdatedTime());
+        adr.setLastUpdatedTime(getAdrLastUpdatedTime());
         rca.addAddress(adr);
       }
     }
@@ -1270,6 +1282,14 @@ public abstract class BaseEsClient
 
   public void setAdrGovernmentEntityCd(Short adrGovernmentEntityCd) {
     this.adrGovernmentEntityCd = adrGovernmentEntityCd;
+  }
+
+  public Date getAdrLastUpdatedTime() {
+    return adrLastUpdatedTime;
+  }
+
+  public void setAdrLastUpdatedTime(Date adrLastUpdatedTime) {
+    this.adrLastUpdatedTime = adrLastUpdatedTime;
   }
 
   public Long getAdrMessageNumber() {

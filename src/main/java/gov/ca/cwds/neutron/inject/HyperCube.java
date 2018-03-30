@@ -16,6 +16,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.inject.CreationException;
@@ -74,6 +75,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherClientName;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedReporter;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedServiceProvider;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedSubstituteCareProvider;
+import gov.ca.cwds.data.persistence.cms.rep.SimpleReplicatedClient;
 import gov.ca.cwds.data.persistence.ns.EsIntakeScreening;
 import gov.ca.cwds.data.persistence.ns.IntakeScreening;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -293,7 +295,13 @@ public class HyperCube extends NeutronGuiceModule {
     bindConstant().annotatedWith(LastRunFile.class).to(this.lastJobRunTimeFilename);
 
     // Singleton:
-    bind(ObjectMapper.class).toInstance(ObjectMapperUtils.createObjectMapper());
+    final ObjectMapper om = ObjectMapperUtils.createObjectMapper();
+    om.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+    om.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+    om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    om.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+    // om.enableDefaultTyping(ObjectMapper.DefaultTyping.);
+    bind(ObjectMapper.class).toInstance(om);
 
     // Command Center:
     bind(AtomFlightRecorder.class).to(FlightRecorder.class).asEagerSingleton();
@@ -351,7 +359,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected SessionFactory makeCmsSessionFactory() {
     LOGGER.info("make CMS session factory");
-    Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
+    final Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
         .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
         .addAnnotatedClass(EsClientPerson.class).addAnnotatedClass(EsRelationship.class)
         .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
@@ -364,10 +372,11 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(ReplicatedReporter.class)
         .addAnnotatedClass(ReplicatedServiceProvider.class)
         .addAnnotatedClass(ReplicatedSubstituteCareProvider.class)
-        .addAnnotatedClass(ReplicatedClient.class).addAnnotatedClass(ReplicatedClientAddress.class)
-        .addAnnotatedClass(ReplicatedAddress.class).addAnnotatedClass(SystemCode.class)
-        .addAnnotatedClass(EsSafetyAlert.class).addAnnotatedClass(SystemMeta.class)
-        .addAnnotatedClass(StaffPerson.class).addAnnotatedClass(DatabaseResetEntry.class);
+        .addAnnotatedClass(SimpleReplicatedClient.class).addAnnotatedClass(ReplicatedClient.class)
+        .addAnnotatedClass(ReplicatedClientAddress.class).addAnnotatedClass(ReplicatedAddress.class)
+        .addAnnotatedClass(SystemCode.class).addAnnotatedClass(EsSafetyAlert.class)
+        .addAnnotatedClass(SystemMeta.class).addAnnotatedClass(StaffPerson.class)
+        .addAnnotatedClass(DatabaseResetEntry.class);
     return additionalDaos(config).buildSessionFactory();
   }
 
