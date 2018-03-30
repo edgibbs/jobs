@@ -3,7 +3,9 @@ package gov.ca.cwds.data.es;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties({"addresses"})
 public class NeutronElasticSearchPerson extends ElasticSearchPerson {
 
   private static final long serialVersionUID = 1L;
