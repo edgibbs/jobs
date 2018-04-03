@@ -32,7 +32,16 @@ import gov.ca.cwds.neutron.rocket.IndexResetPeopleRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.SchemaResetRocket;
 
+/**
+ * Standard rocket settings for Initial Load and On-going (continuous) modes.
+ * 
+ * @author CWDS API Team
+ */
 public enum StandardFlightSchedule {
+
+  // =======================
+  // RECREATE INDEXES:
+  // =======================
 
   /**
    * If requested, drop and create Elasticsearch People index.
@@ -60,11 +69,19 @@ public enum StandardFlightSchedule {
       true // run in initial load
       , false),
 
+  // =======================
+  // PEOPLE SUMMARY:
+  // =======================
+
   /**
    * People Summary index.
    */
   PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 5, 20, 1000, null, true, true,
       false),
+
+  // =======================
+  // PEOPLE INDEX ROCKETS:
+  // =======================
 
   /**
    * Essential document root: Client.
@@ -126,25 +143,41 @@ public enum StandardFlightSchedule {
    */
   REFERRAL(ReferralHistoryIndexerJob.class, "referral", 45, 30, 700, "referrals", true, true, true),
 
-  // TODO: INT-1576: add SystemCodesLoaderJob to Initial Load.
+  // =======================
+  // SCREENINGS:
+  // =======================
 
   /**
-   * Screenings.
+   * Screenings in People index, <strong>NOT</strong> the separate Screenings index.
    */
   INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 90, 20, 900, "screenings", true,
       true, true),
+
+  // =======================
+  // DB2 SCHEMA RESET:
+  // =======================
+
+  /**
+   * Reset test schema. Automatic prevents reset of production-like schemas.
+   */
+  RESET_TEST_SCHEMA(SchemaResetRocket.class, "reset_schema", 2000, 2000000, 10000, null, false,
+      false, true),
+
+  // =======================
+  // SYSTEM CODES:
+  // =======================
+
+  // TODO: INT-1576: add SystemCodesLoaderJob to Initial Load.
+
+  // =======================
+  // UTILITY:
+  // =======================
 
   /**
    * Exit the initial load process.
    */
   EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 140, 2000000, 10000, null,
       false, true, true),
-
-  /**
-   * Reset test schema. Automatic prevents reset of production-like schemas.
-   */
-  RESET_TEST_SCHEMA(SchemaResetRocket.class, "reset_schema", 2000, 2000000, 10000, null, false,
-      false, true)
 
   ;
 

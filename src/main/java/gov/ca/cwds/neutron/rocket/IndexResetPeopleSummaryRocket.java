@@ -35,12 +35,12 @@ public class IndexResetPeopleSummaryRocket extends IndexResetRocket {
 
   @Override
   protected String getIndexSettingsLocation() {
-    return NeutronElasticsearchDefaults.ES_PEOPLE_SUMMARY_INDEX_SETTINGS.getValue();
+    return NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue();
   }
 
   @Override
   protected String getDocumentMappingLocation() {
-    return NeutronElasticsearchDefaults.ES_PEOPLE_SUMMARY_PERSON_MAPPING.getValue();
+    return NeutronElasticsearchDefaults.MAPPING_PEOPLE_SUMMARY.getValue();
   }
 
 }

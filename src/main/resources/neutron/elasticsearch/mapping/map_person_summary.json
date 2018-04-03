@@ -1,0 +1,526 @@
+{
+  "_all": {
+    "enabled": true
+  },
+  "properties": {
+    "id": {
+      "type": "text",
+      "store": true
+    },
+    "index_update_time": {
+      "format": "strict_date_time",
+      "type": "date",
+      "store": true
+    },
+    "first_name": {
+      "type": "text",
+      "store": true,
+      "fields": {
+            "phonetic": {
+              "type": "text",
+              "analyzer": "dbl_metaphone"
+            },
+            "diminutive": {
+              "type": "text",
+              "analyzer": "names_synonyms"
+            }
+          }
+    },
+    "last_name": {
+      "type": "text",
+      "store": true,
+      "fields": {
+            "phonetic": {
+              "type": "text",
+              "analyzer": "dbl_metaphone"
+            },
+            "diminutive": {
+              "type": "text",
+              "analyzer": "names_synonyms"
+            }
+          }
+    },
+    "middle_name": {
+      "type": "text",
+      "store": true
+    },
+    "name_suffix": {
+      "type": "text",
+      "store": true
+    },
+    "searchable_name": {
+      "type": "text",
+      "store": true,
+      "analyzer": "autocomplete",
+      "search_analyzer": "standard"
+    },
+    "gender": {
+      "type": "text",
+      "store": true
+    },
+    "date_of_birth": {
+      "format": "strict_date_optional_time||epoch_millis",
+      "type": "date",
+      "store": true
+    },
+      "date_of_birth_as_text": {
+      "type": "text",
+      "store": true
+    },
+    "searchable_date_of_birth": {
+      "type": "text",
+      "store": true,
+      "analyzer": "autocomplete",
+      "search_analyzer": "standard"
+    },
+    "ssn": {
+      "type": "text",
+      "store": true
+    },
+    "autocomplete_search_bar": {
+      "type": "text",
+      "store": true,
+      "analyzer": "autocomplete",
+      "search_analyzer": "standard",
+      "fields": {
+            "phonetic": {
+              "type": "text",
+              "analyzer": "dbl_metaphone"
+            },
+            "diminutive": {
+              "type": "text",
+              "analyzer": "names_synonyms"
+            }
+          }
+    },
+    "sensitivity_indicator": {
+      "type": "text",
+      "store": true
+    },
+    "client_index_number": {
+      "type": "text",
+      "store": true
+    },
+    "open_case_id": {
+      "type": "text",
+      "store": true
+    },
+    "client_county": {
+      "properties": {
+        "id": {
+          "type": "text",
+          "store": true
+        },
+        "description": {
+          "type": "text",
+          "store": true
+        }
+      }
+    },
+    "client_counties": {
+      "properties": {
+        "id": {
+          "type": "text",
+          "store": true
+        },
+        "description": {
+          "type": "text",
+          "store": true
+        }
+      }
+    },
+    "legacy_descriptor": {
+      "properties": {
+        "legacy_id": {
+          "type": "text",
+          "store": true
+        },
+        "legacy_ui_id": {
+          "type": "text",
+          "store": true
+        },
+        "legacy_last_updated": {
+          "format": "strict_date_time",
+          "type": "date",
+          "store": true
+        },
+        "legacy_table_name": {
+          "type": "text",
+          "store": true
+        },
+        "legacy_table_description": {
+          "type": "text",
+          "store": true
+        }
+      }
+    },
+    "source": {
+      "type": "text",
+      "store": true
+    },
+    "type": {
+      "type": "text",
+      "store": true
+    },
+    "addresses": {
+      "properties": {
+        "id": {
+          "type": "text",
+          "store": true
+        },
+        "effective_start_date": {
+          "format": "strict_date_optional_time||epoch_millis",
+          "type": "date",
+          "store": true
+        },
+        "effective_end_date": {
+          "format": "strict_date_optional_time||epoch_millis",
+          "type": "date",
+          "store": true
+        },
+        "street_number": {
+          "type": "text",
+          "store": true
+        },
+        "street_name": {
+          "type": "text",
+          "store": true
+        },
+        "city": {
+          "type": "text",
+          "store": true
+        },
+        "unit_type": {
+          "type": "text",
+          "store": true
+        },
+        "unit_number": {
+          "type": "text",
+          "store": true
+        },
+        "county": {
+          "properties": {
+            "id": {
+              "type": "text",
+              "store": true
+            },
+            "description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        },
+        "state": {
+          "properties": {
+            "id": {
+              "type": "text",
+              "store": true
+            },
+            "description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        },
+        "zip": {
+          "type": "text",
+          "store": true
+        },
+        "zip_4": {
+          "type": "text",
+          "store": true
+        },
+        "type": {
+          "properties": {
+            "id": {
+              "type": "text",
+              "store": true
+            },
+            "description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        },
+        "active": {
+          "type": "text",
+          "store": true
+        },
+        "legacy_descriptor": {
+          "properties": {
+            "legacy_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_ui_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_last_updated": {
+              "format": "strict_date_time",
+              "type": "date",
+              "store": true
+            },
+            "legacy_table_name": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_table_description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        }
+      }
+    },
+    "phone_numbers": {
+      "properties": {
+        "id": {
+          "type": "text",
+          "store": true
+        },
+        "number": {
+          "type": "text",
+          "store": true
+        },
+        "type": {
+          "type": "text",
+          "store": true
+        },
+        "contact_type": {
+          "type": "text",
+          "store": true
+        },
+        "legacy_descriptor": {
+          "properties": {
+            "legacy_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_ui_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_last_updated": {
+              "format": "strict_date_time",
+              "type": "date",
+              "store": true
+            },
+            "legacy_table_name": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_table_description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        }
+      }
+    },
+    "akas": {
+      "properties": {
+        "id": {
+          "type": "text",
+          "store": true
+        },
+        "first_name": {
+          "type": "text",
+          "store": true
+        },
+        "last_name": {
+          "type": "text",
+          "store": true
+        },
+        "middle_name": {
+          "type": "text",
+          "store": true
+        },
+        "prefix": {
+          "type": "text",
+          "store": true
+        },
+        "suffix": {
+          "type": "text",
+          "store": true
+        },
+        "name_type": {
+          "type": "text",
+          "store": true
+        },
+        "legacy_descriptor": {
+          "properties": {
+            "legacy_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_ui_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_last_updated": {
+              "format": "strict_date_time",
+              "type": "date",
+              "store": true
+            },
+            "legacy_table_name": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_table_description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        }
+      }
+    },
+    "languages": {
+      "properties": {
+        "id": {
+          "type": "text",
+          "store": true
+        },
+        "name": {
+          "type": "text",
+          "store": true
+        },
+        "primary": {
+          "type": "boolean",
+          "store": true
+        }
+      }
+    },
+    "race_ethnicity": {
+      "properties": {
+        "unable_to_determine_code": {
+          "type": "text",
+          "store": true
+        },
+        "hispanic_origin_code": {
+          "type": "text",
+          "store": true
+        },
+        "hispanic_unable_to_determine_code": {
+          "type": "text",
+          "store": true
+        },
+        "race_codes": {
+          "properties": {
+            "id": {
+              "type": "text",
+              "store": true
+            },
+            "description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        },
+        "hispanic_codes": {
+          "properties": {
+            "id": {
+              "type": "text",
+              "store": true
+            },
+            "description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        }
+      }
+    },
+    "safety_alerts": {
+      "properties": {
+        "id": {
+          "type": "text",
+          "store": true
+        },
+        "activation": {
+          "properties": {
+            "activation_reason_description": {
+              "type": "text",
+              "store": true
+            },
+            "activation_reason_id": {
+              "type": "text",
+              "store": true
+            },
+            "activation_date": {
+              "format": "strict_date_optional_time||epoch_millis",
+              "type": "date",
+              "store": true
+            },
+            "activation_explanation": {
+              "type": "text",
+              "store": true
+            },
+            "activation_county": {
+              "properties": {
+                "id": {
+                  "type": "text",
+                  "store": true
+                },
+                "description": {
+                  "type": "text",
+                  "store": true
+                }
+              }
+            }
+          }
+        },
+        "deactivation": {
+          "properties": {
+            "deactivation_explanation": {
+              "type": "text",
+              "store": true
+            },
+            "deactivation_date": {
+              "format": "strict_date_optional_time||epoch_millis",
+              "type": "date",
+              "store": true
+            },
+            "deactivation_county": {
+              "properties": {
+                "id": {
+                  "type": "text",
+                  "store": true
+                },
+                "description": {
+                  "type": "text",
+                  "store": true
+                }
+              }
+            }
+          }
+        },
+        "legacy_descriptor": {
+          "properties": {
+            "legacy_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_ui_id": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_last_updated": {
+              "format": "strict_date_time",
+              "type": "date",
+              "store": true
+            },
+            "legacy_table_name": {
+              "type": "text",
+              "store": true
+            },
+            "legacy_table_description": {
+              "type": "text",
+              "store": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

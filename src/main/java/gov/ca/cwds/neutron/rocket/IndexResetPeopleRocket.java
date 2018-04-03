@@ -35,14 +35,14 @@ public class IndexResetPeopleRocket extends IndexResetRocket {
 
   @Override
   protected String getIndexSettingsLocation() {
-    return NeutronElasticsearchDefaults.ES_PEOPLE_INDEX_SETTINGS.getValue();
+    return NeutronElasticsearchDefaults.SETTINGS_PEOPLE.getValue();
   }
 
   @Override
   protected String getDocumentMappingLocation() {
     return getFlightPlan().isLegacyPeopleMapping()
-        ? NeutronElasticsearchDefaults.ES_LEGACY_PEOPLE_PERSON_MAPPING.getValue()
-        : NeutronElasticsearchDefaults.ES_PEOPLE_PERSON_MAPPING.getValue();
+        ? NeutronElasticsearchDefaults.MAPPING_PEOPLE_SNAPSHOT_1_0.getValue()
+        : NeutronElasticsearchDefaults.MAPPING_PEOPLE_SNAPSHOT_1_1.getValue();
   }
 
 }

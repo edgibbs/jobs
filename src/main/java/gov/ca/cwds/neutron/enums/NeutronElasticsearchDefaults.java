@@ -1,31 +1,36 @@
 package gov.ca.cwds.neutron.enums;
 
+/**
+ * Common settings and mapping files for Elasticsearch indexes.
+ * 
+ * @author CWDS API Team
+ */
 public enum NeutronElasticsearchDefaults {
 
   /**
    * People index settings.
    */
-  ES_PEOPLE_INDEX_SETTINGS("/elasticsearch/setting/people-index-settings.json"),
+  SETTINGS_PEOPLE("/neutron/elasticsearch/setting/people-index-settings.json"),
 
   /**
    * People Summary index settings.
    */
-  ES_PEOPLE_SUMMARY_INDEX_SETTINGS("/elasticsearch/setting/people-summary-index-settings.json"),
-
-  /**
-   * People index, Person document mapping.
-   */
-  ES_PEOPLE_PERSON_MAPPING("/elasticsearch/mapping/map_person_5x_snake.json"),
+  SETTINGS_PEOPLE_SUMMARY("/neutron/elasticsearch/setting/people-summary-index-settings.json"),
 
   /**
    * Legacy People index mapping, Snapshot 0.9.
    */
-  ES_LEGACY_PEOPLE_PERSON_MAPPING("/mapping_people_snapshot_0.9.json"),
+  MAPPING_PEOPLE_SNAPSHOT_1_0("/neutron/elasticsearch/mapping/map_people_snapshot_0.9.json"),
 
   /**
-   * People Summary index, Person Summary document mapping.
+   * People index, Person document mapping.
    */
-  ES_PEOPLE_SUMMARY_PERSON_MAPPING("/elasticsearch/mapping/map_person_summary.json")
+  MAPPING_PEOPLE_SNAPSHOT_1_1("/neutron/elasticsearch/mapping/map_people_snapshot_1.1.json"),
+
+  /**
+   * People Summary index, person-summary document mapping.
+   */
+  MAPPING_PEOPLE_SUMMARY("/neutron/elasticsearch/mapping/map_person_summary.json")
 
   ;
 
