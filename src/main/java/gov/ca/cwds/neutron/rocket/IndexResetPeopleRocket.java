@@ -40,7 +40,9 @@ public class IndexResetPeopleRocket extends IndexResetRocket {
 
   @Override
   protected String getDocumentMappingLocation() {
-    return NeutronElasticsearchDefaults.ES_PEOPLE_PERSON_MAPPING.getValue();
+    return getFlightPlan().isLegacyPeopleMapping()
+        ? NeutronElasticsearchDefaults.ES_LEGACY_PEOPLE_PERSON_MAPPING.getValue()
+        : NeutronElasticsearchDefaults.ES_PEOPLE_PERSON_MAPPING.getValue();
   }
 
 }

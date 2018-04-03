@@ -28,7 +28,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * Entity bean for view VW_LST_SAFETY_ALERT.
  * 
  * <p>
- * The separate safety alerts rocket is <strong>obsolete</strong>.
+ * The separate safety alerts rocket is <strong>OBSOLETE</strong>.
  * </p>
  * 
  * @author CWDS API Team

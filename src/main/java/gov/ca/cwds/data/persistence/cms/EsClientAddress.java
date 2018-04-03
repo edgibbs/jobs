@@ -68,6 +68,8 @@ public class EsClientAddress extends BaseEsClient
 
   private static final long serialVersionUID = 1L;
 
+  private static boolean legacyPeopleMapping = false;
+
   /**
    * Build an EsClientAddress from the incoming ResultSet.
    * 
@@ -81,9 +83,13 @@ public class EsClientAddress extends BaseEsClient
     return ret;
   }
 
+  /**
+   * Handle legacy People mapping as needed. Older environments may have the legacy People index
+   * mapping.
+   */
   @Override
   protected ReplicatedClient makeReplicatedClient() {
-    return new SimpleReplicatedClient();
+    return isLegacyPeopleMapping() ? new SimpleReplicatedClient() : new ReplicatedClient();
   }
 
   @Override
@@ -157,6 +163,14 @@ public class EsClientAddress extends BaseEsClient
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  public static boolean isLegacyPeopleMapping() {
+    return legacyPeopleMapping;
+  }
+
+  public static void setLegacyPeopleMapping(boolean legacyPeoppleMapping) {
+    EsClientAddress.legacyPeopleMapping = legacyPeoppleMapping;
   }
 
 }

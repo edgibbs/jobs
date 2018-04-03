@@ -45,7 +45,7 @@ public enum StandardFlightSchedule {
       null, // last run priority. N/A.
       false, // run in last change mode
       true // run in initial load
-  ),
+      , true),
 
   /**
    * If requested, drop and create Elasticsearch People Summary index.
@@ -58,52 +58,53 @@ public enum StandardFlightSchedule {
       null, // last run priority. N/A.
       false, // run in last change mode
       true // run in initial load
-  ),
+      , false),
 
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 5, 20, 1000, null, true, true),
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 5, 20, 1000, null, true, true,
+      false),
 
   /**
    * Essential document root: Client.
    */
-  CLIENT(ClientIndexerJob.class, "client", 8, 20, 1000, null, true, true),
+  CLIENT(ClientIndexerJob.class, "client", 8, 20, 1000, null, true, true, true),
 
   /**
    * Document root: Reporter.
    */
-  REPORTER(ReporterIndexerJob.class, "reporter", 14, 30, 950, null, true, true),
+  REPORTER(ReporterIndexerJob.class, "reporter", 14, 30, 950, null, true, true, true),
 
   /**
    * Document root: Collateral Individual.
    */
   COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 20, 30, 90,
-      null, true, true),
+      null, true, true, true),
 
   /**
    * Document root: Service Provider.
    */
   SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 25, 120, 85, null, true,
-      true),
+      true, true),
 
   /**
    * Document root: Substitute Care Provider.
    */
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, "substitute_care_provider", 30, 25,
-      80, null, true, true),
+      80, null, true, true, true),
 
   /**
    * Document root: Education Provider.
    */
   EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, "education_provider", 42, 120, 75,
-      null, true, true),
+      null, true, true, true),
 
   OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 50, 120, 70, null,
-      true, true),
+      true, true, true),
 
   OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 55, 120, 65, null,
-      true, true),
+      true, true, true),
 
   //
   // Nested JSON elements, inside a people/person document.
@@ -112,38 +113,38 @@ public enum StandardFlightSchedule {
   /**
    * Combines child and parent case.
    */
-  CASES(CaseRocket.class, "case", 70, 30, 550, "cases", true, true),
+  CASES(CaseRocket.class, "case", 70, 30, 550, "cases", true, true, true),
 
   /**
    * Relationships.
    */
   RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 90, 30, 600, "relationships", true,
-      true),
+      true, true),
 
   /**
    * Referrals.
    */
-  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 45, 30, 700, "referrals", true, true),
+  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 45, 30, 700, "referrals", true, true, true),
 
-  // TODO: add SystemCodesLoaderJob to Initial Load.
+  // TODO: INT-1576: add SystemCodesLoaderJob to Initial Load.
 
   /**
    * Screenings.
    */
   INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 90, 20, 900, "screenings", true,
-      true),
+      true, true),
 
   /**
    * Exit the initial load process.
    */
   EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 140, 2000000, 10000, null,
-      false, true),
+      false, true, true),
 
   /**
    * Reset test schema. Automatic prevents reset of production-like schemas.
    */
   RESET_TEST_SCHEMA(SchemaResetRocket.class, "reset_schema", 2000, 2000000, 10000, null, false,
-      false)
+      false, true)
 
   ;
 
@@ -154,6 +155,8 @@ public enum StandardFlightSchedule {
   private final boolean runLastChange;
 
   private final boolean runInitialLoad;
+
+  private final boolean forPeopleIndex;
 
   private final String rocketName;
 
@@ -180,7 +183,7 @@ public enum StandardFlightSchedule {
 
   private StandardFlightSchedule(Class<?> klazz, String rocketName, int startDelaySeconds,
       int periodSeconds, int lastRunPriority, String nestedElement, boolean runLastChange,
-      boolean runInitialLoad) {
+      boolean runInitialLoad, boolean forPeopleIndex) {
     this.klazz = klazz;
     this.rocketName = rocketName;
     this.startDelaySeconds = startDelaySeconds;
@@ -189,20 +192,22 @@ public enum StandardFlightSchedule {
     this.nestedElement = nestedElement;
     this.runLastChange = runLastChange;
     this.runInitialLoad = runInitialLoad;
+    this.forPeopleIndex = forPeopleIndex;
   }
 
   /**
    * A JobChainingJobListener executes Quartz jobs in sequence by blocking scheduled triggers.
    * Appropriate for initial load, not last change.
    * 
+   * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
    * @return Quartz JobChainingJobListener
    */
-  public static JobChainingJobListener buildInitialLoadJobChainListener() {
+  public static JobChainingJobListener buildInitialLoadJobChainListener(boolean loadPeopleIndex) {
     final JobChainingJobListener ret =
         new JobChainingJobListener(NeutronSchedulerConstants.GRP_FULL_LOAD);
 
     final StandardFlightSchedule[] rawArr =
-        getInitialLoadRockets().toArray(new StandardFlightSchedule[0]);
+        getInitialLoadRockets(true).toArray(new StandardFlightSchedule[0]);
 
     final StandardFlightSchedule[] arr = Arrays.copyOf(rawArr, rawArr.length);
     Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
@@ -226,22 +231,28 @@ public enum StandardFlightSchedule {
   /**
    * Gets the default list of rockets for initial load.
    * 
+   * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
    * @return rockets for initial load
    */
-  public static List<StandardFlightSchedule> getInitialLoadRockets() {
+  public static List<StandardFlightSchedule> getInitialLoadRockets(boolean loadPeopleIndex) {
     return Arrays.asList(values()).stream().sequential()
         .sorted(Comparator.comparingInt(StandardFlightSchedule::getInitialLoadOrder))
-        .filter(StandardFlightSchedule::isRunInitialLoad).collect(Collectors.toList());
+        .filter(StandardFlightSchedule::isRunInitialLoad)
+        .filter(s -> !s.isForPeopleIndex() || (loadPeopleIndex && s.isForPeopleIndex()))
+        .collect(Collectors.toList());
   }
 
   /**
    * Gets the default list of rockets for last run.
    * 
+   * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
    * @return rockets for last run
    */
-  public static List<StandardFlightSchedule> getLastChangeRockets() {
+  public static List<StandardFlightSchedule> getLastChangeRockets(boolean loadPeopleIndex) {
     return Arrays.asList(values()).stream().sequential()
-        .filter(StandardFlightSchedule::isRunLastChange).collect(Collectors.toList());
+        .filter(StandardFlightSchedule::isRunLastChange)
+        .filter(s -> !s.isForPeopleIndex() || (loadPeopleIndex && s.isForPeopleIndex()))
+        .collect(Collectors.toList());
   }
 
   public Class<?> getRocketClass() {
@@ -294,6 +305,10 @@ public enum StandardFlightSchedule {
 
   public boolean isRunInitialLoad() {
     return runInitialLoad;
+  }
+
+  public boolean isForPeopleIndex() {
+    return forPeopleIndex;
   }
 
 }

@@ -12,7 +12,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +51,10 @@ public class FlightPlan implements ApiMarker {
   private String indexName;
 
   private boolean simulateLaunch;
+
+  private boolean legacyPeopleMapping;
+
+  private boolean loadPeopleIndex;
 
   /**
    * Last time rocket was executed in format 'yyyy-MM-dd HH.mm.ss' If this is provided then time
@@ -142,12 +145,14 @@ public class FlightPlan implements ApiMarker {
    * @param refreshMqt refresh materialized query tables (full load only)
    * @param dropIndex drop the index before start (full load only)
    * @param simulateLaunch simulate launch (test mode!)
+   * @param legacyPeopleMapping use Snapshot 0.9 mapping for People index
+   * @param loadPeopleIndex launch rockets for People index
    */
   public FlightPlan(String esConfigPeopleLoc, String esConfigPeopleSummaryLoc, String indexName,
       Date lastStartTime, Date lastEndTime, String lastRunLoc, boolean lastRunMode,
       long startBucket, long endBucket, long threadCount, boolean loadSealedAndSensitive,
       boolean rangeGiven, String baseDirectory, boolean refreshMqt, boolean dropIndex,
-      boolean simulateLaunch) {
+      boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
@@ -164,6 +169,8 @@ public class FlightPlan implements ApiMarker {
     this.refreshMqt = refreshMqt;
     this.dropIndex = dropIndex;
     this.simulateLaunch = simulateLaunch;
+    this.legacyPeopleMapping = legacyPeopleMapping;
+    this.loadPeopleIndex = loadPeopleIndex;
   }
 
   /**
@@ -188,6 +195,8 @@ public class FlightPlan implements ApiMarker {
     this.refreshMqt = flightPlan.refreshMqt;
     this.dropIndex = flightPlan.dropIndex;
     this.simulateLaunch = flightPlan.simulateLaunch;
+    this.legacyPeopleMapping = flightPlan.legacyPeopleMapping;
+    this.loadPeopleIndex = flightPlan.loadPeopleIndex;
   }
 
   /**
@@ -296,61 +305,6 @@ public class FlightPlan implements ApiMarker {
   }
 
   /**
-   * Define a command line option.
-   * 
-   * @param shortOpt single letter option name
-   * @param longOpt long option name
-   * @param description option description
-   * @param required true if required
-   * @param argc number of arguments to this option
-   * @param type arguments Java class
-   * @param sep argument separator
-   * @return command line option
-   */
-  public static Option makeOpt(String shortOpt, String longOpt, String description,
-      boolean required, int argc, Class<?> type, char sep) {
-    return Option.builder(shortOpt).argName(longOpt).required(required).longOpt(longOpt)
-        .desc(description).numberOfArgs(argc).type(type).valueSeparator(sep).build();
-  }
-
-  /**
-   * Define command line options.
-   * 
-   * @return command line option definitions
-   */
-  protected static Options buildCmdLineOptions() {
-    final Options ret = new Options();
-
-    ret.addOption(NeutronCmdLineOption.SIMULATE_LAUNCH.getOpt());
-    ret.addOption(NeutronCmdLineOption.ES_CONFIG_PEOPLE.getOpt());
-    ret.addOption(NeutronCmdLineOption.ES_CONFIG_PEOPLE_SUMMARY.getOpt());
-    ret.addOption(NeutronCmdLineOption.INDEX_NAME.getOpt());
-    ret.addOption(NeutronCmdLineOption.THREADS.getOpt());
-    ret.addOption(NeutronCmdLineOption.LOAD_SEALED_SENSITIVE.getOpt());
-
-    ret.addOption(NeutronCmdLineOption.LAST_START_TIME.getOpt());
-    ret.addOption(NeutronCmdLineOption.LAST_END_TIME.getOpt());
-
-    ret.addOption(NeutronCmdLineOption.FULL_LOAD.getOpt());
-    ret.addOption(NeutronCmdLineOption.REFRESH_MQT.getOpt());
-    ret.addOption(NeutronCmdLineOption.DROP_INDEX.getOpt());
-
-    ret.addOption(NeutronCmdLineOption.BUCKET_RANGE.getOpt());
-    ret.addOption(NeutronCmdLineOption.MIN_ID.getOpt());
-    ret.addOption(NeutronCmdLineOption.MAX_ID.getOpt());
-
-    // RUN MODE: mutually exclusive choice.
-    // Either provide many last run files in base directory or provide a single last run file.
-    final OptionGroup group = new OptionGroup();
-    group.setRequired(true);
-    group.addOption(NeutronCmdLineOption.LAST_RUN_FILE.getOpt());
-    group.addOption(NeutronCmdLineOption.BASE_DIRECTORY.getOpt());
-    ret.addOptionGroup(group);
-
-    return ret;
-  }
-
-  /**
    * Pretty print usage.
    * 
    * @throws NeutronCheckedException on IO exception
@@ -359,28 +313,12 @@ public class FlightPlan implements ApiMarker {
     try (final StringWriter sw = new StringWriter()) {
       final String pad = StringUtils.leftPad("", 90, '=');
       new HelpFormatter().printHelp(new PrintWriter(sw), 100, "Batch loader",
-          pad + "\nUSAGE: java <rocket class> ...\n" + pad, buildCmdLineOptions(), 4, 8, pad, true);
+          pad + "\nUSAGE: java <rocket class> ...\n" + pad,
+          NeutronCmdLineParser.buildCmdLineOptions(), 4, 8, pad, true);
       LOGGER.error(sw.toString()); // NOSONAR
     } catch (IOException e) {
       throw CheeseRay.checked(LOGGER, e, "INCORRECT USAGE! {}", e.getMessage());
     }
-  }
-
-  private static Pair<Long, Long> parseBuckets(final String[] vals) {
-    Long startBucket = Long.MIN_VALUE;
-    Long endBucket = startBucket;
-
-    // Appease SonarQube.
-    int cntr = 0;
-    for (String val : vals) {
-      if (cntr++ == 0) {
-        startBucket = Long.valueOf(val);
-      } else {
-        endBucket = Long.valueOf(val);
-      }
-    }
-
-    return Pair.of(startBucket, endBucket);
   }
 
   /**
@@ -407,13 +345,15 @@ public class FlightPlan implements ApiMarker {
     boolean refreshMqt = false;
     boolean dropIndex = false;
     boolean simulateLaunch = false;
+    boolean legacyPeopleMapping = false;
+    boolean loadPeopleIndex = true;
 
     // CHECKSTYLE:OFF
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
     // CHECKSTYLE:ON
 
     try {
-      final Options options = buildCmdLineOptions();
+      final Options options = NeutronCmdLineParser.buildCmdLineOptions();
       final CommandLineParser parser = new DefaultParser();
       final CommandLine cmd = parser.parse(options, args);
 
@@ -458,7 +398,7 @@ public class FlightPlan implements ApiMarker {
           case NeutronLongCmdLineName.CMD_LINE_BUCKET_RANGE:
             lastRunMode = false;
             rangeGiven = true;
-            bucketRange = parseBuckets(opt.getValues());
+            bucketRange = NeutronCmdLineParser.parseBuckets(opt.getValues());
             break;
 
           case NeutronLongCmdLineName.CMD_LINE_THREADS:
@@ -483,6 +423,14 @@ public class FlightPlan implements ApiMarker {
             simulateLaunch = true;
             break;
 
+          case NeutronLongCmdLineName.CMD_LINE_LEGACY_PEOPLE_MAPPING:
+            legacyPeopleMapping = true;
+            break;
+
+          case NeutronLongCmdLineName.CMD_LINE_NO_PEOPLE_INDEX:
+            loadPeopleIndex = false;
+            break;
+
           default:
             throw new IllegalArgumentException(opt.getArgName());
         }
@@ -495,7 +443,7 @@ public class FlightPlan implements ApiMarker {
     return new FlightPlan(esConfigPeopleLoc, esConfigPeopleSummaryLoc, indexName, lastStartTime,
         lastEndTime, lastRunLoc, lastRunMode, bucketRange.getLeft(), bucketRange.getRight(),
         threadCount, loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex,
-        simulateLaunch);
+        simulateLaunch, legacyPeopleMapping, loadPeopleIndex);
   }
 
   public void setStartBucket(long startBucket) {
@@ -514,7 +462,7 @@ public class FlightPlan implements ApiMarker {
     this.indexName = indexName;
   }
 
-  private static Date createDate(String timestamp) throws java.text.ParseException {
+  public static Date createDate(String timestamp) throws java.text.ParseException {
     Date ret = null;
     final String trimTimestamp = StringUtils.trim(timestamp);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
@@ -593,6 +541,22 @@ public class FlightPlan implements ApiMarker {
 
   public void setOverrideLastEndTime(Date overrideLastEndTime) {
     this.overrideLastEndTime = NeutronDateUtils.freshDate(overrideLastEndTime);
+  }
+
+  public boolean isLegacyPeopleMapping() {
+    return legacyPeopleMapping;
+  }
+
+  public void setLegacyPeopleMapping(boolean legacyPeopleMapping) {
+    this.legacyPeopleMapping = legacyPeopleMapping;
+  }
+
+  public boolean isLoadPeopleIndex() {
+    return loadPeopleIndex;
+  }
+
+  public void setLoadPeopleIndex(boolean loadPeopleIndex) {
+    this.loadPeopleIndex = loadPeopleIndex;
   }
 
 }

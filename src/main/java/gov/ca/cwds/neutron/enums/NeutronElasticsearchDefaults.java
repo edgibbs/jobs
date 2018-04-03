@@ -15,12 +15,19 @@ public enum NeutronElasticsearchDefaults {
   /**
    * People index, Person document mapping.
    */
-  ES_PEOPLE_PERSON_MAPPING("/mapping_people_snapshot_1.0.1.json"),
+  ES_PEOPLE_PERSON_MAPPING("/elasticsearch/mapping/map_person_5x_snake.json"),
+
+  /**
+   * Legacy People index mapping, Snapshot 0.9.
+   */
+  ES_LEGACY_PEOPLE_PERSON_MAPPING("/mapping_people_snapshot_0.9.json"),
 
   /**
    * People Summary index, Person Summary document mapping.
    */
-  ES_PEOPLE_SUMMARY_PERSON_MAPPING("/elasticsearch/mapping/map_person_summary.json");
+  ES_PEOPLE_SUMMARY_PERSON_MAPPING("/elasticsearch/mapping/map_person_summary.json")
+
+  ;
 
   private final String value;
 

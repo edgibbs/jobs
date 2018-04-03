@@ -52,7 +52,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   protected static final List<String> DB_PROPERTY_LIST =
       Collections.unmodifiableList(asList("DB_NS_USER", "DB_NS_PASSWORD", "DB_NS_JDBC_URL",
-          "DB_CMS_USER", "DB_CMS_PASSWORD", "DB_CMS_JDBC_URL", "DB_CMS_SCHEMA"));
+          "DB_CMS_USER", "DB_CMS_PASSWORD", "DB_CMS_JDBC_URL", "DB_CMS_SCHEMA", "LAUNCH_DIR"));
 
   /**
    * Singleton instance. One launch director to rule them all!
@@ -225,11 +225,13 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
           : new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
       configureInitialMode(now);
+      final boolean loadPeopleIndex = commonFlightPlan.isLoadPeopleIndex();
 
+      // Turn off People rockets, if desired.
       // Prepare launch pads.
       for (StandardFlightSchedule sched : isInitialMode()
-          ? StandardFlightSchedule.getInitialLoadRockets()
-          : StandardFlightSchedule.getLastChangeRockets()) {
+          ? StandardFlightSchedule.getInitialLoadRockets(loadPeopleIndex)
+          : StandardFlightSchedule.getLastChangeRockets(loadPeopleIndex)) {
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
         handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
         launchDirector.scheduleLaunch(sched, flightPlan);

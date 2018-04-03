@@ -66,6 +66,15 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
       @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
+    if (flightPlan.isLegacyPeopleMapping()) {
+      EsClientAddress.setLegacyPeopleMapping(true);
+    }
+  }
+
+  @Override
+  public void init(String lastGoodRunTimeFilename, FlightPlan flightPlan) {
+    super.init(lastGoodRunTimeFilename, flightPlan);
+    EsClientAddress.setLegacyPeopleMapping(flightPlan.isLegacyPeopleMapping());
   }
 
   // =======================
@@ -89,6 +98,10 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
           e.getMessage());
     }
   }
+
+  // =======================
+  // ROCKET SPECS:
+  // =======================
 
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {

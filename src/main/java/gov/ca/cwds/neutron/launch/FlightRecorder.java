@@ -22,7 +22,7 @@ public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializab
 
   private static final long serialVersionUID = 1L;
 
-  private static final int KEEP_LAST_FLIGHTS = 200;
+  private static final int KEEP_LAST_FLIGHTS = 100;
 
   private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightLogHistory =
       new ConcurrentHashMap<>();

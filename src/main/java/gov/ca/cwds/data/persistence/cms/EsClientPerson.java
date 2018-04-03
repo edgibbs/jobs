@@ -48,11 +48,11 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @Table(name = "VW_LST_CLIENT_ADDRESS")
 //@formatter:off
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfter",
-query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-    + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
-    + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
-    + "ORDER BY CLT_IDENTIFIER \n"
-    + "FOR READ ONLY WITH UR ",
+  query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
+        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
+        + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
+        + "ORDER BY CLT_IDENTIFIER \n"
+        + "FOR READ ONLY WITH UR ",
     resultClass = EsClientPerson.class, readOnly = true)
 
 @NamedNativeQuery(

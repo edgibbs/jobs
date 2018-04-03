@@ -29,6 +29,8 @@ public class LaunchCommandSettings {
    */
   private boolean initialMode;
 
+  private boolean loadPeopleIndex;
+
   public LaunchCommandSettings() {
     // default
   }
@@ -87,6 +89,14 @@ public class LaunchCommandSettings {
 
   public void setBaseDirectory(String baseDirectory) {
     this.baseDirectory = baseDirectory;
+  }
+
+  public boolean isLoadPeopleIndex() {
+    return loadPeopleIndex;
+  }
+
+  public void setLoadPeopleIndex(boolean loadPeopleIndex) {
+    this.loadPeopleIndex = loadPeopleIndex;
   }
 
 }

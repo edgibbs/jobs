@@ -9,8 +9,8 @@ import org.apache.commons.cli.Option;
 import org.junit.Test;
 
 import gov.ca.cwds.neutron.flight.NeutronCmdLineOption;
+import gov.ca.cwds.neutron.flight.NeutronCmdLineParser;
 import gov.ca.cwds.neutron.flight.NeutronLongCmdLineName;
-import gov.ca.cwds.neutron.flight.FlightPlan;
 
 public class CmdLineOptionTest {
 
@@ -29,7 +29,7 @@ public class CmdLineOptionTest {
   @Test
   public void getOpt_Args__() throws Exception {
     Option actual = NeutronCmdLineOption.BUCKET_RANGE.getOpt();
-    Option expected = FlightPlan.makeOpt("r", NeutronLongCmdLineName.CMD_LINE_BUCKET_RANGE,
+    Option expected = NeutronCmdLineParser.makeOpt("r", NeutronLongCmdLineName.CMD_LINE_BUCKET_RANGE,
         "bucket range (-r 20-24)", false, 2, Integer.class, '-');
     assertThat(actual, is(equalTo(expected)));
   }

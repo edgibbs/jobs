@@ -26,17 +26,24 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  * 
  * @author CWDS API Team
  */
+//@formatter:off
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientRelationship.findBucketRange",
-    query = "SELECT x.* FROM {h-schema}CLN_RELT x "
-        + "WHERE x.IDENTIFIER BETWEEN :min_id AND :max_id FOR READ ONLY WITH UR",
+    query = "SELECT z.ABSENT_CD, z.CLNTRELC, z.END_DT, z.FKCLIENT_0, z.FKCLIENT_T, z.IDENTIFIER, z.SAME_HM_CD, z.START_DT "
+        + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+        + "FROM {h-schema}CLN_RELT z "
+        + "WHERE z.IDENTIFIER BETWEEN :min_id AND :max_id "
+        + "FOR READ ONLY WITH UR",
     resultClass = ReplicatedClientRelationship.class, readOnly = true)
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientRelationship.findAllUpdatedAfter",
     query = "SELECT z.ABSENT_CD, z.CLNTRELC, z.END_DT, z.FKCLIENT_0, z.FKCLIENT_T, z.IDENTIFIER, z.SAME_HM_CD, z.START_DT "
         + ", z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-        + "from {h-schema}CLN_RELT z WHERE z.IBMSNAP_LOGMARKER >= :after FOR READ ONLY WITH UR",
+        + "from {h-schema}CLN_RELT z "
+        + "WHERE z.IBMSNAP_LOGMARKER >= :after "
+        + "FOR READ ONLY WITH UR",
     resultClass = ReplicatedClientRelationship.class)
+//@formatter:on
 @Entity
 @Table(name = "CLN_RELT")
 @JsonPropertyOrder(alphabetic = true)
@@ -44,9 +51,6 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 public class ReplicatedClientRelationship extends BaseClientRelationship
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedClientRelationship> {
 
-  /**
-   * Generated version.
-   */
   private static final long serialVersionUID = 1L;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();

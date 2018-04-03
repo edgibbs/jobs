@@ -67,7 +67,7 @@ public class ExitInitialLoadRocket
       final AtomFlightRecorder flightRecorder = launchDirector.getFlightRecorder();
 
       try {
-        for (StandardFlightSchedule sched : StandardFlightSchedule.getInitialLoadRockets()) {
+        for (StandardFlightSchedule sched : StandardFlightSchedule.getInitialLoadRockets(true)) {
           final FlightSummary summary = flightRecorder.getFlightSummary(sched);
           LOGGER.info("ROCKET SUMMARY:\n{}", summary);
           logError(sched, summary);

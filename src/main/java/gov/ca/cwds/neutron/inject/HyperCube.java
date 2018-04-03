@@ -159,19 +159,19 @@ public class HyperCube extends NeutronGuiceModule {
   /**
    * Preferred constructor. Construct from command line options and required arguments.
    * 
-   * @param opts command line options
+   * @param flightPlan command line options
    * @param esConfigFilePeople location of Elasticsearch configuration file for the people file
    * @param lastJobRunTimeFilename location of last run file
    */
-  public HyperCube(final FlightPlan opts, final File esConfigFilePeople,
+  public HyperCube(final FlightPlan flightPlan, final File esConfigFilePeople,
       String lastJobRunTimeFilename) {
     this.esConfigPeople = esConfigFilePeople;
     this.lastJobRunTimeFilename =
         !StringUtils.isBlank(lastJobRunTimeFilename) ? lastJobRunTimeFilename : "";
-    this.flightPlan = opts;
+    this.flightPlan = flightPlan;
 
-    if (StringUtils.isNotBlank(opts.getEsConfigPeopleSummaryLoc())) {
-      this.esConfigPeopleSummary = new File(opts.getEsConfigPeopleSummaryLoc());
+    if (StringUtils.isNotBlank(flightPlan.getEsConfigPeopleSummaryLoc())) {
+      this.esConfigPeopleSummary = new File(flightPlan.getEsConfigPeopleSummaryLoc());
     }
   }
 
@@ -281,6 +281,8 @@ public class HyperCube extends NeutronGuiceModule {
    */
   @Override
   protected void configure() {
+    bind(FlightPlan.class).toInstance(this.flightPlan);
+
     // DB2 session factory:
     bind(SessionFactory.class).annotatedWith(CmsSessionFactory.class)
         .toInstance(makeCmsSessionFactory());
@@ -571,7 +573,7 @@ public class HyperCube extends NeutronGuiceModule {
     final ListenerManager mgr = ret.getScheduler().getListenerManager();
     mgr.addSchedulerListener(new NeutronSchedulerListener());
     mgr.addTriggerListener(new NeutronTriggerListener(ret));
-    mgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener()
+    mgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener(true)
         : new NeutronJobListener());
     return ret;
   }
