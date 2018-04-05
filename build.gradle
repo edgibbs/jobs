@@ -32,7 +32,7 @@ project.ext {
     powerMockVersion = "1.7.3"
 }
 
-version = 0.45
+version = 0.46
 
 repositories {
     mavenLocal()
