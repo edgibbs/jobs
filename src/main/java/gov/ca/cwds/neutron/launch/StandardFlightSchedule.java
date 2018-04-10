@@ -277,7 +277,7 @@ public enum StandardFlightSchedule {
         .sorted(Comparator.comparingInt(StandardFlightSchedule::getInitialLoadOrder))
         .filter(StandardFlightSchedule::isRunInitialLoad)
         .filter(s -> !s.isForPeopleIndex() || (loadPeopleIndex && s.isForPeopleIndex()))
-        .collect(Collectors.toList());
+        .filter(s -> !excludeRockets.contains(s)).collect(Collectors.toList());
   }
 
   /**
@@ -292,8 +292,7 @@ public enum StandardFlightSchedule {
     return Arrays.asList(values()).stream().sequential()
         .filter(StandardFlightSchedule::isRunLastChange)
         .filter(s -> !s.isForPeopleIndex() || (loadPeopleIndex && s.isForPeopleIndex()))
-        // .filter(excludeRockets.)
-        .collect(Collectors.toList());
+        .filter(s -> !excludeRockets.contains(s)).collect(Collectors.toList());
   }
 
   public Class<?> getRocketClass() {
