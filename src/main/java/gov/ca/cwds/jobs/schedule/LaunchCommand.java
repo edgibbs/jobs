@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
@@ -226,12 +227,17 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
       configureInitialMode(now);
       final boolean loadPeopleIndex = commonFlightPlan.isLoadPeopleIndex();
+      final Set<StandardFlightSchedule> excludeRockets = commonFlightPlan.getExcludedRockets();
+
+      if (!excludeRockets.isEmpty()) {
+        LOGGER.warn("\n\n *********** EXCLUDE ROCKETS!! {} ***********\n\n", excludeRockets);
+      }
 
       // Turn off People rockets, if desired.
       // Prepare launch pads.
       for (StandardFlightSchedule sched : isInitialMode()
-          ? StandardFlightSchedule.getInitialLoadRockets(loadPeopleIndex)
-          : StandardFlightSchedule.getLastChangeRockets(loadPeopleIndex)) {
+          ? StandardFlightSchedule.getInitialLoadRockets(loadPeopleIndex, excludeRockets)
+          : StandardFlightSchedule.getLastChangeRockets(loadPeopleIndex, excludeRockets)) {
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
         handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
         launchDirector.scheduleLaunch(sched, flightPlan);

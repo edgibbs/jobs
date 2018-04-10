@@ -302,7 +302,6 @@ public class HyperCube extends NeutronGuiceModule {
     om.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
     om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     om.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-    // om.enableDefaultTyping(ObjectMapper.DefaultTyping.);
     bind(ObjectMapper.class).toInstance(om);
 
     // Command Center:
@@ -573,8 +572,11 @@ public class HyperCube extends NeutronGuiceModule {
     final ListenerManager mgr = ret.getScheduler().getListenerManager();
     mgr.addSchedulerListener(new NeutronSchedulerListener());
     mgr.addTriggerListener(new NeutronTriggerListener(ret));
-    mgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener(true)
-        : new NeutronJobListener());
+    mgr.addJobListener(
+        initialMode
+            ? StandardFlightSchedule.buildInitialLoadJobChainListener(true,
+                LaunchCommand.getStandardFlightPlan().getExcludedRockets())
+            : new NeutronJobListener());
     return ret;
   }
 

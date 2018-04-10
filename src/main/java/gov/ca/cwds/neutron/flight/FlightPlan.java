@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -22,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 /**
@@ -118,6 +123,8 @@ public class FlightPlan implements ApiMarker {
 
   private boolean dropIndex;
 
+  private Set<StandardFlightSchedule> excludedRockets = new HashSet<>();
+
   /**
    * Default constructor.
    */
@@ -147,12 +154,14 @@ public class FlightPlan implements ApiMarker {
    * @param simulateLaunch simulate launch (test mode!)
    * @param legacyPeopleMapping use Snapshot 0.9 mapping for People index
    * @param loadPeopleIndex launch rockets for People index
+   * @param excludedRockets optionally turn off rockets
    */
   public FlightPlan(String esConfigPeopleLoc, String esConfigPeopleSummaryLoc, String indexName,
       Date lastStartTime, Date lastEndTime, String lastRunLoc, boolean lastRunMode,
       long startBucket, long endBucket, long threadCount, boolean loadSealedAndSensitive,
       boolean rangeGiven, String baseDirectory, boolean refreshMqt, boolean dropIndex,
-      boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex) {
+      boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex,
+      Set<StandardFlightSchedule> excludedRockets) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
@@ -171,6 +180,7 @@ public class FlightPlan implements ApiMarker {
     this.simulateLaunch = simulateLaunch;
     this.legacyPeopleMapping = legacyPeopleMapping;
     this.loadPeopleIndex = loadPeopleIndex;
+    this.excludedRockets = excludedRockets;
   }
 
   /**
@@ -197,6 +207,7 @@ public class FlightPlan implements ApiMarker {
     this.simulateLaunch = flightPlan.simulateLaunch;
     this.legacyPeopleMapping = flightPlan.legacyPeopleMapping;
     this.loadPeopleIndex = flightPlan.loadPeopleIndex;
+    this.excludedRockets = flightPlan.excludedRockets;
   }
 
   /**
@@ -352,6 +363,8 @@ public class FlightPlan implements ApiMarker {
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
     // CHECKSTYLE:ON
 
+    Set<StandardFlightSchedule> excludedRockets = new HashSet<>();
+
     try {
       final Options options = NeutronCmdLineParser.buildCmdLineOptions();
       final CommandLineParser parser = new DefaultParser();
@@ -431,6 +444,11 @@ public class FlightPlan implements ApiMarker {
             loadPeopleIndex = false;
             break;
 
+          case NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS:
+            excludedRockets = Arrays.asList(opt.getValue().trim().split(",")).stream()
+                .map(StandardFlightSchedule::lookupByRocketName).collect(Collectors.toSet());
+            break;
+
           default:
             throw new IllegalArgumentException(opt.getArgName());
         }
@@ -443,7 +461,7 @@ public class FlightPlan implements ApiMarker {
     return new FlightPlan(esConfigPeopleLoc, esConfigPeopleSummaryLoc, indexName, lastStartTime,
         lastEndTime, lastRunLoc, lastRunMode, bucketRange.getLeft(), bucketRange.getRight(),
         threadCount, loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex,
-        simulateLaunch, legacyPeopleMapping, loadPeopleIndex);
+        simulateLaunch, legacyPeopleMapping, loadPeopleIndex, excludedRockets);
   }
 
   public void setStartBucket(long startBucket) {
@@ -557,6 +575,14 @@ public class FlightPlan implements ApiMarker {
 
   public void setLoadPeopleIndex(boolean loadPeopleIndex) {
     this.loadPeopleIndex = loadPeopleIndex;
+  }
+
+  public Set<StandardFlightSchedule> getExcludedRockets() {
+    return excludedRockets;
+  }
+
+  public void setOptPeopleRockets(Set<StandardFlightSchedule> setExcludedRockets) {
+    this.excludedRockets = setExcludedRockets;
   }
 
 }

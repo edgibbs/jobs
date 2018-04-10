@@ -47,7 +47,9 @@ public class NeutronCmdLineParser {
     ret.addOption(NeutronCmdLineOption.FULL_LOAD.getOpt());
     ret.addOption(NeutronCmdLineOption.REFRESH_MQT.getOpt());
     ret.addOption(NeutronCmdLineOption.DROP_INDEX.getOpt());
+
     ret.addOption(NeutronCmdLineOption.NO_INDEX_PEOPLE.getOpt());
+    ret.addOption(NeutronCmdLineOption.EXCLUDE_ROCKETS.getOpt());
 
     ret.addOption(NeutronCmdLineOption.BUCKET_RANGE.getOpt());
     ret.addOption(NeutronCmdLineOption.MIN_ID.getOpt());
@@ -64,6 +66,12 @@ public class NeutronCmdLineParser {
     return ret;
   }
 
+  /**
+   * Parse range buckets for Initial Load.
+   * 
+   * @param vals range in format {@code 1-20}
+   * @return range start and end
+   */
   public static Pair<Long, Long> parseBuckets(final String[] vals) {
     Long startBucket = Long.MIN_VALUE;
     Long endBucket = startBucket;

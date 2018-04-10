@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -233,14 +234,16 @@ public enum StandardFlightSchedule {
    * Appropriate for initial load, not last change.
    * 
    * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
+   * @param excludeRockets optionally exclude rockets
    * @return Quartz JobChainingJobListener
    */
-  public static JobChainingJobListener buildInitialLoadJobChainListener(boolean loadPeopleIndex) {
+  public static JobChainingJobListener buildInitialLoadJobChainListener(boolean loadPeopleIndex,
+      Set<StandardFlightSchedule> excludeRockets) {
     final JobChainingJobListener ret =
         new JobChainingJobListener(NeutronSchedulerConstants.GRP_FULL_LOAD);
 
     final StandardFlightSchedule[] rawArr =
-        getInitialLoadRockets(true).toArray(new StandardFlightSchedule[0]);
+        getInitialLoadRockets(true, excludeRockets).toArray(new StandardFlightSchedule[0]);
 
     final StandardFlightSchedule[] arr = Arrays.copyOf(rawArr, rawArr.length);
     Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
@@ -265,27 +268,31 @@ public enum StandardFlightSchedule {
    * Gets the default list of rockets for initial load.
    * 
    * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
+   * @param excludeRockets optionally exclude rockets
    * @return rockets for initial load
    */
-  public static List<StandardFlightSchedule> getInitialLoadRockets(boolean loadPeopleIndex) {
+  public static List<StandardFlightSchedule> getInitialLoadRockets(boolean loadPeopleIndex,
+      Set<StandardFlightSchedule> excludeRockets) {
     return Arrays.asList(values()).stream().sequential()
         .sorted(Comparator.comparingInt(StandardFlightSchedule::getInitialLoadOrder))
         .filter(StandardFlightSchedule::isRunInitialLoad)
         .filter(s -> !s.isForPeopleIndex() || (loadPeopleIndex && s.isForPeopleIndex()))
-        .collect(Collectors.toList());
+        .filter(s -> !excludeRockets.contains(s)).collect(Collectors.toList());
   }
 
   /**
    * Gets the default list of rockets for last run.
    * 
    * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
+   * @param excludeRockets optionally exclude rockets
    * @return rockets for last run
    */
-  public static List<StandardFlightSchedule> getLastChangeRockets(boolean loadPeopleIndex) {
+  public static List<StandardFlightSchedule> getLastChangeRockets(boolean loadPeopleIndex,
+      Set<StandardFlightSchedule> excludeRockets) {
     return Arrays.asList(values()).stream().sequential()
         .filter(StandardFlightSchedule::isRunLastChange)
         .filter(s -> !s.isForPeopleIndex() || (loadPeopleIndex && s.isForPeopleIndex()))
-        .collect(Collectors.toList());
+        .filter(s -> !excludeRockets.contains(s)).collect(Collectors.toList());
   }
 
   public Class<?> getRocketClass() {
@@ -316,12 +323,12 @@ public enum StandardFlightSchedule {
     return nestedElement;
   }
 
-  public static StandardFlightSchedule lookupByRocketName(String key) {
-    return mapName.get(key);
+  public static StandardFlightSchedule lookupByRocketName(String rocketName) {
+    return mapName.get(rocketName.trim());
   }
 
-  public static StandardFlightSchedule lookupByRocketClass(Class<?> key) {
-    return mapClass.get(key);
+  public static StandardFlightSchedule lookupByRocketClass(Class<?> klazz) {
+    return mapClass.get(klazz);
   }
 
   public int getInitialLoadOrder() {

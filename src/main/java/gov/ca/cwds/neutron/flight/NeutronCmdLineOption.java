@@ -2,6 +2,8 @@ package gov.ca.cwds.neutron.flight;
 
 import org.apache.commons.cli.Option;
 
+import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
+
 /**
  * Neutron command line options.
  * 
@@ -124,6 +126,14 @@ public enum NeutronCmdLineOption {
    */
   NO_INDEX_PEOPLE(NeutronCmdLineParser.makeOpt("N", NeutronLongCmdLineName.CMD_LINE_NO_PEOPLE_INDEX,
       "Do People index rockets", false, 0, Boolean.class, ',')),
+
+  /**
+   * Do not launch exclude rockets.
+   * 
+   * @see StandardFlightSchedule
+   */
+  EXCLUDE_ROCKETS(NeutronCmdLineParser.makeOpt("e", NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS,
+      "exclude rockets (-e=referral,case,relationship)", false, 1, String.class, ',')),
 
   /**
    * Test mode!
