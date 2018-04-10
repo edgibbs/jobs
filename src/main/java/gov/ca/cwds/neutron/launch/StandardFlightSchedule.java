@@ -234,9 +234,11 @@ public enum StandardFlightSchedule {
    * Appropriate for initial load, not last change.
    * 
    * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
+   * @param excludeRockets optionally exclude rockets
    * @return Quartz JobChainingJobListener
    */
-  public static JobChainingJobListener buildInitialLoadJobChainListener(boolean loadPeopleIndex) {
+  public static JobChainingJobListener buildInitialLoadJobChainListener(boolean loadPeopleIndex,
+      List<StandardFlightSchedule> excludeRockets) {
     final JobChainingJobListener ret =
         new JobChainingJobListener(NeutronSchedulerConstants.GRP_FULL_LOAD);
 
@@ -321,12 +323,12 @@ public enum StandardFlightSchedule {
     return nestedElement;
   }
 
-  public static StandardFlightSchedule lookupByRocketName(String key) {
-    return mapName.get(key);
+  public static StandardFlightSchedule lookupByRocketName(String rocketName) {
+    return mapName.get(rocketName.trim());
   }
 
-  public static StandardFlightSchedule lookupByRocketClass(Class<?> key) {
-    return mapClass.get(key);
+  public static StandardFlightSchedule lookupByRocketClass(Class<?> klazz) {
+    return mapClass.get(klazz);
   }
 
   public int getInitialLoadOrder() {

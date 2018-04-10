@@ -445,7 +445,7 @@ public class FlightPlan implements ApiMarker {
             break;
 
           case NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS:
-            excludedRockets = Arrays.asList(opt.getValue().trim().split("\\s*,\\s*")).stream()
+            excludedRockets = Arrays.asList(opt.getValue().trim().split(",")).stream()
                 .map(StandardFlightSchedule::lookupByRocketName).collect(Collectors.toList());
             break;
 

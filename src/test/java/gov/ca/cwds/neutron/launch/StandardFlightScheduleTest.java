@@ -30,7 +30,7 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void buildInitialLoadJobChainListener_Args__() throws Exception {
-    final JobChainingJobListener actual = StandardFlightSchedule.buildInitialLoadJobChainListener(true);
+    final JobChainingJobListener actual = StandardFlightSchedule.buildInitialLoadJobChainListener(true, new ArrayList<>());
     assertThat(actual, is(notNullValue()));
   }
 

@@ -572,8 +572,11 @@ public class HyperCube extends NeutronGuiceModule {
     final ListenerManager mgr = ret.getScheduler().getListenerManager();
     mgr.addSchedulerListener(new NeutronSchedulerListener());
     mgr.addTriggerListener(new NeutronTriggerListener(ret));
-    mgr.addJobListener(initialMode ? StandardFlightSchedule.buildInitialLoadJobChainListener(true)
-        : new NeutronJobListener());
+    mgr.addJobListener(
+        initialMode
+            ? StandardFlightSchedule.buildInitialLoadJobChainListener(true,
+                LaunchCommand.getStandardFlightPlan().getExcludedRockets())
+            : new NeutronJobListener());
     return ret;
   }
 
