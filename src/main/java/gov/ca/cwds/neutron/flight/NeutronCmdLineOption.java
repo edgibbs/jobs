@@ -126,6 +126,12 @@ public enum NeutronCmdLineOption {
       "Do People index rockets", false, 0, Boolean.class, ',')),
 
   /**
+   * Do not launch exclude rockets.
+   */
+  EXCLUDE_ROCKETS(NeutronCmdLineParser.makeOpt("e", NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS,
+      "exclude rockets (-r 20-24)", false, 2, String.class, '-')),
+
+  /**
    * Test mode!
    */
   SIMULATE_LAUNCH(NeutronCmdLineParser.makeOpt("S", NeutronLongCmdLineName.CMD_LINE_SIMULATE_LAUNCH,

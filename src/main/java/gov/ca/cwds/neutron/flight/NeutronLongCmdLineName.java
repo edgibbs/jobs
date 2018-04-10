@@ -24,6 +24,7 @@ public class NeutronLongCmdLineName {
 
   public static final String CMD_LINE_LEGACY_PEOPLE_MAPPING = "legacy_people_mapping";
   public static final String CMD_LINE_NO_PEOPLE_INDEX = "no_people_index";
+  public static final String CMD_LINE_EXCLUDE_ROCKETS = "exclude_rockets";
 
   public static final String CMD_LINE_SIMULATE_LAUNCH = "simulate_launch";
 

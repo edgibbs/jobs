@@ -226,12 +226,13 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
       configureInitialMode(now);
       final boolean loadPeopleIndex = commonFlightPlan.isLoadPeopleIndex();
+      final List<StandardFlightSchedule> excludeRockets = commonFlightPlan.getExcludedRockets();
 
       // Turn off People rockets, if desired.
       // Prepare launch pads.
       for (StandardFlightSchedule sched : isInitialMode()
-          ? StandardFlightSchedule.getInitialLoadRockets(loadPeopleIndex)
-          : StandardFlightSchedule.getLastChangeRockets(loadPeopleIndex)) {
+          ? StandardFlightSchedule.getInitialLoadRockets(loadPeopleIndex, excludeRockets)
+          : StandardFlightSchedule.getLastChangeRockets(loadPeopleIndex, excludeRockets)) {
         final FlightPlan flightPlan = new FlightPlan(commonFlightPlan);
         handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
         launchDirector.scheduleLaunch(sched, flightPlan);
