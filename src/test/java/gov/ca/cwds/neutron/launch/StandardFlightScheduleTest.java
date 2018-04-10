@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Test;
@@ -30,13 +31,15 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void buildInitialLoadJobChainListener_Args__() throws Exception {
-    final JobChainingJobListener actual = StandardFlightSchedule.buildInitialLoadJobChainListener(true, new ArrayList<>());
+    final JobChainingJobListener actual =
+        StandardFlightSchedule.buildInitialLoadJobChainListener(true, new HashSet<>());
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getInitialLoadRockets_Args__() throws Exception {
-    final List<StandardFlightSchedule> actual = StandardFlightSchedule.getInitialLoadRockets(true, new ArrayList<>());
+    final List<StandardFlightSchedule> actual =
+        StandardFlightSchedule.getInitialLoadRockets(true, new HashSet<>());
 
     final List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.RESET_PEOPLE_INDEX);
@@ -61,7 +64,8 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void getLastChangeRockets_Args__() throws Exception {
-    final List<StandardFlightSchedule> actual = StandardFlightSchedule.getLastChangeRockets(true, new ArrayList<>());
+    final List<StandardFlightSchedule> actual =
+        StandardFlightSchedule.getLastChangeRockets(true, new HashSet<>());
 
     final List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);

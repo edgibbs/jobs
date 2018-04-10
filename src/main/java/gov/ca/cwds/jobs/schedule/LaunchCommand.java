@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
@@ -226,7 +227,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
       configureInitialMode(now);
       final boolean loadPeopleIndex = commonFlightPlan.isLoadPeopleIndex();
-      final List<StandardFlightSchedule> excludeRockets = commonFlightPlan.getExcludedRockets();
+      final Set<StandardFlightSchedule> excludeRockets = commonFlightPlan.getExcludedRockets();
 
       if (!excludeRockets.isEmpty()) {
         LOGGER.warn("\n\n *********** EXCLUDE ROCKETS!! {} ***********\n\n", excludeRockets);

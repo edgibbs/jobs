@@ -1,10 +1,10 @@
 package gov.ca.cwds.neutron.launch;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -238,12 +238,12 @@ public enum StandardFlightSchedule {
    * @return Quartz JobChainingJobListener
    */
   public static JobChainingJobListener buildInitialLoadJobChainListener(boolean loadPeopleIndex,
-      List<StandardFlightSchedule> excludeRockets) {
+      Set<StandardFlightSchedule> excludeRockets) {
     final JobChainingJobListener ret =
         new JobChainingJobListener(NeutronSchedulerConstants.GRP_FULL_LOAD);
 
     final StandardFlightSchedule[] rawArr =
-        getInitialLoadRockets(true, new ArrayList<>()).toArray(new StandardFlightSchedule[0]);
+        getInitialLoadRockets(true, excludeRockets).toArray(new StandardFlightSchedule[0]);
 
     final StandardFlightSchedule[] arr = Arrays.copyOf(rawArr, rawArr.length);
     Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
@@ -272,7 +272,7 @@ public enum StandardFlightSchedule {
    * @return rockets for initial load
    */
   public static List<StandardFlightSchedule> getInitialLoadRockets(boolean loadPeopleIndex,
-      List<StandardFlightSchedule> excludeRockets) {
+      Set<StandardFlightSchedule> excludeRockets) {
     return Arrays.asList(values()).stream().sequential()
         .sorted(Comparator.comparingInt(StandardFlightSchedule::getInitialLoadOrder))
         .filter(StandardFlightSchedule::isRunInitialLoad)
@@ -288,10 +288,11 @@ public enum StandardFlightSchedule {
    * @return rockets for last run
    */
   public static List<StandardFlightSchedule> getLastChangeRockets(boolean loadPeopleIndex,
-      List<StandardFlightSchedule> excludeRockets) {
+      Set<StandardFlightSchedule> excludeRockets) {
     return Arrays.asList(values()).stream().sequential()
         .filter(StandardFlightSchedule::isRunLastChange)
         .filter(s -> !s.isForPeopleIndex() || (loadPeopleIndex && s.isForPeopleIndex()))
+        // .filter(excludeRockets.)
         .collect(Collectors.toList());
   }
 

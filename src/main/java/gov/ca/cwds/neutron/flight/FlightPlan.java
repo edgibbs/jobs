@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
@@ -123,7 +123,7 @@ public class FlightPlan implements ApiMarker {
 
   private boolean dropIndex;
 
-  private List<StandardFlightSchedule> excludedRockets = new ArrayList<>();
+  private Set<StandardFlightSchedule> excludedRockets = new HashSet<>();
 
   /**
    * Default constructor.
@@ -161,7 +161,7 @@ public class FlightPlan implements ApiMarker {
       long startBucket, long endBucket, long threadCount, boolean loadSealedAndSensitive,
       boolean rangeGiven, String baseDirectory, boolean refreshMqt, boolean dropIndex,
       boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex,
-      List<StandardFlightSchedule> excludedRockets) {
+      Set<StandardFlightSchedule> excludedRockets) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
@@ -363,7 +363,7 @@ public class FlightPlan implements ApiMarker {
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
     // CHECKSTYLE:ON
 
-    List<StandardFlightSchedule> excludedRockets = new ArrayList<>();
+    Set<StandardFlightSchedule> excludedRockets = new HashSet<>();
 
     try {
       final Options options = NeutronCmdLineParser.buildCmdLineOptions();
@@ -446,7 +446,7 @@ public class FlightPlan implements ApiMarker {
 
           case NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS:
             excludedRockets = Arrays.asList(opt.getValue().trim().split(",")).stream()
-                .map(StandardFlightSchedule::lookupByRocketName).collect(Collectors.toList());
+                .map(StandardFlightSchedule::lookupByRocketName).collect(Collectors.toSet());
             break;
 
           default:
@@ -577,11 +577,11 @@ public class FlightPlan implements ApiMarker {
     this.loadPeopleIndex = loadPeopleIndex;
   }
 
-  public List<StandardFlightSchedule> getExcludedRockets() {
+  public Set<StandardFlightSchedule> getExcludedRockets() {
     return excludedRockets;
   }
 
-  public void setOptPeopleRockets(List<StandardFlightSchedule> setExcludedRockets) {
+  public void setOptPeopleRockets(Set<StandardFlightSchedule> setExcludedRockets) {
     this.excludedRockets = setExcludedRockets;
   }
 

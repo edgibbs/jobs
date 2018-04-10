@@ -133,7 +133,7 @@ public enum NeutronCmdLineOption {
    * @see StandardFlightSchedule
    */
   EXCLUDE_ROCKETS(NeutronCmdLineParser.makeOpt("e", NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS,
-      "exclude rockets (-e referral,cases,relationship)", false, 1, String.class, ',')),
+      "exclude rockets (-e=referral,case,relationship)", false, 1, String.class, ',')),
 
   /**
    * Test mode!
