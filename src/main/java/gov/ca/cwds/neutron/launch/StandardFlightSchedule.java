@@ -31,6 +31,7 @@ import gov.ca.cwds.neutron.rocket.CaseRocket;
 import gov.ca.cwds.neutron.rocket.ExitInitialLoadRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
+import gov.ca.cwds.neutron.rocket.LetsLightThisCandleRocket;
 import gov.ca.cwds.neutron.rocket.SchemaResetRocket;
 
 /**
@@ -45,17 +46,32 @@ public enum StandardFlightSchedule {
   // =======================
 
   /**
-   * If requested, drop and create Elasticsearch People index.
+   * Dummy, just starts the Quartz schedule process.
    */
-  RESET_PEOPLE_INDEX(IndexResetPeopleRocket.class, // rocket class
-      "reset_people_index", // rocket name
+  LIGHT_THIS_CANDLE(LetsLightThisCandleRocket.class, // rocket class
+      "light_this_candle", // rocket name
       1, // initial load order
       0, // start delay seconds. N/A.
       10000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
-      false, // run in last change mode
-      true // run in initial load
-      , true),
+      false, // run in Last Change mode
+      true, // run in Initial Load
+      false // People index
+  ),
+
+  /**
+   * If requested, drop and create Elasticsearch People index.
+   */
+  RESET_PEOPLE_INDEX(IndexResetPeopleRocket.class, // rocket class
+      "reset_people_index", // rocket name
+      2, // initial load order
+      3, // start delay seconds. N/A.
+      10000, // execute every N seconds. N/A.
+      null, // last run priority. N/A.
+      false, // run in Last Change mode
+      true, // run in Initial Load
+      true // People index
+  ),
 
   /**
    * If requested, drop and create Elasticsearch People Summary index.
@@ -66,9 +82,10 @@ public enum StandardFlightSchedule {
       200000000, // start delay seconds. N/A.
       10000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
-      false, // run in last change mode
-      true // run in initial load
-      , false),
+      false, // run in Last Change mode
+      true, // run in Initial Load
+      false // People index
+  ),
 
   // =======================
   // PEOPLE SUMMARY:
@@ -242,8 +259,8 @@ public enum StandardFlightSchedule {
     final JobChainingJobListener ret =
         new JobChainingJobListener(NeutronSchedulerConstants.GRP_FULL_LOAD);
 
-    final StandardFlightSchedule[] rawArr =
-        getInitialLoadRockets(true, excludeRockets).toArray(new StandardFlightSchedule[0]);
+    final StandardFlightSchedule[] rawArr = getInitialLoadRockets(loadPeopleIndex, excludeRockets)
+        .toArray(new StandardFlightSchedule[0]);
 
     final StandardFlightSchedule[] arr = Arrays.copyOf(rawArr, rawArr.length);
     Arrays.sort(arr, (o1, o2) -> Integer.compare(o1.initialLoadOrder, o2.initialLoadOrder));
