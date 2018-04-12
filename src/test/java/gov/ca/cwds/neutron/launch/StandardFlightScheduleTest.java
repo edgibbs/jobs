@@ -42,6 +42,7 @@ public class StandardFlightScheduleTest extends Goddard {
         StandardFlightSchedule.getInitialLoadRockets(true, new HashSet<>());
 
     final List<StandardFlightSchedule> expected = new ArrayList<>();
+    expected.add(StandardFlightSchedule.LIGHT_THIS_CANDLE);
     expected.add(StandardFlightSchedule.RESET_PEOPLE_INDEX);
     expected.add(StandardFlightSchedule.RESET_PEOPLE_SUMMARY_INDEX);
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);
@@ -155,7 +156,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getInitialLoadOrder_Args__() throws Exception {
     final int actual = target.getInitialLoadOrder();
-    final int expected = 3;
+    final int expected = 4;
     assertThat(actual, is(equalTo(expected)));
   }
 
