@@ -585,4 +585,18 @@ public class FlightPlan implements ApiMarker {
     this.excludedRockets = setExcludedRockets;
   }
 
+  @Override
+  public String toString() {
+    return "FlightPlan [esConfigPeopleLoc=" + esConfigPeopleLoc + ", esConfigPeopleSummaryLoc="
+        + esConfigPeopleSummaryLoc + ", indexName=" + indexName + ", simulateLaunch="
+        + simulateLaunch + ", legacyPeopleMapping=" + legacyPeopleMapping + ", loadPeopleIndex="
+        + loadPeopleIndex + ", overrideLastStartTime=" + overrideLastStartTime
+        + ", overrideLastEndTime=" + overrideLastEndTime + ", lastRunLoc=" + lastRunLoc
+        + ", lastRunMode=" + lastRunMode + ", startBucket=" + startBucket + ", endBucket="
+        + endBucket + ", threadCount=" + threadCount + ", loadSealedAndSensitive="
+        + loadSealedAndSensitive + ", rangeGiven=" + rangeGiven + ", baseDirectory=" + baseDirectory
+        + ", refreshMqt=" + refreshMqt + ", dropIndex=" + dropIndex + ", excludedRockets="
+        + excludedRockets + "]";
+  }
+
 }

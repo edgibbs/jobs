@@ -125,7 +125,7 @@ public enum NeutronCmdLineOption {
    * If provided, do NOT launch rockets for the Snapshot 1.0 People index.
    */
   NO_INDEX_PEOPLE(NeutronCmdLineParser.makeOpt("N", NeutronLongCmdLineName.CMD_LINE_NO_PEOPLE_INDEX,
-      "Do People index rockets", false, 0, Boolean.class, ',')),
+      "Do NOT launch People index rockets", false, 0, Boolean.class, ',')),
 
   /**
    * Do not launch exclude rockets.
