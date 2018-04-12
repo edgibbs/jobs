@@ -195,7 +195,7 @@ public enum StandardFlightSchedule {
    * Exit the initial load process.
    */
   EXIT_INITIAL_LOAD(ExitInitialLoadRocket.class, "exit_initial_load", 140, 2000000, 10000, null,
-      false, true, true),
+      false, true, false),
 
   ;
 
