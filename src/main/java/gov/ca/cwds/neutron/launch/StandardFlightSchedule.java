@@ -78,7 +78,7 @@ public enum StandardFlightSchedule {
    */
   RESET_PEOPLE_SUMMARY_INDEX(IndexResetPeopleSummaryRocket.class, // rocket class
       "reset_people_summary_index", // rocket name
-      50, // initial load order
+      4, // initial load order
       200000000, // start delay seconds. N/A.
       10000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
