@@ -23,8 +23,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 
 project.ext {
-    // coreApiVersion = "1.6.2_557-RC"
-    coreApiVersion = "1.6.1_435-RC"
+    coreApiVersion = "1.6.3_732-RC"
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
@@ -32,7 +31,7 @@ project.ext {
     powerMockVersion = "1.7.3"
 }
 
-version = 0.46
+version = 0.47
 
 repositories {
     mavenLocal()
@@ -73,6 +72,7 @@ dependencies {
         exclude group: 'org.glassfish.jersey.core'
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
+        exclude group: 'com.ibm'
 	}
 
     compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
