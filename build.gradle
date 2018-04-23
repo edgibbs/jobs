@@ -49,11 +49,11 @@ dependencies {
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
     compile ("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
-    
+
     compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
 	compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
 
-	// LOGGING:	
+	// LOGGING:
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4jVersion
   	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4jVersion
 	compile group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4jVersion
@@ -62,7 +62,7 @@ dependencies {
 
 	compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
 	compile 'com.google.inject.extensions:guice-jmx:4.1.0'
-	
+
 	compile group: "org.postgresql", name: "postgresql", version: "9.4.1212"
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.0.0-rc4"
 	compile 'org.hibernate:hibernate-c3p0:5.2.10.Final'
@@ -93,7 +93,7 @@ dependencies {
 
 	testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powerMockVersion
     testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: powerMockVersion
-    
+
     testCompile group: 'junit', name: 'junit', version: '4.+'
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
 	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.10.0'
@@ -108,18 +108,19 @@ dependencies {
     testCompile 'org.ow2.asm:asm-all:5.2'
 	testCompile group: 'com.jayway.awaitility', name: 'awaitility', version: '1.7.0'
 	testCompile 'io.exemplary.guice:guice-behave:1.0.0'
-	
+
 	testCompile 'com.github.tlrx:elasticsearch-test:1.2.1'
-	
+
 	// LOCAL ANALYSIS:
 	// testCompile group: 'org.elasticsearch.test', name: 'framework', version: 'elasticsearchVersion'
     // testCompile 'org.jacoco:jacoco:0.8.0'
 }
 
 shadowJar {
+  zip64 = true
   classifier = ''
   baseName = (System.properties.getProperty('baseName') != null) ? System.properties.getProperty('baseName') : 'LaunchCommand'
-  mergeServiceFiles()	
+  mergeServiceFiles()
   manifest {
     attributes 'Main-Class': (System.properties.getProperty('mainClass') != null) ? System.properties.getProperty('mainClass') : 'gov.ca.cwds.jobs.schedule.LaunchCommand'
   }
@@ -180,7 +181,7 @@ jacocoTestReport {
 sonarqube {
   properties {
       property "sonar.jacoco.reportPath",   "${buildDir}/jacoco/test.exec"
-      property "sonar.jacoco.itReportPath", "${buildDir}/jacoco/integrationTest.exec"     
+      property "sonar.jacoco.itReportPath", "${buildDir}/jacoco/integrationTest.exec"
   }
 }
 
@@ -220,7 +221,7 @@ public class CWDSTextReportRenderer implements ReportRenderer {
   CWDSTextReportRenderer(String filename = 'licenses.txt'){
       this.fileName = filename
   }
-  
+
   public void render(ProjectData data) {
         project = data.project
         config = project.licenseReport
