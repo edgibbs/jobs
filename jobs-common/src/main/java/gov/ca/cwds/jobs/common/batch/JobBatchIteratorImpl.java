@@ -6,13 +6,14 @@ import gov.ca.cwds.jobs.common.JobMode;
 import gov.ca.cwds.jobs.common.api.ChangedEntitiesIdentifiersService;
 import gov.ca.cwds.jobs.common.identifier.ChangedEntityIdentifier;
 import gov.ca.cwds.jobs.common.inject.JobBatchSize;
-import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
+import gov.ca.cwds.jobs.common.job.timestamp.SavepointOperator;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   private ChangedEntitiesIdentifiersService changedEntitiesIdentifiersService;
 
   @Inject
-  private TimestampOperator timestampOperator;
+  private SavepointOperator savepointOperator;
 
   private AtomicInteger nextOffset = new AtomicInteger(0);
 
@@ -44,15 +45,15 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   private JobMode defineJobMode() {
-    if (!timestampOperator.timeStampExists()) {
+    if (!savepointOperator.savepointExists()) {
       LOGGER.info("Processing initial load");
       return JobMode.INITIAL_LOAD;
     } else if (isTimestampMoreThanOneMonthOld()) {
-      LOGGER.info("Processing initial load - resuming after save point {}", timestampOperator
+      LOGGER.info("Processing initial load - resuming after save point {}", savepointOperator
           .readTimestamp());
       return JobMode.INITIAL_LOAD_RESUME;
     } else {
-      LocalDateTime timestamp = timestampOperator.readTimestamp();
+      LocalDateTime timestamp = savepointOperator.readTimestamp();
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Processing incremental load after timestamp {}",
             Constants.DATE_TIME_FORMATTER.format(timestamp));
@@ -63,7 +64,9 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   private boolean isTimestampMoreThanOneMonthOld() {
-    return timestampOperator.readTimestamp().until(LocalDateTime.now(), ChronoUnit.MONTHS) > 1;
+    String savepoint = savepointOperator.readSavepoint();
+    return StringUtils.isNumeric(savepoint)
+        || savepointOperator.readTimestamp().until(LocalDateTime.now(), ChronoUnit.MONTHS) > 1;
   }
 
   @Override
@@ -91,10 +94,10 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
       return changedEntitiesIdentifiersService.getIdentifiersForInitialLoad(pageRequest);
     } else if (jobMode == JobMode.INITIAL_LOAD_RESUME) {
       return changedEntitiesIdentifiersService
-          .getIdentifiersForResumingInitialLoad(timestampOperator.readTimestamp(), pageRequest);
+          .getIdentifiersForResumingInitialLoad(savepointOperator.readTimestamp(), pageRequest);
     } else if (jobMode == JobMode.INCREMENTAL_LOAD) {
       return changedEntitiesIdentifiersService
-          .getIdentifiersForIncrementalLoad(timestampOperator.readTimestamp(), pageRequest);
+          .getIdentifiersForIncrementalLoad(savepointOperator.readTimestamp(), pageRequest);
     }
     throw new IllegalStateException("Unexpected job mode");
   }
@@ -146,9 +149,9 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     this.changedEntitiesIdentifiersService = changedEntitiesIdentifiersService;
   }
 
-  public void setTimestampOperator(
-      TimestampOperator timestampOperator) {
-    this.timestampOperator = timestampOperator;
+  public void setSavepointOperator(
+      SavepointOperator savepointOperator) {
+    this.savepointOperator = savepointOperator;
   }
 
   public void setJobMode(JobMode jobMode) {
@@ -163,8 +166,8 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
     return changedEntitiesIdentifiersService;
   }
 
-  public TimestampOperator getTimestampOperator() {
-    return timestampOperator;
+  public SavepointOperator getSavepointOperator() {
+    return savepointOperator;
   }
 
   public AtomicInteger getNextOffset() {

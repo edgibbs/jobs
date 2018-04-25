@@ -25,12 +25,12 @@ import org.junit.Test;
  */
 public class JobTimestampTest {
 
-  private FilesystemTimestampOperator timestampOperator;
+  private FilesystemSavepointOperator timestampOperator;
   private LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("temp");
 
   @Before
   public void beforeMethod() throws IOException {
-    timestampOperator = new FilesystemTimestampOperator(
+    timestampOperator = new FilesystemSavepointOperator(
         lastRunDirHelper.getLastRunDir().toString());
     lastRunDirHelper.createTimestampDirectory();
   }
@@ -42,12 +42,12 @@ public class JobTimestampTest {
 
   @Test
   public void test_timestamp_is_created_if_job_successful() throws IOException {
-    assertFalse(timestampOperator.timeStampExists());
+    assertFalse(timestampOperator.savepointExists());
     TestModule testModule = new TestModule(getModuleArgs());
     testModule
         .setChangedEntitiesIdentifiersClass(SingleBatchChangedEntitiesIdentifiersService.class);
     JobRunner.run(testModule);
-    assertTrue(timestampOperator.timeStampExists());
+    assertTrue(timestampOperator.savepointExists());
     LocalDateTime timestamp = timestampOperator.readTimestamp();
     assertTrue(timestamp.until(LocalDateTime.now(), ChronoUnit.SECONDS) < 1);
   }
@@ -56,10 +56,10 @@ public class JobTimestampTest {
   public void test_timestamp_is_not_created_if_crash_happens()
       throws IOException {
     try {
-      assertFalse(timestampOperator.timeStampExists());
+      assertFalse(timestampOperator.savepointExists());
       runCrashingJob();
     } finally {
-      assertFalse(timestampOperator.timeStampExists());
+      assertFalse(timestampOperator.savepointExists());
     }
   }
 
@@ -68,11 +68,11 @@ public class JobTimestampTest {
       throws IOException {
     LocalDateTime timestamp = LocalDateTime.of(2017, 1, 20, 5, 25);
     try {
-      assertFalse(timestampOperator.timeStampExists());
+      assertFalse(timestampOperator.savepointExists());
       timestampOperator.writeTimestamp(timestamp);
       runCrashingJob();
     } finally {
-      assertTrue(timestampOperator.timeStampExists());
+      assertTrue(timestampOperator.savepointExists());
       assertTrue(timestamp.equals(timestampOperator.readTimestamp()));
     }
   }
@@ -80,7 +80,7 @@ public class JobTimestampTest {
   @Test(expected = JobsException.class)
   public void last_successfull_batch_save_point_test() {
     try {
-      assertFalse(timestampOperator.timeStampExists());
+      assertFalse(timestampOperator.savepointExists());
       TestModule testModule = new TestModule(getModuleArgs());
       testModule
           .setChangedEntitiesIdentifiersClass(SingleBatchChangedEntitiesIdentifiersService.class);
@@ -100,18 +100,18 @@ public class JobTimestampTest {
       });
       JobRunner.run(testModule);
     } finally {
-      assertTrue(timestampOperator.timeStampExists());
+      assertTrue(timestampOperator.savepointExists());
       assertEquals(SECOND_TIMESTAMP, timestampOperator.readTimestamp());
     }
   }
 
   @Test
   public void test_all_timestamps_null() {
-    assertFalse(timestampOperator.timeStampExists());
+    assertFalse(timestampOperator.savepointExists());
     TestModule testModule = new TestModule(getModuleArgs());
     testModule.setChangedEntitiesIdentifiersClass(EmptyTimestampChangedIdentifiersService.class);
     JobRunner.run(testModule);
-    assertTrue(timestampOperator.timeStampExists());
+    assertTrue(timestampOperator.savepointExists());
     LocalDateTime timestamp = timestampOperator.readTimestamp();
     assertTrue(timestamp.until(LocalDateTime.now(), ChronoUnit.SECONDS) < 1);
   }

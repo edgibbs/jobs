@@ -8,8 +8,8 @@ import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.batch.JobBatchIteratorImpl;
 import gov.ca.cwds.jobs.common.config.JobOptions;
 import gov.ca.cwds.jobs.common.job.JobPreparator;
-import gov.ca.cwds.jobs.common.job.timestamp.FilesystemTimestampOperator;
-import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
+import gov.ca.cwds.jobs.common.job.timestamp.FilesystemSavepointOperator;
+import gov.ca.cwds.jobs.common.job.timestamp.SavepointOperator;
 
 /**
  * Created by Alexander Serbin on 3/4/2018.
@@ -49,7 +49,7 @@ public abstract class AbstractBaseJobModule extends AbstractModule {
   protected void configure() {
     bind(JobOptions.class).toInstance(jobOptions);
     bindConstant().annotatedWith(LastRunDir.class).to(jobOptions.getLastRunLoc());
-    bind(TimestampOperator.class).to(FilesystemTimestampOperator.class).asEagerSingleton();
+    bind(SavepointOperator.class).to(FilesystemSavepointOperator.class).asEagerSingleton();
     bind(JobPreparator.class).to(jobPreparatorClass);
     bindConstant().annotatedWith(JobBatchSize.class)
         .to(getJobsConfiguration(jobOptions).getBatchSize());

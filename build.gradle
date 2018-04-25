@@ -18,7 +18,7 @@ apply plugin: 'jacoco'
 
 project.ext {
     cwdsModelVersion = '0.6.2_504-RC'
-    calsApiVersion = '0.6.4_1178-RC'
+    calsApiVersion = '0.6.4_1182-RC'
     coreApiVersion = '1.6.2_585-RC'
     testSupportVersion = '0.5.6_272-RC'
     commonsCliVersion = '1.4'
@@ -70,8 +70,6 @@ subprojects {
 
     dependencies {
         compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
-        //slf4j-log4j12-1.6.1.jar
-        //log4j-1.2.16.jar
         testCompile group: 'junit', name: 'junit', version: jUnitVersion
     }
 }

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.job.Job;
 import gov.ca.cwds.jobs.common.job.JobPreparator;
-import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
+import gov.ca.cwds.jobs.common.job.timestamp.SavepointOperator;
 import gov.ca.cwds.jobs.common.job.utils.ConsumerCounter;
 import java.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ public class JobImpl<T> implements Job {
   private static final Logger LOGGER = LoggerFactory.getLogger(JobImpl.class);
 
   @Inject
-  private TimestampOperator timestampOperator;
+  private SavepointOperator savepointOperator;
 
   @Inject
   private BatchProcessor<T> batchProcessor;
@@ -33,7 +33,7 @@ public class JobImpl<T> implements Job {
       batchProcessor.init();
       batchProcessor.processBatches();
       LocalDateTime now = LocalDateTime.now();
-      timestampOperator.writeTimestamp(now);
+      savepointOperator.writeTimestamp(now);
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Updating job timestamp to the current moment {}", now);
         LOGGER.info("Added {} entities to the Elastic Search index", ConsumerCounter.getCounter());

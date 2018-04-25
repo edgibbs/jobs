@@ -13,19 +13,19 @@ import org.junit.Test;
 /**
  * Created by Alexander Serbin on 2/6/2018.
  */
-public class FilesystemTimestampOperatorTest {
+public class FilesystemSavepointOperatorTest {
 
   private LastRunDirHelper lastRunDirHelper = new LastRunDirHelper("temp");
 
   @Test
   public void readWriteTimestampTest() throws Exception {
     LocalDateTime timestamp = LocalDateTime.of(2018, 2, 6, 4, 14, 20);
-    FilesystemTimestampOperator timestampOperator = new FilesystemTimestampOperator(
+    FilesystemSavepointOperator timestampOperator = new FilesystemSavepointOperator(
         lastRunDirHelper.getLastRunDir().toString());
-    assertFalse(timestampOperator.timeStampExists());
+    assertFalse(timestampOperator.savepointExists());
     timestampOperator.writeTimestamp(timestamp);
     assertEquals(timestamp, timestampOperator.readTimestamp());
-    assertTrue(timestampOperator.timeStampExists());
+    assertTrue(timestampOperator.savepointExists());
   }
 
   @Before

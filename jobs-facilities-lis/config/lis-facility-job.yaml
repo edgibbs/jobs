@@ -29,6 +29,11 @@ lisDataSourceFactory:
       hibernate.use_sql_comments: false
       hibernate.c3p0.min_size: 5
       hibernate.c3p0.max_size: 5
+      hibernate.c3p0.timeout: 300
+      hibernate.c3p0.max_statements: 50
+      hibernate.c3p0.idle_test_period: 3000
+      hibernate.c3p0.preferredTestQuery: SELECT ISN_LIS_TABLE_FILE FROM LIS_TABLE_FILE LIMIT 1
+      hibernate.c3p0.testConnectionOnCheckout: true
 
 fasDataSourceFactory:
   properties:
@@ -42,3 +47,8 @@ fasDataSourceFactory:
       hibernate.show_sql: false
       hibernate.c3p0.min_size: 5
       hibernate.c3p0.max_size: 5
+      hibernate.c3p0.timeout: 300
+      hibernate.c3p0.max_statements: 50
+      hibernate.c3p0.idle_test_period: 3000
+      hibernate.c3p0.preferredTestQuery: SELECT 1
+      hibernate.c3p0.testConnectionOnCheckout: true

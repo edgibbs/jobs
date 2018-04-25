@@ -6,7 +6,7 @@ import gov.ca.cwds.jobs.common.batch.JobBatchIterator;
 import gov.ca.cwds.jobs.common.elastic.ElasticSearchBulkCollector;
 import gov.ca.cwds.jobs.common.exception.JobExceptionHandler;
 import gov.ca.cwds.jobs.common.exception.JobsException;
-import gov.ca.cwds.jobs.common.job.timestamp.TimestampOperator;
+import gov.ca.cwds.jobs.common.job.timestamp.SavepointOperator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class BatchProcessor<T> {
   private JobBatchIterator batchIterator;
 
   @Inject
-  private TimestampOperator timestampOperator;
+  private SavepointOperator savepointOperator;
 
   public void init() {
     batchIterator.init();
@@ -61,7 +61,7 @@ public class BatchProcessor<T> {
   private void processBatch(JobBatch jobBatch) {
     batchReadersPool.loadEntities(jobBatch.getChangedEntityIdentifiers());
     if (!JobExceptionHandler.isExceptionHappened()) {
-      timestampOperator.writeTimestamp(jobBatch.getTimestamp());
+      savepointOperator.writeTimestamp(jobBatch.getTimestamp());
       if (LOGGER.isInfoEnabled()) {
 //          jobTimeReport.printTimeReport(portionBatchNumber);
       }
