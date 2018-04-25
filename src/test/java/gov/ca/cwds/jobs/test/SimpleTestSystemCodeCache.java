@@ -109,4 +109,7 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
     return null;
   }
 
-}
+  @Override
+  public Short getSystemCodeId(String metaId, String shortDescription) {
+    return null;
+  }}
