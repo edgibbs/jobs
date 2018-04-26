@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,24 +38,26 @@ public class FilesystemSavepointOperator implements SavepointOperator {
   }
 
   @Override
-  public ChangedEntityIdentifier readSavepoint() {
+  public Optional<ChangedEntityIdentifier> readSavepoint() {
     try {
-      String savepointString = readSavepoint(getRunningFile());
-      if (savepointString != null) {
-        String[] strings = savepointString.split(",");
-      }
+      Optional<ChangedEntityIdentifier> savepoint = Optional.empty();
+      Optional<String> savepointString = Optional.of(readSavepoint(getRunningFile()));
+      savepointString.isPresent(s -> parseSavepoint(s));
 
-      if (StringUtils.isNumeric(savepointString)) {
-        savepointId = Integer.parseInt(savepointString);
-      } else {
-        savepointTimestamp = LocalDateTime.parse(savepointString, Constants.DATE_TIME_FORMATTER);
-      }
-      ChangedEntityIdentifier savepoint = new ChangedEntityIdentifier(savepointId, null, );
-      return savepoint;
+
     } catch (IOException e) {
       throw new ApiException("Can't read savepoint from the file", e);
     }
   }
+
+  private ChangedEntityIdentifier parseSavepoint(String fileContent) {
+    String[] strings = fileContent.split(",");
+    String id = strings[0];
+    String timestamp = strings[1];
+    return new ChangedEntityIdentifier(
+        id, null, LocalDateTime.parse(timestamp, Constants.DATE_TIME_FORMATTER));
+  }
+
 
   @Override
   public void writeSavepoint(ChangedEntityIdentifier savepoint) {
@@ -64,26 +65,8 @@ public class FilesystemSavepointOperator implements SavepointOperator {
       LOG.info("Savepoint is empty for the batch and will not be recorded");
       return;
     }
-    String savepointString = timestamp.format(Constants.DATE_TIME_FORMATTER);
+    String savepointString = savepoint.getId() + "," + savepoint.getTimestamp().format(Constants.DATE_TIME_FORMATTER);
     writeSavepoint(savepointString);
-  }
-
-  @Override
-  public Integer readId() {
-    try {
-      return Integer.parseInt(readSavepoint(getRunningFile()));
-    } catch (IOException e) {
-      throw new ApiException("Can't reade savepoint Id from the file", e);
-    }
-  }
-
-  @Override
-  public void writeId(Integer id) {
-    if (id == null) {
-      LOG.info("Id is empty for the batch and will not be recorded");
-      return;
-    }
-    writeSavepoint(id.toString());
   }
 
   @SuppressFBWarnings("PATH_TRAVERSAL_IN") //Path cannot be controlled by the user

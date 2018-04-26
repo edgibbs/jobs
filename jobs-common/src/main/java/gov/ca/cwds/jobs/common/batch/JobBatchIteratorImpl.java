@@ -64,7 +64,8 @@ public class JobBatchIteratorImpl implements JobBatchIterator {
   }
 
   private boolean isTimestampMoreThanOneMonthOld() {
-    String savepoint = savepointOperator.readSavepoint();
+    ChangedEntityIdentifier savepoint = savepointOperator.readSavepoint();
+
     return StringUtils.isNumeric(savepoint)
         || savepointOperator.readTimestamp().until(LocalDateTime.now(), ChronoUnit.MONTHS) > 1;
   }
