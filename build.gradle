@@ -24,7 +24,7 @@ apply plugin: 'jacoco'
 
 project.ext {
 //    coreApiVersion = "1.6.3_732-RC"
-    coreApiVersion = "1.6.4_748-RC"
+    coreApiVersion = "1.6.4_749-RC"
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
