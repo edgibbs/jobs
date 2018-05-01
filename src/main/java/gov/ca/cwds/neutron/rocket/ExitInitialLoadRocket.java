@@ -44,8 +44,8 @@ public class ExitInitialLoadRocket
    */
   @Inject
   public ExitInitialLoadRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao, final ObjectMapper mapper,
-      LaunchDirector launchDirector, FlightPlan flightPlan) {
+      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      final ObjectMapper mapper, LaunchDirector launchDirector, FlightPlan flightPlan) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
     this.launchDirector = launchDirector;
   }
@@ -72,6 +72,13 @@ public class ExitInitialLoadRocket
           final FlightSummary summary = flightRecorder.getFlightSummary(sched);
           LOGGER.info("ROCKET SUMMARY:\n{}", summary);
           logError(sched, summary);
+        }
+
+        // Swap Alias to new index
+        final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
+        final String alias = esDao.getConfig().getElasticsearchAlias();
+        if (esDao.createOrSwapAlias(alias, index)) {
+          LOGGER.info("Applied Alias {} to Index {} ", alias, index);
         }
 
         LaunchCommand.getInstance().shutdown();

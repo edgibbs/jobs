@@ -6,11 +6,11 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
@@ -36,7 +36,6 @@ public abstract class IndexResetRocket
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
    */
-  @Inject
   public IndexResetRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
@@ -57,8 +56,8 @@ public abstract class IndexResetRocket
           StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
               : indexNameOverride;
 
-      if (!getFlightPlan().isLastRunMode() ) {
-        //Force new index name for Initial Load when Index name not provided
+      if (!getFlightPlan().isLastRunMode()) {
+        // Force new index name for Initial Load when Index name not provided
         if (StringUtils.isBlank(indexNameOverride)) {
           effectiveIndexName = effectiveIndexName.concat("_")
               .concat(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
@@ -75,6 +74,7 @@ public abstract class IndexResetRocket
       }
 
       getFlightPlan().setIndexName(effectiveIndexName);
+      LaunchCommand.getInstance().getCommonFlightPlan().setIndexName(effectiveIndexName);
 
       // If the index is missing, create it.
       final String documentType = esDao.getConfig().getElasticsearchDocType();
@@ -87,9 +87,9 @@ public abstract class IndexResetRocket
           ? esDao.getConfig().getDocumentMappingFile()
           : getDocumentMappingLocation();
 
-      LOGGER.info(
-          "Create index if missing: effective index name: {}, setting file: {}, mapping file: {}",
-          effectiveIndexName, settingFile, mappingFile);
+      LOGGER.warn(
+          "\nCreate index if missing: \neffective index name: {}, \nalias: {}, \nsetting file: {}, \nmapping file: {}",
+          effectiveIndexName, esDao.getConfig().getElasticsearchAlias(), settingFile, mappingFile);
 
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, settingFile, mappingFile);
     } catch (Exception e) {
