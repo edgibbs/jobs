@@ -57,16 +57,24 @@ public abstract class IndexResetRocket
           StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
               : indexNameOverride;
 
-      //Always force new index name for Initial Load when Index name not provided
-      if (!getFlightPlan().isLastRunMode() && StringUtils.isBlank(indexNameOverride)) {
-        effectiveIndexName = effectiveIndexName.concat("_").concat(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
+      if (!getFlightPlan().isLastRunMode() ) {
+        //Force new index name for Initial Load when Index name not provided
+        if (StringUtils.isBlank(indexNameOverride)) {
+          effectiveIndexName = effectiveIndexName.concat("_")
+              .concat(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
+        }
+        // Drop index first, if requested and name provided
+        if (getFlightPlan().isDropIndex() && !StringUtils.isBlank(indexNameOverride)) {
+          esDao.deleteIndex(effectiveIndexName);
+        }
+      } else {
+        // Drop index first, if requested
+        if (getFlightPlan().isDropIndex()) {
+          esDao.deleteIndex(effectiveIndexName);
+        }
       }
-      getFlightPlan().setIndexName(effectiveIndexName);
 
-      // Drop index first, if requested and index name provided. Not applicable for aliases
-      if (getFlightPlan().isDropIndex() && !StringUtils.isBlank(indexNameOverride)) {
-        esDao.deleteIndex(effectiveIndexName);
-      }
+      getFlightPlan().setIndexName(effectiveIndexName);
 
       // If the index is missing, create it.
       final String documentType = esDao.getConfig().getElasticsearchDocType();
