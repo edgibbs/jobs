@@ -37,7 +37,7 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
-import gov.ca.cwds.neutron.rocket.IndexResetRocket;
+import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -185,7 +185,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     // The Launch Director has a global registry of flight plans.
     if (launchDirector != null) {
       final FlightPlan resetIndexFlightPlan =
-          launchDirector.getFlightPlanManger().getFlightPlan(IndexResetRocket.class);
+          launchDirector.getFlightPlanManger().getFlightPlan(IndexResetPeopleSummaryRocket.class);
       final String globalIndexName =
           LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
 

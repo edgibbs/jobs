@@ -44,8 +44,8 @@ public class ExitInitialLoadRocket
    */
   @Inject
   public ExitInitialLoadRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao, final ObjectMapper mapper,
-      LaunchDirector launchDirector, FlightPlan flightPlan) {
+      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      final ObjectMapper mapper, LaunchDirector launchDirector, FlightPlan flightPlan) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
     this.launchDirector = launchDirector;
   }
