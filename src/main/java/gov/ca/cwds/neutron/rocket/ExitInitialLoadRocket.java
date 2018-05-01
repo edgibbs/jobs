@@ -63,7 +63,7 @@ public class ExitInitialLoadRocket
   public Date launch(Date lastRunDate) {
     nameThread("exit_initial_load");
     if (LaunchCommand.isInitialMode()) {
-      LOGGER.warn("EXIT INITIAL LOAD!");
+      LOGGER.info("EXIT INITIAL LOAD!");
       final AtomFlightRecorder flightRecorder = launchDirector.getFlightRecorder();
 
       try {
@@ -75,6 +75,12 @@ public class ExitInitialLoadRocket
         }
 
         LaunchCommand.getInstance().shutdown();
+        //Swap Alias to new index
+        final String index = flightPlan.getIndexName();
+        final String alias = esDao.getConfig().getElasticsearchAlias();
+        if (esDao.createOrSwapAlias(alias, index)) {
+          LOGGER.info("Applied Alias {} to Index {} ", alias, index);
+        }
       } catch (Exception e) {
         CheeseRay.checked(LOGGER, e, "ELASTICSEARCH INDEX MANAGEMENT ERROR! {}", e.getMessage());
       }

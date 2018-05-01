@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,13 +53,18 @@ public abstract class IndexResetRocket
     try {
       // If index name is provided, use it, else take alias from ES config.
       final String indexNameOverride = getFlightPlan().getIndexName();
-      final String effectiveIndexName =
+      String effectiveIndexName =
           StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
               : indexNameOverride;
+
+      //Always force new index name for Initial Load when Index name not provided
+      if (!getFlightPlan().isLastRunMode() && StringUtils.isBlank(indexNameOverride)) {
+        effectiveIndexName = effectiveIndexName.concat("_").concat(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
+      }
       getFlightPlan().setIndexName(effectiveIndexName);
 
-      // Drop index first, if requested.
-      if (getFlightPlan().isDropIndex()) {
+      // Drop index first, if requested and index name provided. Not applicable for aliases
+      if (getFlightPlan().isDropIndex() && !StringUtils.isBlank(indexNameOverride)) {
         esDao.deleteIndex(effectiveIndexName);
       }
 
