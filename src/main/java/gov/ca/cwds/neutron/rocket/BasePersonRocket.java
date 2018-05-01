@@ -620,18 +620,12 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
     Date ret;
 
     try {
-      // If index name is provided, use it, else take alias from ES config.
-      final String indexNameOverride = getFlightPlan().getIndexName();
-      final String effectiveIndexName =
-          StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
-              : indexNameOverride;
-      getFlightPlan().setIndexName(effectiveIndexName); // WARNING: probably a bad idea.
-
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
       LOGGER.info("last run date/time: {}", lastRun);
 
       sizeQueues(lastRun);
       if (determineInitialLoad(lastRun)) {
+        // Initial mode:
         flightLog.setInitialLoad(true);
         refreshMQT();
         if (isInitialLoadJdbc()) {
@@ -640,6 +634,14 @@ public abstract class BasePersonRocket<T extends PersistentObject, M extends Api
           extractHibernate();
         }
       } else {
+        // Last run mode:
+        // INT-1723: Neutron to create Elasticsearch Alias for people-summary index
+        // If index name is provided, use it, else take alias from ES config.
+        final String indexNameOverride = getFlightPlan().getIndexName();
+        final String effectiveIndexName =
+            StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
+                : indexNameOverride;
+        getFlightPlan().setIndexName(effectiveIndexName);
         doLastRun(lastRun);
       }
 

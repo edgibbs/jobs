@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +29,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
@@ -35,6 +37,7 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
+import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -52,6 +55,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientPersonIndexerJob.class);
 
+  private AtomLaunchDirector launchDirector;
+
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
@@ -66,8 +71,16 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Inject
   public ClientPersonIndexerJob(final ReplicatedClientDao dao,
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
+    this.launchDirector = launchDirector;
+  }
+
+  @Override
+  public Date launch(Date lastSuccessfulRunTime) throws NeutronCheckedException {
+    determineIndexName();
+    return super.launch(lastSuccessfulRunTime);
   }
 
   @Override
@@ -161,6 +174,29 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
       grpRecs.add(m);
       lastId = m.getNormalizationGroupKey();
+    }
+  }
+
+  /**
+   * <a href="https://osi-cwds.atlassian.net/browse/INT-1723">INT-1723</a>: Neutron to create
+   * Elasticsearch Alias for people-summary index.
+   */
+  protected void determineIndexName() {
+    // The Launch Director has a global registry of flight plans.
+    if (launchDirector != null) {
+      final FlightPlan resetIndexFlightPlan =
+          launchDirector.getFlightPlanManger().getFlightPlan(IndexResetPeopleSummaryRocket.class);
+      final String globalIndexName =
+          LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
+
+      if (resetIndexFlightPlan != null
+          && StringUtils.isNotBlank(resetIndexFlightPlan.getIndexName())) {
+        LOGGER.info("\n\nTake index name from IndexResetRocket flight plan!\n\n");
+        flightPlan.setIndexName(resetIndexFlightPlan.getIndexName().trim());
+      } else if (!StringUtils.isBlank(globalIndexName)) {
+        LOGGER.info("\n\nTake index name from global flight plan!\n\n");
+        flightPlan.setIndexName(globalIndexName.trim());
+      }
     }
   }
 

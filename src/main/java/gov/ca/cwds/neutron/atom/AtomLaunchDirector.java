@@ -11,6 +11,11 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.NeutronRocket;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
+/**
+ * Manager scheduled rockets.
+ * 
+ * @author CWDS API Team
+ */
 public interface AtomLaunchDirector {
 
   /**
@@ -23,7 +28,15 @@ public interface AtomLaunchDirector {
    */
   FlightLog launch(Class<?> klass, FlightPlan flightPlan) throws NeutronCheckedException;
 
-  FlightLog launch(String jobName, FlightPlan flightPlan) throws NeutronCheckedException;
+  /**
+   * Launch a registered rocket. Convenient overload.
+   * 
+   * @param rocketClass rocket class name
+   * @param flightPlan command line arguments
+   * @return rocket flight progress
+   * @throws NeutronCheckedException unexpected runtime error
+   */
+  FlightLog launch(String rocketClass, FlightPlan flightPlan) throws NeutronCheckedException;
 
   void prepareLaunchPads();
 

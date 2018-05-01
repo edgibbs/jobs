@@ -17,7 +17,7 @@ class TestClientPersonIndexerJob extends ClientPersonIndexerJob {
   public TestClientPersonIndexerJob(ReplicatedClientDao dao, ElasticsearchDao esDao,
       String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
       FlightRecorder jobHistory, FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, opts);
+    super(dao, esDao, lastJobRunTimeFilename, mapper, opts, null);
   }
 
   @Override
