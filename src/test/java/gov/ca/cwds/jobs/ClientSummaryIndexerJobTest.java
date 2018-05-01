@@ -42,7 +42,8 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
+    target =
+        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 
   @Test
