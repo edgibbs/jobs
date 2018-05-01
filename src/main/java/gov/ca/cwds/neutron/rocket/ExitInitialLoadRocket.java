@@ -74,13 +74,14 @@ public class ExitInitialLoadRocket
           logError(sched, summary);
         }
 
-        LaunchCommand.getInstance().shutdown();
-        //Swap Alias to new index
-        final String index = flightPlan.getIndexName();
+        // Swap Alias to new index
+        final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
         final String alias = esDao.getConfig().getElasticsearchAlias();
         if (esDao.createOrSwapAlias(alias, index)) {
           LOGGER.info("Applied Alias {} to Index {} ", alias, index);
         }
+
+        LaunchCommand.getInstance().shutdown();
       } catch (Exception e) {
         CheeseRay.checked(LOGGER, e, "ELASTICSEARCH INDEX MANAGEMENT ERROR! {}", e.getMessage());
       }

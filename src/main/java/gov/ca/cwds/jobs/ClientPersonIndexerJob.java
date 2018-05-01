@@ -68,6 +68,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
+
+    // INT-1723: Neutron to create Elasticsearch Alias for people-summary index
+    // TO1DO: create a global registry of index names.
+    final String globalIndexName = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
+    if (!StringUtils.isBlank(globalIndexName)) {
+      getFlightPlan().setIndexName(globalIndexName.trim());
+    }
   }
 
   @Override
