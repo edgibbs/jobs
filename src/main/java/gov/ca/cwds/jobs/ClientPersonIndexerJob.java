@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,6 +55,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientPersonIndexerJob.class);
 
+  private AtomLaunchDirector launchDirector;
+
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   /**
@@ -71,24 +74,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
+    this.launchDirector = launchDirector;
+  }
 
-    // INT-1723: Neutron to create Elasticsearch Alias for people-summary index
-    // The Launch Director has a global registry of flight plans.
-    if (launchDirector != null) {
-      final FlightPlan resetIndexFlightPlan =
-          launchDirector.getFlightPlanManger().getFlightPlan(IndexResetRocket.class);
-      final String globalIndexName =
-          LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
-
-      if (resetIndexFlightPlan != null
-          && StringUtils.isNotBlank(resetIndexFlightPlan.getIndexName())) {
-        LOGGER.info("\n\nTake index name from IndexResetRocket flight plan!\n\n");
-        flightPlan.setIndexName(resetIndexFlightPlan.getIndexName().trim());
-      } else if (!StringUtils.isBlank(globalIndexName)) {
-        LOGGER.info("\n\nTake index name from global flight plan!\n\n");
-        flightPlan.setIndexName(globalIndexName.trim());
-      }
-    }
+  @Override
+  public Date launch(Date lastSuccessfulRunTime) throws NeutronCheckedException {
+    determineIndexName();
+    return super.launch(lastSuccessfulRunTime);
   }
 
   @Override
@@ -182,6 +174,29 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
       grpRecs.add(m);
       lastId = m.getNormalizationGroupKey();
+    }
+  }
+
+  /**
+   * <a href="https://osi-cwds.atlassian.net/browse/INT-1723">INT-1723</a>: Neutron to create
+   * Elasticsearch Alias for people-summary index.
+   */
+  protected void determineIndexName() {
+    // The Launch Director has a global registry of flight plans.
+    if (launchDirector != null) {
+      final FlightPlan resetIndexFlightPlan =
+          launchDirector.getFlightPlanManger().getFlightPlan(IndexResetRocket.class);
+      final String globalIndexName =
+          LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
+
+      if (resetIndexFlightPlan != null
+          && StringUtils.isNotBlank(resetIndexFlightPlan.getIndexName())) {
+        LOGGER.info("\n\nTake index name from IndexResetRocket flight plan!\n\n");
+        flightPlan.setIndexName(resetIndexFlightPlan.getIndexName().trim());
+      } else if (!StringUtils.isBlank(globalIndexName)) {
+        LOGGER.info("\n\nTake index name from global flight plan!\n\n");
+        flightPlan.setIndexName(globalIndexName.trim());
+      }
     }
   }
 
