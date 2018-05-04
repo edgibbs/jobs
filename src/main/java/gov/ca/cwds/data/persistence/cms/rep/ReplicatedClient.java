@@ -2,8 +2,10 @@ package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -262,18 +264,28 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   // ApiMultipleClientAddressAware:
   // =================================
 
+  /**
+   * {@inheritDoc}
+   * 
+   * HOT-1885: Elasticsearch: last known residence address (rule R-02294)
+   */
   @JsonIgnore
   @Override
   public List<ElasticSearchPersonAddress> getElasticSearchPersonAddresses() {
-    final Map<String, ElasticSearchPersonAddress> esClientAddresses = new HashMap<>();
+    final Map<String, ElasticSearchPersonAddress> esClientAddresses = new LinkedHashMap<>();
+    final List<ReplicatedClientAddress> sortedClientAddresses = this.clientAddresses.stream()
+        .sorted(Comparator
+            .comparing(ReplicatedClientAddress::getEffStartDt,
+                Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(ReplicatedClientAddress::getEffEndDt,
+                Comparator.nullsLast(Comparator.naturalOrder())))
+        .collect(Collectors.toList());
 
-    for (ReplicatedClientAddress repClientAddress : this.clientAddresses) {
+    for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
 
-      /*
-       * Only index active addresses.
-       */
+      // Rule R - 02294 Client Abstract Most Recent Address
       if (addressActive) {
         final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
 
@@ -347,6 +359,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
+    // INT-1690: Populate client phone information in people_summary ES index
+    // 27 ADDR_TPC Business 0001 N
+    // 28 ADDR_TPC Day Care 0002 N
+    // 29 ADDR_TPC Homeless 0003 N
+    // 30 ADDR_TPC Penal Institution 0004 N
+    // 31 ADDR_TPC Permanent Mailing Address 0005 N
+    // 32 ADDR_TPC Residence 0006 N
+
     return clientAddresses.stream().filter(ReplicatedClientAddress::isActive)
         .flatMap(ca -> ca.getAddresses().stream()).flatMap(adr -> Arrays.stream(adr.getPhones()))
         .collect(Collectors.toList()).toArray(new ApiPhoneAware[0]);
