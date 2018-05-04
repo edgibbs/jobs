@@ -157,6 +157,36 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
+  public static final String PREP_AFFECTED_CLIENTS_FULL =
+      "INSERT INTO GT_ID (IDENTIFIER) \n" 
+    + "SELECT DISTINCT pe.FKCLIENT_T \n"
+    + "FROM PLC_EPST pe \n" 
+    + " WHERE pe.FKCLIENT_T BETWEEN ? AND ? \n"
+    + "   AND pe.IBMSNAP_OPERATION IN ('I','U') \n";
+  //@formatter:on
+
+  //@formatter:off
+  public static final String SELECT_PLACEMENT_ADDRESS_FULL =
+    "SELECT x.* FROM ( \n"
+        + " SELECT  \n"
+        + "       pe.FKCLIENT_T, pe.THIRD_ID, pe.GVR_ENTC as pe_county \n"
+        + "     , ohp.IDENTIFIER as ohp_id, ohp.START_DT as ohp_start, ohp.END_DT as ohp_end \n"
+        + "     , ph.IDENTIFIER as ph_id, ph.GVR_ENTC as ph_county \n"
+        + "     , ph.STREET_NO, ph.STREET_NM, ph.CITY_NM, ph.F_STATE_C, ph.ZIP_NO, ph.ZIP_SFX_NO \n"
+        + "     , DENSE_RANK() OVER (PARTITION BY pe.FKCLIENT_T ORDER BY ohp.START_DT, ohp.END_DT) AS rn \n"
+        + " FROM gt_id gt \n"
+        + " JOIN PLC_EPST pe  ON gt.IDENTIFIER = pe.FKCLIENT_T \n"
+        + " JOIN O_HM_PLT ohp ON ohp.FKPLC_EPS0 = pe.THIRD_ID AND ohp.FKPLC_EPST = pe.FKCLIENT_T \n"
+        + " JOIN PLC_HM_T ph  ON ph.IDENTIFIER = ohp.FKPLC_HM_T \n"
+        + " WHERE CURRENT DATE BETWEEN ohp.START_DT AND NVL(ohp.END_DT, CURRENT DATE)  \n"
+        + " ORDER BY FKCLIENT_T, OHP_START \n"
+    + ") x \n"
+    + "WHERE x.rn = 1 \n"
+    + "ORDER BY FKCLIENT_T, OHP_START \n"
+    + "WITH UR";
+  //@formatter:on
+
+  //@formatter:off
   public static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n" 
           + "SELECT DISTINCT CLT.IDENTIFIER \n"
