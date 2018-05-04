@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -104,6 +105,24 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       throw CheeseRay.runtime(LOGGER, e, "PEOPLE SUMMARY: ERROR BUILDING LAST CHANGE SQL! {}",
           e.getMessage());
     }
+  }
+
+  protected void prepAffectedClients(final PreparedStatement stmtInsClient,
+      final Pair<String, String> p) throws SQLException {
+    LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
+    stmtInsClient.setMaxRows(0);
+    stmtInsClient.setQueryTimeout(0);
+
+    if (!getFlightPlan().isLastRunMode()) {
+      LOGGER.debug("INITIAL LOAD");
+      stmtInsClient.setString(1, p.getLeft());
+      stmtInsClient.setString(2, p.getRight());
+    } else {
+      LOGGER.debug("LAST RUN");
+    }
+
+    final int countInsClient = stmtInsClient.executeUpdate();
+    LOGGER.info("affected clients: {}", countInsClient);
   }
 
   @Override

@@ -157,7 +157,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String PREP_AFFECTED_CLIENTS_FULL =
+  public static final String INSERT_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
     + "SELECT DISTINCT pe.FKCLIENT_T \n"
     + "FROM PLC_EPST pe \n" 
@@ -166,7 +166,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String SELECT_PLACEMENT_ADDRESS_FULL =
+  public static final String SELECT_PLACEMENT_ADDRESS =
     "SELECT x.* FROM ( \n"
         + " SELECT  \n"
         + "       pe.FKCLIENT_T, pe.THIRD_ID, pe.GVR_ENTC as pe_county \n"

@@ -273,12 +273,15 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Override
   public List<ElasticSearchPersonAddress> getElasticSearchPersonAddresses() {
     final Map<String, ElasticSearchPersonAddress> esClientAddresses = new LinkedHashMap<>();
+
+    // Sort addresses by start date in descending order.
+    // Last known address should come first.
     final List<ReplicatedClientAddress> sortedClientAddresses = this.clientAddresses.stream()
         .sorted(Comparator
             .comparing(ReplicatedClientAddress::getEffStartDt,
-                Comparator.nullsLast(Comparator.naturalOrder()))
+                Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(ReplicatedClientAddress::getEffEndDt,
-                Comparator.nullsLast(Comparator.naturalOrder())))
+                Comparator.nullsLast(Comparator.reverseOrder())))
         .collect(Collectors.toList());
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
