@@ -44,7 +44,10 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * Rocket to load Client person data from CMS into ElasticSearch. This is the people-summary index.
+ * PEOPLE SUMMARY!
+ * <p>
+ * Rocket to load Client person data from CMS into ElasticSearch.
+ * </p>
  * 
  * @author CWDS API Team
  */
