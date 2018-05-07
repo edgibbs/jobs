@@ -31,4 +31,8 @@ public interface AtomRangeHandler {
     // Default is no-op.
   }
 
+  default void afterReads(final Pair<String, String> p) {
+    // Default is no-op.
+  }
+
 }

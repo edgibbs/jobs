@@ -150,6 +150,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         throw e;
       }
 
+      // Handle any processing after reads are done, like normalization.
+      afterReads(p);
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", p.getLeft(), p.getRight());
     } catch (Exception e) {
       fail();

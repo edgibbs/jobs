@@ -132,13 +132,18 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
   }
 
   @Override
+  public void afterReads(final Pair<String, String> p) {
+    // TODO: Merge placement home addresses HERE.
+    queueIndex();
+  }
+
+  @Override
   public void beforeRange(Pair<String, String> p) {
     clear();
   }
 
   @Override
   public void afterRange(Pair<String, String> p) {
-    queueIndex();
     clear();
   }
 
