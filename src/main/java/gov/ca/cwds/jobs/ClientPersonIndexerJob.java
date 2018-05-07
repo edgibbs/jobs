@@ -132,7 +132,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   /**
-   * Both modes. Construct one handler per thread.
+   * Both modes. Construct a handler for this thread.
    */
   protected void allocateThreadLocal() {
     if (handler.get() == null) {
@@ -140,6 +140,9 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     }
   }
 
+  /**
+   * Both modes. Set this thread's handler to null.
+   */
   protected void deallocateThreadLocal() {
     if (handler.get() != null) {
       handler.set(null);
@@ -221,7 +224,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
       CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-
         // TODO: Fetch Placement Home addresses before normalizing.
         normalizeAndQueueIndex(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.

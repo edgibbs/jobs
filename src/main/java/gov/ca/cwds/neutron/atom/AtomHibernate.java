@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -116,6 +117,27 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    */
   default boolean isDB2OnZOS() throws NeutronCheckedException {
     return NeutronDB2Utils.isDB2OnZOS(getJobDao());
+  }
+
+  /**
+   * "Work-around" (gentle euphemism for <strong>HACK</strong>) for annoying condition where a
+   * transaction should have started but did not.
+   * 
+   * <p>
+   * Get the current transaction from the current session or start a new transaction.
+   * </p>
+   * 
+   * @return current, active transaction
+   */
+  default Transaction grabTransaction() {
+    Transaction txn = null;
+    final Session session = getJobDao().getSessionFactory().getCurrentSession();
+    try {
+      txn = session.beginTransaction();
+    } catch (Exception e) { // NOSONAR
+      txn = session.getTransaction();
+    }
+    return txn;
   }
 
   /**

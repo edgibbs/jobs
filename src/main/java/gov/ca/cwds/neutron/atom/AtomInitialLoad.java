@@ -12,7 +12,6 @@ import javax.persistence.ParameterMode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 import org.slf4j.Logger;
@@ -104,27 +103,6 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         : false;
   }
 
-  /**
-   * "Work-around" (gentle euphemism for <strong>HACK</strong>) for annoying condition where a
-   * transaction should have started but did not.
-   * 
-   * <p>
-   * Get the current transaction from the current session or start a new transaction.
-   * </p>
-   * 
-   * @return current, active transaction
-   */
-  default Transaction grabTransaction() {
-    Transaction txn = null;
-    final Session session = getJobDao().getSessionFactory().getCurrentSession();
-    try {
-      txn = session.beginTransaction();
-    } catch (Exception e) { // NOSONAR
-      txn = session.getTransaction();
-    }
-    return txn;
-  }
-
   default int nextThreadNumber() {
     return 1;
   }
@@ -211,12 +189,12 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
-      // Queue execution.
+      // Queue up thread execution.
       for (Pair<String, String> p : ranges) {
         tasks.add(threadPool.submit(() -> pullRange(p)));
       }
 
-      // Join threads. Don't return from method until they complete.
+      // Join threads. Don't let this method return until the threads finish.
       for (ForkJoinTask<?> task : tasks) {
         task.get();
       }

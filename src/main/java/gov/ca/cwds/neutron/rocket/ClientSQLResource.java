@@ -159,15 +159,15 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:off
   public static final String SELECT_PLACEMENT_ADDRESS =
         "SELECT  \n"
-      +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_COUNTY, \n"
-      +   " x.OHP_ID, x.OHP_START, x.OHP_END, \n"
-      +   " x.PH_ID, x.PH_COUNTY, x.STREET_NO, x.STREET_NM, "
+      +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_GVR_ENTC, \n"
+      +   " x.OHP_ID, x.START_DT, x.END_DT, \n"
+      +   " x.PH_ID, x.PH_GVR_ENTC, x.STREET_NO, x.STREET_NM, "
       +   "x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO \n"
       + "FROM ( \n"
       + " SELECT \n"
-      + "     PE.FKCLIENT_T, PE.THIRD_ID, PE.GVR_ENTC PE_COUNTY \n"
-      + "   , OHP.IDENTIFIER OHP_ID, OHP.START_DT OHP_START, OHP.END_DT OHP_END \n"
-      + "   , PH.IDENTIFIER PH_ID, PH.GVR_ENTC PH_COUNTY \n"
+      + "     PE.FKCLIENT_T, PE.THIRD_ID, PE.GVR_ENTC PE_GVR_ENTC \n"
+      + "   , OHP.IDENTIFIER OHP_ID, ohp.START_DT, ohp.END_DT \n"
+      + "   , PH.IDENTIFIER PH_ID, PH.GVR_ENTC PH_GVR_ENTC \n"
       + "   , TRIM(PH.STREET_NO) STREET_NO, TRIM(PH.STREET_NM) STREET_NM, TRIM(PH.CITY_NM) CITY_NM \n"
       + "   , PH.F_STATE_C STATE_C, PH.ZIP_NO, PH.ZIP_SFX_NO \n"
       + "   , DENSE_RANK() OVER (PARTITION BY PE.FKCLIENT_T ORDER BY OHP.START_DT, OHP.END_DT) RN \n"
@@ -182,7 +182,7 @@ public class ClientSQLResource implements ApiMarker {
       + " ORDER BY FKCLIENT_T, OHP_START \n"
       + ") X \n"
       + "WHERE X.RN = 1 \n"
-      + "ORDER BY FKCLIENT_T, OHP_START \n"
+      + "ORDER BY CLIENT_ID, OHP_START \n"
       + "WITH UR";  
   //@formatter:on
 
