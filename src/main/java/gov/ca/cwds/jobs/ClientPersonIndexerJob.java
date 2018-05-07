@@ -108,7 +108,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     }
   }
 
-
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,
       final Pair<String, String> p) throws SQLException {
     LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
@@ -292,7 +291,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public void handleCustomJdbc(Connection con, Pair<String, String> range) throws SQLException {
+  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     try (final PreparedStatement stmtInsClient =
         con.prepareStatement(ClientSQLResource.INSERT_CLIENT_FULL)) {
       prepAffectedClients(stmtInsClient, range);

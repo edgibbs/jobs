@@ -567,7 +567,7 @@ public class ReferralHistoryIndexerJob
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
-        // Pull each range independently on the next available thread.
+        // Pull each range **independently** on the next available thread.
         tasks.add(threadPool.submit(() -> pullNextRange(p)));
       }
 
@@ -583,7 +583,7 @@ public class ReferralHistoryIndexerJob
       doneRetrieve();
     }
 
-    LOGGER.info("DONE: read {} ES referral rows", this.rowsReadReferrals.get());
+    LOGGER.info("DONE: retrieved {} ES referral rows", this.rowsReadReferrals.get());
   }
 
   /**

@@ -638,9 +638,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       try {
         catchYourBreath(); // Let bulk processor finish
         for (Pair<String, String> p : tests) {
-          String json =
-              ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get(p.getRight()));
-          LOGGER.info("TEST: name: {}\n{}", p.getLeft(), json);
+          LOGGER.info("TEST: name: {}\n{}", p.getLeft(),
+              ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get(p.getRight())));
         }
       } catch (IOException e) {
         fail();

@@ -13,7 +13,6 @@ import javax.persistence.ParameterMode;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.text.RandomStringGenerator;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
@@ -107,7 +106,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
   }
 
   /**
-   * "Work-around" (gentle euphemism for a <strong>HACK</strong>) for annoying condition where a
+   * "Work-around" (gentle euphemism for <strong>HACK</strong>) for annoying condition where a
    * transaction should have started but did not.
    * 
    * <p>
@@ -141,8 +140,12 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     // Provide your own solution, for now.
   }
 
-  default void handleCustomJdbc(final Connection con, Pair<String, String> range)
+  default void handleSecondaryJdbc(final Connection con, Pair<String, String> range)
       throws SQLException {
+    // Default is no-op.
+  }
+
+  default void cleanupAfterRange(final Pair<String, String> p) {
     // Default is no-op.
   }
 
@@ -152,6 +155,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
    * @param p partition range to read
    */
   default void pullRange(final Pair<String, String> p) {
+    final String origThreadName = Thread.currentThread().getName();
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
@@ -170,13 +174,13 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       NeutronDB2Utils.enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
-        // Handle additional JDBC statements, if any.
-        handleCustomJdbc(con, p);
-
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
         handleRangeResults(stmt.executeQuery(query));
+
+        // Handle additional JDBC statements, if any.
+        handleSecondaryJdbc(con, p);
 
         con.commit();
       } catch (Exception e) {
@@ -190,8 +194,9 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       throw CheeseRay.runtime(log, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
           e.getMessage());
     } finally {
+      cleanupAfterRange(p);
       getFlightLog().markRangeComplete(p);
-      nameThread(new RandomStringGenerator.Builder().withinRange('a', 'z').build().generate(10));
+      nameThread(origThreadName);
     }
   }
 

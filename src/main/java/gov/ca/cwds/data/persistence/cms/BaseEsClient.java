@@ -505,7 +505,7 @@ public abstract class BaseEsClient
     ret.clientCountyId = ifNull(rs.getString("CLC_CLIENT_ID"));
     ret.clientEthnicityId = ifNull(rs.getString("ETHNICITY_CODE"));
 
-    // Languages
+    // Languages:
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
     ret.cltSecondaryLanguageType = rs.getShort("CLT_S_LANG_TC");
 

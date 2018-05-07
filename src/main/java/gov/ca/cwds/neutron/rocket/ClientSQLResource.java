@@ -157,33 +157,42 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
+  public static final String SELECT_PLACEMENT_ADDRESS =
+        "SELECT  \n"
+      +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_COUNTY, \n"
+      +   " x.OHP_ID, x.OHP_START, x.OHP_END, \n"
+      +   " x.PH_ID, x.PH_COUNTY, x.STREET_NO, x.STREET_NM, "
+      +   "x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO \n"
+      + "FROM ( \n"
+      + " SELECT \n"
+      + "     PE.FKCLIENT_T, PE.THIRD_ID, PE.GVR_ENTC PE_COUNTY \n"
+      + "   , OHP.IDENTIFIER OHP_ID, OHP.START_DT OHP_START, OHP.END_DT OHP_END \n"
+      + "   , PH.IDENTIFIER PH_ID, PH.GVR_ENTC PH_COUNTY \n"
+      + "   , TRIM(PH.STREET_NO) STREET_NO, TRIM(PH.STREET_NM) STREET_NM, TRIM(PH.CITY_NM) CITY_NM \n"
+      + "   , PH.F_STATE_C STATE_C, PH.ZIP_NO, PH.ZIP_SFX_NO \n"
+      + "   , DENSE_RANK() OVER (PARTITION BY PE.FKCLIENT_T ORDER BY OHP.START_DT, OHP.END_DT) RN \n"
+      + " FROM GT_ID gt \n"
+      + " JOIN PLC_EPST PE  ON GT.IDENTIFIER  = PE.FKCLIENT_T \n"
+      + " JOIN O_HM_PLT OHP ON OHP.FKPLC_EPS0 = PE.THIRD_ID AND OHP.FKPLC_EPST = PE.FKCLIENT_T \n"
+      + " JOIN PLC_HM_T PH  ON PH.IDENTIFIER  = OHP.FKPLC_HM_T \n"
+      + " WHERE CURRENT DATE BETWEEN OHP.START_DT AND NVL(OHP.END_DT, CURRENT DATE) \n"
+      + "       AND PE.IBMSNAP_OPERATION  IN ('I','U') \n"
+      + "       AND OHP.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "       AND PH.IBMSNAP_OPERATION  IN ('I','U') \n"
+      + " ORDER BY FKCLIENT_T, OHP_START \n"
+      + ") X \n"
+      + "WHERE X.RN = 1 \n"
+      + "ORDER BY FKCLIENT_T, OHP_START \n"
+      + "WITH UR";  
+  //@formatter:on
+
+  //@formatter:off
   public static final String INSERT_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
     + "SELECT DISTINCT pe.FKCLIENT_T \n"
     + "FROM PLC_EPST pe \n" 
     + " WHERE pe.FKCLIENT_T BETWEEN ? AND ? \n"
-    + "   AND pe.IBMSNAP_OPERATION IN ('I','U') \n";
-  //@formatter:on
-
-  //@formatter:off
-  public static final String SELECT_PLACEMENT_ADDRESS =
-    "SELECT x.* FROM ( \n"
-        + " SELECT  \n"
-        + "       pe.FKCLIENT_T, pe.THIRD_ID, pe.GVR_ENTC as pe_county \n"
-        + "     , ohp.IDENTIFIER as ohp_id, ohp.START_DT as ohp_start, ohp.END_DT as ohp_end \n"
-        + "     , ph.IDENTIFIER as ph_id, ph.GVR_ENTC as ph_county \n"
-        + "     , ph.STREET_NO, ph.STREET_NM, ph.CITY_NM, ph.F_STATE_C, ph.ZIP_NO, ph.ZIP_SFX_NO \n"
-        + "     , DENSE_RANK() OVER (PARTITION BY pe.FKCLIENT_T ORDER BY ohp.START_DT, ohp.END_DT) AS rn \n"
-        + " FROM GT_ID gt \n"
-        + " JOIN PLC_EPST pe  ON gt.IDENTIFIER = pe.FKCLIENT_T \n"
-        + " JOIN O_HM_PLT ohp ON ohp.FKPLC_EPS0 = pe.THIRD_ID AND ohp.FKPLC_EPST = pe.FKCLIENT_T \n"
-        + " JOIN PLC_HM_T ph  ON ph.IDENTIFIER = ohp.FKPLC_HM_T \n"
-        + " WHERE CURRENT DATE BETWEEN ohp.START_DT AND NVL(ohp.END_DT, CURRENT DATE)  \n"
-        + " ORDER BY FKCLIENT_T, OHP_START \n"
-    + ") x \n"
-    + "WHERE x.rn = 1 \n"
-    + "ORDER BY FKCLIENT_T, OHP_START \n"
-    + "WITH UR";
+    + "   AND pe.IBMSNAP_OPERATION IN ('I','U')";
   //@formatter:on
 
   //@formatter:off
