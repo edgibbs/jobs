@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.std.ApiMarker;
 
 public class PlacementHomeAddress implements ApiMarker {
@@ -91,6 +93,30 @@ public class PlacementHomeAddress implements ApiMarker {
     this.zip4 = rs.getShort("ZIP_SFX_NO");
 
     this.lastUpdatedTime = rs.getTimestamp("PH_LST_UPD_TS");
+  }
+
+  public ReplicatedClientAddress toReplicatedClientAddress() {
+    final ReplicatedClientAddress ret = new ReplicatedClientAddress();
+
+    ret.setAddressType((short) 32);
+    ret.setEffEndDt(end);
+    ret.setEffStartDt(start);
+    ret.setId(placementHomeId);
+    ret.setLastUpdatedTime(lastUpdatedTime);
+    ret.setFkClient(clientId);
+
+    final ReplicatedAddress addr = new ReplicatedAddress();
+    addr.setCity(city);
+    addr.setGovernmentEntityCd(getPlacementEpisodeGovernmentEntityCd());
+    addr.setState(state);
+    addr.setId(placementHomeId);
+    addr.setLastUpdatedTime(lastUpdatedTime);
+    addr.setStreetNumber(streetNumber);
+    addr.setStreetName(streetName);
+    // addr.setZip(zip);
+    addr.setZip4(zip4);
+
+    return ret;
   }
 
   public String getClientId() {

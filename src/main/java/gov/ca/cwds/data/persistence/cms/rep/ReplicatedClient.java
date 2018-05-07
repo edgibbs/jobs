@@ -369,14 +369,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    // INT-1690: Populate client phone information in people_summary ES index
-    // 27 ADDR_TPC Business 0001 N
-    // 28 ADDR_TPC Day Care 0002 N
-    // 29 ADDR_TPC Homeless 0003 N
-    // 30 ADDR_TPC Penal Institution 0004 N
-    // 31 ADDR_TPC Permanent Mailing Address 0005 N
-    // 32 ADDR_TPC Residence 0006 N
-
     return clientAddresses.stream().filter(ReplicatedClientAddress::isActive)
         .flatMap(ca -> ca.getAddresses().stream()).flatMap(adr -> Arrays.stream(adr.getPhones()))
         .collect(Collectors.toList()).toArray(new ApiPhoneAware[0]);
