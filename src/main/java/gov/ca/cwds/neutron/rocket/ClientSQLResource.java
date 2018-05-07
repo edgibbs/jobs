@@ -162,7 +162,7 @@ public class ClientSQLResource implements ApiMarker {
       +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_GVR_ENTC, \n"
       +   " x.OHP_ID, x.START_DT, x.END_DT, \n"
       +   " x.PH_ID, x.PH_GVR_ENTC, x.STREET_NO, x.STREET_NM, "
-      +   "x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO \n"
+      +   "x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO, , ph.LST_UPD_TS PH_LST_UPD_TS \n"
       + "FROM ( \n"
       + " SELECT \n"
       + "     PE.FKCLIENT_T, PE.THIRD_ID, PE.GVR_ENTC PE_GVR_ENTC \n"
@@ -179,15 +179,15 @@ public class ClientSQLResource implements ApiMarker {
       + "       AND PE.IBMSNAP_OPERATION  IN ('I','U') \n"
       + "       AND OHP.IBMSNAP_OPERATION IN ('I','U') \n"
       + "       AND PH.IBMSNAP_OPERATION  IN ('I','U') \n"
-      + " ORDER BY FKCLIENT_T, OHP_START \n"
+      + " ORDER BY FKCLIENT_T, START_DT \n"
       + ") X \n"
       + "WHERE X.RN = 1 \n"
-      + "ORDER BY CLIENT_ID, OHP_START \n"
+      + "ORDER BY CLIENT_ID, START_DT \n"
       + "WITH UR";  
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_CLIENT_FULL =
+  public static final String INSERT_PLACEHOME_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
     + "SELECT DISTINCT pe.FKCLIENT_T \n"
     + "FROM PLC_EPST pe \n" 

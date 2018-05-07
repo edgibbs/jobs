@@ -45,7 +45,8 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
- * PEOPLE SUMMARY!
+ * PEOPLE SUMMARY ROCKET!
+ * 
  * <p>
  * Rocket to load Client person data from CMS into ElasticSearch.
  * </p>

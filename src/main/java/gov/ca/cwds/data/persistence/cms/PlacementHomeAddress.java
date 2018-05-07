@@ -23,8 +23,8 @@ public class PlacementHomeAddress implements ApiMarker {
   protected String clientId; // PLC_EPST.FKCLIENT_T, PLC_EPST composite key
 
   @Id
-  @Column(name = "THIRD_ID")
-  protected String thirdId; // PLC_EPST.THIRD_ID, PLC_EPST composite key
+  @Column(name = "PE_THIRD_ID")
+  protected String peThirdId; // PLC_EPST.THIRD_ID, PLC_EPST composite key
 
   @Id
   @Column(name = "OHP_ID")
@@ -65,12 +65,18 @@ public class PlacementHomeAddress implements ApiMarker {
   @Column(name = "ZIP_SFX_NO")
   protected Short zip4;
 
+  @Column(name = "START_DT")
+  protected Date start;
+
+  @Column(name = "END_DT")
+  protected Date end;
+
   @Column(name = "LST_UPD_TS")
   protected Date lastUpdatedTime;
 
   public PlacementHomeAddress(ResultSet rs) throws SQLException {
     this.clientId = ifNull(rs.getString("CLIENT_ID"));
-    this.thirdId = ifNull(rs.getString("THIRD_ID"));
+    this.peThirdId = ifNull(rs.getString("PE_THIRD_ID"));
     this.otherHomePlacementId = ifNull(rs.getString("PH_ID"));
     this.placementHomeId = ifNull(rs.getString("OHP_ID"));
 
@@ -82,9 +88,9 @@ public class PlacementHomeAddress implements ApiMarker {
     this.streetName = ifNull(rs.getString("STREET_NM"));
     this.streetNumber = ifNull(rs.getString("STREET_NO"));
     this.zip = rs.getInt("ZIP_NO");
-    this.zip4 = rs.getShort("SFX_NO");
+    this.zip4 = rs.getShort("ZIP_SFX_NO");
 
-    this.lastUpdatedTime = rs.getTimestamp("LST_UPD_TS");
+    this.lastUpdatedTime = rs.getTimestamp("PH_LST_UPD_TS");
   }
 
   public String getClientId() {
@@ -92,7 +98,7 @@ public class PlacementHomeAddress implements ApiMarker {
   }
 
   public String getThirdId() {
-    return thirdId;
+    return peThirdId;
   }
 
   public String getOtherHomePlacementId() {
@@ -137,6 +143,14 @@ public class PlacementHomeAddress implements ApiMarker {
 
   public Date getLastUpdatedTime() {
     return lastUpdatedTime;
+  }
+
+  public Date getStart() {
+    return start;
+  }
+
+  public Date getEnd() {
+    return end;
   }
 
 }

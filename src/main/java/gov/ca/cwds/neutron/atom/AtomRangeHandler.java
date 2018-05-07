@@ -6,10 +6,16 @@ import java.sql.SQLException;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * Interface defines load steps, primarily for initial (full) mode. In last change mode, the range
+ * is arbitrary (like 'a' - 'b'), since range only applies to initial mode.
+ * 
+ * @author CWDS API Team
+ */
 public interface AtomRangeHandler {
 
   /**
-   * Process results sets from {@link #pullRange(Pair)}.
+   * Process results sets from {@link #pullRange(Pair)}. Default implementation is no-op.
    * 
    * @param rs result set for this key range
    * @throws SQLException on database error
@@ -18,20 +24,45 @@ public interface AtomRangeHandler {
     // Provide your own solution, for now.
   }
 
+  /**
+   * Execute arbitrary JDBC as needed on the same connection.
+   * 
+   * @param con database connection
+   * @param range key range
+   * @throws SQLException on database error
+   */
   default void handleSecondaryJdbc(final Connection con, Pair<String, String> range)
       throws SQLException {
     // Default is no-op.
   }
 
-  default void beforeRange(final Pair<String, String> p) {
+  /**
+   * Begin step, before initial load key range processing begins. Allocate resources. Default
+   * implementation is no-op.
+   * 
+   * @param range key range
+   */
+  default void beforeRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
-  default void afterRange(final Pair<String, String> p) {
+  /**
+   * Terminal step, after after initial load key range processing completes. De-allocate resources.
+   * Default implementation is no-op.
+   * 
+   * @param range key range
+   */
+  default void afterRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
-  default void afterReads(final Pair<String, String> p) {
+  /**
+   * Intermediate step, after {@link Connection#commit()} and before {@link #afterRange(Pair)}.
+   * Process data, such as normalization. Default implementation is no-op.
+   * 
+   * @param range key range
+   */
+  default void afterReads(final Pair<String, String> range) {
     // Default is no-op.
   }
 
