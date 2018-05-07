@@ -110,8 +110,8 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomLoadEventHandl
 
   @Override
   public void eventStartRange(Pair<String, String> range) {
-    clear();
     rocket.getFlightLog().doneTransform();
+    clear();
   }
 
   @Override

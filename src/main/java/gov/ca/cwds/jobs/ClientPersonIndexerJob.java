@@ -124,7 +124,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public void eventHandleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+  public void eventHandleSecondaryJdbc(Connection con, Pair<String, String> range)
+      throws SQLException {
     handler.get().eventHandleSecondaryJdbc(con, range);
   }
 
@@ -192,6 +193,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public void eventHandleMainResults(final ResultSet rs) throws SQLException {
     handler.get().eventHandleMainResults(rs);
+  }
+
+  @Override
+  public void eventJdbcDone(final Pair<String, String> range) {
+    handler.get().eventJdbcDone(range);
   }
 
   /**
