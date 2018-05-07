@@ -1,5 +1,9 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -16,11 +20,11 @@ public class PlacementHomeAddress implements ApiMarker {
 
   @Id
   @Column(name = "CLIENT_ID")
-  protected String clientId; // PLC_EPST.FKCLIENT_T
+  protected String clientId; // PLC_EPST.FKCLIENT_T, PLC_EPST composite key
 
   @Id
   @Column(name = "THIRD_ID")
-  protected String thirdId; // PLC_EPST.THIRD_ID
+  protected String thirdId; // PLC_EPST.THIRD_ID, PLC_EPST composite key
 
   @Id
   @Column(name = "OHP_ID")
@@ -39,131 +43,100 @@ public class PlacementHomeAddress implements ApiMarker {
   protected Short placementHomeGovernmentEntityCd;
 
   @Column(name = "STREET_NO")
-  protected String adrStreetNumber;
+  @ColumnTransformer(read = "TRIM(STREET_NO)")
+  protected String streetNumber;
 
   @Column(name = "STREET_NM")
   @ColumnTransformer(read = "TRIM(STREET_NM)")
-  protected String adrStreetName;
+  protected String streetName;
 
   @Column(name = "CITY_NM")
-  protected String adrCity;
+  @ColumnTransformer(read = "TRIM(CITY_NM)")
+  protected String city;
 
   @Type(type = "short")
   @Column(name = "STATE_C")
-  protected Short adrState;
+  protected Short state;
 
   @Column(name = "ZIP_NO")
-  protected String adrZip;
+  protected Integer zip;
 
   @Type(type = "short")
   @Column(name = "ZIP_SFX_NO")
-  protected Short adrZip4;
+  protected Short zip4;
 
   @Column(name = "LST_UPD_TS")
   protected Date lastUpdatedTime;
 
-  public String getClientId() {
-    return clientId;
+  public PlacementHomeAddress(ResultSet rs) throws SQLException {
+    this.clientId = ifNull(rs.getString("CLIENT_ID"));
+    this.thirdId = ifNull(rs.getString("THIRD_ID"));
+    this.otherHomePlacementId = ifNull(rs.getString("PH_ID"));
+    this.placementHomeId = ifNull(rs.getString("OHP_ID"));
+
+    this.placementHomeGovernmentEntityCd = rs.getShort("PH_GVR_ENTC");
+    this.placementEpisodeGovernmentEntityCd = rs.getShort("PE_GVR_ENTC");
+
+    this.city = ifNull(rs.getString("CITY_NM"));
+    this.state = rs.getShort("STATE_C");
+    this.streetName = ifNull(rs.getString("STREET_NM"));
+    this.streetNumber = ifNull(rs.getString("STREET_NO"));
+    this.zip = rs.getInt("ZIP_NO");
+    this.zip4 = rs.getShort("SFX_NO");
+
+    this.lastUpdatedTime = rs.getTimestamp("LST_UPD_TS");
   }
 
-  public void setClientId(String clientId) {
-    this.clientId = clientId;
+  public String getClientId() {
+    return clientId;
   }
 
   public String getThirdId() {
     return thirdId;
   }
 
-  public void setThirdId(String thirdId) {
-    this.thirdId = thirdId;
-  }
-
   public String getOtherHomePlacementId() {
     return otherHomePlacementId;
-  }
-
-  public void setOtherHomePlacementId(String otherHomePlacementId) {
-    this.otherHomePlacementId = otherHomePlacementId;
   }
 
   public String getPlacementHomeId() {
     return placementHomeId;
   }
 
-  public void setPlacementHomeId(String placementHomeId) {
-    this.placementHomeId = placementHomeId;
-  }
-
   public Short getPlacementEpisodeGovernmentEntityCd() {
     return placementEpisodeGovernmentEntityCd;
-  }
-
-  public void setPlacementEpisodeGovernmentEntityCd(Short placementEpisodeGovernmentEntityCd) {
-    this.placementEpisodeGovernmentEntityCd = placementEpisodeGovernmentEntityCd;
   }
 
   public Short getPlacementHomeGovernmentEntityCd() {
     return placementHomeGovernmentEntityCd;
   }
 
-  public void setPlacementHomeGovernmentEntityCd(Short placementHomeGovernmentEntityCd) {
-    this.placementHomeGovernmentEntityCd = placementHomeGovernmentEntityCd;
+  public String getStreetNumber() {
+    return streetNumber;
   }
 
-  public String getAdrStreetNumber() {
-    return adrStreetNumber;
+  public String getStreetName() {
+    return streetName;
   }
 
-  public void setAdrStreetNumber(String adrStreetNumber) {
-    this.adrStreetNumber = adrStreetNumber;
+  public String getCity() {
+    return city;
   }
 
-  public String getAdrStreetName() {
-    return adrStreetName;
+  public Short getState() {
+    return state;
   }
 
-  public void setAdrStreetName(String adrStreetName) {
-    this.adrStreetName = adrStreetName;
+  public Integer getZip() {
+    return zip;
   }
 
-  public String getAdrCity() {
-    return adrCity;
-  }
-
-  public void setAdrCity(String adrCity) {
-    this.adrCity = adrCity;
-  }
-
-  public Short getAdrState() {
-    return adrState;
-  }
-
-  public void setAdrState(Short adrState) {
-    this.adrState = adrState;
-  }
-
-  public String getAdrZip() {
-    return adrZip;
-  }
-
-  public void setAdrZip(String adrZip) {
-    this.adrZip = adrZip;
-  }
-
-  public Short getAdrZip4() {
-    return adrZip4;
-  }
-
-  public void setAdrZip4(Short adrZip4) {
-    this.adrZip4 = adrZip4;
+  public Short getZip4() {
+    return zip4;
   }
 
   public Date getLastUpdatedTime() {
     return lastUpdatedTime;
-  }
-
-  public void setLastUpdatedTime(Date lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
   }
 
 }
