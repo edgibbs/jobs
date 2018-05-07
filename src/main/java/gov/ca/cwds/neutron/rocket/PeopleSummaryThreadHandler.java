@@ -47,8 +47,9 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
   }
 
   protected void clear() {
-    this.normalized.clear();
-    this.denormalized.clear();
+    normalized.clear();
+    denormalized.clear();
+    placementHomeAddresses.clear();
   }
 
   /**
@@ -108,7 +109,7 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
         final PreparedStatement stmtInsClient =
             con.prepareStatement(ClientSQLResource.INSERT_CLIENT_FULL);
         final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.INSERT_CLIENT_FULL)) {
+            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       prepAffectedClients(stmtInsClient, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } finally {
@@ -137,6 +138,7 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
 
   @Override
   public void afterRange(Pair<String, String> p) {
+    queueIndex();
     clear();
   }
 
