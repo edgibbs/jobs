@@ -41,6 +41,7 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
+import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
@@ -64,6 +65,10 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
+  protected transient ThreadLocal<PeopleSummaryThreadHandler> handler = new ThreadLocal<>();
+
+  private boolean largeLoad = false;
+
   /**
    * Construct batch rocket instance with all required dependencies.
    * 
@@ -85,6 +90,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public Date launch(Date lastSuccessfulRunTime) throws NeutronCheckedException {
     determineIndexName();
+    largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
     return super.launch(lastSuccessfulRunTime);
   }
 
@@ -110,12 +116,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,
       final Pair<String, String> p) throws SQLException {
-    LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
 
     if (!getFlightPlan().isLastRunMode()) {
-      LOGGER.debug("INITIAL LOAD");
+      LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
       stmtInsClient.setString(1, p.getLeft());
       stmtInsClient.setString(2, p.getRight());
     } else {
@@ -124,6 +129,31 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
     final int countInsClient = stmtInsClient.executeUpdate();
     LOGGER.info("affected clients: {}", countInsClient);
+  }
+
+  /**
+   * Both modes. Construct one handler per thread.
+   */
+  protected void allocateThreadLocal() {
+    if (handler.get() == null) {
+      handler.set(new PeopleSummaryThreadHandler(this));
+    }
+  }
+
+  protected void deallocateThreadLocal() {
+    if (handler.get() != null) {
+      handler.set(null);
+    }
+  }
+
+  @Override
+  public void beforeRange(Pair<String, String> p) {
+    allocateThreadLocal();
+  }
+
+  @Override
+  public void afterRange(Pair<String, String> p) {
+    deallocateThreadLocal();
   }
 
   @Override
@@ -156,7 +186,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * 
    * @param grpRecs recs for same client id
    */
-  protected void normalizeAndQueueIndex(final List<EsClientPerson> grpRecs) {
+  public void normalizeAndQueueIndex(final List<EsClientPerson> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
         .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
@@ -254,7 +284,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       }
     }
 
-    LOGGER.info("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
+    LOGGER.debug("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
         docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),
         person.getAddresses().size());
 
@@ -297,13 +327,17 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       prepAffectedClients(stmtInsClient, range);
       // readClients(stmtSelClient, mapClients);
     } finally {
-      con.commit(); // release database resources
+      // AtomInitialLoad.pullRange() releases database resources.
     }
   }
 
   @Override
   public boolean isInitialLoadJdbc() {
     return true;
+  }
+
+  public boolean isLargeLoad() {
+    return largeLoad;
   }
 
   @Override

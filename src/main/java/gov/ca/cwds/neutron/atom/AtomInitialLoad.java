@@ -1,8 +1,6 @@
 package gov.ca.cwds.neutron.atom;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +22,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
@@ -38,7 +37,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
  * @param <D> denormalized type
  */
 public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupNormalizer<?>>
-    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl {
+    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl, AtomRangeHandler {
 
   /**
    * Restrict initial load key ranges from flight plan (command line).
@@ -131,25 +130,6 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
   }
 
   /**
-   * Process results sets from {@link #pullRange(Pair)}.
-   * 
-   * @param rs result set for this key range
-   * @throws SQLException on database error
-   */
-  default void handleRangeResults(final ResultSet rs) throws SQLException {
-    // Provide your own solution, for now.
-  }
-
-  default void handleSecondaryJdbc(final Connection con, Pair<String, String> range)
-      throws SQLException {
-    // Default is no-op.
-  }
-
-  default void cleanupAfterRange(final Pair<String, String> p) {
-    // Default is no-op.
-  }
-
-  /**
    * Read records from the given key range, typically within a single partition on large tables.
    * 
    * @param p partition range to read
@@ -159,9 +139,13 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
+
     final Logger log = getLogger();
+    final FlightLog flightLog = getFlightLog();
+
     log.info("BEGIN: extract thread {}", threadName);
-    getFlightLog().markRangeStart(p);
+    flightLog.markRangeStart(p);
+    beforeRange(p);
 
     try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
@@ -173,7 +157,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       log.info("query: {}", query);
       NeutronDB2Utils.enableParallelism(con);
 
-      try (Statement stmt = con.createStatement()) {
+      try (final Statement stmt = con.createStatement()) {
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
@@ -191,11 +175,11 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", p.getLeft(), p.getRight());
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(log, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
+      throw CheeseRay.runtime(log, e, "RANGE FAILED! {}-{} : {}", p.getLeft(), p.getRight(),
           e.getMessage());
     } finally {
-      cleanupAfterRange(p);
-      getFlightLog().markRangeComplete(p);
+      afterRange(p);
+      flightLog.markRangeComplete(p);
       nameThread(origThreadName);
     }
   }
