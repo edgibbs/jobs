@@ -114,13 +114,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public void beforeRange(Pair<String, String> p) {
-    allocateThreadLocal();
+  public void startRange(Pair<String, String> p) {
+    allocateThreadHandler();
   }
 
   @Override
-  public void afterRange(Pair<String, String> p) {
-    deallocateThreadLocal();
+  public void finishRange(Pair<String, String> p) {
+    deallocateThreadHandler();
   }
 
   @Override
@@ -131,7 +131,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   /**
    * Both modes. Construct a handler for this thread.
    */
-  protected void allocateThreadLocal() {
+  protected void allocateThreadHandler() {
     if (handler.get() == null) {
       handler.set(new PeopleSummaryThreadHandler(this));
     }
@@ -140,7 +140,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   /**
    * Both modes. Set this thread's handler to null.
    */
-  protected void deallocateThreadLocal() {
+  protected void deallocateThreadHandler() {
     if (handler.get() != null) {
       handler.set(null);
     }
@@ -190,8 +190,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * {@inheritDoc}
    */
   @Override
-  public void handleRangeResults(final ResultSet rs) throws SQLException {
-    handler.get().handleRangeResults(rs);
+  public void handleMainResults(final ResultSet rs) throws SQLException {
+    handler.get().handleMainResults(rs);
   }
 
   /**

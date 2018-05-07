@@ -177,7 +177,7 @@ public class RelationshipIndexerJob
    * @throws SQLException on database error
    */
   @Override
-  public void handleRangeResults(final ResultSet rs) throws SQLException {
+  public void handleMainResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsRelationship m;
     Object lastId = new Object();

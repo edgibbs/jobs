@@ -135,13 +135,13 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void initialLoadProcessRangeResults_A$ResultSet() throws Exception {
-    target.handleRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test(expected = SQLException.class)
   public void initialLoadProcessRangeResults_A$ResultSet_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
-    target.handleRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test

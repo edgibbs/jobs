@@ -20,7 +20,7 @@ public interface AtomRangeHandler {
    * @param rs result set for this key range
    * @throws SQLException on database error
    */
-  default void handleRangeResults(final ResultSet rs) throws SQLException {
+  default void handleMainResults(final ResultSet rs) throws SQLException {
     // Provide your own solution, for now.
   }
 
@@ -42,7 +42,7 @@ public interface AtomRangeHandler {
    * 
    * @param range key range
    */
-  default void beforeRange(final Pair<String, String> range) {
+  default void startRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
@@ -52,17 +52,17 @@ public interface AtomRangeHandler {
    * 
    * @param range key range
    */
-  default void afterRange(final Pair<String, String> range) {
+  default void finishRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
   /**
-   * Intermediate step, after {@link Connection#commit()} and before {@link #afterRange(Pair)}.
+   * Intermediate step, after {@link Connection#commit()} and before {@link #finishRange(Pair)}.
    * Process data, such as normalization. Default implementation is no-op.
    * 
    * @param range key range
    */
-  default void afterReads(final Pair<String, String> range) {
+  default void afterJdbc(final Pair<String, String> range) {
     // Default is no-op.
   }
 

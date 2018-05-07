@@ -21,8 +21,19 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomRangeHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
+/**
+ * {@link AtomRangeHandler} for the People Summary rocket.
+ * 
+ * <p>
+ * Loads {@link EsClientPerson} and {@link PlacementHomeAddress}, normalizes to
+ * {@link ReplicatedClient}.
+ * </p>
+ * 
+ * @author CWDS API Team
+ */
 public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
 
   private static final long serialVersionUID = 1L;
@@ -33,22 +44,18 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
 
   private final Map<String, PlacementHomeAddress> placementHomeAddresses; // key = client id
 
-  private final Map<String, EsClientPerson> denormalized;
-
   private final Map<String, ReplicatedClient> normalized;
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     final boolean isLargeLoad = rocket.isLargeLoad();
 
     this.rocket = rocket;
-    this.denormalized = isLargeLoad ? new HashMap<>(40000) : new HashMap<>(10000);
     this.normalized = isLargeLoad ? new HashMap<>(20000) : new HashMap<>(5000);
     this.placementHomeAddresses = isLargeLoad ? new HashMap<>(2000) : new HashMap<>(200);
   }
 
   protected void clear() {
     normalized.clear();
-    denormalized.clear();
     placementHomeAddresses.clear();
   }
 
@@ -62,10 +69,6 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
         .stream().map(e -> rocket.normalizeSingle(e.getValue()))
         .forEach(n -> normalized.put(n.getId(), n));
-  }
-
-  protected void queueIndex() {
-    normalized.values().stream().forEach(rocket::addToIndexQueue);
   }
 
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,
@@ -84,11 +87,12 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
   }
 
   @Override
-  public void handleRangeResults(ResultSet rs) throws SQLException {
+  public void handleMainResults(ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientPerson m;
     Object lastId = new Object();
     final List<EsClientPerson> grpRecs = new ArrayList<>();
+    final FlightLog flightLog = rocket.getFlightLog();
 
     // NOTE: Assumes that records are sorted by group key.
     while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
@@ -101,6 +105,9 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
       grpRecs.add(m);
       lastId = m.getNormalizationGroupKey();
     }
+
+    flightLog.addToDenormalized(cntr);
+    LOGGER.info("Normalized count: {}, de-normalized count: {}", normalized.size(), cntr);
   }
 
   @Override
@@ -129,21 +136,27 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
       pha = new PlacementHomeAddress(rs);
       placementHomeAddresses.put(pha.getClientId(), pha);
     }
+
+    LOGGER.info("Placement home count: {}", placementHomeAddresses.size());
   }
 
   @Override
-  public void afterReads(final Pair<String, String> p) {
+  public void afterJdbc(final Pair<String, String> p) {
+    final FlightLog flightLog = rocket.getFlightLog();
+    flightLog.doneRetrieve();
     // TODO: Merge placement home addresses HERE.
-    queueIndex();
+
+    // Send to Elasticsearch.
+    normalized.values().stream().forEach(rocket::addToIndexQueue);
   }
 
   @Override
-  public void beforeRange(Pair<String, String> p) {
+  public void startRange(Pair<String, String> p) {
     clear();
   }
 
   @Override
-  public void afterRange(Pair<String, String> p) {
+  public void finishRange(Pair<String, String> p) {
     clear();
   }
 

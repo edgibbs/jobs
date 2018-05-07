@@ -111,9 +111,9 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
    * Read records from the given key range, typically within a single partition on large tables.
    * 
    * @param range partition range to read
-   * @see AtomRangeHandler#beforeRange(Pair)
-   * @see AtomRangeHandler#afterReads(Pair)
-   * @see AtomRangeHandler#afterRange(Pair)
+   * @see AtomRangeHandler#startRange(Pair)
+   * @see AtomRangeHandler#afterJdbc(Pair)
+   * @see AtomRangeHandler#finishRange(Pair)
    */
   default void pullRange(final Pair<String, String> range) {
     final String origThreadName = Thread.currentThread().getName();
@@ -126,15 +126,15 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
     log.info("BEGIN: extract thread {}", threadName);
     flightLog.markRangeStart(range);
-    beforeRange(range);
+    startRange(range);
 
     try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
         .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
       con.setSchema(getDBSchemaName());
       con.setAutoCommit(false);
 
-      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", range.getLeft())
-          .replaceAll(":toId", range.getRight());
+      final String query = getInitialLoadQuery(getDBSchemaName())
+          .replaceAll(":fromId", range.getLeft()).replaceAll(":toId", range.getRight());
       log.info("query: {}", query);
       NeutronDB2Utils.enableParallelism(con);
 
@@ -142,7 +142,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
-        handleRangeResults(stmt.executeQuery(query));
+        handleMainResults(stmt.executeQuery(query));
 
         // Handle additional JDBC statements, if any.
         handleSecondaryJdbc(con, range);
@@ -154,14 +154,15 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       }
 
       // Handle any processing after reads are done, like normalization.
-      afterReads(range);
+      afterJdbc(range);
+
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
     } catch (Exception e) {
       fail();
       throw CheeseRay.runtime(log, e, "RANGE FAILED! {}-{} : {}", range.getLeft(), range.getRight(),
           e.getMessage());
     } finally {
-      afterRange(range);
+      finishRange(range);
       flightLog.markRangeComplete(range);
       nameThread(origThreadName);
     }
