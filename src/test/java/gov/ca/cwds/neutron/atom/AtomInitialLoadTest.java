@@ -104,7 +104,7 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.handleMainResults(rs);
+    target.eventHandleMainResults(rs);
   }
 
   @Test
@@ -140,7 +140,7 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void initialLoadProcessRangeResults_Args__ResultSet() throws Exception {
-    target.handleMainResults(rs);
+    target.eventHandleMainResults(rs);
   }
 
   @Test

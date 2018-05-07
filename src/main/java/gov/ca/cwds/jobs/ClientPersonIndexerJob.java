@@ -114,18 +114,18 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public void startRange(Pair<String, String> p) {
+  public void eventStartRange(Pair<String, String> p) {
     allocateThreadHandler();
   }
 
   @Override
-  public void finishRange(Pair<String, String> p) {
+  public void eventFinishRange(Pair<String, String> p) {
     deallocateThreadHandler();
   }
 
   @Override
-  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    handler.get().handleSecondaryJdbc(con, range);
+  public void eventHandleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    handler.get().eventHandleSecondaryJdbc(con, range);
   }
 
   /**
@@ -190,8 +190,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * {@inheritDoc}
    */
   @Override
-  public void handleMainResults(final ResultSet rs) throws SQLException {
-    handler.get().handleMainResults(rs);
+  public void eventHandleMainResults(final ResultSet rs) throws SQLException {
+    handler.get().eventHandleMainResults(rs);
   }
 
   /**

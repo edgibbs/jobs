@@ -120,7 +120,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   protected transient ElasticsearchDao esDao;
 
   /**
-   * Hibernate session factory.
+   * Primary Hibernate session factory. Rockets could potentially read from multiple datasources.
    * 
    * <p>
    * OPTION: get this from Hibernate.
@@ -156,7 +156,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(5000);
+  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(10000);
 
   /**
    * Construct rocket with all required dependencies.
@@ -254,7 +254,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     DocWriteRequest<?> ret;
     try {
       if (isDelete(t)) {
-        ret = bulkDelete((String) t.getPrimaryKey()); // WARNING: cannot assume String PK.
+        ret = bulkDelete(t.getPrimaryKey().toString());
         getFlightLog().incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
@@ -308,6 +308,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @throws NeutronCheckedException bombed
    */
+  @SuppressWarnings("unchecked")
   protected void doInitialLoadJdbc() throws NeutronCheckedException {
     final List<Thread> threads = new ArrayList<>();
 

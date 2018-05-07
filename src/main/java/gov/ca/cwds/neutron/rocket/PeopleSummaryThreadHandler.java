@@ -19,13 +19,13 @@ import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
-import gov.ca.cwds.neutron.atom.AtomRangeHandler;
+import gov.ca.cwds.neutron.atom.AtomLoadEventHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
 /**
- * {@link AtomRangeHandler} for the People Summary rocket.
+ * {@link AtomLoadEventHandler} for the People Summary rocket.
  * 
  * <p>
  * Loads {@link EsClientPerson} and {@link PlacementHomeAddress}, normalizes to
@@ -34,7 +34,7 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
  * 
  * @author CWDS API Team
  */
-public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
+public class PeopleSummaryThreadHandler implements ApiMarker, AtomLoadEventHandler {
 
   private static final long serialVersionUID = 1L;
 
@@ -52,6 +52,71 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
     this.rocket = rocket;
     this.normalized = isLargeLoad ? new HashMap<>(20000) : new HashMap<>(5000);
     this.placementHomeAddresses = isLargeLoad ? new HashMap<>(2000) : new HashMap<>(200);
+  }
+
+  @Override
+  public void eventHandleMainResults(ResultSet rs) throws SQLException {
+    int cntr = 0;
+    EsClientPerson m;
+    Object lastId = new Object();
+    final List<EsClientPerson> grpRecs = new ArrayList<>();
+    final FlightLog flightLog = rocket.getFlightLog();
+
+    // NOTE: Assumes that records are sorted by group key.
+    while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
+      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
+      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+        normalize(grpRecs);
+        grpRecs.clear(); // Single thread, re-use memory.
+      }
+
+      grpRecs.add(m);
+      lastId = m.getNormalizationGroupKey();
+    }
+
+    flightLog.addToDenormalized(cntr);
+    LOGGER.info("Normalized count: {}, de-normalized count: {}", normalized.size(), cntr);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * <p>
+   * Read placement home addresses per rule R-02294, Client Abstract Most Recent Address.
+   * </p>
+   */
+  @Override
+  public void eventHandleSecondaryJdbc(Connection con, Pair<String, String> range)
+      throws SQLException {
+    try (
+        final PreparedStatement stmtInsClient =
+            con.prepareStatement(ClientSQLResource.INSERT_PLACEHOME_CLIENT_FULL);
+        final PreparedStatement stmtSelPlacementAddress =
+            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
+      prepAffectedClients(stmtInsClient, range);
+      readPlacementAddress(stmtSelPlacementAddress);
+    } finally {
+      // Auto-close prepared statements.
+    }
+  }
+
+  @Override
+  public void eventJdbcDone(final Pair<String, String> range) {
+    // TODO: Merge placement home addresses HERE.
+
+    // Send to Elasticsearch.
+    normalized.values().stream().forEach(rocket::addToIndexQueue);
+  }
+
+  @Override
+  public void eventStartRange(Pair<String, String> range) {
+    clear();
+    rocket.getFlightLog().doneTransform();
+  }
+
+  @Override
+  public void eventFinishRange(Pair<String, String> range) {
+    clear();
   }
 
   protected void clear() {
@@ -86,44 +151,6 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
     LOGGER.info("affected clients: {}", countInsClient);
   }
 
-  @Override
-  public void handleMainResults(ResultSet rs) throws SQLException {
-    int cntr = 0;
-    EsClientPerson m;
-    Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>();
-    final FlightLog flightLog = rocket.getFlightLog();
-
-    // NOTE: Assumes that records are sorted by group key.
-    while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
-      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-        normalize(grpRecs);
-        grpRecs.clear(); // Single thread, re-use memory.
-      }
-
-      grpRecs.add(m);
-      lastId = m.getNormalizationGroupKey();
-    }
-
-    flightLog.addToDenormalized(cntr);
-    LOGGER.info("Normalized count: {}, de-normalized count: {}", normalized.size(), cntr);
-  }
-
-  @Override
-  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    try (
-        final PreparedStatement stmtInsClient =
-            con.prepareStatement(ClientSQLResource.INSERT_PLACEHOME_CLIENT_FULL);
-        final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
-      prepAffectedClients(stmtInsClient, range);
-      readPlacementAddress(stmtSelPlacementAddress);
-    } finally {
-      // NOTE: AtomInitialLoad.pullRange() releases database resources.
-    }
-  }
-
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
     LOGGER.info("read placement home address");
     stmt.setMaxRows(0);
@@ -138,26 +165,6 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
     }
 
     LOGGER.info("Placement home count: {}", placementHomeAddresses.size());
-  }
-
-  @Override
-  public void afterJdbc(final Pair<String, String> p) {
-    final FlightLog flightLog = rocket.getFlightLog();
-    // TODO: Merge placement home addresses HERE.
-
-    // Send to Elasticsearch.
-    normalized.values().stream().forEach(rocket::addToIndexQueue);
-    flightLog.doneRetrieve();
-  }
-
-  @Override
-  public void startRange(Pair<String, String> p) {
-    clear();
-  }
-
-  @Override
-  public void finishRange(Pair<String, String> p) {
-    clear();
   }
 
 }

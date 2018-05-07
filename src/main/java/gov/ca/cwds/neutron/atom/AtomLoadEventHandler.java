@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author CWDS API Team
  */
-public interface AtomRangeHandler {
+public interface AtomLoadEventHandler {
 
   /**
    * Process results sets from {@link #pullRange(Pair)}. Default implementation is no-op.
@@ -20,7 +20,7 @@ public interface AtomRangeHandler {
    * @param rs result set for this key range
    * @throws SQLException on database error
    */
-  default void handleMainResults(final ResultSet rs) throws SQLException {
+  default void eventHandleMainResults(final ResultSet rs) throws SQLException {
     // Provide your own solution, for now.
   }
 
@@ -31,7 +31,7 @@ public interface AtomRangeHandler {
    * @param range key range
    * @throws SQLException on database error
    */
-  default void handleSecondaryJdbc(final Connection con, Pair<String, String> range)
+  default void eventHandleSecondaryJdbc(final Connection con, Pair<String, String> range)
       throws SQLException {
     // Default is no-op.
   }
@@ -42,7 +42,7 @@ public interface AtomRangeHandler {
    * 
    * @param range key range
    */
-  default void startRange(final Pair<String, String> range) {
+  default void eventStartRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
@@ -52,17 +52,17 @@ public interface AtomRangeHandler {
    * 
    * @param range key range
    */
-  default void finishRange(final Pair<String, String> range) {
+  default void eventFinishRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
   /**
-   * Intermediate step, after {@link Connection#commit()} and before {@link #finishRange(Pair)}.
+   * Intermediate step, after {@link Connection#commit()} and before {@link #eventFinishRange(Pair)}.
    * Process data, such as normalization. Default implementation is no-op.
    * 
    * @param range key range
    */
-  default void afterJdbc(final Pair<String, String> range) {
+  default void eventJdbcDone(final Pair<String, String> range) {
     // Default is no-op.
   }
 
