@@ -42,6 +42,7 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -138,6 +139,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   @Transient
   private String openCaseId;
+
+  @Transient
+  private PlacementHomeAddress activePlacementHomeAddress;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
@@ -267,7 +271,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   /**
    * {@inheritDoc}
    * 
-   * HOT-1885: Elasticsearch: last known residence address (rule R-02294)
+   * <p>
+   * HOT-1885: last known residence address (rule R-02294)
+   * </p>
    */
   @JsonIgnore
   @Override
@@ -276,13 +282,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
     // Sort addresses by start date in descending order.
     // Last known address should come first.
-    final List<ReplicatedClientAddress> sortedClientAddresses = this.clientAddresses.stream()
-        .sorted(Comparator
-            .comparing(ReplicatedClientAddress::getEffStartDt,
-                Comparator.nullsLast(Comparator.reverseOrder()))
-            .thenComparing(ReplicatedClientAddress::getEffEndDt,
-                Comparator.nullsLast(Comparator.reverseOrder())))
-        .collect(Collectors.toList());
+    final List<ReplicatedClientAddress> sortedClientAddresses =
+        this.clientAddresses.stream().filter(r -> r.getEffEndDt() == null) // active only
+            .sorted(Comparator
+                .comparing(ReplicatedClientAddress::getEffEndDt,
+                    Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(ReplicatedClientAddress::getEffStartDt,
+                    Comparator.nullsLast(Comparator.reverseOrder())))
+            .collect(Collectors.toList());
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
