@@ -143,11 +143,11 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomRangeHandler {
   @Override
   public void afterJdbc(final Pair<String, String> p) {
     final FlightLog flightLog = rocket.getFlightLog();
-    flightLog.doneRetrieve();
     // TODO: Merge placement home addresses HERE.
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
+    flightLog.doneRetrieve();
   }
 
   @Override
