@@ -174,7 +174,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * {@inheritDoc}
    */
   @Override
-  public void initialLoadProcessRangeResults(final ResultSet rs) throws SQLException {
+  public void handleRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientAddress m;
     Object lastId = new Object();
@@ -249,7 +249,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
     try {
       // HACK: Initialize transaction. Fix DAO implementation instead.
-      getOrCreateTransaction();
+      grabTransaction();
       final ReplicatedClient client = getJobDao().find(clientId);
 
       return client.getCommonFirstName().equals(person.getFirstName())

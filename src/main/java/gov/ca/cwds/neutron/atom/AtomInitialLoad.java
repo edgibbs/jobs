@@ -11,9 +11,9 @@ import java.util.concurrent.ForkJoinTask;
 
 import javax.persistence.ParameterMode;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.text.RandomStringGenerator;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
@@ -31,15 +31,15 @@ import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 
 /**
- * Common functions and features for initial load.
+ * Common functions and features for initial (full) load.
  * 
  * @author CWDS API Team
  *
- * @param <T> normalized type
- * @param <M> denormalized type
+ * @param <N> normalized type
+ * @param <D> denormalized type
  */
-public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends AtomHibernate<T, M>, AtomShared, AtomRocketControl {
+public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupNormalizer<?>>
+    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl {
 
   /**
    * Restrict initial load key ranges from flight plan (command line).
@@ -101,18 +101,22 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
    * @param t bean to check
    * @return true if marked for deletion
    */
-  default boolean isDelete(T t) {
+  default boolean isDelete(N t) {
     return t instanceof CmsReplicatedEntity ? CmsReplicatedEntity.isDelete((CmsReplicatedEntity) t)
         : false;
   }
 
   /**
-   * Work-around (gentle euphemism for a <strong>HACK</strong>) for annoying condition where a
+   * "Work-around" (gentle euphemism for a <strong>HACK</strong>) for annoying condition where a
    * transaction should have started but did not.
+   * 
+   * <p>
+   * Get the current transaction from the current session or start a new transaction.
+   * </p>
    * 
    * @return current, active transaction
    */
-  default Transaction getOrCreateTransaction() {
+  default Transaction grabTransaction() {
     Transaction txn = null;
     final Session session = getJobDao().getSessionFactory().getCurrentSession();
     try {
@@ -133,8 +137,13 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
    * @param rs result set for this key range
    * @throws SQLException on database error
    */
-  default void initialLoadProcessRangeResults(final ResultSet rs) throws SQLException {
+  default void handleRangeResults(final ResultSet rs) throws SQLException {
     // Provide your own solution, for now.
+  }
+
+  default void handleCustomJdbc(final Connection con, Pair<String, String> range)
+      throws SQLException {
+    // Default is no-op.
   }
 
   /**
@@ -161,12 +170,18 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
       NeutronDB2Utils.enableParallelism(con);
 
       try (Statement stmt = con.createStatement()) {
+        // Handle additional JDBC statements, if any.
+        handleCustomJdbc(con, p);
+
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
-        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        initialLoadProcessRangeResults(rs);
+        handleRangeResults(stmt.executeQuery(query));
+
         con.commit();
+      } catch (Exception e) {
+        con.rollback();
+        throw e;
       }
 
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", p.getLeft(), p.getRight());
@@ -176,7 +191,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
           e.getMessage());
     } finally {
       getFlightLog().markRangeComplete(p);
-      nameThread(RandomStringUtils.random(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZ12345674890"));
+      nameThread(new RandomStringGenerator.Builder().withinRange('a', 'z').build().generate(10));
     }
   }
 
@@ -245,7 +260,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
     if (getFlightPlan().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
       log.warn("REFRESH MQT!");
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
-      getOrCreateTransaction(); // HACK
+      grabTransaction(); // HACK
       final String schema =
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 

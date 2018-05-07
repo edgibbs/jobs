@@ -174,7 +174,7 @@ public class ClientSQLResource implements ApiMarker {
         + "     , ph.IDENTIFIER as ph_id, ph.GVR_ENTC as ph_county \n"
         + "     , ph.STREET_NO, ph.STREET_NM, ph.CITY_NM, ph.F_STATE_C, ph.ZIP_NO, ph.ZIP_SFX_NO \n"
         + "     , DENSE_RANK() OVER (PARTITION BY pe.FKCLIENT_T ORDER BY ohp.START_DT, ohp.END_DT) AS rn \n"
-        + " FROM gt_id gt \n"
+        + " FROM GT_ID gt \n"
         + " JOIN PLC_EPST pe  ON gt.IDENTIFIER = pe.FKCLIENT_T \n"
         + " JOIN O_HM_PLT ohp ON ohp.FKPLC_EPS0 = pe.THIRD_ID AND ohp.FKPLC_EPST = pe.FKCLIENT_T \n"
         + " JOIN PLC_HM_T ph  ON ph.IDENTIFIER = ohp.FKPLC_HM_T \n"

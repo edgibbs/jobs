@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -107,6 +108,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     }
   }
 
+
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,
       final Pair<String, String> p) throws SQLException {
     LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
@@ -180,7 +182,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * {@inheritDoc}
    */
   @Override
-  public void initialLoadProcessRangeResults(final ResultSet rs) throws SQLException {
+  public void handleRangeResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientPerson m;
     Object lastId = new Object();
@@ -190,6 +192,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
       CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
+
+        // TODO: Fetch Placement Home addresses before normalizing.
         normalizeAndQueueIndex(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
       }
@@ -265,7 +269,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       LOGGER.info("Validate client: {}", clientId);
 
       // HACK: Initialize transaction. Fix DAO impl instead.
-      getOrCreateTransaction();
+      grabTransaction();
       final ReplicatedClient client = getJobDao().find(clientId);
 
       return StringUtils.equals(client.getCommonFirstName(), person.getFirstName())
@@ -285,6 +289,17 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   protected void threadRetrieveByJdbc() {
     pullMultiThreadJdbc();
+  }
+
+  @Override
+  public void handleCustomJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    try (final PreparedStatement stmtInsClient =
+        con.prepareStatement(ClientSQLResource.INSERT_CLIENT_FULL)) {
+      prepAffectedClients(stmtInsClient, range);
+      // readClients(stmtSelClient, mapClients);
+    } finally {
+      con.commit(); // release database resources
+    }
   }
 
   @Override

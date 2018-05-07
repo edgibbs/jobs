@@ -209,7 +209,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleRangeResults(rs);
   }
 
   @Test
@@ -270,12 +270,12 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleRangeResults(rs);
   }
 
   @Test
   public void handleRangeResults_Args__ResultSet__2() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleRangeResults(rs);
   }
 
   @Test

@@ -94,7 +94,7 @@ public class ClientCountyRocket extends ClientIndexerJob
       stmt.setMaxRows(0);
       stmt.setQueryTimeout(0);
 
-      getOrCreateTransaction(); // HACK: fix Hibernate DAO.
+      grabTransaction(); // HACK: fix Hibernate DAO.
       getFlightLog().markRangeStart(p);
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
@@ -143,7 +143,7 @@ public class ClientCountyRocket extends ClientIndexerJob
       LOGGER.info("Call stored proc");
       final SessionFactory sessionFactory = getJobDao().getSessionFactory();
       final Session session = sessionFactory.getCurrentSession();
-      getOrCreateTransaction(); // HACK. move to base DAO.
+      grabTransaction(); // HACK. move to base DAO.
       final String schema = (String) sessionFactory.getProperties().get("hibernate.default_schema");
 
       final ProcedureCall proc = session.createStoredProcedureCall(schema + ".PRCCLNCNTY");
