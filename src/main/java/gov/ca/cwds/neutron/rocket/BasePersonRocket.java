@@ -196,7 +196,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @param norm normalized object to add to index queue
    */
-  protected void addToIndexQueue(N norm) {
+  public void addToIndexQueue(N norm) {
     try {
       CheeseRay.logEvery(flightLog.markQueuedToIndex(), "index queue", "recs");
       queueIndex.putLast(norm);

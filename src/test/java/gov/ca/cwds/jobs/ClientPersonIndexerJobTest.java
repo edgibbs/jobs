@@ -118,11 +118,11 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void normalizeAndQueueIndex_A$List() throws Exception {
-    final List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
-    target.normalizeAndQueueIndex(grpRecs);
-  }
+  // @Test
+  // public void normalizeAndQueueIndex_A$List() throws Exception {
+  // final List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+  // target.normalizeAndQueueIndex(grpRecs);
+  // }
 
   @Test
   public void getInitialLoadQuery_A$String() throws Exception {

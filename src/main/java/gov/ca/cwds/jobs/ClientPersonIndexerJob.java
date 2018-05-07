@@ -1,10 +1,8 @@
 package gov.ca.cwds.jobs;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -114,21 +112,19 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     }
   }
 
-  protected void prepAffectedClients(final PreparedStatement stmtInsClient,
-      final Pair<String, String> p) throws SQLException {
-    stmtInsClient.setMaxRows(0);
-    stmtInsClient.setQueryTimeout(0);
+  @Override
+  public void beforeRange(Pair<String, String> p) {
+    allocateThreadLocal();
+  }
 
-    if (!getFlightPlan().isLastRunMode()) {
-      LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
-      stmtInsClient.setString(1, p.getLeft());
-      stmtInsClient.setString(2, p.getRight());
-    } else {
-      LOGGER.debug("LAST RUN");
-    }
+  @Override
+  public void afterRange(Pair<String, String> p) {
+    deallocateThreadLocal();
+  }
 
-    final int countInsClient = stmtInsClient.executeUpdate();
-    LOGGER.info("affected clients: {}", countInsClient);
+  @Override
+  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    handler.get().handleSecondaryJdbc(con, range);
   }
 
   /**
@@ -147,16 +143,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     if (handler.get() != null) {
       handler.set(null);
     }
-  }
-
-  @Override
-  public void beforeRange(Pair<String, String> p) {
-    allocateThreadLocal();
-  }
-
-  @Override
-  public void afterRange(Pair<String, String> p) {
-    deallocateThreadLocal();
   }
 
   @Override
@@ -184,17 +170,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return " ORDER BY X.CLT_IDENTIFIER ";
   }
 
-  /**
-   * Send all recs for same client id to the index queue.
-   * 
-   * @param grpRecs recs for same client id
-   */
-  public void normalizeAndQueueIndex(final List<EsClientPerson> grpRecs) {
-    grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
-        .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
-        .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
-  }
-
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
@@ -215,23 +190,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    */
   @Override
   public void handleRangeResults(final ResultSet rs) throws SQLException {
-    int cntr = 0;
-    EsClientPerson m;
-    Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>();
-
-    // NOTE: Assumes that records are sorted by group key.
-    while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
-      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-        // TODO: Fetch Placement Home addresses before normalizing.
-        normalizeAndQueueIndex(grpRecs);
-        grpRecs.clear(); // Single thread, re-use memory.
-      }
-
-      grpRecs.add(m);
-      lastId = m.getNormalizationGroupKey();
-    }
+    handler.get().handleRangeResults(rs);
   }
 
   /**
@@ -320,17 +279,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   protected void threadRetrieveByJdbc() {
     pullMultiThreadJdbc();
-  }
-
-  @Override
-  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    try (final PreparedStatement stmtInsClient =
-        con.prepareStatement(ClientSQLResource.INSERT_CLIENT_FULL)) {
-      prepAffectedClients(stmtInsClient, range);
-      // readClients(stmtSelClient, mapClients);
-    } finally {
-      // AtomInitialLoad.pullRange() releases database resources.
-    }
   }
 
   @Override

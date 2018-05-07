@@ -158,7 +158,7 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String SELECT_PLACEMENT_ADDRESS =
-        "SELECT  \n"
+        "SELECT \n"
       +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_GVR_ENTC, \n"
       +   " x.OHP_ID, x.START_DT, x.END_DT, \n"
       +   " x.PH_ID, x.PH_GVR_ENTC, x.STREET_NO, x.STREET_NM, "

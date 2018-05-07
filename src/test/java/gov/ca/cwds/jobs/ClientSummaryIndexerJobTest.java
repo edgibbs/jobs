@@ -130,11 +130,11 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void normalizeAndQueueIndex() throws Exception {
-    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
-    target.normalizeAndQueueIndex(grpRecs);
-  }
+  // @Test
+  // public void normalizeAndQueueIndex() throws Exception {
+  // List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+  // target.normalizeAndQueueIndex(grpRecs);
+  // }
 
   @Test
   public void threadExtractJdbc_Args__() throws Exception {
@@ -201,11 +201,11 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
-  public void normalizeAndQueueIndex_Args__List() throws Exception {
-    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
-    target.normalizeAndQueueIndex(grpRecs);
-  }
+  // @Test
+  // public void normalizeAndQueueIndex_Args__List() throws Exception {
+  // List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+  // target.normalizeAndQueueIndex(grpRecs);
+  // }
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
