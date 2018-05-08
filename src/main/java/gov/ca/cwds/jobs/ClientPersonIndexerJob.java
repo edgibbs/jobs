@@ -84,6 +84,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
     this.launchDirector = launchDirector;
+    allocateThreadHandler();
   }
 
   @Override

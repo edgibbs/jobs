@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -37,6 +38,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     dao = new ReplicatedClientDao(sessionFactory);
     target =
         new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+    target.allocateThreadHandler();
   }
 
   @Test
@@ -224,6 +226,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   }
 
   @Test
+  @Ignore
   public void threadRetrieveByJdbc_A$() throws Exception {
     target.threadRetrieveByJdbc();
   }
