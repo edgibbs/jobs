@@ -289,7 +289,7 @@ public final class ElasticTransformer {
    * 
    * <p>
    * Legacy ID should always be 10 characters long, otherwise we can not parse it to get UI ID. For
-   * LegacyTable.STFPERST it is usually 3 characters long.
+   * example, LegacyTable.STFPERST is usually 3 characters long.
    * </p>
    * 
    * @param legacyId Legacy ID
@@ -302,7 +302,7 @@ public final class ElasticTransformer {
     final ElasticSearchLegacyDescriptor ret = new ElasticSearchLegacyDescriptor();
 
     if (!StringUtils.isBlank(legacyId)) {
-      final String cleanLegacyId = legacyId.trim();
+      final String cleanLegacyId = legacyId.trim(); // Yes, actually trim a fix CHAR(10) PK.
       ret.setLegacyId(cleanLegacyId);
       ret.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 

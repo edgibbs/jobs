@@ -23,6 +23,8 @@ public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClient
 
   private static final long serialVersionUID = 1L;
 
+  public static final short ADDRESS_TYPE_PLACEMENT_HOME = 10001;
+
   @Id
   @Column(name = "CLIENT_ID")
   protected String clientId; // PLC_EPST.FKCLIENT_T, PLC_EPST composite key
@@ -98,10 +100,15 @@ public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClient
     this.lastUpdatedTime = rs.getTimestamp("PH_LST_UPD_TS");
   }
 
+  /**
+   * Convert to {@link ReplicatedClientAddress}.
+   * 
+   * @return an equivalent ReplicatedClientAddress
+   */
   public ReplicatedClientAddress toReplicatedClientAddress() {
     final ReplicatedClientAddress ret = new ReplicatedClientAddress();
 
-    ret.setAddressType((short) 32);
+    ret.setAddressType(ADDRESS_TYPE_PLACEMENT_HOME); // FAKE address type for placement home
     ret.setEffEndDt(end);
     ret.setEffStartDt(start);
     ret.setId(placementHomeId);
@@ -121,8 +128,8 @@ public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClient
 
     if (zip != null) {
       addr.setZip(new ZipCodeConverter().convertToEntityAttribute(zip));
+      addr.setZip4(zip4);
     }
-    addr.setZip4(zip4);
 
     return ret;
   }
