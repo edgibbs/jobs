@@ -62,6 +62,8 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     // NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime);
     // target.writeLastSuccessfulRunTime(datetime);
     // target.getFlightPlan().setOverrideLastRunTime(lastRunTime);
+
+    // NOTE: the date is **dynamic** (current date/time).
     final String actual = target.getPrepLastChangeSQL();
     // final String expected =
     // "\"INSERT INTO GT_ID (IDENTIFIER)\\nSELECT DISTINCT CLT.IDENTIFIER \\nFROM CLIENT_T clt
