@@ -289,7 +289,11 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       sortedClientAddresses.add(activePlacementHomeAddress.toReplicatedClientAddress());
     }
 
+    final short residenceType = (short) 32;
+
     clientAddresses.stream().filter(r -> r.getEffEndDt() == null) // active only
+        .filter(
+            r -> r.getAddresses().stream().anyMatch(a -> a.getApiAdrAddressType() == residenceType))
         .sorted(Comparator
             .comparing(ReplicatedClientAddress::getEffEndDt,
                 Comparator.nullsLast(Comparator.reverseOrder()))
@@ -315,6 +319,10 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
         }
 
         for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
+          if (repAddress.getApiAdrAddressType() == residenceType) {
+            continue;
+          }
+
           final ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress();
           esClientAddresses.put(repAddress.getAddressId(), esAddress);
 
