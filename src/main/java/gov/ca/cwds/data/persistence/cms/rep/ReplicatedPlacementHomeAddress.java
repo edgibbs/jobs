@@ -11,7 +11,7 @@ public class ReplicatedPlacementHomeAddress extends ReplicatedAddress {
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
-        LegacyTable.CHILD_IN_PLACEMENT_HOME);
+        LegacyTable.PLACEMENT_HOME);
   }
 
 }

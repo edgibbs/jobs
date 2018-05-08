@@ -19,6 +19,16 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedPlacementHomeAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
+/**
+ * Represents a placement home as a recent address per, HOT-1885 and rule R-02294, Client Abstract
+ * Most Recent Address.
+ * 
+ * <p>
+ * Normalizes to {@link ReplicatedClientAddress}.
+ * </p>
+ * 
+ * @author CWDS API Team
+ */
 public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClientAddress> {
 
   private static final long serialVersionUID = 1L;
@@ -122,7 +132,7 @@ public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClient
     ret.addAddress(addr);
 
     addr.setCity(city);
-    addr.setGovernmentEntityCd(getPlacementEpisodeGovernmentEntityCd());
+    addr.setGovernmentEntityCd(placementEpisodeGovernmentEntityCd);
     addr.setState(state);
     addr.setId(placementHomeId);
     addr.setLastUpdatedTime(lastUpdatedTime);
