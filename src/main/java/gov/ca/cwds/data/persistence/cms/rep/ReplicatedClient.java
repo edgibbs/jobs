@@ -281,21 +281,26 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     final Map<String, ElasticSearchPersonAddress> esClientAddresses = new LinkedHashMap<>();
 
     // Sort addresses by start date in descending order.
-    // Last known address should come first.
-    final List<ReplicatedClientAddress> sortedClientAddresses =
-        this.clientAddresses.stream().filter(r -> r.getEffEndDt() == null) // active only
-            .sorted(Comparator
-                .comparing(ReplicatedClientAddress::getEffEndDt,
-                    Comparator.nullsLast(Comparator.reverseOrder()))
-                .thenComparing(ReplicatedClientAddress::getEffStartDt,
-                    Comparator.nullsLast(Comparator.reverseOrder())))
-            .collect(Collectors.toList());
+    // Last known address comes first.
+    final List<ReplicatedClientAddress> sortedClientAddresses = new ArrayList<>();
+
+    // Rule R - 02294 Client Abstract Most Recent Address
+    if (activePlacementHomeAddress != null) {
+      sortedClientAddresses.add(activePlacementHomeAddress.toReplicatedClientAddress());
+    }
+
+    clientAddresses.stream().filter(r -> r.getEffEndDt() == null) // active only
+        .sorted(Comparator
+            .comparing(ReplicatedClientAddress::getEffEndDt,
+                Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(ReplicatedClientAddress::getEffStartDt,
+                Comparator.nullsLast(Comparator.reverseOrder())))
+        .forEach(sortedClientAddresses::add);
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
 
-      // Rule R - 02294 Client Abstract Most Recent Address
       if (addressActive) {
         final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
 
@@ -503,6 +508,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  public PlacementHomeAddress getActivePlacementHomeAddress() {
+    return activePlacementHomeAddress;
+  }
+
+  public void setActivePlacementHomeAddress(PlacementHomeAddress activePlacementHomeAddress) {
+    this.activePlacementHomeAddress = activePlacementHomeAddress;
   }
 
 }

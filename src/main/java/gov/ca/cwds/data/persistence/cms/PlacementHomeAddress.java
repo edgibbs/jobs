@@ -2,9 +2,11 @@ package gov.ca.cwds.data.persistence.cms;
 
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -12,11 +14,12 @@ import javax.persistence.Id;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
+import gov.ca.cwds.data.legacy.cms.entity.converter.ZipCodeConverter;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
-import gov.ca.cwds.data.std.ApiMarker;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedPlacementHomeAddress;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
-public class PlacementHomeAddress implements ApiMarker {
+public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClientAddress> {
 
   private static final long serialVersionUID = 1L;
 
@@ -105,7 +108,9 @@ public class PlacementHomeAddress implements ApiMarker {
     ret.setLastUpdatedTime(lastUpdatedTime);
     ret.setFkClient(clientId);
 
-    final ReplicatedAddress addr = new ReplicatedAddress();
+    final ReplicatedPlacementHomeAddress addr = new ReplicatedPlacementHomeAddress();
+    ret.addAddress(addr);
+
     addr.setCity(city);
     addr.setGovernmentEntityCd(getPlacementEpisodeGovernmentEntityCd());
     addr.setState(state);
@@ -113,7 +118,10 @@ public class PlacementHomeAddress implements ApiMarker {
     addr.setLastUpdatedTime(lastUpdatedTime);
     addr.setStreetNumber(streetNumber);
     addr.setStreetName(streetName);
-    // addr.setZip(zip);
+
+    if (zip != null) {
+      addr.setZip(new ZipCodeConverter().convertToEntityAttribute(zip));
+    }
     addr.setZip4(zip4);
 
     return ret;
@@ -177,6 +185,21 @@ public class PlacementHomeAddress implements ApiMarker {
 
   public Date getEnd() {
     return end;
+  }
+
+  @Override
+  public Class<ReplicatedClientAddress> getNormalizationClass() {
+    return ReplicatedClientAddress.class;
+  }
+
+  @Override
+  public Serializable getNormalizationGroupKey() {
+    return this.clientId;
+  }
+
+  @Override
+  public ReplicatedClientAddress normalize(Map<Object, ReplicatedClientAddress> arg0) {
+    return toReplicatedClientAddress();
   }
 
 }
