@@ -23,7 +23,10 @@ public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClient
 
   private static final long serialVersionUID = 1L;
 
-  public static final short ADDRESS_TYPE_PLACEMENT_HOME = 10001;
+  // TOD0: Code cache is unhappy with this unknown value.
+  // No code loader interface method to add custom, non-CMS codes.
+  // public static final short ADDRESS_TYPE_PLACEMENT_HOME = 10001;
+  public static final short ADDRESS_TYPE_PLACEMENT_HOME = 32;
 
   @Id
   @Column(name = "CLIENT_ID")
