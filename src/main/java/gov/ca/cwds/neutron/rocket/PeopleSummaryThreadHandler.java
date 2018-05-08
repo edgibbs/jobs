@@ -103,13 +103,13 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomLoadEventHandl
   protected void mapReplicatedClient(PlacementHomeAddress pha) {
     if (normalized.containsKey(pha.getClientId())) {
       final ReplicatedClient rc = normalized.get(pha.getClientId());
-      rc.addClientAddress(pha.toReplicatedClientAddress());
+      rc.setActivePlacementHomeAddress(pha);
     }
   }
 
   @Override
   public void eventJdbcDone(final Pair<String, String> range) {
-    // Merge placement home addresses HERE.
+    // Merge placement home addresses.
     this.placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
 
     // Send to Elasticsearch.
