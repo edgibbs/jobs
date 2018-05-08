@@ -90,7 +90,7 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomLoadEventHandl
       throws SQLException {
     try (
         final PreparedStatement stmtInsClient =
-            con.prepareStatement(ClientSQLResource.INSERT_PLACEHOME_CLIENT_FULL);
+            con.prepareStatement(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL);
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       prepAffectedClients(stmtInsClient, range);

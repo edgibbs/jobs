@@ -187,7 +187,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_PLACEHOME_CLIENT_FULL =
+  public static final String INSERT_PLACEMENT_HOME_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
     + "SELECT DISTINCT pe.FKCLIENT_T \n"
     + "FROM PLC_EPST pe \n" 
@@ -197,21 +197,31 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String INSERT_CLIENT_LAST_CHG =
-      "INSERT INTO GT_ID (IDENTIFIER)\n" 
+     "INSERT INTO GT_ID (IDENTIFIER)  \n"
           + "SELECT DISTINCT CLT.IDENTIFIER \n"
-       + "FROM CLIENT_T clt \n"
-       + "WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + "FROM CLIENT_T clt \n"
+          + "WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "UNION SELECT DISTINCT cla.FKCLIENT_T AS IDENTIFIER \n"
-       + "FROM CL_ADDRT cla \n"
-       + "WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + "FROM CL_ADDRT cla \n"
+          + "WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "UNION SELECT DISTINCT cla.FKCLIENT_T AS IDENTIFIER \n"
-       + "FROM CL_ADDRT cla \n"
-       + "JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
-       + "WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + "FROM CL_ADDRT cla \n"
+          + "JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
+          + "WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "UNION SELECT DISTINCT eth.ESTBLSH_ID AS IDENTIFIER \n"
-       + "FROM CLSCP_ET eth \n"
-       + "WHERE ETH.ESTBLSH_CD = 'C' \n"
-       + "AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' ";
+          + "FROM CLSCP_ET eth \n"
+          + "WHERE ETH.ESTBLSH_CD = 'C' \n"
+          + "AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+    + "UNION SELECT DISTINCT pe.FKCLIENT_T \n"
+          + "FROM PLC_EPST pe  \n"
+          + "WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+    + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
+          + "FROM O_HM_PLT ohp \n"
+          + "JOIN PLC_HM_T ph  ON ph.IDENTIFIER  = ohp.FKPLC_HM_T \n"
+          + "WHERE ph.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+    + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
+          + "FROM O_HM_PLT ohp  \n"
+          + "WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'";
   //@formatter:on
 
 }

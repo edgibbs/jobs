@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -92,6 +93,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     determineIndexName();
     largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
     return super.launch(lastSuccessfulRunTime);
+  }
+
+  @Override
+  protected List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
+      final Set<String> deletionResults) {
+    final List<ReplicatedClient> ret = extractLastRunRecsFromView(lastRunDate, deletionResults);
+    return ret;
   }
 
   @Override
