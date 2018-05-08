@@ -290,10 +290,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     }
 
     final short residenceType = (short) 32;
-
     clientAddresses.stream().filter(r -> r.getEffEndDt() == null) // active only
-        .filter(
-            r -> r.getAddresses().stream().anyMatch(a -> a.getApiAdrAddressType() == residenceType))
+        .filter(r -> r.getAddresses().stream().anyMatch(
+            a -> a.getApiAdrAddressType() != null && a.getApiAdrAddressType() == residenceType))
         .sorted(Comparator
             .comparing(ReplicatedClientAddress::getEffEndDt,
                 Comparator.nullsLast(Comparator.reverseOrder()))
@@ -305,7 +304,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
 
-      if (addressActive) {
+      if (addressActive && repClientAddress.getAddresses() != null) {
         final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
 
         // Choose appropriate system code type for index target index.
@@ -319,7 +318,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
         }
 
         for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
-          if (repAddress.getApiAdrAddressType() == residenceType) {
+          if (repAddress == null || (repAddress.getApiAdrAddressType() != null
+              && repAddress.getApiAdrAddressType() == residenceType)) {
             continue;
           }
 
