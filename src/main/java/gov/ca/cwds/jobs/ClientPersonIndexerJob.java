@@ -96,6 +96,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return super.launch(lastSuccessfulRunTime);
   }
 
+  public List<ReplicatedClient> fetchLastRunResultsStandard(final Date lastRunDate,
+      final Set<String> deletionResults) {
+    return super.fetchLastRunNormalizedResults(lastRunDate, deletionResults);
+  }
+
   @Override
   public List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {

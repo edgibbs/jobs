@@ -158,7 +158,7 @@ public class PeopleSummaryThreadHandler
     handleStartRange(range);
 
     // Read from the view, old school.
-    addAll(rocket.fetchLastRunResults(lastRunDate, deletionResults));
+    addAll(rocket.fetchLastRunResultsStandard(lastRunDate, deletionResults));
 
     final Session session = rocket.getJobDao().grabSession();
     final Transaction txn = rocket.grabTransaction();
