@@ -28,6 +28,7 @@ import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.util.jdbc.WorkSecondaryResults;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
@@ -88,6 +89,16 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("Normalized count: {}, de-normalized count: {}", normalized.size(), cntr);
   }
 
+  protected String pickPrepDml() throws NeutronCheckedException {
+    final String sql = rocket.getFlightPlan().isLastRunMode()
+        ? NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+            rocket.determineLastSuccessfulRunTime(),
+            rocket.getFlightPlan().getOverrideLastEndTime())
+        : ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL;
+    LOGGER.info("Prep SQL: {}", sql);
+    return sql;
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -97,22 +108,13 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    try (
-        final PreparedStatement stmtInsClient =
-            con.prepareStatement(rocket.getFlightPlan().isLastRunMode()
-                ? NeutronDB2Utils.prepLastChangeSQL(
-                    ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
-                    rocket.determineLastSuccessfulRunTime(),
-                    rocket.getFlightPlan().getOverrideLastEndTime())
-                : ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL);
+    try (final PreparedStatement stmtInsClient = con.prepareStatement(pickPrepDml());
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       prepAffectedClients(stmtInsClient, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
-    } finally {
-      // Auto-close prepared statements.
     }
   }
 
