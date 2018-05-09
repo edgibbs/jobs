@@ -85,10 +85,11 @@ public interface AtomLoadStepHandler<N extends PersistentObject> {
   }
 
   /**
+   * Retrieve records from Hibernate, JDBC, or whatever.
    * 
-   * @param lastRunDate
-   * @param deletionResults
-   * @return all
+   * @param lastRunDate last successful run date-time
+   * @param deletionResults sensitive records to delete, if any
+   * @return list of normalized records, ready for Elasticsearch
    */
   default List<N> fetchLastRunNormalizedResults(final Date lastRunDate,
       final Set<String> deletionResults) {
