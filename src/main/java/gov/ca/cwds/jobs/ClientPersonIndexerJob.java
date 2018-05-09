@@ -118,11 +118,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     try {
       NeutronJdbcUtils.doWork(session, work);
 
-      // Done reading data. Process data, like cleansing and normalizing.
-      theHandler.handleJdbcDone(range);
-
       session.clear();
       txn.commit();
+
+      // Done reading data. Process data, like cleansing and normalizing.
+      theHandler.handleJdbcDone(range);
 
       LOGGER.info("LAST CHANGE COMPLETED SUCCESSFULLY!");
       return getResults();
