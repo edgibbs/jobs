@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -89,8 +90,7 @@ public class PeopleSummaryThreadHandler
    * </p>
    */
   @Override
-  public void handleSecondaryJdbc(Connection con, Pair<String, String> range)
-      throws SQLException {
+  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     try (
         final PreparedStatement stmtInsClient =
             con.prepareStatement(rocket.getFlightPlan().isLastRunMode()
@@ -120,7 +120,7 @@ public class PeopleSummaryThreadHandler
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
     // Merge placement home addresses.
-    this.placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
+    placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
@@ -140,6 +140,12 @@ public class PeopleSummaryThreadHandler
   @Override
   public List<ReplicatedClient> getResults() {
     return normalized.values().stream().collect(Collectors.toList());
+  }
+
+  public void addAll(Collection<ReplicatedClient> collection) {
+    if (!collection.isEmpty()) {
+      collection.stream().forEach(c -> normalized.put(c.getId(), c));
+    }
   }
 
   protected void clear() {

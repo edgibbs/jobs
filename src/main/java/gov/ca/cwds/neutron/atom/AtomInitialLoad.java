@@ -107,7 +107,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
   /**
    * Read records from the given key range, typically within a single partition on large tables.
-   * Default initial load prep query takes the form
+   * Default prep query for initial load takes the form
    * {@code WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId'}.
    * 
    * <p>

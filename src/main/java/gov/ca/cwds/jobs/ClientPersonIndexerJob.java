@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.jobs.util.jdbc.WorkSecondaryResults;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
@@ -98,33 +101,53 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   protected List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {
-    final List<ReplicatedClient> ret = super.fetchLastRunResults(lastRunDate, deletionResults);
+    final List<ReplicatedClient> viewResults =
+        super.fetchLastRunResults(lastRunDate, deletionResults);
     final Pair<String, String> range = Pair.<String, String>of("a", "b");
 
+    flightLog.markRangeStart(range);
+    handleStartRange(range);
+
+    final Session session = getJobDao().grabSession();
+    final Transaction txn = grabTransaction();
+
     try {
-      pullRange(range, NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
-          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime()));
+      final PeopleSummaryThreadHandler theHandler = handler.get();
 
-      // final PeopleSummaryThreadHandler theHandler = handler.get();
-      // final Session session = getJobDao().grabSession();
-      // final Work work = new WorkSecondaryResults<ReplicatedClient>(theHandler);
-      //
+      prepHibernateLastChange(session, lastRunDate,
+          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime()));
+
+      final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(handler.get());
+      NeutronJdbcUtils.doWork(session, work);
+
+      // try (Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
       // try {
-      // // May fail without a transaction.
-      // session.clear(); // Hibernate "duplicate object" bug
+      // handleSecondaryJdbc(con, range);
+      // con.commit();
       // } catch (Exception e) {
-      // LOGGER.warn("'clear' without transaction", e);
+      // con.rollback();
+      // throw e;
       // }
-      //
-      // session.doWork(work);
-      // session.clear();
-      //
-      // handleJdbcDone(range);
-    } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
-    }
+      // } // Auto-close connection.
 
-    return ret;
+      // Done reading data. Process data, like cleansing and normalizing.
+      theHandler.addAll(viewResults);
+      theHandler.handleJdbcDone(range);
+
+      session.clear();
+      txn.commit();
+
+      LOGGER.info("LAST CHANGE COMPLETED SUCCESSFULLY!");
+      return getResults();
+    } catch (Exception e) {
+      fail();
+      txn.rollback();
+      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
+    } finally {
+      handleFinishRange(range);
+      flightLog.markRangeComplete(range);
+    }
   }
 
   @Override

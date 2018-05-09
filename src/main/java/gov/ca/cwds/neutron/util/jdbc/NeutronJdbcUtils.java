@@ -95,6 +95,13 @@ public final class NeutronJdbcUtils {
     return System.getProperty("DB_CMS_SCHEMA");
   }
 
+  /**
+   * Steal a connection from a Hibernate SessionFactory.
+   * 
+   * @param sessionFactory Hibernate SessionFactory
+   * @return database Connection
+   * @throws SQLException on database error
+   */
   public static Connection prepConnection(final SessionFactory sessionFactory) throws SQLException {
     final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
@@ -104,8 +111,10 @@ public final class NeutronJdbcUtils {
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
       final String sql, final Function<Connection, PreparedStatement> func) {
-    final Work work = new WorkPrepareLastChange(lastRunTime, sql, func);
+    doWork(session, new WorkPrepareLastChange(lastRunTime, sql, func));
+  }
 
+  public static void doWork(final Session session, Work work) {
     try {
       // May fail without a transaction.
       session.clear(); // Hibernate "duplicate object" bug
