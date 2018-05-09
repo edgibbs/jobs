@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +30,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.WorkSecondaryResults;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
@@ -100,41 +97,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  protected List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
+  public List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {
     allocateThreadHandler();
-    final PeopleSummaryThreadHandler theHandler = handler.get();
-    final Pair<String, String> range = Pair.<String, String>of("a", "b");
-
-    flightLog.markRangeStart(range);
-    theHandler.handleStartRange(range);
-
-    // Read from the view, old school.
-    theHandler.addAll(super.fetchLastRunResults(lastRunDate, deletionResults));
-
-    final Session session = getJobDao().grabSession();
-    final Transaction txn = grabTransaction();
-    final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(theHandler);
-
-    try {
-      NeutronJdbcUtils.doWork(session, work);
-      session.clear();
-      txn.commit();
-
-      // Done reading data. Process data, like cleansing and normalizing.
-      theHandler.handleJdbcDone(range);
-
-      LOGGER.info("LAST CHANGE COMPLETED SUCCESSFULLY!");
-      return getResults();
-    } catch (Exception e) {
-      fail();
-      txn.rollback();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
-    } finally {
-      handleFinishRange(range);
-      flightLog.markRangeComplete(range);
-      deallocateThreadHandler();
-    }
+    final List<ReplicatedClient> ret =
+        handler.get().fetchLastRunNormalizedResults(lastRunDate, deletionResults);
+    deallocateThreadHandler();
+    return ret;
   }
 
   @Override

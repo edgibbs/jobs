@@ -761,7 +761,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   @Override
-  protected List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDate,
+  public List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDate,
       Set<String> deletionResults) {
     doneTransform(); // normalize in place **WITHOUT** the transform thread
     try {

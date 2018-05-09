@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -79,6 +81,17 @@ public interface AtomLoadStepHandler<N extends PersistentObject> {
    * @return clean, normalized results
    */
   default List<N> getResults() {
+    return new ArrayList<>();
+  }
+
+  /**
+   * 
+   * @param lastRunDate
+   * @param deletionResults
+   * @return all
+   */
+  default List<N> fetchLastRunNormalizedResults(final Date lastRunDate,
+      final Set<String> deletionResults) {
     return new ArrayList<>();
   }
 

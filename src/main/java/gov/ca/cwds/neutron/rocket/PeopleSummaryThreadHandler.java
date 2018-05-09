@@ -6,13 +6,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +25,13 @@ import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
+import gov.ca.cwds.jobs.util.jdbc.WorkSecondaryResults;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * {@link AtomLoadStepHandler} for the People Summary rocket.
@@ -140,6 +146,42 @@ public class PeopleSummaryThreadHandler
   @Override
   public List<ReplicatedClient> getResults() {
     return normalized.values().stream().collect(Collectors.toList());
+  }
+
+  @Override
+  public List<ReplicatedClient> fetchLastRunNormalizedResults(Date lastRunDate,
+      Set<String> deletionResults) {
+    final Pair<String, String> range = Pair.<String, String>of("a", "b");
+
+    final FlightLog flightLog = rocket.getFlightLog();
+    flightLog.markRangeStart(range);
+    handleStartRange(range);
+
+    // Read from the view, old school.
+    addAll(rocket.fetchLastRunResults(lastRunDate, deletionResults));
+
+    final Session session = rocket.getJobDao().grabSession();
+    final Transaction txn = rocket.grabTransaction();
+    final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(this);
+
+    try {
+      NeutronJdbcUtils.doWork(session, work);
+      session.clear();
+      txn.commit();
+
+      // Done reading data. Process data, like cleansing and normalizing.
+      handleJdbcDone(range);
+
+      LOGGER.info("LAST CHANGE COMPLETED SUCCESSFULLY!");
+      return getResults();
+    } catch (Exception e) {
+      rocket.fail();
+      txn.rollback();
+      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
+    } finally {
+      handleFinishRange(range);
+      flightLog.markRangeComplete(range);
+    }
   }
 
   public void addAll(Collection<ReplicatedClient> collection) {

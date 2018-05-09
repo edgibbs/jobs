@@ -533,7 +533,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     }
   }
 
-  protected List<N> fetchLastRunResults(final Date lastRunDate, final Set<String> deletionResults) {
+  public List<N> fetchLastRunResults(final Date lastRunDate, final Set<String> deletionResults) {
     return isViewNormalizer() ? extractLastRunRecsFromView(lastRunDate, deletionResults)
         : extractLastRunRecsFromTable(lastRunDate);
   }
