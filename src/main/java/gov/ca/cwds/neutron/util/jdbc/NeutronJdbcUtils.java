@@ -110,7 +110,7 @@ public final class NeutronJdbcUtils {
 
     try {
       // May fail without a transaction.
-      session.clear(); // Fixes Hibernate "duplicate object" bug
+      session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {
       LOGGER.warn("'clear' without transaction", e);
     }

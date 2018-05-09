@@ -161,21 +161,21 @@ public class AtomHibernateTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void getPreparedStatementMaker_Args__() throws Exception {
-    Function<Connection, PreparedStatement> actual = target.getPreparedStatementMaker();
+    Function<Connection, PreparedStatement> actual = target.getPreparedStatementMaker(null);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void prepHibernateLastChange_Args__Session__Transaction__Date() throws Exception {
     Date lastRunTime = new Date();
-    target.prepHibernateLastChange(session, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime, null);
   }
 
   @Test
   public void prepHibernateLastChange_Args__Session__Date() throws Exception {
     Session session = mock(Session.class);
     Date lastRunTime = new Date();
-    target.prepHibernateLastChange(session, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime, null);
   }
 
 }

@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -164,14 +165,14 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * 
    * @return prepared statement for last change pre-processing
    */
-  default Function<Connection, PreparedStatement> getPreparedStatementMaker() {
+  default Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
     return c -> {
-      final String sql = getPrepLastChangeSQL();
+      final Logger log = getLogger();
       try {
-        getLogger().info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
+        log.info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw CheeseRay.runtime(getLogger(), e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
+        throw CheeseRay.runtime(log, e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
       }
     };
   }
@@ -195,12 +196,13 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * 
    * @param session current Hibernate session
    * @param lastRunTime last successful run datetime
+   * @param pSql optional, roll-your-own SQL
    */
-  default void prepHibernateLastChange(final Session session, final Date lastRunTime) {
-    final String sql = getPrepLastChangeSQL();
+  default void prepHibernateLastChange(final Session session, final Date lastRunTime, String pSql) {
+    final String sql = StringUtils.isNotBlank(pSql) ? pSql.trim() : getPrepLastChangeSQL();
     if (StringUtils.isNotBlank(sql)) {
       NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql,
-          getPreparedStatementMaker());
+          getPreparedStatementMaker(sql));
     }
   }
 

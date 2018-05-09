@@ -567,7 +567,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final List<N> results = fetchLastRunResults(lastRunDt, deletionResults);
 
       if (results != null && !results.isEmpty()) {
-        LOGGER.info("Found {} people to index", results.size());
+        LOGGER.info("Found {} persons to index", results.size());
         results.stream().forEach(p -> { // NOSONAR
           getFlightLog().addAffectedDocumentId(p.getPrimaryKey().toString());
           prepareDocumentTrapException(bp, p);
@@ -752,16 +752,16 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
     final Class<?> entityClass = getDenormalizedClass(); // view entity class
     final String namedQueryName =
-        getFlightPlan().isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
+        flightPlan.isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
             : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
-    final Session session = jobDao.getSessionFactory().getCurrentSession();
+    final Session session = jobDao.grabSession();
     final Transaction txn = grabTransaction();
     Object lastId = new Object();
 
     try {
       // Insert into session temp table that drives a last change view.
-      prepHibernateLastChange(session, lastRunTime);
+      prepHibernateLastChange(session, lastRunTime, null);
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
       q.setCacheMode(CacheMode.IGNORE);
       q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +99,20 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   protected List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {
-    return pullRange(Pair.<String, String>of("a", "b"));
+    final List<ReplicatedClient> ret = super.fetchLastRunResults(lastRunDate, deletionResults);
+
+    try {
+      final Session session = getJobDao().grabSession();
+      prepHibernateLastChange(session, lastRunDate,
+          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime()));
+
+
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "ERROR CALLING LAST CHANGE SQL! {}", e.getMessage());
+    }
+
+    return ret;
   }
 
   @Override
@@ -116,8 +130,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       return NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
           determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "PEOPLE SUMMARY: ERROR BUILDING LAST CHANGE SQL! {}",
-          e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
     }
   }
 

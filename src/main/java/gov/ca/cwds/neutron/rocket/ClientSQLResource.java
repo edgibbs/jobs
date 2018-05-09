@@ -197,7 +197,7 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String INSERT_CLIENT_LAST_CHG =
-     "INSERT INTO GT_ID (IDENTIFIER)  \n"
+     "INSERT INTO GT_ID (IDENTIFIER) \n"
           + "SELECT DISTINCT CLT.IDENTIFIER \n"
           + "FROM CLIENT_T clt \n"
           + "WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
@@ -211,9 +211,14 @@ public class ClientSQLResource implements ApiMarker {
     + "UNION SELECT DISTINCT eth.ESTBLSH_ID AS IDENTIFIER \n"
           + "FROM CLSCP_ET eth \n"
           + "WHERE ETH.ESTBLSH_CD = 'C' \n"
-          + "AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-    + "UNION SELECT DISTINCT pe.FKCLIENT_T \n"
-          + "FROM PLC_EPST pe  \n"
+          + "AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'";
+  //@formatter:on
+
+  //@formatter:off
+  public static final String INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG =
+     "INSERT INTO GT_ID (IDENTIFIER) \n"
+          + "SELECT DISTINCT pe.FKCLIENT_T \n"
+          + "FROM PLC_EPST pe \n"
           + "WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
           + "FROM O_HM_PLT ohp \n"

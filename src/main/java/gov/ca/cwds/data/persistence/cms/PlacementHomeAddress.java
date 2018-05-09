@@ -15,6 +15,7 @@ import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.legacy.cms.entity.converter.ZipCodeConverter;
+import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedPlacementHomeAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -29,7 +30,8 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * 
  * @author CWDS API Team
  */
-public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClientAddress> {
+public class PlacementHomeAddress
+    implements PersistentObject, ApiGroupNormalizer<ReplicatedClientAddress> {
 
   private static final long serialVersionUID = 1L;
 
@@ -220,6 +222,11 @@ public class PlacementHomeAddress implements ApiGroupNormalizer<ReplicatedClient
   @Override
   public ReplicatedClientAddress normalize(Map<Object, ReplicatedClientAddress> arg0) {
     return toReplicatedClientAddress();
+  }
+
+  @Override
+  public Serializable getPrimaryKey() {
+    return new VarargPrimaryKey(clientId, peThirdId, otherHomePlacementId, placementHomeId);
   }
 
 }

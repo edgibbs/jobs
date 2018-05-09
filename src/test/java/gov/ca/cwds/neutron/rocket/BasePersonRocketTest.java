@@ -664,7 +664,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.prepHibernateLastChange(session, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime, null);
   }
 
   @Test

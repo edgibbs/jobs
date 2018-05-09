@@ -12,7 +12,6 @@ import javax.persistence.ParameterMode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 import org.slf4j.Logger;
 
@@ -25,7 +24,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Common functions and features for initial (full) load.
@@ -127,17 +126,12 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     flightLog.markRangeStart(range);
     eventStartRange(range);
 
-    try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
-        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
+    final String query = getInitialLoadQuery(getDBSchemaName())
+        .replaceAll(":fromId", range.getLeft()).replaceAll(":toId", range.getRight());
+    log.info("query: {}", query);
 
-      final String query = getInitialLoadQuery(getDBSchemaName())
-          .replaceAll(":fromId", range.getLeft()).replaceAll(":toId", range.getRight());
-      log.info("query: {}", query);
-      NeutronDB2Utils.enableParallelism(con);
-
-      try (final Statement stmt = con.createStatement()) {
+    try (final Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
+      try (final Statement stmt = con.createStatement()) { // Auto-close statement.
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
