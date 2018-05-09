@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +44,7 @@ import gov.ca.cwds.neutron.rocket.referral.MinClientReferral;
 import gov.ca.cwds.neutron.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
@@ -260,12 +260,11 @@ public class ReferralHistoryIndexerJob
   /**
    * Synchronize grabbing connections from the connection pool to prevent deadlocks in C3P0.
    * 
-   * @return a connection
+   * @return database connection
    * @throws SQLException on database error
    */
   protected synchronized Connection getConnection() throws SQLException {
-    return jobDao.getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-        .getService(ConnectionProvider.class).getConnection();
+    return NeutronJdbcUtils.prepConnection(jobDao.getSessionFactory());
   }
 
   /**
@@ -511,9 +510,7 @@ public class ReferralHistoryIndexerJob
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
 
     try (final Connection con = getConnection()) {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
-      NeutronDB2Utils.enableParallelism(con);
+      NeutronDB2Utils.enableBatchSettings(con);
 
       final DB2SystemMonitor monitor = NeutronDB2Utils.monitorStart(con);
       final String schema = getDBSchemaName();

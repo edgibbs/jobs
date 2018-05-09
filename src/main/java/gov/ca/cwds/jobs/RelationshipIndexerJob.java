@@ -171,13 +171,13 @@ public class RelationshipIndexerJob
   }
 
   /**
-   * Iterate results sets from {@link #pullRange(Pair)}.
+   * Iterate results sets from {@link #pullRange(Pair, String)}.
    * 
    * @param rs result set
    * @throws SQLException on database error
    */
   @Override
-  public void eventHandleMainResults(final ResultSet rs) throws SQLException {
+  public void handleMainResults(final ResultSet rs) throws SQLException {
     int cntr = 0;
     EsRelationship m;
     Object lastId = new Object();
@@ -221,7 +221,7 @@ public class RelationshipIndexerJob
 
       // Queue execution.
       for (Pair<String, String> p : ranges) {
-        tasks.add(threadPool.submit(() -> pullRange(p)));
+        tasks.add(threadPool.submit(() -> pullRange(p, null)));
       }
 
       // Join threads. Don't return from method until they complete.

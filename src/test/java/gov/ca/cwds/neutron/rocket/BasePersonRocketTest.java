@@ -698,7 +698,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Utils.enableBatchSettings(con);
   }
 
   @Test

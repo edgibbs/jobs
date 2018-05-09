@@ -7,17 +7,16 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.neutron.atom.AtomLoadEventHandler;
+import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
- * Execute arbitrary SELECT statements, typically for last change runs. Lets us reuse JDBC handlers
- * from initial load in last change mode without changing the architecture when switching between
- * Hibernate and raw JDBC.
+ * Execute arbitrary SQL statements. Allows reuse of JDBC and Hibernate handlers when switching
+ * between Hibernate queries and raw JDBC without major architectural changes.
  * 
  * <p>
- * Examples include one or more SELECT statements after insert keys into a global temporary table.
+ * Examples include inserting keys into a global temporary table and executing one or more SELECT
+ * statements.
  * </p>
  * 
  * @author CWDS API Team
@@ -25,28 +24,32 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  */
 public class WorkSecondaryResults<T extends PersistentObject> implements Work {
 
-  private final AtomLoadEventHandler<T> handler;
+  private final AtomLoadStepHandler<T> handler;
+  private Connection conn;
 
   /**
    * Constructor.
    * 
    * @param handler results handler
    */
-  public WorkSecondaryResults(AtomLoadEventHandler<T> handler) {
+  public WorkSecondaryResults(AtomLoadStepHandler<T> handler) {
     this.handler = handler;
   }
 
   /**
-   * Call {@link AtomLoadEventHandler#eventHandleSecondaryJdbc(Connection, Pair)}.
+   * Call {@link AtomLoadStepHandler#handleSecondaryJdbc(Connection, Pair)}.
    * 
    * @param con current database connection
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
-    con.setAutoCommit(false);
-    NeutronDB2Utils.enableParallelism(con);
-    handler.eventHandleSecondaryJdbc(con, Pair.<String, String>of("a", "b"));
+    conn = con;
+    NeutronDB2Utils.enableBatchSettings(con);
+    handler.handleSecondaryJdbc(con, Pair.<String, String>of("a", "b"));
+  }
+
+  public Connection getConn() {
+    return conn;
   }
 
 }

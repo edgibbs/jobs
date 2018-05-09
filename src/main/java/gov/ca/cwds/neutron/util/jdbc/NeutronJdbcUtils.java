@@ -98,9 +98,7 @@ public final class NeutronJdbcUtils {
   public static Connection prepConnection(final SessionFactory sessionFactory) throws SQLException {
     final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
-    con.setSchema(getDBSchemaName());
-    con.setAutoCommit(false);
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Utils.enableBatchSettings(con);
     return con;
   }
 

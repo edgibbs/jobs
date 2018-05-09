@@ -115,11 +115,10 @@ public class ClientCountyRocket extends ClientIndexerJob
 
   /**
    * Read records from the given key range, typically within a single partition on large tables.
-   * 
    * @param p partition range to read
    */
   @Override
-  public List<ReplicatedClient> pullRange(final Pair<String, String> p) {
+  public List<ReplicatedClient> pullRange(final Pair<String, String> p, String sql) {
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);

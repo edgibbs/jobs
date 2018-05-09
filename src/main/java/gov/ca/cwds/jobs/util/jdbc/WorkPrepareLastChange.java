@@ -66,9 +66,7 @@ public class WorkPrepareLastChange implements Work {
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
-    con.setAutoCommit(false);
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Utils.enableBatchSettings(con);
 
     final String strLastRunTime = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunTime);
     LOGGER.info("strLastRunTime: {}", strLastRunTime);

@@ -29,7 +29,6 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 
@@ -351,18 +350,14 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     nameThread("jdbc");
     LOGGER.info("BEGIN: jdbc thread");
 
-    try (final Connection con = jobDao.getSessionFactory().getSessionFactoryOptions()
-        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
-
+    try (final Connection con = NeutronJdbcUtils.prepConnection(jobDao.getSessionFactory())) {
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName());
       LOGGER.info("query: {}", query);
 
       // Enable parallelism for underlying database.
-      NeutronDB2Utils.enableParallelism(con);
+      NeutronDB2Utils.enableBatchSettings(con);
 
       D m;
       try (final Statement stmt = con.createStatement()) {

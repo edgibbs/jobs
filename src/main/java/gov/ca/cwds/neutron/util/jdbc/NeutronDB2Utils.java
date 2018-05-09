@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 
 import com.ibm.db2.jcc.DB2Connection;
 import com.ibm.db2.jcc.DB2SystemMonitor;
@@ -36,8 +35,11 @@ public final class NeutronDB2Utils {
    * @param con connection
    * @throws SQLException connection error
    */
-  public static void enableParallelism(Connection con) throws SQLException {
-    String dbProductName = con.getMetaData().getDatabaseProductName();
+  public static void enableBatchSettings(Connection con) throws SQLException {
+    final String dbProductName = con.getMetaData().getDatabaseProductName();
+    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
+    con.setAutoCommit(false);
+
     if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
       con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
     }
@@ -108,9 +110,7 @@ public final class NeutronDB2Utils {
   public static boolean isDB2OnZOS(final BaseDaoImpl<?> dao) throws NeutronCheckedException {
     boolean ret = false;
 
-    try (final Connection con = dao.getSessionFactory().getSessionFactoryOptions()
-        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
-
+    try (final Connection con = NeutronJdbcUtils.prepConnection(dao.getSessionFactory())) {
       final DatabaseMetaData meta = con.getMetaData();
       LOGGER.debug("meta: product name: {}, production version: {}, major: {}, minor: {}",
           meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),

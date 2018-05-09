@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +30,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.jobs.util.jdbc.WorkSecondaryResults;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
@@ -105,21 +102,24 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     final Pair<String, String> range = Pair.<String, String>of("a", "b");
 
     try {
-      final PeopleSummaryThreadHandler theHandler = handler.get();
-      final Session session = getJobDao().grabSession();
-      final Work work = new WorkSecondaryResults<ReplicatedClient>(theHandler);
+      pullRange(range, NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
+          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime()));
 
-      try {
-        // May fail without a transaction.
-        session.clear(); // Hibernate "duplicate object" bug
-      } catch (Exception e) {
-        LOGGER.warn("'clear' without transaction", e);
-      }
-
-      session.doWork(work);
-      session.clear();
-
-      eventJdbcDone(range);
+      // final PeopleSummaryThreadHandler theHandler = handler.get();
+      // final Session session = getJobDao().grabSession();
+      // final Work work = new WorkSecondaryResults<ReplicatedClient>(theHandler);
+      //
+      // try {
+      // // May fail without a transaction.
+      // session.clear(); // Hibernate "duplicate object" bug
+      // } catch (Exception e) {
+      // LOGGER.warn("'clear' without transaction", e);
+      // }
+      //
+      // session.doWork(work);
+      // session.clear();
+      //
+      // handleJdbcDone(range);
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
     }
@@ -147,19 +147,18 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public void eventStartRange(Pair<String, String> range) {
+  public void handleStartRange(Pair<String, String> range) {
     allocateThreadHandler();
   }
 
   @Override
-  public void eventFinishRange(Pair<String, String> range) {
+  public void handleFinishRange(Pair<String, String> range) {
     deallocateThreadHandler();
   }
 
   @Override
-  public void eventHandleSecondaryJdbc(Connection con, Pair<String, String> range)
-      throws SQLException {
-    handler.get().eventHandleSecondaryJdbc(con, range);
+  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    handler.get().handleSecondaryJdbc(con, range);
   }
 
   /**
@@ -224,13 +223,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * {@inheritDoc}
    */
   @Override
-  public void eventHandleMainResults(final ResultSet rs) throws SQLException {
-    handler.get().eventHandleMainResults(rs);
+  public void handleMainResults(final ResultSet rs) throws SQLException {
+    handler.get().handleMainResults(rs);
   }
 
   @Override
-  public void eventJdbcDone(final Pair<String, String> range) {
-    handler.get().eventJdbcDone(range);
+  public void handleJdbcDone(final Pair<String, String> range) {
+    handler.get().handleJdbcDone(range);
   }
 
   /**
@@ -254,6 +253,53 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
         flightPlan.setIndexName(globalIndexName.trim());
       }
     }
+  }
+
+  /**
+   * The "extract" part of ETL. Single producer, chained consumers. This rocket normalizes
+   * <strong>without</strong> the transform thread.
+   */
+  @Override
+  protected void threadRetrieveByJdbc() {
+    pullMultiThreadJdbc();
+  }
+
+  @Override
+  public boolean isInitialLoadJdbc() {
+    return true;
+  }
+
+  public boolean isLargeLoad() {
+    return largeLoad;
+  }
+
+  @Override
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronCheckedException {
+    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
+  }
+
+  /**
+   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
+   * sensitive flag must be deleted.
+   */
+  @Override
+  public boolean mustDeleteLimitedAccessRecords() {
+    return !getFlightPlan().isLoadSealedAndSensitive();
+  }
+
+  @Override
+  public List<ReplicatedClient> normalize(List<EsClientPerson> recs) {
+    return EntityNormalizer.<ReplicatedClient, EsClientPerson>normalizeList(recs);
+  }
+
+  @Override
+  public int nextThreadNumber() {
+    return nextThreadNum.incrementAndGet();
+  }
+
+  @Override
+  public ESOptionalCollection[] keepCollections() {
+    return new ESOptionalCollection[] {ESOptionalCollection.AKA, ESOptionalCollection.SAFETY_ALERT};
   }
 
   /**
@@ -310,53 +356,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       LOGGER.error("PEOPLE SUMMARY VALIDATION ERROR!", e);
       return false;
     }
-  }
-
-  /**
-   * The "extract" part of ETL. Single producer, chained consumers. This rocket normalizes
-   * <strong>without</strong> the transform thread.
-   */
-  @Override
-  protected void threadRetrieveByJdbc() {
-    pullMultiThreadJdbc();
-  }
-
-  @Override
-  public boolean isInitialLoadJdbc() {
-    return true;
-  }
-
-  public boolean isLargeLoad() {
-    return largeLoad;
-  }
-
-  @Override
-  public List<Pair<String, String>> getPartitionRanges() throws NeutronCheckedException {
-    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
-  }
-
-  /**
-   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
-   * sensitive flag must be deleted.
-   */
-  @Override
-  public boolean mustDeleteLimitedAccessRecords() {
-    return !getFlightPlan().isLoadSealedAndSensitive();
-  }
-
-  @Override
-  public List<ReplicatedClient> normalize(List<EsClientPerson> recs) {
-    return EntityNormalizer.<ReplicatedClient, EsClientPerson>normalizeList(recs);
-  }
-
-  @Override
-  public int nextThreadNumber() {
-    return nextThreadNum.incrementAndGet();
-  }
-
-  @Override
-  public ESOptionalCollection[] keepCollections() {
-    return new ESOptionalCollection[] {ESOptionalCollection.AKA, ESOptionalCollection.SAFETY_ALERT};
   }
 
   /**

@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.util.function.Function;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +17,12 @@ import gov.ca.cwds.jobs.util.JobReader;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
+ * Generic JDBC results reader. Callers should call {{@link #init()}, call {@link #read()} until it
+ * returns null, then finally call {@link #destroy()};
+ * 
  * @param <T> persistence class
  * @author CWDS Elasticsearch Team
  */
@@ -50,8 +53,7 @@ public class JdbcJobReader<T extends PersistentObject> implements JobReader<T> {
   @Override
   public void init() throws NeutronCheckedException {
     try {
-      final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
-          .getService(ConnectionProvider.class).getConnection();
+      final Connection con = NeutronJdbcUtils.prepConnection(sessionFactory);
       con.setAutoCommit(false);
       con.setReadOnly(true); // may fail in some situations.
 

@@ -15,17 +15,17 @@ import gov.ca.cwds.data.persistence.PersistentObject;
  * is arbitrary (like 'a' - 'b'), since range only applies to initial mode.
  * 
  * @author CWDS API Team
- * @param <N> normalized type
+ * @param <N> persistent, normalized type
  */
-public interface AtomLoadEventHandler<N extends PersistentObject> {
+public interface AtomLoadStepHandler<N extends PersistentObject> {
 
   /**
-   * Process results sets from {@link #pullRange(Pair)}. Default implementation is no-op.
+   * Process results sets from {@link #pullRange(Pair, String)}. Default implementation is no-op.
    * 
    * @param rs result set for this key range
    * @throws SQLException on database error
    */
-  default void eventHandleMainResults(final ResultSet rs) throws SQLException {
+  default void handleMainResults(final ResultSet rs) throws SQLException {
     // Provide your own solution, for now.
   }
 
@@ -36,7 +36,7 @@ public interface AtomLoadEventHandler<N extends PersistentObject> {
    * @param range key range
    * @throws SQLException on database error
    */
-  default void eventHandleSecondaryJdbc(final Connection con, Pair<String, String> range)
+  default void handleSecondaryJdbc(final Connection con, Pair<String, String> range)
       throws SQLException {
     // Default is no-op.
   }
@@ -47,7 +47,7 @@ public interface AtomLoadEventHandler<N extends PersistentObject> {
    * 
    * @param range key range
    */
-  default void eventStartRange(final Pair<String, String> range) {
+  default void handleStartRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
@@ -57,21 +57,26 @@ public interface AtomLoadEventHandler<N extends PersistentObject> {
    * 
    * @param range key range
    */
-  default void eventFinishRange(final Pair<String, String> range) {
+  default void handleFinishRange(final Pair<String, String> range) {
     // Default is no-op.
   }
 
   /**
    * Intermediate step, after {@link Connection#commit()} and before
-   * {@link #eventFinishRange(Pair)}. Process data, such as normalization. Default implementation is
+   * {@link #handleFinishRange(Pair)}. Process data, such as normalization. Default implementation is
    * no-op.
    * 
    * @param range key range
    */
-  default void eventJdbcDone(final Pair<String, String> range) {
+  default void handleJdbcDone(final Pair<String, String> range) {
     // Default is no-op.
   }
 
+  /**
+   * Return the handler's results.
+   * 
+   * @return clean, normalized results
+   */
   default List<N> getResults() {
     return new ArrayList<>();
   }

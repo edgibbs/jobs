@@ -20,14 +20,14 @@ import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
-import gov.ca.cwds.neutron.atom.AtomLoadEventHandler;
+import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 
 /**
- * {@link AtomLoadEventHandler} for the People Summary rocket.
+ * {@link AtomLoadStepHandler} for the People Summary rocket.
  * 
  * <p>
  * Loads {@link EsClientPerson} and {@link PlacementHomeAddress}, normalizes to
@@ -37,7 +37,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
  * @author CWDS API Team
  */
 public class PeopleSummaryThreadHandler
-    implements ApiMarker, AtomLoadEventHandler<ReplicatedClient> {
+    implements ApiMarker, AtomLoadStepHandler<ReplicatedClient> {
 
   private static final long serialVersionUID = 1L;
 
@@ -58,7 +58,7 @@ public class PeopleSummaryThreadHandler
   }
 
   @Override
-  public void eventHandleMainResults(ResultSet rs) throws SQLException {
+  public void handleMainResults(ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientPerson m;
     Object lastId = new Object();
@@ -89,7 +89,7 @@ public class PeopleSummaryThreadHandler
    * </p>
    */
   @Override
-  public void eventHandleSecondaryJdbc(Connection con, Pair<String, String> range)
+  public void handleSecondaryJdbc(Connection con, Pair<String, String> range)
       throws SQLException {
     try (
         final PreparedStatement stmtInsClient =
@@ -118,7 +118,7 @@ public class PeopleSummaryThreadHandler
   }
 
   @Override
-  public void eventJdbcDone(final Pair<String, String> range) {
+  public void handleJdbcDone(final Pair<String, String> range) {
     // Merge placement home addresses.
     this.placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
 
@@ -127,13 +127,13 @@ public class PeopleSummaryThreadHandler
   }
 
   @Override
-  public void eventStartRange(Pair<String, String> range) {
+  public void handleStartRange(Pair<String, String> range) {
     rocket.doneTransform();
     clear();
   }
 
   @Override
-  public void eventFinishRange(Pair<String, String> range) {
+  public void handleFinishRange(Pair<String, String> range) {
     clear();
   }
 

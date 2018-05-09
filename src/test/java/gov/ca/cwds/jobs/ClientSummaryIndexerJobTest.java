@@ -144,7 +144,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void pullRange_Args__Pair() throws Exception {
     final Pair<String, String> p = pair;
-    target.pullRange(p);
+    target.pullRange(p, null);
   }
 
   @Test(expected = NeutronRuntimeException.class)
@@ -155,7 +155,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
         sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
-    target.pullRange(p);
+    target.pullRange(p, null);
   }
 
   @Test
@@ -209,7 +209,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
-    target.eventHandleMainResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test
@@ -270,12 +270,12 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.eventHandleMainResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test
   public void handleRangeResults_Args__ResultSet__2() throws Exception {
-    target.eventHandleMainResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test

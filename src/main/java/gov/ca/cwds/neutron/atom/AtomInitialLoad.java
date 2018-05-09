@@ -34,7 +34,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * @param <D> denormalized type
  */
 public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupNormalizer<?>>
-    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl, AtomLoadEventHandler<N> {
+    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl, AtomLoadStepHandler<N> {
 
   /**
    * Restrict initial load key ranges from flight plan (command line).
@@ -107,13 +107,20 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
   /**
    * Read records from the given key range, typically within a single partition on large tables.
+   * Default initial load prep query takes the form
+   * {@code WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId'}.
+   * 
+   * <p>
+   * Pass optional SQL to execute to prepare
+   * </p>
    * 
    * @param range partition range to read
-   * @see AtomLoadEventHandler#eventStartRange(Pair)
-   * @see AtomLoadEventHandler#eventJdbcDone(Pair)
-   * @see AtomLoadEventHandler#eventFinishRange(Pair)
+   * @param sql optional SQL statement
+   * @see AtomLoadStepHandler#handleStartRange(Pair)
+   * @see AtomLoadStepHandler#handleJdbcDone(Pair)
+   * @see AtomLoadStepHandler#handleFinishRange(Pair)
    */
-  default List<N> pullRange(final Pair<String, String> range) {
+  default List<N> pullRange(final Pair<String, String> range, String sql) {
     final String origThreadName = Thread.currentThread().getName();
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + range.getLeft() + "_" + range.getRight();
@@ -124,10 +131,11 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
     log.info("BEGIN: extract thread {}", threadName);
     flightLog.markRangeStart(range);
-    eventStartRange(range);
+    handleStartRange(range);
 
-    final String query = getInitialLoadQuery(getDBSchemaName())
-        .replaceAll(":fromId", range.getLeft()).replaceAll(":toId", range.getRight());
+    final String query = StringUtils.isNotBlank(sql) ? sql.trim()
+        : getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", range.getLeft())
+            .replaceAll(":toId", range.getRight());
     log.info("query: {}", query);
 
     try (final Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
@@ -135,10 +143,10 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
-        eventHandleMainResults(stmt.executeQuery(query));
+        handleMainResults(stmt.executeQuery(query));
 
         // Handle additional JDBC statements, if any.
-        eventHandleSecondaryJdbc(con, range);
+        handleSecondaryJdbc(con, range);
 
         con.commit();
       } catch (Exception e) {
@@ -146,8 +154,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         throw e;
       }
 
-      // Handle any processing after reads are done, like normalization.
-      eventJdbcDone(range);
+      // Done reading data. Process data, like cleansing and normalizing.
+      handleJdbcDone(range);
 
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
       return getResults();
@@ -156,7 +164,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       throw CheeseRay.runtime(log, e, "RANGE FAILED! {}-{} : {}", range.getLeft(), range.getRight(),
           e.getMessage());
     } finally {
-      eventFinishRange(range);
+      handleFinishRange(range);
       flightLog.markRangeComplete(range);
       nameThread(origThreadName);
     }
@@ -191,7 +199,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
       // Queue up thread execution.
       for (Pair<String, String> p : ranges) {
-        tasks.add(threadPool.submit(() -> pullRange(p)));
+        tasks.add(threadPool.submit(() -> pullRange(p, null)));
       }
 
       // Join threads. Don't let this method return until the threads finish.
