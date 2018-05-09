@@ -108,12 +108,15 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    final String sql = ClientSQLResource.SELECT_PLACEMENT_ADDRESS;
+    LOGGER.info("handleSecondaryJdbc: SQL: {}", sql);
     try (final PreparedStatement stmtInsClient = con.prepareStatement(pickPrepDml());
-        final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
+        final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sql)) {
       prepAffectedClients(stmtInsClient, range);
       readPlacementAddress(stmtSelPlacementAddress);
+      con.commit();
     } catch (Exception e) {
+      con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
   }
@@ -174,7 +177,7 @@ public class PeopleSummaryThreadHandler
       // Done reading data. Process data, like cleansing and normalizing.
       handleJdbcDone(range);
 
-      LOGGER.info("LAST CHANGE COMPLETED SUCCESSFULLY!");
+      LOGGER.info("FETCH LAST CHANGE RESULTS SUCCESSFULLY!");
       return getResults();
     } catch (Exception e) {
       rocket.fail();
@@ -198,7 +201,7 @@ public class PeopleSummaryThreadHandler
   }
 
   /**
-   * Normalize all recs for same client id.
+   * Normalize records from MQT/view for same client id.
    * 
    * @param grpRecs recs for same client id
    */
