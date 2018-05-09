@@ -83,7 +83,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     if (!isLargeDataSet()) {
       LOGGER.warn("\n\n\n\t   ********** RESET DB2 SCHEMA!! ********** \n\n\n");
 
-      final Session session = getJobDao().getSessionFactory().getCurrentSession();
+      final Session session = getJobDao().grabSession();
       grabTransaction();
 
       final ProcedureCall proc = session.createStoredProcedureCall("CWSTMP.SPREFDBS");

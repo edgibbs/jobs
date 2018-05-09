@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,13 +15,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.DbResetStatusDao;
-import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
+import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 
-public class SchemaResetRocketTest extends Goddard {
+public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseResetEntry> {
 
-	DbResetStatusDao dao;
+  DbResetStatusDao dao;
   SchemaResetRocket target;
 
   @Override
@@ -61,27 +60,16 @@ public class SchemaResetRocketTest extends Goddard {
     target.refreshSchema();
   }
 
-  @Test
-  @Ignore
+  @Test(expected = NeutronCheckedException.class)
   public void refreshSchema_A$_T$NeutronCheckedException() throws Exception {
-    try {
-      when(dao.getSessionFactory()).thenThrow(SQLException.class);
-      target.refreshSchema();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    when(dao.getSessionFactory()).thenThrow(SQLException.class);
+    target.refreshSchema();
   }
 
-  @Test
-  @Ignore
+  @Test(expected = Exception.class)
   public void main_A$StringArray_T$Exception() throws Exception {
     String[] args = new String[] {};
-
-    try {
-      SchemaResetRocket.main(args);
-      fail("Expected exception was not thrown!");
-    } catch (Exception e) {
-    }
+    SchemaResetRocket.main(args);
   }
 
 }

@@ -104,7 +104,7 @@ public class FlightSummary implements ApiMarker {
     this.flightSchedule = flightSchedule;
   }
 
-  public synchronized void accumulate(final FlightLog flightLog) {
+  public void accumulate(final FlightLog flightLog) {
     totalRuns++;
     this.bulkDeleted += flightLog.getCurrentBulkDeleted();
     this.bulkPrepared += flightLog.getCurrentBulkPrepared();
@@ -112,7 +112,6 @@ public class FlightSummary implements ApiMarker {
     this.bulkAfter += flightLog.getCurrentBulkAfter();
 
     this.rowsNormalized += flightLog.getCurrentNormalized();
-
 
     if (flightLog.isValidationErrors()) {
       this.validationErrors++;
