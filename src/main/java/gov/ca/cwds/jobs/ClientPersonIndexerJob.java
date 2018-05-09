@@ -101,38 +101,24 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   protected List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {
-    final List<ReplicatedClient> viewResults =
-        super.fetchLastRunResults(lastRunDate, deletionResults);
+    allocateThreadHandler();
+    final PeopleSummaryThreadHandler theHandler = handler.get();
     final Pair<String, String> range = Pair.<String, String>of("a", "b");
 
     flightLog.markRangeStart(range);
-    handleStartRange(range);
+    theHandler.handleStartRange(range);
+
+    // Read from the view, old school.
+    theHandler.addAll(super.fetchLastRunResults(lastRunDate, deletionResults));
 
     final Session session = getJobDao().grabSession();
     final Transaction txn = grabTransaction();
+    final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(theHandler);
 
     try {
-      final PeopleSummaryThreadHandler theHandler = handler.get();
-
-      prepHibernateLastChange(session, lastRunDate,
-          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
-              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime()));
-
-      final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(handler.get());
       NeutronJdbcUtils.doWork(session, work);
 
-      // try (Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
-      // try {
-      // handleSecondaryJdbc(con, range);
-      // con.commit();
-      // } catch (Exception e) {
-      // con.rollback();
-      // throw e;
-      // }
-      // } // Auto-close connection.
-
       // Done reading data. Process data, like cleansing and normalizing.
-      theHandler.addAll(viewResults);
       theHandler.handleJdbcDone(range);
 
       session.clear();
@@ -147,6 +133,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     } finally {
       handleFinishRange(range);
       flightLog.markRangeComplete(range);
+      deallocateThreadHandler();
     }
   }
 
