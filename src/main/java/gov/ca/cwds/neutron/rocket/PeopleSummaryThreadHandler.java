@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,7 +35,8 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
  * 
  * @author CWDS API Team
  */
-public class PeopleSummaryThreadHandler implements ApiMarker, AtomLoadEventHandler {
+public class PeopleSummaryThreadHandler
+    implements ApiMarker, AtomLoadEventHandler<ReplicatedClient> {
 
   private static final long serialVersionUID = 1L;
 
@@ -50,7 +52,7 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomLoadEventHandl
     final boolean isLargeLoad = rocket.isLargeLoad();
 
     this.rocket = rocket;
-    this.normalized = isLargeLoad ? new HashMap<>(20000) : new HashMap<>(5000);
+    this.normalized = isLargeLoad ? new LinkedHashMap<>(20000) : new LinkedHashMap<>(5000);
     this.placementHomeAddresses = isLargeLoad ? new HashMap<>(2000) : new HashMap<>(200);
   }
 
@@ -118,13 +120,18 @@ public class PeopleSummaryThreadHandler implements ApiMarker, AtomLoadEventHandl
 
   @Override
   public void eventStartRange(Pair<String, String> range) {
-    rocket.getFlightLog().doneTransform();
+    rocket.doneTransform();
     clear();
   }
 
   @Override
   public void eventFinishRange(Pair<String, String> range) {
     clear();
+  }
+
+  @Override
+  public List<ReplicatedClient> getResults() {
+    return normalized.values().stream().collect(Collectors.toList());
   }
 
   protected void clear() {

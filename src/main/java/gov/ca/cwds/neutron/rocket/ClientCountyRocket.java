@@ -3,6 +3,8 @@ package gov.ca.cwds.neutron.rocket;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.ParameterMode;
@@ -18,6 +20,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -116,7 +119,7 @@ public class ClientCountyRocket extends ClientIndexerJob
    * @param p partition range to read
    */
   @Override
-  public void pullRange(final Pair<String, String> p) {
+  public List<ReplicatedClient> pullRange(final Pair<String, String> p) {
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
@@ -129,6 +132,8 @@ public class ClientCountyRocket extends ClientIndexerJob
       throw CheeseRay.runtime(LOGGER, e, "PROC ERROR ON RANGE! {}-{} : {}", p.getLeft(),
           p.getRight(), e.getMessage());
     }
+
+    return new ArrayList<>();
   }
 
   /**

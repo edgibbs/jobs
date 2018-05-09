@@ -98,8 +98,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   protected List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {
-    final List<ReplicatedClient> ret = extractLastRunRecsFromView(lastRunDate, deletionResults);
-    return ret;
+    return pullRange(Pair.<String, String>of("a", "b"));
   }
 
   @Override
@@ -123,12 +122,12 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public void eventStartRange(Pair<String, String> p) {
+  public void eventStartRange(Pair<String, String> range) {
     allocateThreadHandler();
   }
 
   @Override
-  public void eventFinishRange(Pair<String, String> p) {
+  public void eventFinishRange(Pair<String, String> range) {
     deallocateThreadHandler();
   }
 

@@ -539,7 +539,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   protected List<N> fetchLastRunResults(final Date lastRunDate, final Set<String> deletionResults) {
-    return this.isViewNormalizer() ? extractLastRunRecsFromView(lastRunDate, deletionResults)
+    return isViewNormalizer() ? extractLastRunRecsFromView(lastRunDate, deletionResults)
         : extractLastRunRecsFromTable(lastRunDate);
   }
 
@@ -598,7 +598,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   protected boolean determineInitialLoad(final Date lastRun) {
-    return this.getFlightPlan().determineInitialLoad(lastRun);
+    return getFlightPlan().determineInitialLoad(lastRun);
   }
 
   /**

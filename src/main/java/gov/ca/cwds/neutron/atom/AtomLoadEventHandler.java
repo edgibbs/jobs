@@ -3,16 +3,21 @@ package gov.ca.cwds.neutron.atom;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+
+import gov.ca.cwds.data.persistence.PersistentObject;
 
 /**
  * Interface defines load steps, primarily for initial (full) mode. In last change mode, the range
  * is arbitrary (like 'a' - 'b'), since range only applies to initial mode.
  * 
  * @author CWDS API Team
+ * @param <N> normalized type
  */
-public interface AtomLoadEventHandler {
+public interface AtomLoadEventHandler<N extends PersistentObject> {
 
   /**
    * Process results sets from {@link #pullRange(Pair)}. Default implementation is no-op.
@@ -57,13 +62,18 @@ public interface AtomLoadEventHandler {
   }
 
   /**
-   * Intermediate step, after {@link Connection#commit()} and before {@link #eventFinishRange(Pair)}.
-   * Process data, such as normalization. Default implementation is no-op.
+   * Intermediate step, after {@link Connection#commit()} and before
+   * {@link #eventFinishRange(Pair)}. Process data, such as normalization. Default implementation is
+   * no-op.
    * 
    * @param range key range
    */
   default void eventJdbcDone(final Pair<String, String> range) {
     // Default is no-op.
+  }
+
+  default List<N> getResults() {
+    return new ArrayList<>();
   }
 
 }

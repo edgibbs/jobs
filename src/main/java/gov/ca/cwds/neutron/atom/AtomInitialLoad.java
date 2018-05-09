@@ -31,12 +31,11 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
  * Common functions and features for initial (full) load.
  * 
  * @author CWDS API Team
- *
  * @param <N> normalized type
  * @param <D> denormalized type
  */
 public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupNormalizer<?>>
-    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl, AtomLoadEventHandler {
+    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl, AtomLoadEventHandler<N> {
 
   /**
    * Restrict initial load key ranges from flight plan (command line).
@@ -115,7 +114,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
    * @see AtomLoadEventHandler#eventJdbcDone(Pair)
    * @see AtomLoadEventHandler#eventFinishRange(Pair)
    */
-  default void pullRange(final Pair<String, String> range) {
+  default List<N> pullRange(final Pair<String, String> range) {
     final String origThreadName = Thread.currentThread().getName();
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + range.getLeft() + "_" + range.getRight();
@@ -157,6 +156,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       eventJdbcDone(range);
 
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
+      return getResults();
     } catch (Exception e) {
       fail();
       throw CheeseRay.runtime(log, e, "RANGE FAILED! {}-{} : {}", range.getLeft(), range.getRight(),
