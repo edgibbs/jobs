@@ -136,16 +136,16 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   // target.normalizeAndQueueIndex(grpRecs);
   // }
 
-  @Test
-  public void threadExtractJdbc_Args__() throws Exception {
-    target.threadRetrieveByJdbc();
-  }
+  // @Test
+  // public void threadExtractJdbc_Args__() throws Exception {
+  // target.threadRetrieveByJdbc();
+  // }
 
-  @Test
-  public void pullRange_Args__Pair() throws Exception {
-    final Pair<String, String> p = pair;
-    target.pullRange(p, null);
-  }
+  // @Test
+  // public void pullRange_Args__Pair() throws Exception {
+  // final Pair<String, String> p = pair;
+  // target.pullRange(p, null);
+  // }
 
   @Test(expected = NeutronRuntimeException.class)
   public void pullRange_Args__Pair__Exception() throws Exception {
@@ -160,8 +160,8 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void getPartitionRanges_Args() throws Exception {
-    final List actual = target.getPartitionRanges();
-    final List expected = new ArrayList<>();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
     expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
@@ -169,7 +169,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    final List actual = target.getPartitionRanges();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual.size(), is(equalTo(64)));
   }
 
@@ -234,10 +234,10 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void threadRetrieveByJdbc_Args__() throws Exception {
-    target.threadRetrieveByJdbc();
-  }
+  // @Test
+  // public void threadRetrieveByJdbc_Args__() throws Exception {
+  // target.threadRetrieveByJdbc();
+  // }
 
   @Test
   public void isInitialLoadJdbc_Args__() throws Exception {
