@@ -24,6 +24,7 @@ import gov.ca.cwds.neutron.atom.AtomLoadEventHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 
 /**
  * {@link AtomLoadEventHandler} for the People Summary rocket.
@@ -93,12 +94,17 @@ public class PeopleSummaryThreadHandler
     try (
         final PreparedStatement stmtInsClient =
             con.prepareStatement(rocket.getFlightPlan().isLastRunMode()
-                ? ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG
+                ? NeutronDB2Utils.prepLastChangeSQL(
+                    ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+                    rocket.determineLastSuccessfulRunTime(),
+                    rocket.getFlightPlan().getOverrideLastEndTime())
                 : ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL);
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       prepAffectedClients(stmtInsClient, range);
       readPlacementAddress(stmtSelPlacementAddress);
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     } finally {
       // Auto-close prepared statements.
     }
@@ -182,6 +188,10 @@ public class PeopleSummaryThreadHandler
     }
 
     LOGGER.info("Placement home count: {}", placementHomeAddresses.size());
+  }
+
+  public Map<String, ReplicatedClient> getNormalized() {
+    return normalized;
   }
 
 }

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
+import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.jobs.util.jdbc.WorkSecondaryResults;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
@@ -100,16 +102,26 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   protected List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {
     final List<ReplicatedClient> ret = super.fetchLastRunResults(lastRunDate, deletionResults);
+    final Pair<String, String> range = Pair.<String, String>of("a", "b");
 
     try {
+      final PeopleSummaryThreadHandler theHandler = handler.get();
       final Session session = getJobDao().grabSession();
-      prepHibernateLastChange(session, lastRunDate,
-          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
-              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime()));
+      final Work work = new WorkSecondaryResults<ReplicatedClient>(theHandler);
 
+      try {
+        // May fail without a transaction.
+        session.clear(); // Hibernate "duplicate object" bug
+      } catch (Exception e) {
+        LOGGER.warn("'clear' without transaction", e);
+      }
 
+      session.doWork(work);
+      session.clear();
+
+      eventJdbcDone(range);
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR CALLING LAST CHANGE SQL! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
     }
 
     return ret;
