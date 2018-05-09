@@ -20,7 +20,8 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 public interface AtomLoadStepHandler<N extends PersistentObject> {
 
   /**
-   * Process results sets from {@link #pullRange(Pair, String)}. Default implementation is no-op.
+   * Process results sets from the main, original query (view or MQT). Default implementation is
+   * no-op.
    * 
    * @param rs result set for this key range
    * @throws SQLException on database error
@@ -63,8 +64,8 @@ public interface AtomLoadStepHandler<N extends PersistentObject> {
 
   /**
    * Intermediate step, after {@link Connection#commit()} and before
-   * {@link #handleFinishRange(Pair)}. Process data, such as normalization. Default implementation is
-   * no-op.
+   * {@link #handleFinishRange(Pair)}. Process data, such as normalization. Default implementation
+   * is no-op.
    * 
    * @param range key range
    */

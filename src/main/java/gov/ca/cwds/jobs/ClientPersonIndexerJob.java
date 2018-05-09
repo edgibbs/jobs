@@ -80,6 +80,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector global Launch Director
    */
   @Inject
   public ClientPersonIndexerJob(final ReplicatedClientDao dao,
@@ -117,7 +118,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
     try {
       NeutronJdbcUtils.doWork(session, work);
-
       session.clear();
       txn.commit();
 

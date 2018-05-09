@@ -163,6 +163,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * Return Function that creates a prepared statement for last change pre-processing, such as
    * inserting identifiers into a global temporary table.
    * 
+   * @param sql SQL to prepare
    * @return prepared statement for last change pre-processing
    */
   default Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {

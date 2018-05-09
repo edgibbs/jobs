@@ -116,6 +116,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
    * 
    * @param range partition range to read
    * @param sql optional SQL statement
+   * @return List of persistent type N
+   * 
    * @see AtomLoadStepHandler#handleStartRange(Pair)
    * @see AtomLoadStepHandler#handleJdbcDone(Pair)
    * @see AtomLoadStepHandler#handleFinishRange(Pair)
