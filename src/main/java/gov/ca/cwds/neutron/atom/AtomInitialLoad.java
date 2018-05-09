@@ -149,7 +149,6 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
         // Handle additional JDBC statements, if any.
         handleSecondaryJdbc(con, range);
-
         con.commit();
       } catch (Exception e) {
         con.rollback();
@@ -158,7 +157,6 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
       // Done reading data. Process data, like cleansing and normalizing.
       handleJdbcDone(range);
-
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
       return getResults();
     } catch (Exception e) {

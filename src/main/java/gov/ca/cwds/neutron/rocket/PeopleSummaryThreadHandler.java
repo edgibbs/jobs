@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,6 @@ import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
-import gov.ca.cwds.jobs.util.jdbc.WorkSecondaryResults;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
@@ -157,31 +154,40 @@ public class PeopleSummaryThreadHandler
   public List<ReplicatedClient> fetchLastRunNormalizedResults(Date lastRunDate,
       Set<String> deletionResults) {
     final Pair<String, String> range = Pair.<String, String>of("a", "b");
-
     final FlightLog flightLog = rocket.getFlightLog();
+
     flightLog.markRangeStart(range);
     handleStartRange(range);
 
     // Read from the view, old school.
     addAll(rocket.fetchLastRunResultsStandard(lastRunDate, deletionResults));
 
-    final Session session = rocket.getJobDao().grabSession();
-    final Transaction txn = rocket.grabTransaction();
-    final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(this);
+    // final Session session = rocket.getJobDao().grabSession();
+    // final Transaction txn = rocket.grabTransaction();
+    // final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(this);
 
-    try {
-      NeutronJdbcUtils.doWork(session, work);
-      session.clear();
-      txn.commit();
+    // try {
+    // NeutronJdbcUtils.doWork(session, work);
+    // session.clear();
+    // txn.commit();
+
+    try (Connection con = NeutronJdbcUtils.prepConnection(rocket.getJobDao().getSessionFactory())) {
+      try {
+        // Handle additional JDBC statements, if any.
+        handleSecondaryJdbc(con, range);
+        con.commit();
+      } catch (Exception e) {
+        con.rollback();
+        throw e;
+      }
 
       // Done reading data. Process data, like cleansing and normalizing.
       handleJdbcDone(range);
-
       LOGGER.info("FETCH LAST CHANGE RESULTS SUCCESSFULLY!");
       return getResults();
     } catch (Exception e) {
       rocket.fail();
-      txn.rollback();
+      // txn.rollback();
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
