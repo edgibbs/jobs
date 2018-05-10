@@ -118,6 +118,9 @@ public class PeopleSummaryThreadHandler
     if (normalized.containsKey(pha.getClientId())) {
       final ReplicatedClient rc = normalized.get(pha.getClientId());
       rc.setActivePlacementHomeAddress(pha);
+    } else {
+      // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
+      LOGGER.warn("Placement home address not in normalized map! client id: {}", pha.getClientId());
     }
   }
 

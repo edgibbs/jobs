@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,9 +16,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
@@ -84,19 +87,6 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void setClientAddresses_Args__Set() throws Exception {
-    final Set<ReplicatedClientAddress> clientAddresses = new HashSet<>();
-    target.setClientAddresses(clientAddresses);
-    assertThat(target.getClientAddresses().isEmpty(), is(equalTo(Boolean.TRUE)));
-  }
-
-  @Test 
-  public void shouldBeEmptyWhenClientAddressesIsNull() throws Exception {
-    target.setClientAddresses(null);
-    assertThat(target.getClientAddresses().isEmpty(), is(equalTo(Boolean.TRUE)));
-  }
-  
   @Test
   public void addClientAddress_Args__ReplicatedClientAddress() throws Exception {
     final ReplicatedClientAddress clientAddress = mock(ReplicatedClientAddress.class);
@@ -173,7 +163,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final List<ElasticSearchSystemCode> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
-  
+
   @Test
   public void shouldReturnClientCounties() throws Exception {
     final short lakeCounty = 20;
@@ -233,7 +223,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual.getHispanicCodes().size(), is(equalTo(0)));
   }
-  
+
   @Test
   public void shouldBeHispanicWhenNotCaribbeanRace() throws Exception {
     final List<Short> clientRaces = new ArrayList<>();
@@ -242,7 +232,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual.getHispanicCodes().size(), is(equalTo(1)));
   }
-  
+
   @Test
   public void shouldNotBeHispanicWhenOtherCDIsNot02() throws Exception {
     final List<Short> clientRaces = new ArrayList<>();
@@ -251,7 +241,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual.getHispanicCodes().size(), is(equalTo(0)));
   }
-  
+
   @Test
   public void shouldSetHispanicOriginCodeToYes() throws Exception {
     final List<Short> clientRaces = new ArrayList<>();
@@ -261,7 +251,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final ElasticSearchRaceAndEthnicity actual = target.getRaceAndEthnicity();
     assertThat(actual.getHispanicOriginCode(), is(equalTo("Y")));
   }
-  
+
   @Test
   public void getAkas_Args__() throws Exception {
     final Map<String, ElasticSearchPersonAka> actual = target.getAkas();
@@ -280,7 +270,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
     target.addAka(aka);
   }
-  
+
   @Test
   public void shouldBeEmptyWhenNullIsAddedToAka() throws Exception {
     target.addAka(null);
@@ -304,9 +294,9 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   public void shouldBeEmptyWhenNullIsSetToSafetyAlerts() throws Exception {
     target.setSafetyAlerts(null);
     assertThat(target.getSafetyAlerts().isEmpty(), is(equalTo(Boolean.TRUE)));
-    
+
   }
-  
+
   @Test
   public void addSafetyAlert_Args__ElasticSearchSafetyAlert() throws Exception {
     final ElasticSearchSafetyAlert safetyAlert = mock(ElasticSearchSafetyAlert.class);
@@ -345,7 +335,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final ReplicatedClientAddress clientAddress = mock(ReplicatedClientAddress.class);
     target.addClientAddress(clientAddress);
   }
-  
+
   @Test
   public void shouldBeEmptyWhenNullClientAddressIsAdded() throws Exception {
     target.addClientAddress(null);

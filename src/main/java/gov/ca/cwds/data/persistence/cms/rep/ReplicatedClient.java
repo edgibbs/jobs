@@ -162,19 +162,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   }
 
   /**
-   * Set the client address linkages.
-   *
-   * @param clientAddresses Set of client address linkages
-   */
-  public void setClientAddresses(Set<ReplicatedClientAddress> clientAddresses) {
-    if (clientAddresses != null) {
-      this.clientAddresses = clientAddresses;
-    } else {
-      this.clientAddresses = new LinkedHashSet<>();
-    }
-  }
-
-  /**
    * Add a client address linkage.
    *
    * @param clientAddress client address

@@ -211,7 +211,17 @@ public class ClientSQLResource implements ApiMarker {
     + "UNION SELECT DISTINCT eth.ESTBLSH_ID AS IDENTIFIER \n"
           + "FROM CLSCP_ET eth \n"
           + "WHERE ETH.ESTBLSH_CD = 'C' \n"
-          + "AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'";
+          + "AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'"
+    + "UNION SELECT DISTINCT pe.FKCLIENT_T \n"
+          + "FROM PLC_EPST pe \n"
+          + "WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+    + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
+          + "FROM O_HM_PLT ohp \n"
+          + "JOIN PLC_HM_T ph  ON ph.IDENTIFIER  = ohp.FKPLC_HM_T \n"
+          + "WHERE ph.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+    + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
+          + "FROM O_HM_PLT ohp \n"
+          + "WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'";
   //@formatter:on
 
   //@formatter:off
