@@ -171,9 +171,10 @@ public class PeopleSummaryThreadHandler
     // session.clear();
     // txn.commit();
 
+    // Handle additional JDBC statements, if any.
     try (Connection con = NeutronJdbcUtils.prepConnection(rocket.getJobDao().getSessionFactory())) {
       try {
-        // Handle additional JDBC statements, if any.
+        con.commit();
         handleSecondaryJdbc(con, range);
         con.commit();
       } catch (Exception e) {

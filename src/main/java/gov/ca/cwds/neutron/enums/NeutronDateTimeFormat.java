@@ -21,12 +21,10 @@ public enum NeutronDateTimeFormat {
     this.format = format;
   }
 
-  @SuppressWarnings("javadoc")
   public String getFormat() {
     return format;
   }
 
-  @SuppressWarnings("javadoc")
   public DateFormat formatter() {
     return new SimpleDateFormat(format);
   }
