@@ -142,6 +142,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
     try (final Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
       try (final Statement stmt = con.createStatement()) { // Auto-close statement.
+        con.commit();
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
