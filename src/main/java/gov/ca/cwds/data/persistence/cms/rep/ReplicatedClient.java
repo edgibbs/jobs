@@ -278,7 +278,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
     final short residenceType = (short) 32;
     clientAddresses.stream().filter(r -> r.getEffEndDt() == null) // active only
-        .filter(r -> r.getAddresses().stream().anyMatch(
+        .filter(r -> r.getAddresses().stream().anyMatch( // residential only
             a -> a.getApiAdrAddressType() != null && a.getApiAdrAddressType() == residenceType))
         .sorted(Comparator
             .comparing(ReplicatedClientAddress::getEffEndDt,

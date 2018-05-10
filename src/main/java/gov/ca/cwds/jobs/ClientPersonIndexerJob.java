@@ -280,6 +280,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return new ESOptionalCollection[] {ESOptionalCollection.AKA, ESOptionalCollection.SAFETY_ALERT};
   }
 
+  @Override
+  public void doneRetrieve() {
+    if (handler.get().isDoneHandlerRetrieve()) {
+      super.doneRetrieve();
+    }
+  }
+
   /**
    * Validate that addresses are found in ES and vice versa.
    * 

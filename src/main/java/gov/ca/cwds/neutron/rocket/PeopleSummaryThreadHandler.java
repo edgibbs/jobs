@@ -50,6 +50,8 @@ public class PeopleSummaryThreadHandler
 
   private final ClientPersonIndexerJob rocket;
 
+  private boolean doneHandlerRetrieve = false;
+
   /**
    * key = client id
    */
@@ -111,6 +113,8 @@ public class PeopleSummaryThreadHandler
     } catch (Exception e) {
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
+    } finally {
+      doneHandlerRetrieve = true;
     }
   }
 
@@ -131,6 +135,7 @@ public class PeopleSummaryThreadHandler
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
+    doneRetrieve();
   }
 
   @Override
@@ -143,6 +148,7 @@ public class PeopleSummaryThreadHandler
   @Override
   public void handleFinishRange(Pair<String, String> range) {
     clear();
+    doneRetrieve();
   }
 
   @Override
@@ -251,6 +257,14 @@ public class PeopleSummaryThreadHandler
 
   public Map<String, ReplicatedClient> getNormalized() {
     return normalized;
+  }
+
+  public boolean isDoneHandlerRetrieve() {
+    return doneHandlerRetrieve;
+  }
+
+  protected void doneRetrieve() {
+    this.doneHandlerRetrieve = true;
   }
 
 }

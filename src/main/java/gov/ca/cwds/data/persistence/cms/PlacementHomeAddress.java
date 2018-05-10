@@ -19,6 +19,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedPlacementHomeAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 
 /**
  * Represents a placement home as a recent address per, HOT-1885 and rule R-02294, Client Abstract
@@ -30,7 +31,7 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
  * 
  * @author CWDS API Team
  */
-public class PlacementHomeAddress
+public class PlacementHomeAddress extends ApiObjectIdentity
     implements PersistentObject, ApiGroupNormalizer<ReplicatedClientAddress> {
 
   private static final long serialVersionUID = 1L;
