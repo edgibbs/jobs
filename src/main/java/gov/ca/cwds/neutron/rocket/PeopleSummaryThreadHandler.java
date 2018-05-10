@@ -154,7 +154,7 @@ public class PeopleSummaryThreadHandler
     handleStartRange(range);
 
     // Read from the view, old school.
-    addAll(rocket.fetchLastRunResultsStandard(lastRunDate, deletionResults));
+    addAll(rocket.extractLastRunRecsFromView(lastRunDate, deletionResults));
 
     // Handle additional JDBC statements, if any.
     try (Connection con = NeutronJdbcUtils.prepConnection(rocket.getJobDao().getSessionFactory())) {
