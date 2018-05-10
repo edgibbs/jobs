@@ -22,7 +22,7 @@ public interface AtomRocketControl extends ApiMarker {
   /**
    * Did the rocket fail?
    * 
-   * @return true if Job has failed
+   * @return true if the rocket has failed
    */
   boolean isFailed();
 

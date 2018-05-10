@@ -18,7 +18,7 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
     extends AtomShared {
 
   /**
-   * Transform (normalize) in the Job instead of relying on the transformation thread.
+   * Transform (normalize) in the rocket instead of relying on the transformation thread.
    * 
    * @return true if the transformer thread should run
    */

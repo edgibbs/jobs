@@ -499,7 +499,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @Override
   public String toString() {
     final StringBuilder buf = new StringBuilder();
-    buf.append("\n[\n    JOB STATUS: ").append(status).append(":\t").append(rocketName);
+    buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t").append(rocketName);
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")

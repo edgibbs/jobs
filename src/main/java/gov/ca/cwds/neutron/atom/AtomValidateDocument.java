@@ -76,7 +76,7 @@ public interface AtomValidateDocument extends AtomShared {
         ret = true;
       }
     } catch (Exception e) {
-      // Do NOT re-throw and kill a job over a validation issue.
+      // Do NOT re-throw and abort a flight over a validation issue.
       // Instead, note the validation error in the flight log.
       logger.error("ERROR READING DOCUMENT! doc id: {}", docId, e);
       failValidation();

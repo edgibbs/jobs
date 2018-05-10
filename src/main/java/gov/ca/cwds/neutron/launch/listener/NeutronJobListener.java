@@ -17,17 +17,17 @@ public class NeutronJobListener implements JobListener {
 
   @Override
   public void jobToBeExecuted(JobExecutionContext context) {
-    LOGGER.debug("job to be executed");
+    LOGGER.debug("Quartz job to be executed");
   }
 
   @Override
   public void jobExecutionVetoed(JobExecutionContext context) {
-    LOGGER.debug("job execution vetoed");
+    LOGGER.debug("Quartz job execution vetoed");
   }
 
   @Override
   public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
-    LOGGER.debug("job was executed");
+    LOGGER.debug("Quartz job was executed");
   }
 
 }
