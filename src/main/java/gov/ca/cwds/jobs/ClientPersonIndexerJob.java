@@ -288,9 +288,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * @return true if addresses pass validation
    */
   public boolean validateAddresses(ReplicatedClient client, ElasticSearchPerson person) {
+    final short residenceType = (short) 32;
     final String clientId = person.getId();
     final Map<String, ReplicatedAddress> repAddresses = client.getClientAddresses().stream()
         .filter(a -> a.getEffEndDt() == null).flatMap(ca -> ca.getAddresses().stream())
+        .filter(a -> a.getApiAdrAddressType() != null && a.getApiAdrAddressType() == residenceType)
         .collect(Collectors.toMap(ReplicatedAddress::getId, a -> a));
     final Map<String, ElasticSearchPersonAddress> docAddresses = person.getAddresses().stream()
         .collect(Collectors.toMap(ElasticSearchPersonAddress::getId, a -> a));

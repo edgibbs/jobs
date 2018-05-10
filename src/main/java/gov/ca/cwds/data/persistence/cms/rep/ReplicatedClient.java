@@ -319,8 +319,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
         for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
           // Filter non-residence addresses.
-          if (repAddress == null || (repAddress.getApiAdrAddressType() != null
-              && repAddress.getApiAdrAddressType() == residenceType)) {
+          if (repAddress == null || repAddress.getApiAdrAddressType() == null
+              || repAddress.getApiAdrAddressType() != residenceType) {
             continue;
           }
 
