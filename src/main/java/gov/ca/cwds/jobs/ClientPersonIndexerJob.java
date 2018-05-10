@@ -131,6 +131,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
+    handler.get().handleFinishRange(range);
     deallocateThreadHandler();
   }
 
@@ -282,7 +283,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public void doneRetrieve() {
-    if (handler.get().isDoneHandlerRetrieve()) {
+    final PeopleSummaryThreadHandler theHandler = handler.get();
+    if (theHandler != null && theHandler.isDoneHandlerRetrieve()) {
       super.doneRetrieve();
     }
   }
