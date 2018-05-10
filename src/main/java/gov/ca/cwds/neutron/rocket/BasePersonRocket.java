@@ -736,7 +736,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * Pull from view for last run mode.
+   * Pull from view for last run mode with Hibernate, normalize, and delete sensitive records
+   * (optional).
    * 
    * @param lastRunTime last successful run time
    * @param deletionResults records to remove

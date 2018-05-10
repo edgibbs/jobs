@@ -155,6 +155,7 @@ public class PeopleSummaryThreadHandler
 
     // Read from the view, old school.
     addAll(rocket.extractLastRunRecsFromView(lastRunDate, deletionResults));
+    LOGGER.info("After view: count: {}", normalized.size());
 
     // Handle additional JDBC statements, if any.
     try (Connection con = NeutronJdbcUtils.prepConnection(rocket.getJobDao().getSessionFactory())) {
