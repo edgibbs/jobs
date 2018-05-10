@@ -99,6 +99,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public List<ReplicatedClient> fetchLastRunResults(final Date lastRunDate,
       final Set<String> deletionResults) {
+    allocateThreadHandler();
     final List<ReplicatedClient> ret =
         handler.get().fetchLastRunNormalizedResults(lastRunDate, deletionResults);
     return ret;
