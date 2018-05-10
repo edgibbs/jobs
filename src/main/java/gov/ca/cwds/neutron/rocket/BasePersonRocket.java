@@ -155,7 +155,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(10000);
+  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(20000);
 
   /**
    * Construct rocket with all required dependencies.
@@ -589,7 +589,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       queueIndex = new LinkedBlockingDeque<>(75000);
     } else {
       queueNormalize = new LinkedBlockingDeque<>(8000);
-      queueIndex = new LinkedBlockingDeque<>(16000);
+      queueIndex = new LinkedBlockingDeque<>(20000);
     }
   }
 
