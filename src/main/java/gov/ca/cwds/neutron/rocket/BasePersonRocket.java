@@ -762,7 +762,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
       q.setCacheMode(CacheMode.IGNORE);
       q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
-
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronJdbcUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -830,7 +829,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   @Override
   protected synchronized void finish() throws NeutronCheckedException {
     final String rocketName = this.getClass().getName();
-    LOGGER.info("FINISH JOB! {}", rocketName);
+    LOGGER.info("FINISH FLIGHT! {}", rocketName);
     try {
       done();
       close();
@@ -839,7 +838,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       throw CheeseRay.checked(LOGGER, e, "ERROR LANDING ROCKET! {}, {}", rocketName,
           e.getMessage());
     }
-    LOGGER.info("JOB FINISHED!");
+    LOGGER.info("FLIGHT FINISHED!");
   }
 
   /**
