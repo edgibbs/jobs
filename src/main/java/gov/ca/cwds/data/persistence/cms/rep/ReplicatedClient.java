@@ -318,6 +318,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
         }
 
         for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
+          // Filter non-residence addresses.
           if (repAddress == null || (repAddress.getApiAdrAddressType() != null
               && repAddress.getApiAdrAddressType() == residenceType)) {
             continue;
@@ -339,7 +340,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           esAddress.setEffectiveStartDate(effectiveStartDate);
           esAddress.setEffectiveEndDate(effectiveEndDate);
           esAddress.setType(addressType);
-          esAddress.setActive("true"); // We set a string, not a boolean?
+          esAddress.setActive("true"); // String, not a boolean?
 
           final ElasticSearchSystemCode stateCode = new ElasticSearchSystemCode();
           esAddress.setStateSystemCode(stateCode);

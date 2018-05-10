@@ -50,8 +50,14 @@ public class PeopleSummaryThreadHandler
 
   private final ClientPersonIndexerJob rocket;
 
-  private final Map<String, PlacementHomeAddress> placementHomeAddresses; // key = client id
+  /**
+   * key = client id
+   */
+  private final Map<String, PlacementHomeAddress> placementHomeAddresses;
 
+  /**
+   * key = client id
+   */
   private final Map<String, ReplicatedClient> normalized;
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
@@ -86,16 +92,6 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("Normalized count: {}, de-normalized count: {}", normalized.size(), cntr);
   }
 
-  protected String pickPrepDml() throws NeutronCheckedException {
-    final String sql = rocket.getFlightPlan().isLastRunMode()
-        ? NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
-            rocket.determineLastSuccessfulRunTime(),
-            rocket.getFlightPlan().getOverrideLastEndTime())
-        : ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL;
-    LOGGER.info("Prep SQL: {}", sql);
-    return sql;
-  }
-
   /**
    * {@inheritDoc}
    * 
@@ -111,7 +107,7 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sql)) {
       prepAffectedClients(stmtInsClient, range);
       readPlacementAddress(stmtSelPlacementAddress);
-      con.commit();
+      con.commit(); // Clear temp table
     } catch (Exception e) {
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
@@ -136,6 +132,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleStartRange(Pair<String, String> range) {
+    rocket.getFlightLog().markRangeStart(range);
     rocket.doneTransform();
     clear();
   }
@@ -153,30 +150,18 @@ public class PeopleSummaryThreadHandler
   @Override
   public List<ReplicatedClient> fetchLastRunNormalizedResults(Date lastRunDate,
       Set<String> deletionResults) {
-    final Pair<String, String> range = Pair.<String, String>of("a", "b");
-    final FlightLog flightLog = rocket.getFlightLog();
-
-    flightLog.markRangeStart(range);
+    final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
 
     // Read from the view, old school.
     addAll(rocket.fetchLastRunResultsStandard(lastRunDate, deletionResults));
 
-    // final Session session = rocket.getJobDao().grabSession();
-    // final Transaction txn = rocket.grabTransaction();
-    // final WorkSecondaryResults<ReplicatedClient> work = new WorkSecondaryResults<>(this);
-
-    // try {
-    // NeutronJdbcUtils.doWork(session, work);
-    // session.clear();
-    // txn.commit();
-
     // Handle additional JDBC statements, if any.
     try (Connection con = NeutronJdbcUtils.prepConnection(rocket.getJobDao().getSessionFactory())) {
       try {
-        con.commit();
+        con.commit(); // clean up first
         handleSecondaryJdbc(con, range);
-        con.commit();
+        con.commit(); // clear temp table
       } catch (Exception e) {
         con.rollback();
         throw e;
@@ -184,16 +169,26 @@ public class PeopleSummaryThreadHandler
 
       // Done reading data. Process data, like cleansing and normalizing.
       handleJdbcDone(range);
-      LOGGER.info("FETCH LAST CHANGE RESULTS SUCCESSFULLY!");
-      return getResults();
+      final List<ReplicatedClient> ret = getResults();
+      LOGGER.info("FETCHED LAST CHANGE RESULTS: count: {}", ret.size());
+      return ret;
     } catch (Exception e) {
       rocket.fail();
-      // txn.rollback();
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
-      flightLog.markRangeComplete(range);
+      rocket.getFlightLog().markRangeComplete(range);
     }
+  }
+
+  protected String pickPrepDml() throws NeutronCheckedException {
+    final String sql = rocket.getFlightPlan().isLastRunMode()
+        ? NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+            rocket.determineLastSuccessfulRunTime(),
+            rocket.getFlightPlan().getOverrideLastEndTime())
+        : ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL;
+    LOGGER.info("Prep SQL: {}", sql);
+    return sql;
   }
 
   public void addAll(Collection<ReplicatedClient> collection) {
