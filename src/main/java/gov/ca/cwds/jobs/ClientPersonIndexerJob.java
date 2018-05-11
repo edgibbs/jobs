@@ -140,22 +140,16 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     handler.get().handleSecondaryJdbc(con, range);
   }
 
-  /**
-   * Both modes. Construct a handler for this thread.
-   */
-  protected void allocateThreadHandler() {
-    if (handler.get() == null) {
-      handler.set(new PeopleSummaryThreadHandler(this));
+  @Override
+  public String[] getPrepLastChangeSQLs() {
+    try {
+      NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
+          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
+      final String[] ret = {getPrepLastChangeSQL(), ClientSQLResource.INSERT_CLIENT_LAST_CHG};
+    } catch (NeutronCheckedException e) {
+      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
     }
-  }
-
-  /**
-   * Both modes. Set this thread's handler to null.
-   */
-  protected void deallocateThreadHandler() {
-    if (handler.get() != null) {
-      handler.set(null);
-    }
+    return super.getPrepLastChangeSQLs();
   }
 
   @Override
@@ -186,7 +180,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     final StringBuilder buf = new StringBuilder();
-
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' ");
 
@@ -289,8 +282,29 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     }
   }
 
+  @Override
+  public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
+    try {
+      final String clientId = person.getId();
+      LOGGER.info("Validate client: {}", clientId);
+
+      // HACK: Initialize transaction. Fix DAO impl instead.
+      grabTransaction();
+      final ReplicatedClient client = getJobDao().find(clientId);
+
+      return StringUtils.equals(client.getCommonFirstName(), person.getFirstName())
+          && StringUtils.equals(client.getCommonLastName(), person.getLastName())
+          && StringUtils.equals(client.getCommonMiddleName(), person.getMiddleName())
+          && validateAddresses(client, person);
+    } catch (Exception e) {
+      LOGGER.error("PEOPLE SUMMARY VALIDATION ERROR!", e);
+      failValidation();
+      return false;
+    }
+  }
+
   /**
-   * Validate that addresses are found in ES and vice versa.
+   * Validate that addresses are found in Elasticsearch and vice versa.
    * 
    * @param client client address to check
    * @param person person document
@@ -300,8 +314,9 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     final short residenceType = (short) 32;
     final String clientId = person.getId();
     final Map<String, ReplicatedAddress> repAddresses = client.getClientAddresses().stream()
-        .filter(a -> a.getEffEndDt() == null).flatMap(ca -> ca.getAddresses().stream())
-        .filter(a -> a.getApiAdrAddressType() != null && a.getApiAdrAddressType() == residenceType)
+        .filter(ca -> ca.getEffEndDt() == null && ca.getAddressType() != null
+            && ca.getAddressType() == residenceType) // active only
+        .flatMap(ca -> ca.getAddresses().stream())
         .collect(Collectors.toMap(ReplicatedAddress::getId, a -> a));
     final Map<String, ElasticSearchPersonAddress> docAddresses = person.getAddresses().stream()
         .collect(Collectors.toMap(ElasticSearchPersonAddress::getId, a -> a));
@@ -323,27 +338,24 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     LOGGER.debug("set size: docAddresses: {}, repAddresses: {}, client addrs: {}, doc addrs: {}",
         docAddresses.size(), repAddresses.size(), client.getClientAddresses().size(),
         person.getAddresses().size());
-
     return true;
   }
 
-  @Override
-  public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
-    try {
-      final String clientId = person.getId();
-      LOGGER.info("Validate client: {}", clientId);
+  /**
+   * Both modes. Construct a handler for this thread.
+   */
+  protected void allocateThreadHandler() {
+    if (handler.get() == null) {
+      handler.set(new PeopleSummaryThreadHandler(this));
+    }
+  }
 
-      // HACK: Initialize transaction. Fix DAO impl instead.
-      grabTransaction();
-      final ReplicatedClient client = getJobDao().find(clientId);
-
-      return StringUtils.equals(client.getCommonFirstName(), person.getFirstName())
-          && StringUtils.equals(client.getCommonLastName(), person.getLastName())
-          && StringUtils.equals(client.getCommonMiddleName(), person.getMiddleName())
-          && validateAddresses(client, person);
-    } catch (Exception e) {
-      LOGGER.error("PEOPLE SUMMARY VALIDATION ERROR!", e);
-      return false;
+  /**
+   * Both modes. Set this thread's handler to null.
+   */
+  protected void deallocateThreadHandler() {
+    if (handler.get() != null) {
+      handler.set(null);
     }
   }
 

@@ -9,7 +9,6 @@ import java.util.function.Function;
 
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -96,12 +95,26 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * Return SQL to run before SELECTing from a last change view.
+   * Return DML (INSERT/UPDATE/DELETE) for a single prepared statement that will execute with
+   * {@link PreparedStatement#executeUpdate()} before reading from a last change view or SELECT.
+   * Default implementation returns null.
    * 
    * @return prep SQL
    */
   default String getPrepLastChangeSQL() {
     return null;
+  }
+
+  /**
+   * Return DML (INSERT/UPDATE/DELETE) for one or more prepared statements that will execute with
+   * {@link PreparedStatement#executeUpdate()} before reading from last change views or SELECT
+   * statements. Default implementation returns value from {@link #getPrepLastChangeSQL()}.
+   * 
+   * @return DML SQL for prepared statement
+   */
+  default String[] getPrepLastChangeSQLs() {
+    final String[] ret = {getPrepLastChangeSQL()};
+    return ret;
   }
 
   @Override
@@ -199,9 +212,9 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @param lastRunTime last successful run datetime
    * @param pSql optional, roll-your-own SQL
    */
-  default void prepHibernateLastChange(final Session session, final Date lastRunTime, String pSql) {
-    final String sql = StringUtils.isNotBlank(pSql) ? pSql.trim() : getPrepLastChangeSQL();
-    if (StringUtils.isNotBlank(sql)) {
+  default void prepHibernateLastChange(final Session session, final Date lastRunTime,
+      String... sqls) {
+    for (String sql : sqls) {
       NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql,
           getPreparedStatementMaker(sql));
     }

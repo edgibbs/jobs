@@ -758,7 +758,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     try {
       // Insert into session temp table that drives a last change view.
-      prepHibernateLastChange(session, lastRunTime, null);
+      prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
       q.setCacheMode(CacheMode.IGNORE);
       q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
