@@ -29,7 +29,6 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
  * 
  * @author CWDS API Team
  */
-@SuppressWarnings("javadoc")
 public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsClientPerson> {
 
   ReplicatedClientDao dao;
@@ -299,7 +298,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     esp.getAddresses().add(espAddr);
 
     boolean actual = target.validateAddresses(client, person);
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -318,7 +317,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     client.addClientAddress(ca);
 
     boolean actual = target.validateAddresses(client, person);
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
