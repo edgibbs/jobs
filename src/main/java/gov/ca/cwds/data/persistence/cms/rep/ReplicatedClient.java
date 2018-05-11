@@ -285,9 +285,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     // DRS: Filters not working for some reason.
     final short residenceType = (short) 32;
     clientAddresses.stream()
-        // .filter(ca -> ca.getEffEndDt() == null) // active only
-        // .filter(ca -> ca.getAddresses().stream().anyMatch( // residential only
-        // a -> a.getApiAdrAddressType() != null && a.getApiAdrAddressType() == residenceType))
+        .filter(ca -> ca.getEffEndDt() == null && ca.getAddressType() != null
+            && ca.getAddressType() == residenceType) // active only
         .sorted(Comparator
             .comparing(ReplicatedClientAddress::getEffEndDt,
                 Comparator.nullsLast(Comparator.reverseOrder()))
@@ -323,12 +322,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
         }
 
         for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
-          // Filter non-residence addresses.
-          // if (repAddress == null || repAddress.getApiAdrAddressType() == null
-          // || repAddress.getApiAdrAddressType() != residenceType) {
-          // continue;
-          // }
-
           final ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress();
           esClientAddresses.put(repAddress.getAddressId(), esAddress);
 
