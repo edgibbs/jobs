@@ -143,13 +143,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public String[] getPrepLastChangeSQLs() {
     try {
-      NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
-          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
-      final String[] ret = {getPrepLastChangeSQL(), ClientSQLResource.INSERT_CLIENT_LAST_CHG};
+      final String[] ret = {getPrepLastChangeSQL(),
+          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime())};
+      return ret;
     } catch (NeutronCheckedException e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
     }
-    return super.getPrepLastChangeSQLs();
   }
 
   @Override
