@@ -373,9 +373,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
     // DIAGNOSTICS:
     if (getLegacyId().equals("5pbx9vO09t")) {
-      LOGGER.warn("\n\n\n\n\nDIAGNOSTICS:\nesClientAddresses.values()): {}\n\n\n\n\n\n",
-          ToStringBuilder.reflectionToString(esClientAddresses.values(),
-              ToStringStyle.MULTI_LINE_STYLE, true));
+      LOGGER.warn("\n\n\n\n\nDIAGNOSTICS:\nesClientAddresses): {}\n\n\n\n\n\n", ToStringBuilder
+          .reflectionToString(esClientAddresses, ToStringStyle.MULTI_LINE_STYLE, true));
     }
 
     return new ArrayList<>(esClientAddresses.values());
