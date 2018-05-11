@@ -210,7 +210,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * 
    * @param session current Hibernate session
    * @param lastRunTime last successful run datetime
-   * @param pSql optional, roll-your-own SQL
+   * @param sqls optional DML, roll-your-own SQL
    */
   default void prepHibernateLastChange(final Session session, final Date lastRunTime,
       String... sqls) {
