@@ -114,7 +114,7 @@ public class PeopleSummaryThreadHandler
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     } finally {
-      doneHandlerRetrieve = true;
+      doneRetrieve();
     }
   }
 
@@ -265,6 +265,7 @@ public class PeopleSummaryThreadHandler
 
   protected void doneRetrieve() {
     this.doneHandlerRetrieve = true;
+    rocket.doneRetrieve();
   }
 
 }
