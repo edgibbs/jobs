@@ -16,6 +16,8 @@ import javax.persistence.MappedSuperclass;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
@@ -30,6 +32,8 @@ public abstract class BaseEsClient
     implements PersistentObject, ApiGroupNormalizer<ReplicatedClient> {
 
   private static final long serialVersionUID = 1L;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReplicatedClient.class);
 
   @Type(type = "timestamp")
   @Column(name = "LAST_CHG", updatable = false)

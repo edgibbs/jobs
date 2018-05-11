@@ -21,6 +21,8 @@ import javax.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +51,6 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
-import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -119,7 +120,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PeopleSummaryThreadHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReplicatedClient.class);
 
   private static final String HISPANIC_CODE_OTHER_ID = "02";
   private static final Short CARIBBEAN_RACE_CODE = 3162;
@@ -282,16 +283,26 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     }
 
     final short residenceType = (short) 32;
-    clientAddresses.stream().filter(r -> r.getEffEndDt() == null) // active only
-        .filter(r -> r.getAddresses().stream().anyMatch( // residential only
-            a -> a.getApiAdrAddressType() != null && a.getApiAdrAddressType() == residenceType))
+    clientAddresses.stream()
+        // .filter(ca -> ca.getEffEndDt() == null) // active only
+        // .filter(ca -> ca.getAddresses().stream().anyMatch( // residential only
+        // a -> a.getApiAdrAddressType() != null && a.getApiAdrAddressType() == residenceType))
         .sorted(Comparator
             .comparing(ReplicatedClientAddress::getEffEndDt,
                 Comparator.nullsLast(Comparator.reverseOrder()))
             .thenComparing(ReplicatedClientAddress::getEffStartDt,
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
-    LOGGER.debug("sortedClientAddresses: size: {}", sortedClientAddresses.size());
+
+    // DIAGNOSTICS:
+    if (getLegacyId().equals("5pbx9vO09t")) {
+      LOGGER.warn(
+          "\n\n\n\n\n\n\n\nWTF:\nsortedClientAddresses: {}\n\nclientAddresses: {}\n\n\n\n\n\n\n\n\n",
+          ToStringBuilder.reflectionToString(sortedClientAddresses, ToStringStyle.MULTI_LINE_STYLE,
+              false),
+          ToStringBuilder.reflectionToString(clientAddresses, ToStringStyle.MULTI_LINE_STYLE,
+              false));
+    }
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());

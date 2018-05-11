@@ -124,7 +124,7 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   public ReplicatedClientAddress toReplicatedClientAddress() {
     final ReplicatedClientAddress ret = new ReplicatedClientAddress();
 
-    ret.setAddressType(ADDRESS_TYPE_PLACEMENT_HOME); // FAKE address type for placement home
+    ret.setAddressType(ADDRESS_TYPE_PLACEMENT_HOME);
     ret.setEffEndDt(end);
     ret.setEffStartDt(start);
     ret.setId(placementHomeId);
@@ -141,6 +141,7 @@ public class PlacementHomeAddress extends ApiObjectIdentity
     addr.setLastUpdatedTime(lastUpdatedTime);
     addr.setStreetNumber(streetNumber);
     addr.setStreetName(streetName);
+    addr.getLegacyDescriptor();
 
     if (zip != null) {
       addr.setZip(new ZipCodeConverter().convertToEntityAttribute(zip));
