@@ -103,11 +103,17 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    final String sql = ClientSQLResource.SELECT_PLACEMENT_ADDRESS;
-    LOGGER.info("handleSecondaryJdbc: SQL: {}", sql);
-    try (final PreparedStatement stmtInsClient = con.prepareStatement(pickPrepDml());
-        final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sql)) {
-      prepAffectedClients(stmtInsClient, range);
+    try (
+        final PreparedStatement stmtInsClient1 =
+            con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_CLIENT_FULL,
+                ClientSQLResource.INSERT_CLIENT_LAST_CHG));
+        final PreparedStatement stmtInsClient2 =
+            con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL,
+                ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG));
+        final PreparedStatement stmtSelPlacementAddress =
+            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
+      prepAffectedClients(stmtInsClient1, range);
+      prepAffectedClients(stmtInsClient2, range);
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // Clear temp table
     } catch (Exception e) {
@@ -188,14 +194,14 @@ public class PeopleSummaryThreadHandler
     }
   }
 
-  protected String pickPrepDml() throws NeutronCheckedException {
-    final String sql = rocket.getFlightPlan().isLastRunMode()
-        ? NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
-            rocket.determineLastSuccessfulRunTime(),
+  protected String pickPrepDml(String sqlInitialLoad, String sqlLastChange)
+      throws NeutronCheckedException {
+    final String preparedSql = rocket.getFlightPlan().isLastRunMode()
+        ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange, rocket.determineLastSuccessfulRunTime(),
             rocket.getFlightPlan().getOverrideLastEndTime())
-        : ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL;
-    LOGGER.info("Prep SQL: {}", sql);
-    return sql;
+        : sqlInitialLoad; // initial mode
+    LOGGER.info("Prep SQL: {}", preparedSql);
+    return preparedSql;
   }
 
   public void addAll(Collection<ReplicatedClient> collection) {
