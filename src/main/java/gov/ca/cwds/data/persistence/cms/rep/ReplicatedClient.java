@@ -21,8 +21,6 @@ import javax.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -288,16 +286,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
 
-    // DIAGNOSTICS:
-    if (getLegacyId().equals("5pbx9vO09t")) {
-      LOGGER.warn(
-          "\n\n\n\n\n\n\n\nDIAGNOSTICS:\nsortedClientAddresses: {}\n\nclientAddresses: {}\n\n\n\n\n\n\n\n\n",
-          ToStringBuilder.reflectionToString(sortedClientAddresses, ToStringStyle.MULTI_LINE_STYLE,
-              true),
-          ToStringBuilder.reflectionToString(clientAddresses, ToStringStyle.MULTI_LINE_STYLE,
-              true));
-    }
-
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
@@ -363,12 +351,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           }
         }
       }
-    }
-
-    // DIAGNOSTICS:
-    if (getLegacyId().equals("5pbx9vO09t")) {
-      LOGGER.warn("\n\n\n\n\nDIAGNOSTICS:\nesClientAddresses): {}\n\n\n\n\n\n", ToStringBuilder
-          .reflectionToString(esClientAddresses, ToStringStyle.MULTI_LINE_STYLE, true));
     }
 
     return new ArrayList<>(esClientAddresses.values());
