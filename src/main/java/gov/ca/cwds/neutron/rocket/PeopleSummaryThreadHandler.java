@@ -113,8 +113,6 @@ public class PeopleSummaryThreadHandler
     } catch (Exception e) {
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
-    } finally {
-      doneRetrieve();
     }
   }
 
