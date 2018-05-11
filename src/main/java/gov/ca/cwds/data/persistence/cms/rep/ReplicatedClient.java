@@ -282,6 +282,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       sortedClientAddresses.add(activePlacementHomeAddress.toReplicatedClientAddress());
     }
 
+    // DRS: Filters not working for some reason.
     final short residenceType = (short) 32;
     clientAddresses.stream()
         // .filter(ca -> ca.getEffEndDt() == null) // active only
@@ -297,11 +298,11 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     // DIAGNOSTICS:
     if (getLegacyId().equals("5pbx9vO09t")) {
       LOGGER.warn(
-          "\n\n\n\n\n\n\n\nWTF:\nsortedClientAddresses: {}\n\nclientAddresses: {}\n\n\n\n\n\n\n\n\n",
+          "\n\n\n\n\n\n\n\nDIAGNOSTICS:\nsortedClientAddresses: {}\n\nclientAddresses: {}\n\n\n\n\n\n\n\n\n",
           ToStringBuilder.reflectionToString(sortedClientAddresses, ToStringStyle.MULTI_LINE_STYLE,
-              false),
+              true),
           ToStringBuilder.reflectionToString(clientAddresses, ToStringStyle.MULTI_LINE_STYLE,
-              false));
+              true));
     }
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
@@ -323,10 +324,10 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
         for (ReplicatedAddress repAddress : repClientAddress.getAddresses()) {
           // Filter non-residence addresses.
-          if (repAddress == null || repAddress.getApiAdrAddressType() == null
-              || repAddress.getApiAdrAddressType() != residenceType) {
-            continue;
-          }
+          // if (repAddress == null || repAddress.getApiAdrAddressType() == null
+          // || repAddress.getApiAdrAddressType() != residenceType) {
+          // continue;
+          // }
 
           final ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress();
           esClientAddresses.put(repAddress.getAddressId(), esAddress);
@@ -375,6 +376,13 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           }
         }
       }
+    }
+
+    // DIAGNOSTICS:
+    if (getLegacyId().equals("5pbx9vO09t")) {
+      LOGGER.warn("\n\n\n\n\nDIAGNOSTICS:\nesClientAddresses.values()): {}\n\n\n\n\n\n",
+          ToStringBuilder.reflectionToString(esClientAddresses.values(),
+              ToStringStyle.MULTI_LINE_STYLE, true));
     }
 
     return new ArrayList<>(esClientAddresses.values());
