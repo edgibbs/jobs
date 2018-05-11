@@ -133,7 +133,6 @@ public class PeopleSummaryThreadHandler
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
-    doneRetrieve();
   }
 
   @Override
@@ -145,8 +144,8 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
-    clear();
     doneRetrieve();
+    clear();
   }
 
   @Override
