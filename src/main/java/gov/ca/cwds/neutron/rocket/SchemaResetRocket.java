@@ -134,6 +134,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     try {
       TimeUnit.SECONDS.sleep(waitTimeSeconds);
     } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
       String errorMsg = "DB2 schema reset operation timeout!";
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR! {}", errorMsg);
     }

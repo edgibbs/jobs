@@ -227,6 +227,14 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
   }
 
   @Test
+  public void runStandalone_again() throws Exception {
+    final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
+    final String[] args = new String[] {"-S", "-l", "/var/lib/jenkins/SuperRocket/LastRuntime.time",
+        "-c", "config/local.yaml"};
+    LaunchCommand.launchOneWayTrip(klass, args);
+  }
+
+  @Test
   @Ignore
   public void runStandalone_Args2__Class__StringArray() throws Exception {
     final Class<Mach1TestRocket> klass = Mach1TestRocket.class;

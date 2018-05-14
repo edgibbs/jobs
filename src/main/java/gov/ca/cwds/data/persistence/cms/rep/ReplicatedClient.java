@@ -270,19 +270,18 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     final List<ReplicatedClientAddress> sortedClientAddresses = new ArrayList<>();
 
     // Rule R - 02294 Client Abstract Most Recent Address
+    // Store all active addresses.
+    // Placement home first.
     if (activePlacementHomeAddress != null) {
       sortedClientAddresses.add(activePlacementHomeAddress.toReplicatedClientAddress());
     }
 
-    // DRS: Filters not working for some reason.
-    final short residenceType = (short) 32;
-    clientAddresses.stream()
-        .filter(ca -> ca.getEffEndDt() == null && ca.getAddressType() != null
-            && ca.getAddressType() == residenceType) // active only
+    // Sort by placement home, residence, and other types, and start date descending.
+    clientAddresses.stream().filter(ReplicatedClientAddress::isActive) // active only
         .sorted(Comparator
-            .comparing(ReplicatedClientAddress::getEffEndDt,
-                Comparator.nullsLast(Comparator.reverseOrder()))
-            .thenComparing(ReplicatedClientAddress::getEffStartDt,
+            .comparing(ReplicatedClientAddress::isResidence,
+                Comparator.nullsLast(Comparator.reverseOrder())) // residence next
+            .thenComparing(ReplicatedClientAddress::getEffStartDt, // start date, descending
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
 

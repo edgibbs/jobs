@@ -86,11 +86,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
     this.launchDirector = launchDirector;
-    allocateThreadHandler();
   }
 
   @Override
   public Date launch(Date lastSuccessfulRunTime) throws NeutronCheckedException {
+    allocateThreadHandler();
     determineIndexName();
     largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
     return super.launch(lastSuccessfulRunTime);

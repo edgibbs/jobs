@@ -560,7 +560,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final BulkProcessor bp = buildBulkProcessor();
       final Set<String> deletionResults = new HashSet<>();
       final List<N> results = fetchLastRunResults(lastRunDt, deletionResults);
-      LOGGER.info("LAST RUN: fetched {} records to index", results.size());
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info("Found {} persons to index", results.size());
@@ -568,6 +567,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
           getFlightLog().addAffectedDocumentId(p.getPrimaryKey().toString());
           prepareDocumentTrapException(bp, p);
         });
+      } else {
+        LOGGER.info("NO PERSON CHANGES FOUND");
       }
 
       deleteRestricted(deletionResults, bp); // last run only
