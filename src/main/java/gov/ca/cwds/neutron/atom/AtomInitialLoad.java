@@ -233,10 +233,11 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
    */
   default void refreshMQT() {
     final Logger log = getLogger();
-    if (getFlightPlan().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
+    final String mqt = getMQTName();
+    if (getFlightPlan().isRefreshMqt() && StringUtils.isNotBlank(mqt)) {
       log.warn("REFRESH MQT!");
-      final Session session = getJobDao().getSessionFactory().getCurrentSession();
-      grabTransaction(); // HACK
+      final Session session = getJobDao().grabSession();
+      grabTransaction();
       final String schema =
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 
@@ -245,7 +246,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
       proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
 
-      proc.setParameter("MQTNAME", getMQTName());
+      proc.setParameter("MQTNAME", mqt);
       proc.execute();
 
       final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");

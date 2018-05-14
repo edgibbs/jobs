@@ -94,6 +94,10 @@ public class ReplicatedClientAddress extends BaseClientAddress implements CmsRep
     return getEffEndDt() == null;
   }
 
+  public boolean isResidence() {
+    return getAddressType() != null && getAddressType() == (short) 32;
+  }
+
   @Override
   public String getLegacyId() {
     return this.getPrimaryKey();
