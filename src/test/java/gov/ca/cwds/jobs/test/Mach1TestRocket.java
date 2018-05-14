@@ -34,6 +34,8 @@ import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 public class Mach1TestRocket extends BasePersonRocket<TestNormalizedEntity, TestDenormalizedEntity>
     implements ApiGroupNormalizer<TestDenormalizedEntity> {
 
+  private static final long serialVersionUID = 1L;
+
   private static final String INSERT_CLIENT_LAST_CHG =
       "INSERT INTO GT_ID (IDENTIFIER)\n" + "SELECT CLT.IDENTIFIER \nFROM CLIENT_T clt\n"
           + "WHERE CLT.IBMSNAP_LOGMARKER > ?\nUNION\n" + "SELECT CLT.IDENTIFIER "
