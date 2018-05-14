@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -37,6 +38,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     dao = new ReplicatedClientDao(sessionFactory);
     target =
         new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+    target.allocateThreadHandler();
   }
 
   @Test
@@ -62,6 +64,8 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     // NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime);
     // target.writeLastSuccessfulRunTime(datetime);
     // target.getFlightPlan().setOverrideLastRunTime(lastRunTime);
+
+    // NOTE: the date is **dynamic** (current date/time).
     final String actual = target.getPrepLastChangeSQL();
     // final String expected =
     // "\"INSERT INTO GT_ID (IDENTIFIER)\\nSELECT DISTINCT CLT.IDENTIFIER \\nFROM CLIENT_T clt
@@ -118,11 +122,11 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void normalizeAndQueueIndex_A$List() throws Exception {
-    final List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
-    target.normalizeAndQueueIndex(grpRecs);
-  }
+  // @Test
+  // public void normalizeAndQueueIndex_A$List() throws Exception {
+  // final List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+  // target.normalizeAndQueueIndex(grpRecs);
+  // }
 
   @Test
   public void getInitialLoadQuery_A$String() throws Exception {
@@ -135,13 +139,13 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void initialLoadProcessRangeResults_A$ResultSet() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test(expected = SQLException.class)
   public void initialLoadProcessRangeResults_A$ResultSet_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
-    target.initialLoadProcessRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test
@@ -222,6 +226,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   }
 
   @Test
+  @Ignore
   public void threadRetrieveByJdbc_A$() throws Exception {
     target.threadRetrieveByJdbc();
   }

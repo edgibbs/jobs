@@ -9,8 +9,9 @@ import java.util.function.Function;
 
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.slf4j.Logger;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
@@ -94,12 +95,26 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   }
 
   /**
-   * Return SQL to run before SELECTing from a last change view.
+   * Return DML (INSERT/UPDATE/DELETE) for a single prepared statement that will execute with
+   * {@link PreparedStatement#executeUpdate()} before reading from a last change view or SELECT.
+   * Default implementation returns null.
    * 
    * @return prep SQL
    */
   default String getPrepLastChangeSQL() {
     return null;
+  }
+
+  /**
+   * Return DML (INSERT/UPDATE/DELETE) for one or more prepared statements that will execute with
+   * {@link PreparedStatement#executeUpdate()} before reading from last change views or SELECT
+   * statements. Default implementation returns value from {@link #getPrepLastChangeSQL()}.
+   * 
+   * @return DML SQL for prepared statement
+   */
+  default String[] getPrepLastChangeSQLs() {
+    final String[] ret = {getPrepLastChangeSQL()};
+    return ret;
   }
 
   @Override
@@ -116,6 +131,27 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    */
   default boolean isDB2OnZOS() throws NeutronCheckedException {
     return NeutronDB2Utils.isDB2OnZOS(getJobDao());
+  }
+
+  /**
+   * "Work-around" (gentle euphemism for <strong>HACK</strong>) for annoying condition where a
+   * transaction should have started but did not.
+   * 
+   * <p>
+   * Get the current transaction from the current session or start a new transaction.
+   * </p>
+   * 
+   * @return current, active transaction
+   */
+  default Transaction grabTransaction() {
+    Transaction txn = null;
+    final Session session = getJobDao().getSessionFactory().getCurrentSession();
+    try {
+      txn = session.beginTransaction();
+    } catch (Exception e) { // NOSONAR
+      txn = session.getTransaction();
+    }
+    return txn;
   }
 
   /**
@@ -140,16 +176,17 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * Return Function that creates a prepared statement for last change pre-processing, such as
    * inserting identifiers into a global temporary table.
    * 
+   * @param sql SQL to prepare
    * @return prepared statement for last change pre-processing
    */
-  default Function<Connection, PreparedStatement> getPreparedStatementMaker() {
+  default Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
     return c -> {
-      final String sql = getPrepLastChangeSQL();
+      final Logger log = getLogger();
       try {
-        getLogger().info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
+        log.info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
         return c.prepareStatement(sql);
       } catch (SQLException e) {
-        throw CheeseRay.runtime(getLogger(), e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
+        throw CheeseRay.runtime(log, e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
       }
     };
   }
@@ -173,12 +210,13 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * 
    * @param session current Hibernate session
    * @param lastRunTime last successful run datetime
+   * @param sqls optional DML, roll-your-own SQL
    */
-  default void prepHibernateLastChange(final Session session, final Date lastRunTime) {
-    final String sql = getPrepLastChangeSQL();
-    if (StringUtils.isNotBlank(sql)) {
+  default void prepHibernateLastChange(final Session session, final Date lastRunTime,
+      String... sqls) {
+    for (String sql : sqls) {
       NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql,
-          getPreparedStatementMaker());
+          getPreparedStatementMaker(sql));
     }
   }
 

@@ -34,13 +34,11 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
- * Entity bean for the person index.
+ * Entity bean for the People Summary index.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
  * </p>
- * 
- * REFRESH TABLE CWSRSQ.ES_REL_CLN_RELT_CLIENT ;
  * 
  * @author CWDS API Team
  */

@@ -132,7 +132,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
       final String rocketClass = flightSchedule.getRocketClass().getName();
 
-      // Job detail.
+      // Rocket detail.
       jd = newJob(NeutronRocket.class)
           .withIdentity(rocketName,
               LaunchCommand.isInitialMode() ? NeutronSchedulerConstants.GRP_FULL_LOAD

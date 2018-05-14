@@ -95,22 +95,29 @@ public final class NeutronJdbcUtils {
     return System.getProperty("DB_CMS_SCHEMA");
   }
 
+  /**
+   * Steal a connection from a Hibernate SessionFactory.
+   * 
+   * @param sessionFactory Hibernate SessionFactory
+   * @return database Connection
+   * @throws SQLException on database error
+   */
   public static Connection prepConnection(final SessionFactory sessionFactory) throws SQLException {
     final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
-    con.setSchema(getDBSchemaName());
-    con.setAutoCommit(false);
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Utils.enableBatchSettings(con);
     return con;
   }
 
   public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
       final String sql, final Function<Connection, PreparedStatement> func) {
-    final Work work = new WorkPrepareLastChange(lastRunTime, sql, func);
+    doWork(session, new WorkPrepareLastChange(lastRunTime, sql, func));
+  }
 
+  public static void doWork(final Session session, Work work) {
     try {
       // May fail without a transaction.
-      session.clear(); // Fixes Hibernate "duplicate object" bug
+      session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {
       LOGGER.warn("'clear' without transaction", e);
     }

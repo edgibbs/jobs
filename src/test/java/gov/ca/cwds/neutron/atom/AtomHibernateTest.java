@@ -4,14 +4,12 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Date;
 import java.util.function.Function;
 
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +28,7 @@ import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
+import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 
 public class AtomHibernateTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
@@ -161,21 +160,20 @@ public class AtomHibernateTest extends Goddard<TestNormalizedEntity, TestDenorma
 
   @Test
   public void getPreparedStatementMaker_Args__() throws Exception {
-    Function<Connection, PreparedStatement> actual = target.getPreparedStatementMaker();
+    Function<Connection, PreparedStatement> actual = target.getPreparedStatementMaker(null);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void prepHibernateLastChange_Args__Session__Transaction__Date() throws Exception {
     Date lastRunTime = new Date();
-    target.prepHibernateLastChange(session, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_FULL);
   }
 
   @Test
   public void prepHibernateLastChange_Args__Session__Date() throws Exception {
-    Session session = mock(Session.class);
     Date lastRunTime = new Date();
-    target.prepHibernateLastChange(session, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_FULL);
   }
 
 }

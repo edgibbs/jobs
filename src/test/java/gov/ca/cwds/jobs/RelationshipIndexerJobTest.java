@@ -108,7 +108,7 @@ public class RelationshipIndexerJobTest extends Goddard<ReplicatedRelationships,
   @Test
   public void pullRange_Args__Pair() throws Exception {
     final Pair<String, String> p = Pair.of("aaaaaaaaaa", "9999999999");
-    target.pullRange(p);
+    target.pullRange(p, null);
   }
 
   @Test

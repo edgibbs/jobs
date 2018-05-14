@@ -638,9 +638,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       try {
         catchYourBreath(); // Let bulk processor finish
         for (Pair<String, String> p : tests) {
-          String json =
-              ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get(p.getRight()));
-          LOGGER.info("TEST: name: {}\n{}", p.getLeft(), json);
+          LOGGER.info("TEST: name: {}\n{}", p.getLeft(),
+              ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get(p.getRight())));
         }
       } catch (IOException e) {
         fail();
@@ -681,9 +680,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     // Retrieve records.
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
-      con.setSchema(schema);
-      con.setAutoCommit(false);
-      NeutronDB2Utils.enableParallelism(con);
+      NeutronDB2Utils.enableBatchSettings(con);
 
       final String sqlAffectedClients = buildAffectedClientsSQL();
       LOGGER.info("Case History affected clients SQL:\n {}", sqlAffectedClients);
@@ -764,7 +761,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   @Override
-  protected List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDate,
+  public List<ReplicatedPersonCases> fetchLastRunResults(Date lastRunDate,
       Set<String> deletionResults) {
     doneTransform(); // normalize in place **WITHOUT** the transform thread
     try {

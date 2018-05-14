@@ -3,6 +3,8 @@ package gov.ca.cwds.neutron.rocket;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.ParameterMode;
@@ -18,6 +20,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -94,7 +97,7 @@ public class ClientCountyRocket extends ClientIndexerJob
       stmt.setMaxRows(0);
       stmt.setQueryTimeout(0);
 
-      getOrCreateTransaction(); // HACK: fix Hibernate DAO.
+      grabTransaction(); // HACK: fix Hibernate DAO.
       getFlightLog().markRangeStart(p);
       final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
           .replaceAll(":toId", p.getRight());
@@ -112,11 +115,10 @@ public class ClientCountyRocket extends ClientIndexerJob
 
   /**
    * Read records from the given key range, typically within a single partition on large tables.
-   * 
    * @param p partition range to read
    */
   @Override
-  public void pullRange(final Pair<String, String> p) {
+  public List<ReplicatedClient> pullRange(final Pair<String, String> p, String sql) {
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
     nameThread(threadName);
@@ -129,6 +131,8 @@ public class ClientCountyRocket extends ClientIndexerJob
       throw CheeseRay.runtime(LOGGER, e, "PROC ERROR ON RANGE! {}-{} : {}", p.getLeft(),
           p.getRight(), e.getMessage());
     }
+
+    return new ArrayList<>();
   }
 
   /**
@@ -143,7 +147,7 @@ public class ClientCountyRocket extends ClientIndexerJob
       LOGGER.info("Call stored proc");
       final SessionFactory sessionFactory = getJobDao().getSessionFactory();
       final Session session = sessionFactory.getCurrentSession();
-      getOrCreateTransaction(); // HACK. move to base DAO.
+      grabTransaction(); // HACK. move to base DAO.
       final String schema = (String) sessionFactory.getProperties().get("hibernate.default_schema");
 
       final ProcedureCall proc = session.createStoredProcedureCall(schema + ".PRCCLNCNTY");

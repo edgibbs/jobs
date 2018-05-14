@@ -65,7 +65,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   public String getDbSchema() {
     final Session session = getJobDao().getSessionFactory().getCurrentSession();
-    getOrCreateTransaction(); // HACK
+    grabTransaction(); // HACK
 
     final String targetTransactionalSchema =
         ((String) session.getSessionFactory().getProperties().get("hibernate.default_schema"))
@@ -83,8 +83,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     if (!isLargeDataSet()) {
       LOGGER.warn("\n\n\n\t   ********** RESET DB2 SCHEMA!! ********** \n\n\n");
 
-      final Session session = getJobDao().getSessionFactory().getCurrentSession();
-      getOrCreateTransaction();
+      final Session session = getJobDao().grabSession();
+      grabTransaction();
 
       final ProcedureCall proc = session.createStoredProcedureCall("CWSTMP.SPREFDBS");
       proc.registerStoredProcedureParameter("SCHEMANM", String.class, ParameterMode.IN);

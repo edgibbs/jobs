@@ -2,8 +2,10 @@ package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -41,6 +45,7 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -107,6 +112,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   private static final long serialVersionUID = 1L;
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReplicatedClient.class);
+
   private static final String HISPANIC_CODE_OTHER_ID = "02";
   private static final Short CARIBBEAN_RACE_CODE = 3162;
 
@@ -131,6 +138,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Transient
   private String openCaseId;
 
+  @Transient
+  private PlacementHomeAddress activePlacementHomeAddress;
+
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 
   /**
@@ -147,19 +157,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
    */
   public Set<ReplicatedClientAddress> getClientAddresses() {
     return clientAddresses;
-  }
-
-  /**
-   * Set the client address linkages.
-   *
-   * @param clientAddresses Set of client address linkages
-   */
-  public void setClientAddresses(Set<ReplicatedClientAddress> clientAddresses) {
-    if (clientAddresses != null) {
-      this.clientAddresses = clientAddresses;
-    } else {
-      this.clientAddresses = new LinkedHashSet<>();
-    }
   }
 
   /**
@@ -256,18 +253,43 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   // ApiMultipleClientAddressAware:
   // =================================
 
+  /**
+   * {@inheritDoc}
+   * 
+   * <p>
+   * HOT-1885: last known residence address (rule R-02294)
+   * </p>
+   */
   @JsonIgnore
   @Override
   public List<ElasticSearchPersonAddress> getElasticSearchPersonAddresses() {
-    final Map<String, ElasticSearchPersonAddress> esClientAddresses = new HashMap<>();
+    final Map<String, ElasticSearchPersonAddress> esClientAddresses = new LinkedHashMap<>();
 
-    for (ReplicatedClientAddress repClientAddress : this.clientAddresses) {
+    // Sort addresses by start date in descending order.
+    // Last known address comes first.
+    final List<ReplicatedClientAddress> sortedClientAddresses = new ArrayList<>();
+
+    // Rule R - 02294 Client Abstract Most Recent Address
+    if (activePlacementHomeAddress != null) {
+      sortedClientAddresses.add(activePlacementHomeAddress.toReplicatedClientAddress());
+    }
+
+    // DRS: Filters not working for some reason.
+    final short residenceType = (short) 32;
+    clientAddresses.stream()
+        .filter(ca -> ca.getEffEndDt() == null && ca.getAddressType() != null
+            && ca.getAddressType() == residenceType) // active only
+        .sorted(Comparator
+            .comparing(ReplicatedClientAddress::getEffEndDt,
+                Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(ReplicatedClientAddress::getEffStartDt,
+                Comparator.nullsLast(Comparator.reverseOrder())))
+        .forEach(sortedClientAddresses::add);
+
+    for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
 
-      /*
-       * Only index active addresses.
-       */
       if (addressActive) {
         final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
 
@@ -298,7 +320,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           esAddress.setEffectiveStartDate(effectiveStartDate);
           esAddress.setEffectiveEndDate(effectiveEndDate);
           esAddress.setType(addressType);
-          esAddress.setActive("true"); // We set a string, not a boolean?
+          esAddress.setActive("true"); // String, not a boolean?
 
           final ElasticSearchSystemCode stateCode = new ElasticSearchSystemCode();
           esAddress.setStateSystemCode(stateCode);
@@ -484,6 +506,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  public PlacementHomeAddress getActivePlacementHomeAddress() {
+    return activePlacementHomeAddress;
+  }
+
+  public void setActivePlacementHomeAddress(PlacementHomeAddress activePlacementHomeAddress) {
+    this.activePlacementHomeAddress = activePlacementHomeAddress;
   }
 
 }

@@ -215,7 +215,8 @@ public class FlightPlan implements ApiMarker {
    * DevOps started using Rundeck and was unable to pass parameters to jobs.
    * 
    * <p>
-   * HACK: This approach was concocted because Rundeck was not configured to accept job parameters.
+   * HACK: This approach was concocted because Rundeck jobs were not configured to accept
+   * parameters.
    * </p>
    * 
    * @param lastRun last successful run date

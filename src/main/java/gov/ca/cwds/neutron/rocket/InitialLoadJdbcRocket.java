@@ -3,8 +3,6 @@ package gov.ca.cwds.neutron.rocket;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.BaseDaoImpl;
@@ -12,6 +10,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.flight.FlightPlan;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends BasePersonRocket<T, M> {
@@ -49,8 +48,7 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
    * @throws SQLException on database error
    */
   protected synchronized Connection getConnection() throws SQLException {
-    return getJobDao().getSessionFactory().getSessionFactoryOptions().getServiceRegistry()
-        .getService(ConnectionProvider.class).getConnection();
+    return NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory());
   }
 
 }

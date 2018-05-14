@@ -107,13 +107,13 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
   @Test
   public void pullRange_Args__Pair() throws Exception {
-    target.pullRange(pair);
+    target.pullRange(pair, null);
   }
 
   @Test(expected = NeutronRuntimeException.class)
   public void pullRange_Args__Pair__boom() throws Exception {
     doThrow(new SQLException()).when(con).commit();
-    target.pullRange(pair);
+    target.pullRange(pair, null);
   }
 
   @Test

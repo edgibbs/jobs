@@ -91,7 +91,7 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void getOrCreateTransaction_Args__() throws Exception {
-    final Transaction actual = target.getOrCreateTransaction();
+    final Transaction actual = target.grabTransaction();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -104,13 +104,13 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test
   public void pullRange_Args__Pair() throws Exception {
     Pair<String, String> p = pair;
-    target.pullRange(p);
+    target.pullRange(p, null);
   }
 
   @Test
@@ -140,7 +140,7 @@ public class AtomInitialLoadTest extends Goddard<TestDenormalizedEntity, TestDen
 
   @Test
   public void initialLoadProcessRangeResults_Args__ResultSet() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test

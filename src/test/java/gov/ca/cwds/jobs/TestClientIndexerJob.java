@@ -26,7 +26,7 @@ class TestClientIndexerJob extends ClientIndexerJob {
   }
 
   @Override
-  public Transaction getOrCreateTransaction() {
+  public Transaction grabTransaction() {
     return txn;
   }
 

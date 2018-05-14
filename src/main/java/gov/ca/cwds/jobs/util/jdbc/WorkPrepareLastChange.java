@@ -66,9 +66,7 @@ public class WorkPrepareLastChange implements Work {
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
-    con.setAutoCommit(false);
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Utils.enableBatchSettings(con);
 
     final String strLastRunTime = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunTime);
     LOGGER.info("strLastRunTime: {}", strLastRunTime);
@@ -76,7 +74,8 @@ public class WorkPrepareLastChange implements Work {
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       for (int i = 1; i <= StringUtils.countMatches(sql, "?"); i++) {
         // DB2's optimizer is a cosmic mystery wrapped in an enigma.
-        // Prepared statements do NOT optimize with the **exact same parameter types and values**.
+        // Prepared statements do not always optimize as standard SQL, even with the **exact same
+        // parameter types and values**.
         stmt.setString(i, strLastRunTime);
       }
 

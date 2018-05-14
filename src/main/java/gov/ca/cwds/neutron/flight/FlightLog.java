@@ -81,7 +81,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   /**
    * Completion flag for whole rocket.
    */
-  private volatile boolean doneJob = false;
+  private volatile boolean doneFlight = false;
 
   /**
    * Flag any/all validation errors.
@@ -115,6 +115,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   @JsonIgnore
   private final AtomicInteger rowsNormalized = new AtomicInteger(0);
+
+  @JsonIgnore
+  private final AtomicInteger rowsDenormalized = new AtomicInteger(0);
 
   /**
    * Running count of records prepared for bulk indexing.
@@ -182,7 +185,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
    */
   @Override
   public boolean isRunning() {
-    return !this.doneJob && !this.fatalError;
+    return !this.doneFlight && !this.fatalError;
   }
 
   /**
@@ -235,7 +238,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       this.endTime = System.currentTimeMillis();
 
       this.fatalError = true;
-      this.doneJob = true;
+      this.doneFlight = true;
     }
   }
 
@@ -249,7 +252,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     this.doneRetrieve = true;
     this.doneIndex = true;
     this.doneTransform = true;
-    this.doneJob = true;
+    this.doneFlight = true;
   }
 
   /**
@@ -276,47 +279,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private String pad(Integer padme) {
     return StringUtils.leftPad(new DecimalFormat("###,###,###").format(padme.intValue()), 8, ' ');
-  }
-
-  /**
-   * Format for JMX console.
-   */
-  @Override
-  public String toString() {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("\n[\n    JOB STATUS: ").append(status).append(":\t").append(rocketName);
-
-    if (initialLoad) {
-      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
-          .append(pad(initialLoadRangesCompleted.size()));
-    } else {
-      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
-    }
-
-    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
-    if (endTime > 0L) {
-      buf.append("\n\tend:                    ").append(new Date(endTime))
-          .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
-    }
-
-    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
-        .append(pad(recsSentToIndexQueue.get())).append("\n\tnormalized:      ")
-        .append(pad(rowsNormalized.get())).append("\n\n    ELASTICSEARCH:")
-        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
-        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
-        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
-        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
-        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
-        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
-
-    if (!initialLoad && !affectedDocumentIds.isEmpty()) {
-      buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
-          .append(StringUtils.joinWith(",", (Object[]) getAffectedDocumentIds()));
-    }
-
-    buf.append("\n]");
-    return buf.toString();
   }
 
   public String toJson() {
@@ -353,6 +315,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return this.rowsNormalized.getAndAdd(addMe);
   }
 
+  public int addToDenormalized(int addMe) {
+    return this.rowsDenormalized.getAndAdd(addMe);
+  }
+
   public int addToBulkDeleted(int addMe) {
     return this.recsBulkDeleted.getAndAdd(addMe);
   }
@@ -383,6 +349,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public int incrementNormalized() {
     return this.rowsNormalized.incrementAndGet();
+  }
+
+  public int incrementDenormalized() {
+    return this.rowsDenormalized.incrementAndGet();
   }
 
   public int incrementBulkDeleted() {
@@ -433,6 +403,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonProperty("normalized")
   public int getCurrentNormalized() {
     return this.rowsNormalized.get();
+  }
+
+  @JsonProperty("denormalized")
+  public int getCurrentDenormalized() {
+    return this.rowsDenormalized.get();
   }
 
   @JsonProperty("bulk_deleted")
@@ -516,5 +491,50 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   public void failValidation() {
     this.validationErrors = true;
   }
+
+  /**
+   * Format for JMX console and logs.
+   */
+  //@formatter:off
+  @Override
+  public String toString() {
+    final StringBuilder buf = new StringBuilder();
+    buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t").append(rocketName);
+
+    if (initialLoad) {
+      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
+          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
+          .append(pad(initialLoadRangesCompleted.size()));
+    } else {
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
+    }
+
+    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
+    if (endTime > 0L) {
+      buf.append("\n\tend:                    ").append(new Date(endTime))
+          .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
+    }
+
+    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
+        .append(pad(recsSentToIndexQueue.get()))
+        .append("\n\tnormalized:      ").append(pad(rowsNormalized.get()))
+        .append("\n\tde-normalized:   ").append(pad(rowsDenormalized.get()))
+        .append("\n\n    ELASTICSEARCH:")
+        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
+        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
+        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
+        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
+        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
+        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
+
+    if (!initialLoad && !affectedDocumentIds.isEmpty()) {
+      buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")
+          .append(StringUtils.joinWith(",", (Object[]) getAffectedDocumentIds()));
+    }
+
+    buf.append("\n]");
+    return buf.toString();
+  }
+  //@formatter:on
 
 }

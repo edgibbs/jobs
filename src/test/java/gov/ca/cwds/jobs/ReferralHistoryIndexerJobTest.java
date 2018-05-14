@@ -350,7 +350,7 @@ public class ReferralHistoryIndexerJobTest
 
     final Pair<String, String> p = pair;
     target.fakePull = false;
-    target.pullRange(p);
+    target.pullRange(p, null);
   }
 
   @Test
@@ -446,7 +446,7 @@ public class ReferralHistoryIndexerJobTest
     doThrow(SQLException.class).when(con).setAutoCommit(false);
     final Pair<String, String> p = pair;
     target.fakePull = false;
-    target.pullRange(p);
+    target.pullRange(p, null);
   }
 
   @Test

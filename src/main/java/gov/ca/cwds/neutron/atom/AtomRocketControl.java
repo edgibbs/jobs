@@ -13,7 +13,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 public interface AtomRocketControl extends ApiMarker {
 
   /**
-   * Is the rocket still running?
+   * Is the rocket still flying?
    * 
    * @return true if rocket has not completed
    */
@@ -22,7 +22,7 @@ public interface AtomRocketControl extends ApiMarker {
   /**
    * Did the rocket fail?
    * 
-   * @return true if Job has failed
+   * @return true if the rocket has failed
    */
   boolean isFailed();
 

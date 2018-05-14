@@ -29,7 +29,6 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
  * 
  * @author CWDS API Team
  */
-@SuppressWarnings("javadoc")
 public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsClientPerson> {
 
   ReplicatedClientDao dao;
@@ -130,22 +129,22 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void normalizeAndQueueIndex() throws Exception {
-    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
-    target.normalizeAndQueueIndex(grpRecs);
-  }
+  // @Test
+  // public void normalizeAndQueueIndex() throws Exception {
+  // List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+  // target.normalizeAndQueueIndex(grpRecs);
+  // }
 
-  @Test
-  public void threadExtractJdbc_Args__() throws Exception {
-    target.threadRetrieveByJdbc();
-  }
+  // @Test
+  // public void threadExtractJdbc_Args__() throws Exception {
+  // target.threadRetrieveByJdbc();
+  // }
 
-  @Test
-  public void pullRange_Args__Pair() throws Exception {
-    final Pair<String, String> p = pair;
-    target.pullRange(p);
-  }
+  // @Test
+  // public void pullRange_Args__Pair() throws Exception {
+  // final Pair<String, String> p = pair;
+  // target.pullRange(p, null);
+  // }
 
   @Test(expected = NeutronRuntimeException.class)
   public void pullRange_Args__Pair__Exception() throws Exception {
@@ -155,13 +154,13 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
         sessionFactory, flightRecorder, flightPlan);
     target.setTxn(transaction);
-    target.pullRange(p);
+    target.pullRange(p, null);
   }
 
   @Test
   public void getPartitionRanges_Args() throws Exception {
-    final List actual = target.getPartitionRanges();
-    final List expected = new ArrayList<>();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
     expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
@@ -169,7 +168,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    final List actual = target.getPartitionRanges();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual.size(), is(equalTo(64)));
   }
 
@@ -201,15 +200,15 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
-  public void normalizeAndQueueIndex_Args__List() throws Exception {
-    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
-    target.normalizeAndQueueIndex(grpRecs);
-  }
+  // @Test
+  // public void normalizeAndQueueIndex_Args__List() throws Exception {
+  // List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+  // target.normalizeAndQueueIndex(grpRecs);
+  // }
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test
@@ -234,10 +233,10 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void threadRetrieveByJdbc_Args__() throws Exception {
-    target.threadRetrieveByJdbc();
-  }
+  // @Test
+  // public void threadRetrieveByJdbc_Args__() throws Exception {
+  // target.threadRetrieveByJdbc();
+  // }
 
   @Test
   public void isInitialLoadJdbc_Args__() throws Exception {
@@ -270,12 +269,12 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test
   public void handleRangeResults_Args__ResultSet__2() throws Exception {
-    target.initialLoadProcessRangeResults(rs);
+    target.handleMainResults(rs);
   }
 
   @Test
@@ -299,7 +298,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     esp.getAddresses().add(espAddr);
 
     boolean actual = target.validateAddresses(client, person);
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -318,7 +317,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     client.addClientAddress(ca);
 
     boolean actual = target.validateAddresses(client, person);
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 

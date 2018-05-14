@@ -1,8 +1,6 @@
 package gov.ca.cwds.neutron.atom;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,12 +9,9 @@ import java.util.concurrent.ForkJoinTask;
 
 import javax.persistence.ParameterMode;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 import org.slf4j.Logger;
 
@@ -25,21 +20,21 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
- * Common functions and features for initial load.
+ * Common functions and features for initial (full) load.
  * 
  * @author CWDS API Team
- *
- * @param <T> normalized type
- * @param <M> denormalized type
+ * @param <N> normalized type
+ * @param <D> denormalized type
  */
-public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
-    extends AtomHibernate<T, M>, AtomShared, AtomRocketControl {
+public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupNormalizer<?>>
+    extends AtomHibernate<N, D>, AtomShared, AtomRocketControl, AtomLoadStepHandler<N> {
 
   /**
    * Restrict initial load key ranges from flight plan (command line).
@@ -101,26 +96,9 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
    * @param t bean to check
    * @return true if marked for deletion
    */
-  default boolean isDelete(T t) {
+  default boolean isDelete(N t) {
     return t instanceof CmsReplicatedEntity ? CmsReplicatedEntity.isDelete((CmsReplicatedEntity) t)
         : false;
-  }
-
-  /**
-   * Work-around (gentle euphemism for a <strong>HACK</strong>) for annoying condition where a
-   * transaction should have started but did not.
-   * 
-   * @return current, active transaction
-   */
-  default Transaction getOrCreateTransaction() {
-    Transaction txn = null;
-    final Session session = getJobDao().getSessionFactory().getCurrentSession();
-    try {
-      txn = session.beginTransaction();
-    } catch (Exception e) { // NOSONAR
-      txn = session.getTransaction();
-    }
-    return txn;
   }
 
   default int nextThreadNumber() {
@@ -128,55 +106,68 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
   }
 
   /**
-   * Process results sets from {@link #pullRange(Pair)}.
-   * 
-   * @param rs result set for this key range
-   * @throws SQLException on database error
-   */
-  default void initialLoadProcessRangeResults(final ResultSet rs) throws SQLException {
-    // Provide your own solution, for now.
-  }
-
-  /**
    * Read records from the given key range, typically within a single partition on large tables.
+   * Default prep query for initial load takes the form
+   * {@code WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId'}.
    * 
-   * @param p partition range to read
+   * <p>
+   * Pass optional SQL to execute to prepare
+   * </p>
+   * 
+   * @param range partition range to read
+   * @param sql optional SQL statement
+   * @return List of persistent type N
+   * 
+   * @see AtomLoadStepHandler#handleStartRange(Pair)
+   * @see AtomLoadStepHandler#handleJdbcDone(Pair)
+   * @see AtomLoadStepHandler#handleFinishRange(Pair)
    */
-  default void pullRange(final Pair<String, String> p) {
+  default List<N> pullRange(final Pair<String, String> range, String sql) {
+    final String origThreadName = Thread.currentThread().getName();
     final String threadName =
-        "extract_" + nextThreadNumber() + "_" + p.getLeft() + "_" + p.getRight();
+        "extract_" + nextThreadNumber() + "_" + range.getLeft() + "_" + range.getRight();
     nameThread(threadName);
+
     final Logger log = getLogger();
+    final FlightLog flightLog = getFlightLog();
+
     log.info("BEGIN: extract thread {}", threadName);
-    getFlightLog().markRangeStart(p);
+    flightLog.markRangeStart(range);
+    handleStartRange(range);
 
-    try (Connection con = getJobDao().getSessionFactory().getSessionFactoryOptions()
-        .getServiceRegistry().getService(ConnectionProvider.class).getConnection()) {
-      con.setSchema(getDBSchemaName());
-      con.setAutoCommit(false);
+    final String query = StringUtils.isNotBlank(sql) ? sql.trim()
+        : getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", range.getLeft())
+            .replaceAll(":toId", range.getRight());
+    log.info("query: {}", query);
 
-      final String query = getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", p.getLeft())
-          .replaceAll(":toId", p.getRight());
-      log.info("query: {}", query);
-      NeutronDB2Utils.enableParallelism(con);
-
-      try (Statement stmt = con.createStatement()) {
+    try (final Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
+      try (final Statement stmt = con.createStatement()) { // Auto-close statement.
+        con.commit();
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(0);
-        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
-        initialLoadProcessRangeResults(rs);
+        handleMainResults(stmt.executeQuery(query));
+
+        // Handle additional JDBC statements, if any.
+        handleSecondaryJdbc(con, range);
         con.commit();
+      } catch (Exception e) {
+        con.rollback();
+        throw e;
       }
 
-      log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", p.getLeft(), p.getRight());
+      // Done reading data. Process data, like cleansing and normalizing.
+      handleJdbcDone(range);
+      log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
+      return getResults();
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(log, e, "FAILED TO PULL RANGE! {}-{} : {}", p.getLeft(), p.getRight(),
+      throw CheeseRay.runtime(log, e, "RANGE FAILED! {}-{} : {}", range.getLeft(), range.getRight(),
           e.getMessage());
     } finally {
-      getFlightLog().markRangeComplete(p);
-      nameThread(RandomStringUtils.random(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZ12345674890"));
+      handleFinishRange(range);
+      flightLog.markRangeComplete(range);
+      nameThread(origThreadName);
     }
   }
 
@@ -207,12 +198,12 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
-      // Queue execution.
+      // Queue up thread execution.
       for (Pair<String, String> p : ranges) {
-        tasks.add(threadPool.submit(() -> pullRange(p)));
+        tasks.add(threadPool.submit(() -> pullRange(p, null)));
       }
 
-      // Join threads. Don't return from method until they complete.
+      // Join threads. Don't let this method return until the threads finish.
       for (ForkJoinTask<?> task : tasks) {
         task.get();
       }
@@ -245,7 +236,7 @@ public interface AtomInitialLoad<T extends PersistentObject, M extends ApiGroupN
     if (getFlightPlan().isRefreshMqt() && StringUtils.isNotBlank(getMQTName())) {
       log.warn("REFRESH MQT!");
       final Session session = getJobDao().getSessionFactory().getCurrentSession();
-      getOrCreateTransaction(); // HACK
+      grabTransaction(); // HACK
       final String schema =
           (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 

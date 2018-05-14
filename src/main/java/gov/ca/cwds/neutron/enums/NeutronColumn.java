@@ -13,7 +13,6 @@ public enum NeutronColumn {
     this.value = value;
   }
 
-  @SuppressWarnings("javadoc")
   public String getValue() {
     return value;
   }

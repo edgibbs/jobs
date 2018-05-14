@@ -664,7 +664,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.prepHibernateLastChange(session, lastRunTime);
+    target.prepHibernateLastChange(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_LAST_CHG);
   }
 
   @Test
@@ -698,7 +698,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    NeutronDB2Utils.enableParallelism(con);
+    NeutronDB2Utils.enableBatchSettings(con);
   }
 
   @Test

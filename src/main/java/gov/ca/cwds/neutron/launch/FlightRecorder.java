@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.launch;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -12,13 +11,12 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import com.google.inject.Singleton;
 
-import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightSummary;
 
 @Singleton
-public class FlightRecorder implements ApiMarker, AtomFlightRecorder, Serializable {
+public class FlightRecorder implements AtomFlightRecorder {
 
   private static final long serialVersionUID = 1L;
 
