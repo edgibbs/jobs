@@ -200,7 +200,7 @@ public class PeopleSummaryThreadHandler
         ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange, rocket.determineLastSuccessfulRunTime(),
             rocket.getFlightPlan().getOverrideLastEndTime())
         : sqlInitialLoad; // initial mode
-    LOGGER.info("Prep SQL: {}", preparedSql);
+    LOGGER.info("Prep SQL: \n{}", preparedSql);
     return preparedSql;
   }
 
