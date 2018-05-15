@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.common.NameSuffixTranslator;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
@@ -44,34 +45,28 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  */
 @Entity
 @Table(name = "VW_LST_CLIENT_ADDRESS")
-//@formatter:off
+// @formatter:off
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfter",
-  query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
-        + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
-        + "ORDER BY CLT_IDENTIFIER \n"
-        + "FOR READ ONLY WITH UR ",
+    query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
+        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n" + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
+        + "ORDER BY CLT_IDENTIFIER \n" + "FOR READ ONLY WITH UR ",
     resultClass = EsClientPerson.class, readOnly = true)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithUnlimitedAccess",
-        query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
-        + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
-        + "ORDER BY CLT_IDENTIFIER \n"
-        + "FOR READ ONLY WITH UR",
+    query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
+        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n" + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
+        + "ORDER BY CLT_IDENTIFIER \n" + "FOR READ ONLY WITH UR",
     resultClass = EsClientPerson.class, readOnly = true)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithLimitedAccess",
-        query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
-        + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
-        + "AND x.CLT_SENSTV_IND != 'N' \n"
-        + "ORDER BY CLT_IDENTIFIER \n"
+    query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
+        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n" + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
+        + "AND x.CLT_SENSTV_IND != 'N' \n" + "ORDER BY CLT_IDENTIFIER \n"
         + "FOR READ ONLY WITH UR ",
     resultClass = EsClientPerson.class, readOnly = true)
-//@formatter:on
+// @formatter:on
 public class EsClientPerson extends BaseEsClient
     implements Comparable<EsClientPerson>, Comparator<EsClientPerson> {
 
@@ -581,7 +576,7 @@ public class EsClientPerson extends BaseEsClient
     }
 
     if (StringUtils.isNotBlank(this.akaSuffixTitleDescription)) {
-      aka.setSuffix(this.akaSuffixTitleDescription.trim());
+      aka.setSuffix(NameSuffixTranslator.translate(this.akaSuffixTitleDescription.trim()));
     }
 
     if (this.akaNameType != null && this.akaNameType.intValue() != 0) {
