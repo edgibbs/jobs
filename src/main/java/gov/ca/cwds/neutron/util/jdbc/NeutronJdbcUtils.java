@@ -5,8 +5,10 @@ import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_TIMESTAMP_F
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
@@ -84,8 +86,18 @@ public final class NeutronJdbcUtils {
   }
 
   public static String makeTimestampStringLookBack(final Date date) {
-    return date != null ? new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat())
-        .format(NeutronDateUtils.lookBack(date)) : "CURRENT TIMESTAMP";
+    String ret;
+    final DateFormat fmt = new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat());
+
+    if (date != null) {
+      ret = fmt.format(NeutronDateUtils.lookBack(date));
+    } else {
+      final Calendar cal = Calendar.getInstance();
+      cal.add(Calendar.MINUTE, 5);
+      ret = fmt.format(NeutronDateUtils.lookBack(cal.getTime()));
+    }
+
+    return ret;
   }
 
   /**
