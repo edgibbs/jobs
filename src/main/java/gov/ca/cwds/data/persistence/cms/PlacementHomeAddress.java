@@ -39,7 +39,7 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   // TOD0: Code cache is unhappy with this unknown value.
   // No code loader interface method to add custom, non-CMS codes.
   // public static final short ADDRESS_TYPE_PLACEMENT_HOME = 10001;
-  public static final short ADDRESS_TYPE_PLACEMENT_HOME = 32;
+  public static final short ADDRESS_TYPE_PLACEMENT_HOME = 32; // call it a residence
 
   @Id
   @Column(name = "CLIENT_ID")
@@ -97,6 +97,13 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   @Column(name = "LST_UPD_TS")
   protected Date lastUpdatedTime;
 
+  @Column(name = "PRM_TEL_NO", nullable = false)
+  protected Long primaryNumber;
+
+  @Type(type = "integer")
+  @Column(name = "PRM_EXT_NO", nullable = false)
+  protected Integer primaryExtension;
+
   public PlacementHomeAddress(ResultSet rs) throws SQLException {
     this.clientId = ifNull(rs.getString("CLIENT_ID"));
     this.peThirdId = ifNull(rs.getString("PE_THIRD_ID"));
@@ -112,6 +119,9 @@ public class PlacementHomeAddress extends ApiObjectIdentity
     this.streetNumber = ifNull(rs.getString("STREET_NO"));
     this.zip = rs.getInt("ZIP_NO");
     this.zip4 = rs.getShort("ZIP_SFX_NO");
+
+    this.primaryNumber = rs.getLong("PRM_TEL_NO");
+    this.primaryExtension = rs.getInt("PRM_EXT_NO");
 
     this.lastUpdatedTime = rs.getTimestamp("PH_LST_UPD_TS");
   }
@@ -142,6 +152,9 @@ public class PlacementHomeAddress extends ApiObjectIdentity
     addr.setStreetNumber(streetNumber);
     addr.setStreetName(streetName);
     addr.getLegacyDescriptor();
+
+    addr.setPrimaryNumber(primaryNumber);
+    addr.setPrimaryExtension(primaryExtension);
 
     if (zip != null) {
       addr.setZip(new ZipCodeConverter().convertToEntityAttribute(zip));
@@ -209,6 +222,14 @@ public class PlacementHomeAddress extends ApiObjectIdentity
 
   public Date getEnd() {
     return end;
+  }
+
+  public Long getPrimaryNumber() {
+    return primaryNumber;
+  }
+
+  public Integer getPrimaryExtension() {
+    return primaryExtension;
   }
 
   @Override

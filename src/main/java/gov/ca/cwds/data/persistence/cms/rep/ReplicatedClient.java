@@ -1,7 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -375,11 +374,15 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     return ret;
   }
 
+  protected boolean isNumberPopulated(Number n) {
+    return n != null && n.intValue() != 0;
+  }
+
   public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress clientAddress,
       ReplicatedAddress addr) {
-    final List<ElasticSearchPersonPhone> phones = new ArrayList<>();
+    final List<ElasticSearchPersonPhone> ret = new ArrayList<>();
 
-    if (addr.getPrimaryNumber() != null && addr.getPrimaryNumber() != 0) {
+    if (isNumberPopulated(addr.getPrimaryNumber())) {
       ApiPhoneAware.PhoneType phoneType = ApiPhoneAware.PhoneType.Other;
       if (clientAddress.isResidence()) {
         phoneType = ApiPhoneAware.PhoneType.Home;
@@ -387,32 +390,41 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
         phoneType = ApiPhoneAware.PhoneType.Work;
       }
 
-      phones.add(toPhone(String.valueOf(addr.getPrimaryNumber()),
+      ret.add(toPhone(String.valueOf(addr.getPrimaryNumber()),
           addr.getPrimaryExtension() != null ? addr.getPrimaryExtension().toString() : null,
           phoneType));
     }
 
-    if (addr.getMessageNumber() != null && addr.getMessageNumber() != 0) {
-      phones.add(toPhone(String.valueOf(addr.getMessageNumber()),
+    if (isNumberPopulated(addr.getMessageNumber())) {
+      ret.add(toPhone(String.valueOf(addr.getMessageNumber()),
           addr.getMessageExtension() != null ? addr.getMessageExtension().toString() : null,
           ApiPhoneAware.PhoneType.Cell));
     }
 
-    if (addr.getEmergencyNumber() != null && addr.getEmergencyNumber() != 0) {
-      phones.add(toPhone(String.valueOf(addr.getEmergencyNumber()),
+    if (isNumberPopulated(addr.getEmergencyNumber())) {
+      ret.add(toPhone(String.valueOf(addr.getEmergencyNumber()),
           addr.getEmergencyExtension() != null ? addr.getEmergencyExtension().toString() : null,
           ApiPhoneAware.PhoneType.Other));
     }
 
-    return phones;
+    return ret;
+  }
+
+  public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress ca) {
+    return ca.isActive()
+        ? ca.getAddresses().stream().filter(a -> a != null).map(a -> getPhones(ca, a))
+            .flatMap(List::stream).collect(Collectors.toList())
+        : new ArrayList<>();
   }
 
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    return clientAddresses.stream().filter(ReplicatedClientAddress::isActive)
-        .flatMap(ca -> ca.getAddresses().stream()).flatMap(adr -> Arrays.stream(adr.getPhones()))
-        .collect(Collectors.toList()).toArray(new ApiPhoneAware[0]);
+    return clientAddresses != null && !clientAddresses.isEmpty()
+        ? clientAddresses.stream().filter(ca -> ca != null)
+            .filter(ReplicatedClientAddress::isActive).map(ca -> getPhones(ca))
+            .flatMap(List::stream).collect(Collectors.toList()).toArray(new ApiPhoneAware[0])
+        : new ApiPhoneAware[0];
   }
 
   // =======================
