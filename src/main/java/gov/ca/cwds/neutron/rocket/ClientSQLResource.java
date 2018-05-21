@@ -162,7 +162,7 @@ public class ClientSQLResource implements ApiMarker {
       +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_GVR_ENTC, \n"
       +   " x.OHP_ID, x.START_DT, x.END_DT, \n"
       +   " x.PH_ID, x.PH_GVR_ENTC, x.STREET_NO, x.STREET_NM, \n"
-      +   " x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO, x.PH_LST_UPD_TS \n"
+      +   " x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO, x.PH_LST_UPD_TS, \n"
       +   " x.PRM_TEL_NO, x.PRM_EXT_NO \n"
       + "FROM ( \n"
       + " SELECT \n"
