@@ -31,6 +31,9 @@ import gov.ca.cwds.data.persistence.cms.BaseClientAddress;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedClientAddress extends BaseClientAddress implements CmsReplicatedEntity {
 
+  private static final short ADDRESS_TYPE_HOME = 32;
+  private static final short ADDRESS_TYPE_WORK = 27;
+
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "IDENTIFIER", referencedColumnName = "FKADDRS_T", insertable = false,
       updatable = false, unique = false)
@@ -95,7 +98,11 @@ public class ReplicatedClientAddress extends BaseClientAddress implements CmsRep
   }
 
   public boolean isResidence() {
-    return getAddressType() != null && getAddressType() == (short) 32;
+    return getAddressType() != null && getAddressType() == ADDRESS_TYPE_HOME;
+  }
+
+  public boolean isBusiness() {
+    return getAddressType() != null && getAddressType() == ADDRESS_TYPE_WORK;
   }
 
   @Override
