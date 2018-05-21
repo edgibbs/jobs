@@ -39,6 +39,7 @@ import gov.ca.cwds.dao.ApiOtherClientNamesAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
@@ -50,6 +51,7 @@ import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
+import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -348,6 +350,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
             esAddress.setUnitType(SystemCodeCache.global()
                 .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
           }
+
+          // SNAP-46: last known phone numbers.
+          esAddress.setPhones(getPhones(repClientAddress, repAddress));
         }
       }
     }
@@ -358,6 +363,49 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   // ============================
   // ApiMultiplePhonesAware:
   // ============================
+
+  protected ElasticSearchPersonPhone toPhone(String phoneNumber, String phoneNumberExtension,
+      PhoneType phoneType) {
+    ElasticSearchPersonPhone ret = new ElasticSearchPersonPhone();
+
+    ret.setPhoneNumber(phoneNumber);
+    ret.setPhoneNumberExtension(phoneNumberExtension);
+    ret.setPhoneType(phoneType);
+
+    return ret;
+  }
+
+  public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress clientAddress,
+      ReplicatedAddress addr) {
+    final List<ElasticSearchPersonPhone> phones = new ArrayList<>();
+
+    if (addr.getPrimaryNumber() != null && addr.getPrimaryNumber() != 0) {
+      ApiPhoneAware.PhoneType phoneType = ApiPhoneAware.PhoneType.Other;
+      if (clientAddress.isResidence()) {
+        phoneType = ApiPhoneAware.PhoneType.Home;
+      } else if (clientAddress.isBusiness()) {
+        phoneType = ApiPhoneAware.PhoneType.Work;
+      }
+
+      phones.add(toPhone(String.valueOf(addr.getPrimaryNumber()),
+          addr.getPrimaryExtension() != null ? addr.getPrimaryExtension().toString() : null,
+          phoneType));
+    }
+
+    if (addr.getMessageNumber() != null && addr.getMessageNumber() != 0) {
+      phones.add(toPhone(String.valueOf(addr.getMessageNumber()),
+          addr.getMessageExtension() != null ? addr.getMessageExtension().toString() : null,
+          ApiPhoneAware.PhoneType.Cell));
+    }
+
+    if (addr.getEmergencyNumber() != null && addr.getEmergencyNumber() != 0) {
+      phones.add(toPhone(String.valueOf(addr.getEmergencyNumber()),
+          addr.getEmergencyExtension() != null ? addr.getEmergencyExtension().toString() : null,
+          ApiPhoneAware.PhoneType.Other));
+    }
+
+    return phones;
+  }
 
   @JsonIgnore
   @Override
