@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,8 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -112,8 +111,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     ApiClientSafetyAlertsAware, ApiOtherClientNamesAware, ApiClientCaseAware {
 
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReplicatedClient.class);
 
   private static final String HISPANIC_CODE_OTHER_ID = "02";
   private static final Short CARIBBEAN_RACE_CODE = 3162;
@@ -412,7 +409,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress ca) {
     return ca.isActive()
-        ? ca.getAddresses().stream().filter(a -> a != null).map(a -> getPhones(ca, a))
+        ? ca.getAddresses().stream().filter(Objects::nonNull).map(a -> getPhones(ca, a))
             .flatMap(List::stream).collect(Collectors.toList())
         : new ArrayList<>();
   }
@@ -421,7 +418,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Override
   public ApiPhoneAware[] getPhones() {
     return clientAddresses != null && !clientAddresses.isEmpty()
-        ? clientAddresses.stream().filter(ca -> ca != null)
+        ? clientAddresses.stream().filter(Objects::nonNull)
             .filter(ReplicatedClientAddress::isActive).map(ca -> getPhones(ca))
             .flatMap(List::stream).collect(Collectors.toList()).toArray(new ApiPhoneAware[0])
         : new ApiPhoneAware[0];
