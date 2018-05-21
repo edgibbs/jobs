@@ -374,11 +374,15 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     return ret;
   }
 
+  protected boolean isNumberPopulated(Number n) {
+    return n != null && n.intValue() != 0;
+  }
+
   public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress clientAddress,
       ReplicatedAddress addr) {
     final List<ElasticSearchPersonPhone> ret = new ArrayList<>();
 
-    if (addr.getPrimaryNumber() != null && addr.getPrimaryNumber() != 0) {
+    if (isNumberPopulated(addr.getPrimaryNumber())) {
       ApiPhoneAware.PhoneType phoneType = ApiPhoneAware.PhoneType.Other;
       if (clientAddress.isResidence()) {
         phoneType = ApiPhoneAware.PhoneType.Home;
@@ -391,13 +395,13 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           phoneType));
     }
 
-    if (addr.getMessageNumber() != null && addr.getMessageNumber() != 0) {
+    if (isNumberPopulated(addr.getMessageNumber())) {
       ret.add(toPhone(String.valueOf(addr.getMessageNumber()),
           addr.getMessageExtension() != null ? addr.getMessageExtension().toString() : null,
           ApiPhoneAware.PhoneType.Cell));
     }
 
-    if (addr.getEmergencyNumber() != null && addr.getEmergencyNumber() != 0) {
+    if (isNumberPopulated(addr.getEmergencyNumber())) {
       ret.add(toPhone(String.valueOf(addr.getEmergencyNumber()),
           addr.getEmergencyExtension() != null ? addr.getEmergencyExtension().toString() : null,
           ApiPhoneAware.PhoneType.Other));
@@ -407,15 +411,20 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   }
 
   public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress ca) {
-    return ca.isActive() ? ca.getAddresses().stream().map(a -> getPhones(ca, a))
-        .flatMap(List::stream).collect(Collectors.toList()) : new ArrayList<>();
+    return ca.isActive()
+        ? ca.getAddresses().stream().filter(a -> a != null).map(a -> getPhones(ca, a))
+            .flatMap(List::stream).collect(Collectors.toList())
+        : new ArrayList<>();
   }
 
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    return clientAddresses.stream().filter(ReplicatedClientAddress::isActive)
-        .map(ca -> getPhones(ca)).collect(Collectors.toList()).toArray(new ApiPhoneAware[0]);
+    return clientAddresses != null && !clientAddresses.isEmpty()
+        ? clientAddresses.stream().filter(ca -> ca != null)
+            .filter(ReplicatedClientAddress::isActive).map(ca -> getPhones(ca))
+            .flatMap(List::stream).collect(Collectors.toList()).toArray(new ApiPhoneAware[0])
+        : new ApiPhoneAware[0];
   }
 
   // =======================
