@@ -1,6 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,13 +60,13 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 /**
  * {@link PersistentObject} representing a Client a {@link CmsReplicatedEntity} in the replicated
  * schema.
- * 
+ *
  * <p>
  * Entity class {@link EsClientAddress} for Materialized Query Table ES_CLIENT_ADDRESS now holds the
  * named queries below. These are left here for tracking purposes and will be removed in the near
  * future.
  * </p>
- * 
+ *
  * @author CWDS API Team
  */
 // @formatter:off
@@ -220,7 +221,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   /**
    * Get id of open case for this client
-   * 
+   *
    * @return Open case id if any
    */
   @Override
@@ -230,7 +231,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   /**
    * Set id of open case for this client
-   * 
+   *
    * @param openCaseId Open case id if any
    */
   public void setOpenCaseId(String openCaseId) {
@@ -240,12 +241,12 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   /**
    * Override to substitute an alternative System Code implementation, such as a simple String or
    * Short.
-   * 
+   *
    * @return ElasticSearchSystemCode instance
    */
   protected ElasticSearchSystemCode makeJsonAddressType() {
     return new ElasticSearchSystemCode();
-  };
+  }
 
   // =================================
   // ApiMultipleClientAddressAware:
@@ -253,7 +254,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * <p>
    * HOT-1885: last known residence address (rule R-02294)
    * </p>
@@ -341,7 +342,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
             countyCode.setId(countySysCode.getSystemId().toString());
           }
 
-          if (isNumberPopulated(repAddress.getApiAdrUnitType())) {
+          if (repAddress.getApiAdrUnitType() != null
+              && repAddress.getApiAdrUnitType().intValue() != 0) {
             esAddress.setUnitType(SystemCodeCache.global()
                 .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
           }
@@ -409,18 +411,25 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress ca) {
     return ca.isActive()
         ? ca.getAddresses().stream().filter(Objects::nonNull).map(a -> getPhones(ca, a))
-            .flatMap(List::stream).collect(Collectors.toList())
+        .flatMap(List::stream).collect(Collectors.toList())
         : new ArrayList<>();
   }
 
   @JsonIgnore
   @Override
   public ApiPhoneAware[] getPhones() {
-    return clientAddresses != null && !clientAddresses.isEmpty()
-        ? clientAddresses.stream().filter(Objects::nonNull)
-            .filter(ReplicatedClientAddress::isActive).map(ca -> getPhones(ca))
-            .flatMap(List::stream).collect(Collectors.toList()).toArray(new ApiPhoneAware[0])
-        : new ApiPhoneAware[0];
+    final List<ReplicatedClientAddress> clientAddressesNew = new ArrayList<>();
+    if (Objects.nonNull(activePlacementHomeAddress)) {
+      clientAddressesNew.add(activePlacementHomeAddress.toReplicatedClientAddress());
+    }
+    if (Objects.nonNull(clientAddresses)) {
+      clientAddressesNew.addAll(clientAddresses);
+    }
+
+    return clientAddressesNew.isEmpty() ? new ApiPhoneAware[0]
+        : clientAddressesNew.stream().filter(Objects::nonNull)
+            .filter(ReplicatedClientAddress::isActive).map(this::getPhones)
+            .flatMap(Collection::stream).toArray(ApiPhoneAware[]::new);
   }
 
   // =======================
