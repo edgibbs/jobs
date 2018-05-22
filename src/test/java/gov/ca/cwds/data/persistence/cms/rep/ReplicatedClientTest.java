@@ -364,8 +364,8 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     assertThat(actual, is(equalTo(expected)));
   }
 
-  protected void doGetPhones(Short addressType, String addrId, Long phoneNo, Integer ext)
-      throws Exception {
+  protected void doGetPhones(Short addressType, String addrId, Long phoneNo, Integer ext,
+      boolean isMessage, boolean isEmergency) throws Exception {
     final ReplicatedClientAddress ca = new ReplicatedClientAddress();
     PhoneType phoneType = PhoneType.Other;
 
@@ -381,10 +381,18 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
     final ReplicatedAddress adr = new ReplicatedAddress();
     adr.setId(addrId);
-    adr.setPrimaryNumber(phoneNo);
-    adr.setPrimaryExtension(ext);
-    ca.addAddress(adr);
+    if (isMessage) {
+      adr.setMessageNumber(phoneNo);
+      adr.setMessageExtension(ext);
+    } else if (isEmergency) {
+      adr.setEmergencyNumber(phoneNo);
+      adr.setEmergencyExtension(ext);
+    } else {
+      adr.setPrimaryNumber(phoneNo);
+      adr.setPrimaryExtension(ext);
+    }
 
+    ca.addAddress(adr);
     target.addClientAddress(ca);
     final ApiPhoneAware[] actual = target.getPhones();
 
@@ -401,22 +409,22 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void getPhones_residence() throws Exception {
-    doGetPhones((short) 32, "1234567xyz", 4083742790L, 1234);
+    doGetPhones((short) 32, "1234567xyz", 4083742790L, 1234, false, false);
   }
 
   @Test
   public void getPhones_business() throws Exception {
-    doGetPhones((short) 27, "1234567xyz", 4083742790L, 1234);
+    doGetPhones((short) 27, "1234567xyz", 4083742790L, 1234, false, false);
   }
 
   @Test
   public void getPhones_other() throws Exception {
-    doGetPhones((short) 33, "1234567xyz", 4083742790L, 1234);
+    doGetPhones((short) 33, "1234567xyz", 4083742790L, 1234, false, false);
   }
 
   @Test
   public void getPhones_blank_ext() throws Exception {
-    doGetPhones((short) 33, "1234567xyz", 4083742790L, null);
+    doGetPhones((short) 33, "1234567xyz", 4083742790L, null, false, false);
   }
 
   @Test
