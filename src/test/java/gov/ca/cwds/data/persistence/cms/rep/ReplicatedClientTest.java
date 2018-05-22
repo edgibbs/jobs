@@ -389,8 +389,9 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     final ApiPhoneAware[] actual = target.getPhones();
 
     final ApiPhoneAware[] expected = new ApiPhoneAware[1];
-    expected[0] = new ReadablePhone(addrId, phoneNo != null ? phoneNo.toString() : null,
-        ext != null ? ext.toString() : null, phoneType);
+    expected[0] = new ElasticSearchPersonPhone(
+        new ReadablePhone(addrId, phoneNo != null ? phoneNo.toString() : null,
+            ext != null ? ext.toString() : null, phoneType));
 
     final String jsonActual = JsonUtils.to(actual);
     final String jsonExpected = JsonUtils.to(expected);
