@@ -341,8 +341,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
             countyCode.setId(countySysCode.getSystemId().toString());
           }
 
-          if (repAddress.getApiAdrUnitType() != null
-              && repAddress.getApiAdrUnitType().intValue() != 0) {
+          if (isNumberPopulated(repAddress.getApiAdrUnitType())) {
             esAddress.setUnitType(SystemCodeCache.global()
                 .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
           }

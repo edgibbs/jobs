@@ -385,6 +385,8 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
     final ReplicatedAddress adr = new ReplicatedAddress();
     adr.setId(addrId);
+    adr.setUnitDesignationCd((short) 2066);
+
     if (isMessage) {
       adr.setMessageNumber(phoneNo);
       adr.setMessageExtension(ext);
