@@ -445,6 +445,7 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   public void getPhones_placement_home() throws Exception {
     target.setActivePlacementHomeAddress(new PlacementHomeAddress(rs));
     doGetPhones((short) 33, "1234567xyz", 4083742790L, null, false, false);
+    target.getElasticSearchPersonAddresses();
   }
 
   @Test
