@@ -372,7 +372,11 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     if (addressType != null) {
       ca.setAddressType((short) addressType);
 
-      if (ca.isResidence()) {
+      if (isMessage) {
+        phoneType = ApiPhoneAware.PhoneType.Cell;
+      } else if (isEmergency) {
+        phoneType = ApiPhoneAware.PhoneType.Other;
+      } else if (ca.isResidence()) {
         phoneType = ApiPhoneAware.PhoneType.Home;
       } else if (ca.isBusiness()) {
         phoneType = ApiPhoneAware.PhoneType.Work;
@@ -423,7 +427,23 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   }
 
   @Test
+  public void getPhones_message() throws Exception {
+    doGetPhones((short) 33, "1234567xyz", 4083742790L, 1234, true, false);
+  }
+
+  @Test
+  public void getPhones_emergency() throws Exception {
+    doGetPhones((short) 33, "1234567xyz", 4083742790L, 1234, false, true);
+  }
+
+  @Test
   public void getPhones_blank_ext() throws Exception {
+    doGetPhones((short) 33, "1234567xyz", 4083742790L, null, false, false);
+  }
+
+  @Test
+  public void getPhones_placement_home() throws Exception {
+    target.setActivePlacementHomeAddress(new PlacementHomeAddress(rs));
     doGetPhones((short) 33, "1234567xyz", 4083742790L, null, false, false);
   }
 
