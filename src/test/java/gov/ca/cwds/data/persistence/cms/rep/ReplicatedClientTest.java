@@ -364,6 +364,16 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void getPhones_A$() throws Exception {
+    final ReplicatedClientAddress ca = new ReplicatedClientAddress();
+    ca.setAddressType((short) 32);
+
+    final ReplicatedAddress adr = new ReplicatedAddress();
+    adr.setId("1234567xyz");
+    adr.setPrimaryNumber(4083742790L);
+    adr.setPrimaryExtension(1234);
+    ca.addAddress(adr);
+
+    target.addClientAddress(ca);
     final ApiPhoneAware[] actual = target.getPhones();
     final ApiPhoneAware[] expected = new ApiPhoneAware[0];
     assertThat(actual, is(equalTo(expected)));
