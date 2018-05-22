@@ -248,6 +248,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     return new ElasticSearchSystemCode();
   }
 
+  public PlacementHomeAddress getActivePlacementHomeAddress() {
+    return activePlacementHomeAddress;
+  }
+
+  public void setActivePlacementHomeAddress(PlacementHomeAddress activePlacementHomeAddress) {
+    this.activePlacementHomeAddress = activePlacementHomeAddress;
+  }
+
   // =================================
   // ApiMultipleClientAddressAware:
   // =================================
@@ -411,7 +419,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress ca) {
     return ca.isActive()
         ? ca.getAddresses().stream().filter(Objects::nonNull).map(a -> getPhones(ca, a))
-        .flatMap(List::stream).collect(Collectors.toList())
+            .flatMap(List::stream).collect(Collectors.toList())
         : new ArrayList<>();
   }
 
@@ -570,14 +578,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
-  }
-
-  public PlacementHomeAddress getActivePlacementHomeAddress() {
-    return activePlacementHomeAddress;
-  }
-
-  public void setActivePlacementHomeAddress(PlacementHomeAddress activePlacementHomeAddress) {
-    this.activePlacementHomeAddress = activePlacementHomeAddress;
   }
 
 }
