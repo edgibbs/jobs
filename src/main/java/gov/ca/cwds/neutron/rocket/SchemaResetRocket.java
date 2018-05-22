@@ -33,7 +33,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(SchemaResetRocket.class);
 
-  private DbResetStatusDao dao;
+  private transient DbResetStatusDao dao;
 
   /**
    * Construct rocket with all required dependencies.

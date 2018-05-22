@@ -169,9 +169,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     }
   }
 
-  public void addClientCounty(Short clinetCountyId) {
-    if (clinetCountyId != null) {
-      this.clientCounties.add(clinetCountyId);
+  public void addClientCounty(Short clientCountyId) {
+    if (clientCountyId != null) {
+      this.clientCounties.add(clientCountyId);
     }
   }
 
@@ -542,7 +542,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   @Override
   public List<ElasticSearchSystemCode> getClientCounties() {
-    if (this.clientCounties == null || this.clientCounties.isEmpty()) {
+    if (this.clientCounties.isEmpty()) {
       return new ArrayList<>();
     }
 

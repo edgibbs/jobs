@@ -54,8 +54,20 @@ public class ReplicatedClientAddressTest extends Goddard<ReplicatedClient, EsCli
   }
 
   @Test
+  public void setAddresses_Args__Set__null() throws Exception {
+    Set<ReplicatedAddress> addresses = null;
+    target.setAddresses(addresses);
+  }
+
+  @Test
   public void addAddress_Args__ReplicatedAddress() throws Exception {
     ReplicatedAddress address = mock(ReplicatedAddress.class);
+    target.addAddress(address);
+  }
+
+  @Test
+  public void addAddress_Args__ReplicatedAddress__null() throws Exception {
+    ReplicatedAddress address = null;
     target.addAddress(address);
   }
 
@@ -82,6 +94,14 @@ public class ReplicatedClientAddressTest extends Goddard<ReplicatedClient, EsCli
   public void isActive_A$() throws Exception {
     boolean actual = target.isActive();
     boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isActive__end_dated() throws Exception {
+    target.setEffEndDt(new Date());
+    boolean actual = target.isActive();
+    boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 

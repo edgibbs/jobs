@@ -61,7 +61,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientPersonIndexerJob.class);
 
-  private AtomLaunchDirector launchDirector;
+  private transient AtomLaunchDirector launchDirector;
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 

@@ -301,6 +301,11 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   }
 
   @Test
+  public void addSafetyAlert_Args__ElasticSearchSafetyAlert_null() throws Exception {
+    target.addSafetyAlert(null);
+  }
+
+  @Test
   public void getOpenCaseId_Args__() throws Exception {
     final String actual = target.getOpenCaseId();
     final String expected = null;
@@ -624,6 +629,14 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void getClientCounties_A$() throws Exception {
+    List<ElasticSearchSystemCode> actual = target.getClientCounties();
+    List<ElasticSearchSystemCode> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getClientCounties_null() throws Exception {
+    // target.setClientCounties(null);
     List<ElasticSearchSystemCode> actual = target.getClientCounties();
     List<ElasticSearchSystemCode> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
