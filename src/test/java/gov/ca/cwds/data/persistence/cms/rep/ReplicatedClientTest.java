@@ -415,6 +415,11 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   }
 
   @Test
+  public void getPhones_blank_ext() throws Exception {
+    doGetPhones((short) 33, "1234567xyz", 4083742790L, null);
+  }
+
+  @Test
   public void getLegacyId_A$() throws Exception {
     final String actual = target.getLegacyId();
     final String expected = DEFAULT_CLIENT_ID;
