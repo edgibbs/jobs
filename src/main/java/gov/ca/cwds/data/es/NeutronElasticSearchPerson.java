@@ -25,6 +25,8 @@ public class NeutronElasticSearchPerson extends ElasticSearchPerson {
 
   @JsonIgnore
   @Override
-  public void setAddresses(List<ElasticSearchPersonAddress> addresses) {}
+  public void setAddresses(List<ElasticSearchPersonAddress> addresses) {
+    // Omit addresses.
+  }
 
 }
