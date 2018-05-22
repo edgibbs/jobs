@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import gov.ca.cwds.data.ReadablePhone;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
@@ -36,6 +37,7 @@ import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
+import gov.ca.cwds.utils.JsonUtils;
 
 public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddress> {
 
@@ -362,21 +364,53 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  public void getPhones_A$() throws Exception {
+  protected void doGetPhones(Short addressType, String addrId, Long phoneNo, Integer ext)
+      throws Exception {
     final ReplicatedClientAddress ca = new ReplicatedClientAddress();
-    ca.setAddressType((short) 32);
+    PhoneType phoneType = PhoneType.Other;
+
+    if (addressType != null) {
+      ca.setAddressType((short) addressType);
+
+      if (ca.isResidence()) {
+        phoneType = ApiPhoneAware.PhoneType.Home;
+      } else if (ca.isBusiness()) {
+        phoneType = ApiPhoneAware.PhoneType.Work;
+      }
+    }
 
     final ReplicatedAddress adr = new ReplicatedAddress();
-    adr.setId("1234567xyz");
-    adr.setPrimaryNumber(4083742790L);
-    adr.setPrimaryExtension(1234);
+    adr.setId(addrId);
+    adr.setPrimaryNumber(phoneNo);
+    adr.setPrimaryExtension(ext);
     ca.addAddress(adr);
 
     target.addClientAddress(ca);
     final ApiPhoneAware[] actual = target.getPhones();
-    final ApiPhoneAware[] expected = new ApiPhoneAware[0];
-    assertThat(actual, is(equalTo(expected)));
+
+    final ApiPhoneAware[] expected = new ApiPhoneAware[1];
+    expected[0] = new ReadablePhone(addrId, phoneNo != null ? phoneNo.toString() : null,
+        ext != null ? ext.toString() : null, phoneType);
+
+    final String jsonActual = JsonUtils.to(actual);
+    final String jsonExpected = JsonUtils.to(expected);
+
+    assertThat(jsonActual, is(equalTo(jsonExpected)));
+  }
+
+  @Test
+  public void getPhones_residence() throws Exception {
+    doGetPhones((short) 32, "1234567xyz", 4083742790L, 1234);
+  }
+
+  @Test
+  public void getPhones_business() throws Exception {
+    doGetPhones((short) 27, "1234567xyz", 4083742790L, 1234);
+  }
+
+  @Test
+  public void getPhones_other() throws Exception {
+    doGetPhones((short) 33, "1234567xyz", 4083742790L, 1234);
   }
 
   @Test
