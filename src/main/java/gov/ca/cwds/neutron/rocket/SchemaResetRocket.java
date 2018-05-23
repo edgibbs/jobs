@@ -137,8 +137,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         LOGGER.warn("DB2 SCHEMA RESET COMPLETED!");
       }
     } else {
-      LOGGER.error("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
       fail();
+      LOGGER.error("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
     }
   }
 
@@ -196,8 +196,9 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     super.done();
 
     try {
-      if (lock.tryLock(3, TimeUnit.SECONDS)) {
+      if (lock.tryLock(5, TimeUnit.SECONDS)) {
         try {
+          notifyAll();
           condDone.signal();
         } finally {
           lock.unlock();
@@ -215,8 +216,9 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     super.fail();
 
     try {
-      if (lock.tryLock(3, TimeUnit.SECONDS)) {
+      if (lock.tryLock(5, TimeUnit.SECONDS)) {
         try {
+          notifyAll();
           condDone.signal();
         } finally {
           lock.unlock();
