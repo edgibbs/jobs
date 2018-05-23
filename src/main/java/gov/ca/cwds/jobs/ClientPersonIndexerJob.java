@@ -344,7 +344,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   /**
    * Both modes. Construct a handler for this thread.
    */
-  protected void allocateThreadHandler() {
+  public void allocateThreadHandler() {
     if (handler.get() == null) {
       handler.set(new PeopleSummaryThreadHandler(this));
     }
@@ -353,7 +353,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   /**
    * Both modes. Set this thread's handler to null.
    */
-  protected void deallocateThreadHandler() {
+  public void deallocateThreadHandler() {
     if (handler.get() != null) {
       handler.set(null);
     }
