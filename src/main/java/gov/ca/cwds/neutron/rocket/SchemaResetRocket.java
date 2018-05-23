@@ -44,10 +44,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   private final Lock lock = new ReentrantLock();
 
-  private final Condition condWait = lock.newCondition();
   private final Condition condDone = lock.newCondition();
-
-  private Condition condition;
 
   /**
    * Construct rocket with all required dependencies.
