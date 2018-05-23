@@ -397,10 +397,12 @@ public class ReferralHistoryIndexerJobTest
   @Test(expected = NeutronCheckedException.class)
   public void pullNextRange_Args__Pair__boom() throws Exception {
     final String schema = target.getDBSchemaName();
+
     final PreparedStatement stmtInsClient = mock(PreparedStatement.class);
     final PreparedStatement stmtSelClient = mock(PreparedStatement.class);
     final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
     final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
+
     final ResultSet rsInsClient = mock(ResultSet.class);
     final ResultSet rsSelClient = mock(ResultSet.class);
     final ResultSet rsSelReferral = mock(ResultSet.class);

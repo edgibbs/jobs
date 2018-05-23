@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -136,6 +135,13 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test(expected = NeutronCheckedException.class)
   public void pickPrepDml_A$String$String_T$NeutronCheckedException() throws Exception {
+    when(rs.next()).thenThrow(NeutronCheckedException.class);
+    when(preparedStatement.executeUpdate()).thenThrow(NeutronCheckedException.class);
+
+    rocket = mock(ClientPersonIndexerJob.class);
+    when(rocket.getFlightPlan()).thenThrow(NeutronCheckedException.class);
+    target = new PeopleSummaryThreadHandler(rocket);
+
     String sqlInitialLoad = null;
     String sqlLastChange = null;
     target.pickPrepDml(sqlInitialLoad, sqlLastChange);
@@ -160,26 +166,27 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test
   public void prepAffectedClients_A$PreparedStatement$Pair() throws Exception {
-    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
     Pair<String, String> p = pair;
-    target.prepAffectedClients(stmtInsClient, p);
+    target.prepAffectedClients(preparedStatement, p);
   }
 
   @Test(expected = SQLException.class)
   public void prepAffectedClients_A$PreparedStatement$Pair_T$SQLException() throws Exception {
-    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    when(rs.next()).thenThrow(SQLException.class);
+    when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+
     Pair<String, String> p = pair;
-    target.prepAffectedClients(stmtInsClient, p);
+    target.prepAffectedClients(preparedStatement, p);
   }
 
   @Test
   public void readPlacementAddress_A$PreparedStatement() throws Exception {
-    PreparedStatement stmt = mock(PreparedStatement.class);
-    target.readPlacementAddress(stmt);
+    target.readPlacementAddress(preparedStatement);
   }
 
   @Test(expected = SQLException.class)
   public void readPlacementAddress_A$PreparedStatement_T$SQLException() throws Exception {
+    when(rs.next()).thenThrow(SQLException.class);
     target.readPlacementAddress(preparedStatement);
   }
 

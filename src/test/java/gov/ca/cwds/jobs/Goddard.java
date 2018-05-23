@@ -238,6 +238,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     preparedStatement = mock(PreparedStatement.class);
     when(con.prepareStatement(any(String.class))).thenReturn(preparedStatement);
+    when(preparedStatement.executeQuery()).thenReturn(rs);
     when(preparedStatement.executeQuery(any())).thenReturn(rs);
     when(preparedStatement.executeUpdate()).thenReturn(1);
 
