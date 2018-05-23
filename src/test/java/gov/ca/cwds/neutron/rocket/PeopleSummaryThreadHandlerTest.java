@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,6 +67,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test(expected = SQLException.class)
   public void handleMainResults_A$ResultSet_T$SQLException() throws Exception {
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
     target.handleMainResults(rs);
   }
 
@@ -132,16 +134,11 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void pickPrepDml_A$String$String_T$NeutronCheckedException() throws Exception {
     String sqlInitialLoad = null;
     String sqlLastChange = null;
-    try {
-      target.pickPrepDml(sqlInitialLoad, sqlLastChange);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
-
+    target.pickPrepDml(sqlInitialLoad, sqlLastChange);
   }
 
   @Test
@@ -183,14 +180,13 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test(expected = SQLException.class)
   public void readPlacementAddress_A$PreparedStatement_T$SQLException() throws Exception {
-    PreparedStatement stmt = mock(PreparedStatement.class);
-    target.readPlacementAddress(stmt);
+    target.readPlacementAddress(preparedStatement);
   }
 
   @Test
   public void getNormalized_A$() throws Exception {
     Map<String, ReplicatedClient> actual = target.getNormalized();
-    Map<String, ReplicatedClient> expected = null;
+    Map<String, ReplicatedClient> expected = new HashMap<>();
     assertThat(actual, is(equalTo(expected)));
   }
 

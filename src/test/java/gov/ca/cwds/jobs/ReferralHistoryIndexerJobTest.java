@@ -418,10 +418,12 @@ public class ReferralHistoryIndexerJobTest
     when(con.prepareStatement(sqlSelClient)).thenReturn(stmtSelClient);
     when(con.prepareStatement(sqlSelReferral)).thenReturn(stmtSelReferral);
     when(con.prepareStatement(selAllegation)).thenReturn(stmtSelAllegation);
+
     when(stmtInsClient.executeQuery()).thenReturn(rsInsClient);
     when(stmtSelClient.executeQuery()).thenReturn(rsSelClient);
     when(stmtSelReferral.executeQuery()).thenReturn(rsSelReferral);
     when(stmtSelAllegation.executeQuery()).thenReturn(rsSelAllegation);
+
     when(rsInsClient.next()).thenReturn(true).thenReturn(false);
     when(rsSelClient.next()).thenReturn(true).thenReturn(false);
     when(rsSelReferral.next()).thenReturn(false);

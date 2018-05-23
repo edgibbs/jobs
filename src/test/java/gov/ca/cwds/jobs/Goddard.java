@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -133,6 +134,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public ConnectionProvider cp;
   public Connection con;
   public Statement stmt;
+  public PreparedStatement preparedStatement;
   public ResultSet rs;
   public DatabaseMetaData meta;
   public NativeQuery<M> nq;
@@ -234,9 +236,14 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(con.createStatement()).thenReturn(stmt);
     when(stmt.executeQuery(any())).thenReturn(rs);
 
+    preparedStatement = mock(PreparedStatement.class);
+    when(con.prepareStatement(any(String.class))).thenReturn(preparedStatement);
+    when(preparedStatement.executeQuery(any())).thenReturn(rs);
+    when(preparedStatement.executeUpdate()).thenReturn(1);
+
     // Result set:
     when(rs.next()).thenReturn(true).thenReturn(false);
-    when(rs.getString(any())).thenReturn("abc1234567");
+    when(rs.getString(any())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(contains("IBMSNAP_OPERATION"))).thenReturn("I");
     when(rs.getString("LIMITED_ACCESS_CODE")).thenReturn("N");
     when(rs.getInt(any())).thenReturn(0);
