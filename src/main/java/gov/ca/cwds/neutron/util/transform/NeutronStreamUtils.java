@@ -32,12 +32,8 @@ public final class NeutronStreamUtils {
 
       @Override
       public Stream<T> apply(T t) {
-        if (i++ % n == 0) {
-          return Stream.of(t);
-        }
-        return Stream.empty();
+        return (i++ % n == 0) ? Stream.of(t) : Stream.empty();
       }
-
     };
   }
 

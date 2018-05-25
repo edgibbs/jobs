@@ -211,7 +211,7 @@ public final class NeutronJdbcUtils {
       // z/OS, large data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      ret = initialLoad.limitRange(buildPartitionsRanges(numPartitions, BASE_PARTITIONS));
+      ret = initialLoad.limitRange(buildPartitionsRanges(numPartitions, partitions));
     } else if (initialLoad.isDB2OnZOS()) {
       // ----------------------------
       // z/OS, small data set:
@@ -242,7 +242,7 @@ public final class NeutronJdbcUtils {
   }
 
   public static List<Pair<String, String>> getPartitionRanges512() {
-    return buildPartitionsRanges(511, EXTENDED_PARTITIONS);
+    return buildPartitionsRanges(512, EXTENDED_PARTITIONS);
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges4(
@@ -262,7 +262,7 @@ public final class NeutronJdbcUtils {
 
   public static List<Pair<String, String>> getCommonPartitionRanges512(
       @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) throws NeutronCheckedException {
-    return getCommonPartitionRanges(initialLoad, 512, EXTENDED_PARTITIONS);
+    return getCommonPartitionRanges(initialLoad, 511, EXTENDED_PARTITIONS);
   }
 
 }
