@@ -150,6 +150,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
+    doneRetrieve();
     clear();
   }
 
