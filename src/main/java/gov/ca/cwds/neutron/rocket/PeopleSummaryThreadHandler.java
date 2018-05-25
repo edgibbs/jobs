@@ -66,8 +66,8 @@ public class PeopleSummaryThreadHandler
     final boolean isLargeLoad = rocket.isLargeLoad();
 
     this.rocket = rocket;
-    this.normalized = isLargeLoad ? new LinkedHashMap<>(20000) : new LinkedHashMap<>(5000);
-    this.placementHomeAddresses = isLargeLoad ? new HashMap<>(2000) : new HashMap<>(200);
+    this.normalized = isLargeLoad ? new LinkedHashMap<>(150011) : new LinkedHashMap<>(20011);
+    this.placementHomeAddresses = isLargeLoad ? new HashMap<>(20011) : new HashMap<>(2003);
   }
 
   @Override

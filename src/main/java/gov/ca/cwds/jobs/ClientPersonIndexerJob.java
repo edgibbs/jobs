@@ -247,7 +247,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronCheckedException {
-    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges512(this);
   }
 
   /**
