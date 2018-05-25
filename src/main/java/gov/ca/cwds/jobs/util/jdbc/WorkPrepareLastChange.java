@@ -12,7 +12,7 @@ import org.hibernate.jdbc.Work;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
-import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 /**
  * Execute DML prior to retrieving records, typically for last change runs.
@@ -68,7 +68,7 @@ public class WorkPrepareLastChange implements Work {
   public void execute(Connection con) throws SQLException {
     NeutronDB2Utils.enableBatchSettings(con);
 
-    final String strLastRunTime = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunTime);
+    final String strLastRunTime = NeutronDateUtils.makeTimestampStringLookBack(lastRunTime);
     LOGGER.info("strLastRunTime: {}", strLastRunTime);
 
     try (final PreparedStatement stmt = createPreparedStatement(con)) {

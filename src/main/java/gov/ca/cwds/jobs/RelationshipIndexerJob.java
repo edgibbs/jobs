@@ -36,6 +36,7 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 
 /**
@@ -110,7 +111,7 @@ public class RelationshipIndexerJob
   public String getPrepLastChangeSQL() {
     try {
       return INSERT_RELATION_LAST_CHG.replaceAll("XYZ",
-          NeutronJdbcUtils.makeTimestampStringLookBack(determineLastSuccessfulRunTime()));
+          NeutronDateUtils.makeTimestampStringLookBack(determineLastSuccessfulRunTime()));
     } catch (NeutronCheckedException e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL: {}", e.getMessage());
     }

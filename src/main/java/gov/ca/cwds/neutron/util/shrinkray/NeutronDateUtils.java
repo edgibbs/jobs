@@ -1,9 +1,16 @@
 package gov.ca.cwds.neutron.util.shrinkray;
 
+import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
 public class NeutronDateUtils {
 
@@ -20,6 +27,45 @@ public class NeutronDateUtils {
     cal.setTime(lastRunTime);
     cal.add(Calendar.MINUTE, NeutronIntegerDefaults.LOOKBACK_MINUTES.getValue());
     return cal.getTime();
+  }
+
+  public static Date uncookTimestampString(String timestamp) {
+    String trimTimestamp = StringUtils.trim(timestamp);
+    if (StringUtils.isNotEmpty(trimTimestamp)) {
+      try {
+        return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).parse(trimTimestamp);
+      } catch (Exception e) {
+        throw new NeutronRuntimeException(e);
+      }
+    }
+    return null;
+  }
+
+  public static String makeTimestampString(final Date date) {
+    final StringBuilder buf = new StringBuilder();
+    buf.append("TIMESTAMP('")
+        .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date))
+        .append("')");
+    return buf.toString();
+  }
+
+  public static String makeSimpleTimestampString(final Date date) {
+    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date);
+  }
+
+  public static String makeTimestampStringLookBack(final Date date) {
+    String ret;
+    final DateFormat fmt = new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat());
+  
+    if (date != null) {
+      ret = fmt.format(lookBack(date));
+    } else {
+      final Calendar cal = Calendar.getInstance();
+      cal.add(Calendar.MINUTE, 5);
+      ret = fmt.format(lookBack(cal.getTime()));
+    }
+  
+    return ret;
   }
 
 }

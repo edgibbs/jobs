@@ -22,6 +22,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 /**
  * Rocket to load reporters from CMS into ElasticSearch.
@@ -62,7 +63,7 @@ public class ReporterIndexerJob extends BasePersonRocket<ReplicatedReporter, Rep
   public String getPrepLastChangeSQL() {
     try {
       return INSERT_REPORTER_LAST_CHG.replaceAll("XYZ",
-          NeutronJdbcUtils.makeTimestampStringLookBack(determineLastSuccessfulRunTime()));
+          NeutronDateUtils.makeTimestampStringLookBack(determineLastSuccessfulRunTime()));
     } catch (NeutronCheckedException e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL: {}", e.getMessage());
     }

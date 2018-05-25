@@ -1,21 +1,15 @@
 package gov.ca.cwds.neutron.util.jdbc;
 
-import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,10 +21,8 @@ import org.hibernate.jdbc.Work;
 import gov.ca.cwds.jobs.util.jdbc.WorkPrepareLastChange;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.NeutronStreamUtils;
 
 /**
@@ -148,45 +140,6 @@ public final class NeutronJdbcUtils {
     // Static utility class.
   }
 
-  public static Date uncookTimestampString(String timestamp) {
-    String trimTimestamp = StringUtils.trim(timestamp);
-    if (StringUtils.isNotEmpty(trimTimestamp)) {
-      try {
-        return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).parse(trimTimestamp);
-      } catch (Exception e) {
-        throw new NeutronRuntimeException(e);
-      }
-    }
-    return null;
-  }
-
-  public static String makeTimestampString(final Date date) {
-    final StringBuilder buf = new StringBuilder();
-    buf.append("TIMESTAMP('")
-        .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date))
-        .append("')");
-    return buf.toString();
-  }
-
-  public static String makeSimpleTimestampString(final Date date) {
-    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date);
-  }
-
-  public static String makeTimestampStringLookBack(final Date date) {
-    String ret;
-    final DateFormat fmt = new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat());
-
-    if (date != null) {
-      ret = fmt.format(NeutronDateUtils.lookBack(date));
-    } else {
-      final Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.MINUTE, 5);
-      ret = fmt.format(NeutronDateUtils.lookBack(cal.getTime()));
-    }
-
-    return ret;
-  }
-
   /**
    * @return default CMS schema name
    */
@@ -289,7 +242,7 @@ public final class NeutronJdbcUtils {
   }
 
   public static List<Pair<String, String>> getPartitionRanges512() {
-    return buildPartitionsRanges(512, EXTENDED_PARTITIONS);
+    return buildPartitionsRanges(511, EXTENDED_PARTITIONS);
   }
 
   public static List<Pair<String, String>> getCommonPartitionRanges4(
