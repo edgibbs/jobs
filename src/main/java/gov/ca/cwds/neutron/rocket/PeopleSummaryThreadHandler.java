@@ -268,7 +268,6 @@ public class PeopleSummaryThreadHandler
 
   protected void doneRetrieve() {
     this.doneHandlerRetrieve = true;
-    rocket.doneRetrieve();
   }
 
 }
