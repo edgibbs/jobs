@@ -67,7 +67,7 @@ public class PeopleSummaryThreadHandler
 
     this.rocket = rocket;
     this.normalized = isLargeLoad ? new LinkedHashMap<>(150011) : new LinkedHashMap<>(20011);
-    this.placementHomeAddresses = isLargeLoad ? new HashMap<>(20011) : new HashMap<>(2003);
+    this.placementHomeAddresses = isLargeLoad ? new HashMap<>(5011) : new HashMap<>(2003);
   }
 
   @Override
@@ -80,7 +80,7 @@ public class PeopleSummaryThreadHandler
 
     // NOTE: Assumes that records are sorted by group key.
     while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
+      CheeseRay.logEvery(LOGGER, 2000, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
@@ -150,7 +150,6 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
-    doneRetrieve();
     clear();
   }
 

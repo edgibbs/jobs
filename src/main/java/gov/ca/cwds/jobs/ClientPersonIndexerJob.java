@@ -126,6 +126,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public void handleStartRange(Pair<String, String> range) {
+    deallocateThreadHandler();
     allocateThreadHandler();
   }
 
