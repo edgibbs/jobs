@@ -86,6 +86,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
     this.launchDirector = launchDirector;
+    allocateThreadHandler();
   }
 
   @Override
@@ -275,13 +276,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return new ESOptionalCollection[] {ESOptionalCollection.AKA, ESOptionalCollection.SAFETY_ALERT};
   }
 
-  @Override
-  public void doneRetrieve() {
-    final PeopleSummaryThreadHandler theHandler = handler.get();
-    if (theHandler != null && theHandler.isDoneHandlerRetrieve()) {
-      super.doneRetrieve();
-    }
-  }
+  // @Override
+  // public void doneRetrieve() {
+  // final PeopleSummaryThreadHandler theHandler = handler.get();
+  // if (theHandler != null && theHandler.isDoneHandlerRetrieve()) {
+  // super.doneRetrieve();
+  // }
+  // }
 
   @Override
   public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
