@@ -225,6 +225,7 @@ public class PeopleSummaryThreadHandler
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
         .stream().map(e -> rocket.normalizeSingle(e.getValue()))
         .forEach(n -> normalized.put(n.getId(), n));
+    LOGGER.warn("normalized.size: {}", normalized.size());
   }
 
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,
