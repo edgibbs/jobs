@@ -206,7 +206,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test
   public void doneRetrieve_A$() throws Exception {
-    target.doneRetrieve();
+    target.doneThreadRetrieve();
   }
 
 }

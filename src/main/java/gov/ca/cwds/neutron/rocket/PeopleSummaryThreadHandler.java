@@ -115,7 +115,6 @@ public class PeopleSummaryThreadHandler
       prepAffectedClients(stmtInsClient1, range);
       prepAffectedClients(stmtInsClient2, range);
       readPlacementAddress(stmtSelPlacementAddress);
-      con.commit(); // Clear temp table
     } catch (Exception e) {
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
@@ -134,6 +133,8 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
+    LOGGER.info("\nhandleJdbcDone: normalized.size(): {}\n", normalized.size());
+
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
 
@@ -150,7 +151,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
-    doneRetrieve();
+    doneThreadRetrieve();
     clear();
   }
 
@@ -267,7 +268,7 @@ public class PeopleSummaryThreadHandler
     return doneHandlerRetrieve;
   }
 
-  protected void doneRetrieve() {
+  protected void doneThreadRetrieve() {
     this.doneHandlerRetrieve = true;
   }
 

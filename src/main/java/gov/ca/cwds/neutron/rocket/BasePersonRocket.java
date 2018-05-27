@@ -760,16 +760,26 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     try {
       // Insert into session temp table that drives a last change view.
+      final int fetchSize = NeutronIntegerDefaults.FETCH_SIZE.getValue();
       prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
       q.setCacheMode(CacheMode.IGNORE);
-      q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+      q.setFetchSize(fetchSize);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
+      // Iterate, process, flush.
+      List<D> recs = new ArrayList<>();
+      try (final ScrollableResults scroll = q.scroll(ScrollMode.FORWARD_ONLY)) {
+        recs = q.list();
+        LOGGER.info("FOUND {} RECORDS", recs.size());
+
+        session.flush();
+        session.clear();
+      }
+
+      // ImmutableList lacks a public constructor and setters to set starting size.
       final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
-      final List<D> recs = q.list();
-      LOGGER.info("FOUND {} RECORDS", recs.size());
 
       // Convert denormalized rows to normalized persistence objects.
       final List<D> groupRecs = new ArrayList<>(recs.size());
@@ -797,8 +807,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
 
       groupRecs.clear();
-      session.clear();
       txn.commit();
+
       return results.build();
     } catch (Exception h) {
       fail();
@@ -915,7 +925,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       fail();
       throw new NeutronRuntimeException("ERROR CLOSING BULK PROCESSOR!", e2);
     } finally {
-      doneRetrieve();
+      doneIndex();
     }
   }
 

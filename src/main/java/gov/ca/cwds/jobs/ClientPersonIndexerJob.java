@@ -69,6 +69,10 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private boolean largeLoad = false;
 
+  private boolean runMultiThread = false;
+
+  private boolean multiThreadRetrieveDone = false;
+
   /**
    * Construct batch rocket instance with all required dependencies.
    * 
@@ -86,7 +90,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan);
     this.launchDirector = launchDirector;
-    allocateThreadHandler();
   }
 
   @Override
@@ -127,6 +130,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public void handleStartRange(Pair<String, String> range) {
+    multiThreadRetrieveDone = true;
     deallocateThreadHandler();
     allocateThreadHandler();
   }
@@ -276,14 +280,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return new ESOptionalCollection[] {ESOptionalCollection.AKA, ESOptionalCollection.SAFETY_ALERT};
   }
 
-  // @Override
-  // public void doneRetrieve() {
-  // final PeopleSummaryThreadHandler theHandler = handler.get();
-  // if (theHandler != null && theHandler.isDoneHandlerRetrieve()) {
-  // super.doneRetrieve();
-  // }
-  // }
-
   @Override
   public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
     try {
@@ -358,6 +354,25 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   public void deallocateThreadHandler() {
     if (handler.get() != null) {
       handler.set(null);
+    }
+  }
+
+  @Override
+  public void startMultiThreadRetrieve() {
+    runMultiThread = true;
+    multiThreadRetrieveDone = false;
+  }
+
+  @Override
+  public void doneMultiThreadRetrieve() {
+    multiThreadRetrieveDone = true;
+    doneRetrieve();
+  }
+
+  @Override
+  public void doneRetrieve() {
+    if (!runMultiThread || (runMultiThread && multiThreadRetrieveDone)) {
+      super.doneRetrieve();
     }
   }
 
