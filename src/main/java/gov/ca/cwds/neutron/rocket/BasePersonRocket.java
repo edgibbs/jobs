@@ -782,7 +782,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
 
       // Convert denormalized rows to normalized persistence objects.
-      final List<D> groupRecs = new ArrayList<>(recs.size());
+      final List<D> groupRecs = new ArrayList<>(20);
       for (D m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(normalizeSingle(groupRecs));
@@ -815,7 +815,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       txn.rollback();
       throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } finally {
-      doneRetrieve();
+      doneRetrieve(); // Override in multi-thread mode to avoid killing the indexer thread
     }
   }
 
