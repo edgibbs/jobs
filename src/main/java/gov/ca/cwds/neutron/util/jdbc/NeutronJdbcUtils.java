@@ -37,7 +37,7 @@ public final class NeutronJdbcUtils {
   private static final String Z_OS_START = "aaaaaaaaaa";
   private static final String Z_OS_END = "9999999999";
 
-  private static final String[] BASE_PARTITIONS = {"ACZAVXC2PZ", "A6y48OH3Ut", "BzaK4AmDfS",
+  private static final String[] BASE_PARTITIONS = {"AeRTLuZ6WW", "A6y48OH3Ut", "BzaK4AmDfS",
       "B26CwOn9qX", "CvIYhuyCJt", "CY8r2uwEBI", "DsNAQ1W4l6", "DWQGOmFAzi", "EpKrO9a9xb",
       "ESH4wdQ02u", "Fmy2cMI0kW", "FN4JbQ0BFV", "GjekFiPEuJ", "GMSl4aH4wm", "HfvKXzA7rJ",
       "HJtGK9J07S", "IbMKNtL5Dk", "IEwHjr9FXO", "I6RlOno3qC", "JBHjcBU74E", "J5p3IOTEaC",
@@ -49,7 +49,7 @@ public final class NeutronJdbcUtils {
       "4u0U0MECwr", "4YRF9Dd70O", "5rOfwNO3gC", "5T7PS2j37S", "6oipPRSKDX", "6R6kaia0SL",
       "7ki4MYoAzi", "7NYwtxJ7Lu", "8guC2hG4ak", "8JpJrxB37S", "9cRG3VmH6i", "9GwwRzY7D3", Z_OS_END};
 
-  private static final String[] EXTENDED_PARTITIONS = {"AdSqEtbIQT", "Ahg03Ap3Ez", "AkEfSN73RZ",
+  private static final String[] EXTENDED_PARTITIONS = {"AeRTLuZ6WW", "Ahg03Ap3Ez", "AkEfSN73RZ",
       "An1tg0144S", "AroiT1Z7OF", "Av2FphfBw8", "AzyEzYCFYI", "AC5wEdz9YH", "AG82rVX2KA",
       "AK6Qtf82LK", "AOv5WvzM5K", "ARUrOuS8Xz", "AVkHVOY99d", "AYNERiMCOB", "A24xxaN6bb",
       "A6zehUX30A", "A94Mn377OF", "BdzzZCiCFA", "Bg2L0ID36B", "Bkuv1Zh37S", "Bo6SRjV8fe",
