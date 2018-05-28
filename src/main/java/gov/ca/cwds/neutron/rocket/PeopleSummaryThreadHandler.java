@@ -80,7 +80,7 @@ public class PeopleSummaryThreadHandler
 
     // NOTE: Assumes that records are sorted by group key.
     while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, 2000, ++cntr, "Retrieved", "recs");
+      CheeseRay.logEvery(LOGGER, 5000, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
