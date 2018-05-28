@@ -198,7 +198,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     try {
       if (lock.tryLock(5, TimeUnit.SECONDS)) {
         try {
-          notifyAll();
+          // notifyAll();
           condDone.signal();
         } finally {
           lock.unlock();
@@ -218,7 +218,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     try {
       if (lock.tryLock(5, TimeUnit.SECONDS)) {
         try {
-          notifyAll();
+          // notifyAll();
           condDone.signal();
         } finally {
           lock.unlock();
@@ -229,6 +229,14 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
     }
+  }
+
+  public int getTimeoutSeconds() {
+    return timeoutSeconds;
+  }
+
+  public void setTimeoutSeconds(int timeoutSeconds) {
+    this.timeoutSeconds = timeoutSeconds;
   }
 
   /**
