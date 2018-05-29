@@ -473,7 +473,7 @@ public class CaseSQLResource implements ApiMarker {
    */
   //@formatter:off
   public static final String SELECT_CASES_FULL_EVERYTHING = 
-      "\nWITH DRIVER AS (\n"
+      "WITH DRIVER AS (\n"
           + " SELECT     \n"
           + "       c.IDENTIFIER        AS THIS_CLIENT_ID \n"
           + "     , TRIM(c.COM_FST_NM)  AS THIS_CLIENT_FIRST_NM \n"

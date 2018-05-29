@@ -65,6 +65,7 @@ import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 
 /**
@@ -689,7 +690,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final NativeQuery<N> q = session.getNamedNativeQuery(namedQueryName);
       q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          NeutronJdbcUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
+          NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
       final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
       final List<N> recs = q.list();
@@ -717,7 +718,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
     q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-        NeutronJdbcUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
+        NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
     final List<D> deletionRecs = q.list();
     if (deletionRecs != null && !deletionRecs.isEmpty()) {
@@ -759,19 +760,29 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     try {
       // Insert into session temp table that drives a last change view.
+      final int fetchSize = NeutronIntegerDefaults.FETCH_SIZE.getValue();
       prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
       q.setCacheMode(CacheMode.IGNORE);
-      q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+      q.setFetchSize(fetchSize);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          NeutronJdbcUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
+          NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
+      // Iterate, process, flush.
+      List<D> recs = new ArrayList<>();
+      try (final ScrollableResults scroll = q.scroll(ScrollMode.FORWARD_ONLY)) {
+        recs = q.list();
+        LOGGER.info("FOUND {} RECORDS", recs.size());
+
+        session.flush();
+        session.clear();
+      }
+
+      // ImmutableList lacks a public constructor and setters to set starting size.
       final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
-      final List<D> recs = q.list();
-      LOGGER.info("FOUND {} RECORDS", recs.size());
 
       // Convert denormalized rows to normalized persistence objects.
-      final List<D> groupRecs = new ArrayList<>(recs.size());
+      final List<D> groupRecs = new ArrayList<>(20);
       for (D m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(normalizeSingle(groupRecs));
@@ -796,15 +807,15 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
 
       groupRecs.clear();
-      session.clear();
       txn.commit();
+
       return results.build();
     } catch (Exception h) {
       fail();
       txn.rollback();
       throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } finally {
-      doneRetrieve();
+      doneRetrieve(); // Override in multi-thread mode to avoid killing the indexer thread
     }
   }
 
@@ -914,7 +925,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       fail();
       throw new NeutronRuntimeException("ERROR CLOSING BULK PROCESSOR!", e2);
     } finally {
-      doneRetrieve();
+      doneIndex();
     }
   }
 

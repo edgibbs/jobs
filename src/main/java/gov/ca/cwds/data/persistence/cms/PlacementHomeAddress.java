@@ -36,9 +36,8 @@ public class PlacementHomeAddress extends ApiObjectIdentity
 
   private static final long serialVersionUID = 1L;
 
-  // TOD0: Code cache is unhappy with this unknown value.
+  // System code cache is unhappy with this unknown value.
   // No code loader interface method to add custom, non-CMS codes.
-  // public static final short ADDRESS_TYPE_PLACEMENT_HOME = 10001;
   public static final short ADDRESS_TYPE_PLACEMENT_HOME = 32; // call it a residence
 
   @Id

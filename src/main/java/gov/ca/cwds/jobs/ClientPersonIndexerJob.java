@@ -44,12 +44,18 @@ import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
+import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
- * PEOPLE SUMMARY ROCKET!
+ * PEOPLE SUMMARY ROCKET! Let's light this candle!
  * 
  * <p>
  * Rocket to load Client person data from CMS into ElasticSearch.
+ * </p>
+ * 
+ * <p>
+ * Important safety tip: sometimes rockets blow up during testing, sometimes on the launch pad. The
+ * same holds true for rockets in the Neutron code base ... :-)
  * </p>
  * 
  * @author CWDS API Team
@@ -61,13 +67,17 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientPersonIndexerJob.class);
 
-  private AtomLaunchDirector launchDirector;
+  private transient AtomLaunchDirector launchDirector;
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
   protected transient ThreadLocal<PeopleSummaryThreadHandler> handler = new ThreadLocal<>();
 
   private boolean largeLoad = false;
+
+  private boolean runMultiThread = false;
+
+  private boolean multiThreadRetrieveDone = false;
 
   /**
    * Construct batch rocket instance with all required dependencies.
@@ -110,48 +120,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return false;
   }
 
-  /**
-   * Despite IBM's research prowess in machine learning and artificial intelligence, DB2's optimizer
-   * can be as dumb as a stone.
-   */
-  @Override
-  public String getPrepLastChangeSQL() {
-    try {
-      return NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
-          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
-    } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
-    }
-  }
-
-  @Override
-  public void handleStartRange(Pair<String, String> range) {
-    allocateThreadHandler();
-  }
-
-  @Override
-  public void handleFinishRange(Pair<String, String> range) {
-    handler.get().handleFinishRange(range);
-    deallocateThreadHandler();
-  }
-
-  @Override
-  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    handler.get().handleSecondaryJdbc(con, range);
-  }
-
-  @Override
-  public String[] getPrepLastChangeSQLs() {
-    try {
-      final String[] ret = {getPrepLastChangeSQL(),
-          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
-              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime())};
-      return ret;
-    } catch (NeutronCheckedException e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
-    }
-  }
-
   @Override
   public EsClientPerson extract(ResultSet rs) throws SQLException {
     return EsClientPerson.extract(rs);
@@ -192,16 +160,57 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   /**
-   * {@inheritDoc}
+   * Despite IBM's research prowess in machine learning and artificial intelligence, DB2's optimizer
+   * can be as dumb as a stone.
    */
   @Override
-  public void handleMainResults(final ResultSet rs) throws SQLException {
-    handler.get().handleMainResults(rs);
+  public String getPrepLastChangeSQL() {
+    try {
+      return NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
+          determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
+    }
   }
 
   @Override
-  public void handleJdbcDone(final Pair<String, String> range) {
-    handler.get().handleJdbcDone(range);
+  public boolean isInitialLoadJdbc() {
+    return true;
+  }
+
+  public boolean isLargeLoad() {
+    return largeLoad;
+  }
+
+  @Override
+  public List<Pair<String, String>> getPartitionRanges() throws NeutronCheckedException {
+    return NeutronJdbcUtils.getCommonPartitionRanges512(this);
+  }
+
+  /**
+   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
+   * sensitive flag must be deleted.
+   */
+  @Override
+  public boolean mustDeleteLimitedAccessRecords() {
+    return !getFlightPlan().isLoadSealedAndSensitive();
+  }
+
+  @Override
+  public List<ReplicatedClient> normalize(List<EsClientPerson> recs) {
+    return EntityNormalizer.<ReplicatedClient, EsClientPerson>normalizeList(recs);
+  }
+
+  @Override
+  public String[] getPrepLastChangeSQLs() {
+    try {
+      final String[] ret = {getPrepLastChangeSQL(),
+          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime())};
+      return ret;
+    } catch (NeutronCheckedException e) {
+      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
+    }
   }
 
   /**
@@ -237,34 +246,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public boolean isInitialLoadJdbc() {
-    return true;
-  }
-
-  public boolean isLargeLoad() {
-    return largeLoad;
-  }
-
-  @Override
-  public List<Pair<String, String>> getPartitionRanges() throws NeutronCheckedException {
-    return NeutronJdbcUtils.getCommonPartitionRanges64(this);
-  }
-
-  /**
-   * If sealed or sensitive data must NOT be loaded then any records indexed with sealed or
-   * sensitive flag must be deleted.
-   */
-  @Override
-  public boolean mustDeleteLimitedAccessRecords() {
-    return !getFlightPlan().isLoadSealedAndSensitive();
-  }
-
-  @Override
-  public List<ReplicatedClient> normalize(List<EsClientPerson> recs) {
-    return EntityNormalizer.<ReplicatedClient, EsClientPerson>normalizeList(recs);
-  }
-
-  @Override
   public int nextThreadNumber() {
     return nextThreadNum.incrementAndGet();
   }
@@ -274,13 +255,44 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return new ESOptionalCollection[] {ESOptionalCollection.AKA, ESOptionalCollection.SAFETY_ALERT};
   }
 
+  // =========================
+  // INITIAL LOAD HANDLERS:
+  // =========================
+
   @Override
-  public void doneRetrieve() {
-    final PeopleSummaryThreadHandler theHandler = handler.get();
-    if (theHandler != null && theHandler.isDoneHandlerRetrieve()) {
-      super.doneRetrieve();
-    }
+  public void handleStartRange(Pair<String, String> range) {
+    multiThreadRetrieveDone = true;
+    deallocateThreadHandler();
+    allocateThreadHandler();
   }
+
+  @Override
+  public void handleFinishRange(Pair<String, String> range) {
+    handler.get().handleFinishRange(range);
+    deallocateThreadHandler();
+  }
+
+  @Override
+  public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    handler.get().handleSecondaryJdbc(con, range);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void handleMainResults(final ResultSet rs) throws SQLException {
+    handler.get().handleMainResults(rs);
+  }
+
+  @Override
+  public void handleJdbcDone(final Pair<String, String> range) {
+    handler.get().handleJdbcDone(range);
+  }
+
+  // =========================
+  // VALIDATION:
+  // =========================
 
   @Override
   public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
@@ -297,8 +309,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
           && StringUtils.equals(client.getCommonMiddleName(), person.getMiddleName())
           && validateAddresses(client, person);
     } catch (Exception e) {
-      LOGGER.error("PEOPLE SUMMARY VALIDATION ERROR!", e);
-      failValidation();
+      LOGGER.warn("PEOPLE SUMMARY VALIDATION ERROR!", e);
+      failValidation(); // fail optional validation without aborting the flight
       return false;
     }
   }
@@ -315,22 +327,24 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     final String clientId = person.getId();
     final Map<String, ReplicatedAddress> repAddresses = client.getClientAddresses().stream()
         .filter(ca -> ca.getEffEndDt() == null && ca.getAddressType() != null
-            && ca.getAddressType() == residenceType) // active only
+            && ca.getAddressType() == residenceType) // active residence only
         .flatMap(ca -> ca.getAddresses().stream())
         .collect(Collectors.toMap(ReplicatedAddress::getId, a -> a));
     final Map<String, ElasticSearchPersonAddress> docAddresses = person.getAddresses().stream()
         .collect(Collectors.toMap(ElasticSearchPersonAddress::getId, a -> a));
 
     for (ElasticSearchPersonAddress docAddr : docAddresses.values()) {
-      if (!repAddresses.containsKey(docAddr.getAddressId())) {
-        LOGGER.warn("DOC ADDRESS ID {} NOT FOUND IN DATABASE {}", docAddr.getAddressId(), clientId);
+      if (docAddr.getLegacyDescriptor().getLegacyTableName().equals(LegacyTable.ADDRESS.getName())
+          && !repAddresses.containsKey(docAddr.getAddressId())) {
+        LOGGER.debug("DOC ADDRESS ID {} NOT FOUND IN DATABASE {}", docAddr.getAddressId(),
+            clientId);
         return false;
       }
     }
 
     for (ReplicatedAddress repAddr : repAddresses.values()) {
       if (!docAddresses.containsKey(repAddr.getAddressId())) {
-        LOGGER.warn("ADDRESS ID {} NOT FOUND IN DOCUMENT {}", repAddr.getAddressId(), clientId);
+        LOGGER.debug("ADDRESS ID {} NOT FOUND IN DOCUMENT {}", repAddr.getAddressId(), clientId);
         return false;
       }
     }
@@ -344,7 +358,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   /**
    * Both modes. Construct a handler for this thread.
    */
-  protected void allocateThreadHandler() {
+  public void allocateThreadHandler() {
     if (handler.get() == null) {
       handler.set(new PeopleSummaryThreadHandler(this));
     }
@@ -353,9 +367,28 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   /**
    * Both modes. Set this thread's handler to null.
    */
-  protected void deallocateThreadHandler() {
+  public void deallocateThreadHandler() {
     if (handler.get() != null) {
       handler.set(null);
+    }
+  }
+
+  @Override
+  public void startMultiThreadRetrieve() {
+    runMultiThread = true;
+    multiThreadRetrieveDone = false;
+  }
+
+  @Override
+  public void doneMultiThreadRetrieve() {
+    multiThreadRetrieveDone = true;
+    doneRetrieve();
+  }
+
+  @Override
+  public void doneRetrieve() {
+    if (!runMultiThread || (runMultiThread && multiThreadRetrieveDone)) {
+      super.doneRetrieve();
     }
   }
 

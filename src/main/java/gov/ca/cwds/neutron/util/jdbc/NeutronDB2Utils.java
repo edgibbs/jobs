@@ -15,6 +15,7 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 /**
  * Miscellaneous DB2 utilities for Neutron rockets.
@@ -55,8 +56,8 @@ public final class NeutronDB2Utils {
    * @return DB2 timestamp string
    */
   public static String prepLastChangeSQL(String sql, Date lastRunStartDate, Date lastRunEndDate) {
-    final String strStartDate = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunStartDate);
-    final String strEndDate = NeutronJdbcUtils.makeTimestampStringLookBack(lastRunEndDate);
+    final String strStartDate = NeutronDateUtils.makeTimestampStringLookBack(lastRunStartDate);
+    final String strEndDate = NeutronDateUtils.makeTimestampStringLookBack(lastRunEndDate);
     return sql.replaceAll("XYZ", strStartDate).replaceAll("LAST_RUN_START", strStartDate)
         .replaceAll("LAST_RUN_END", strEndDate)
         .replaceAll("'CURRENT TIMESTAMP'", "CURRENT TIMESTAMP");

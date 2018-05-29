@@ -66,8 +66,8 @@ public class PeopleSummaryThreadHandler
     final boolean isLargeLoad = rocket.isLargeLoad();
 
     this.rocket = rocket;
-    this.normalized = isLargeLoad ? new LinkedHashMap<>(20000) : new LinkedHashMap<>(5000);
-    this.placementHomeAddresses = isLargeLoad ? new HashMap<>(2000) : new HashMap<>(200);
+    this.normalized = isLargeLoad ? new LinkedHashMap<>(150011) : new LinkedHashMap<>(20011);
+    this.placementHomeAddresses = isLargeLoad ? new HashMap<>(5011) : new HashMap<>(2003);
   }
 
   @Override
@@ -80,7 +80,7 @@ public class PeopleSummaryThreadHandler
 
     // NOTE: Assumes that records are sorted by group key.
     while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
+      CheeseRay.logEvery(LOGGER, 5000, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
@@ -115,7 +115,6 @@ public class PeopleSummaryThreadHandler
       prepAffectedClients(stmtInsClient1, range);
       prepAffectedClients(stmtInsClient2, range);
       readPlacementAddress(stmtSelPlacementAddress);
-      con.commit(); // Clear temp table
     } catch (Exception e) {
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
@@ -134,6 +133,8 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
+    LOGGER.info("\nhandleJdbcDone: normalized.size(): {}\n", normalized.size());
+
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
 
@@ -150,7 +151,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
-    doneRetrieve();
+    doneThreadRetrieve();
     clear();
   }
 
@@ -225,6 +226,7 @@ public class PeopleSummaryThreadHandler
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
         .stream().map(e -> rocket.normalizeSingle(e.getValue()))
         .forEach(n -> normalized.put(n.getId(), n));
+    LOGGER.trace("normalized.size: {}", normalized.size());
   }
 
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,
@@ -266,9 +268,8 @@ public class PeopleSummaryThreadHandler
     return doneHandlerRetrieve;
   }
 
-  protected void doneRetrieve() {
+  protected void doneThreadRetrieve() {
     this.doneHandlerRetrieve = true;
-    rocket.doneRetrieve();
   }
 
 }

@@ -2,6 +2,9 @@ package gov.ca.cwds.neutron.rocket;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.persistence.ParameterMode;
 
@@ -33,7 +36,15 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(SchemaResetRocket.class);
 
-  private DbResetStatusDao dao;
+  private transient DbResetStatusDao dao;
+
+  private int timeoutSeconds = 90 * 60;
+
+  private int pollPeriodInSeconds = 60;
+
+  private final Lock lock = new ReentrantLock();
+
+  private final Condition condDone = lock.newCondition();
 
   /**
    * Construct rocket with all required dependencies.
@@ -103,16 +114,17 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         throw CheeseRay.checked(LOGGER, "DB2 SCHEMA RESET ERROR! {}", returnMsg);
       } else {
         // If schema reset operation does not finish in 90 minutes, we timeout with an exception
-        final int schemaRefreshTimeoutSeconds = 90 * 60;
-        final int pollPeriodInSeconds = 60;
         int secondsWaited = 0;
 
         while (!schemaRefreshCompleted(pollPeriodInSeconds)) {
           secondsWaited += pollPeriodInSeconds;
-          LOGGER.info("seconds waited: {}, timeout: {}", secondsWaited,
-              schemaRefreshTimeoutSeconds);
+          LOGGER.info("seconds waited: {}, timeout: {}", secondsWaited, timeoutSeconds);
 
-          if (secondsWaited >= schemaRefreshTimeoutSeconds) {
+          if (!isRunning()) {
+            throw new IllegalStateException("SCHEMA RESET: FLIGHT ABORTED!");
+          }
+
+          if (secondsWaited >= timeoutSeconds) {
             final StringBuilder buf = new StringBuilder();
             buf.append("DB2 schema reset operation timed out after ").append(secondsWaited / 60)
                 .append(" minutes");
@@ -125,26 +137,34 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         LOGGER.warn("DB2 SCHEMA RESET COMPLETED!");
       }
     } else {
-      LOGGER.error("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
       fail();
+      LOGGER.error("SAFETY! DB2 SCHEMA RESET PROHIBITED ON LARGE DATA SETS!");
     }
   }
 
   private boolean schemaRefreshCompleted(int waitTimeSeconds) {
-    try {
-      TimeUnit.SECONDS.sleep(waitTimeSeconds);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      String errorMsg = "DB2 schema reset operation timeout!";
-      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR! {}", errorMsg);
+    if (lock.tryLock()) {
+      try {
+        condDone.await(waitTimeSeconds, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        fail();
+        Thread.currentThread().interrupt();
+        throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
+      } finally {
+        lock.unlock();
+      }
+    }
+
+    if (!isRunning()) {
+      throw new IllegalStateException("SCHEMA RESET: FLIGHT ABORTED!");
     }
 
     boolean completed = false;
-    String status = findSchemaRefreshStatus();
+    final String status = findSchemaRefreshStatus();
 
-    if (status.equalsIgnoreCase("S")) {
+    if (status.equalsIgnoreCase("S")) { // success
       completed = true;
-    } else if (status.equalsIgnoreCase("F")) {
+    } else if (status.equalsIgnoreCase("F")) { // fail
       throw new IllegalStateException("DB2 SCHEMA RESET OPERATION FAILED!");
     }
 
@@ -153,6 +173,70 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   private String findSchemaRefreshStatus() {
     return dao.findBySchemaStartTime(getDbSchema()).getRefreshStatus();
+  }
+
+  public int getSchemaRefreshTimeoutSeconds() {
+    return timeoutSeconds;
+  }
+
+  public void setSchemaRefreshTimeoutSeconds(int schemaRefreshTimeoutSeconds) {
+    this.timeoutSeconds = schemaRefreshTimeoutSeconds;
+  }
+
+  public int getPollPeriodInSeconds() {
+    return pollPeriodInSeconds;
+  }
+
+  public void setPollPeriodInSeconds(int pollPeriodInSeconds) {
+    this.pollPeriodInSeconds = pollPeriodInSeconds;
+  }
+
+  @Override
+  public void done() {
+    super.done();
+
+    try {
+      if (lock.tryLock(5, TimeUnit.SECONDS)) {
+        try {
+          // notifyAll();
+          condDone.signal();
+        } finally {
+          lock.unlock();
+        }
+      }
+    } catch (InterruptedException e) {
+      fail();
+      Thread.currentThread().interrupt();
+      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
+    }
+  }
+
+  @Override
+  public void fail() {
+    super.fail();
+
+    try {
+      if (lock.tryLock(5, TimeUnit.SECONDS)) {
+        try {
+          // notifyAll();
+          condDone.signal();
+        } finally {
+          lock.unlock();
+        }
+      }
+    } catch (InterruptedException e) {
+      fail();
+      Thread.currentThread().interrupt();
+      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
+    }
+  }
+
+  public int getTimeoutSeconds() {
+    return timeoutSeconds;
+  }
+
+  public void setTimeoutSeconds(int timeoutSeconds) {
+    this.timeoutSeconds = timeoutSeconds;
   }
 
   /**

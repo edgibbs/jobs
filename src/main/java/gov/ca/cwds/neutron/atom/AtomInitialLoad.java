@@ -150,7 +150,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
         // Handle additional JDBC statements, if any.
         handleSecondaryJdbc(con, range);
-        con.commit();
+        con.commit(); // Clear temp tables
       } catch (Exception e) {
         con.rollback();
         throw e;
@@ -181,6 +181,14 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     return new ArrayList<>();
   }
 
+  default void doneMultiThreadRetrieve() {
+    doneRetrieve();
+  }
+
+  default void startMultiThreadRetrieve() {
+    // Implement marker.
+  }
+
   /**
    * The "extract" part of ETL. Single producer, chained consumers. This rocket normalizes
    * <strong>without the transform thread</strong>.
@@ -192,27 +200,28 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     doneTransform(); // no transform/normalize thread
 
     try {
+      startMultiThreadRetrieve();
       final List<Pair<String, String>> ranges = getPartitionRanges();
       log.info(">>>>>>>> # OF RANGES: {} <<<<<<<<", ranges);
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
-      // Queue up thread execution.
+      // Queue range threads.
       for (Pair<String, String> p : ranges) {
         tasks.add(threadPool.submit(() -> pullRange(p, null)));
       }
 
-      // Join threads. Don't let this method return until the threads finish.
+      // Join threads. Don't let this method return, until all range threads finish.
       for (ForkJoinTask<?> task : tasks) {
         task.get();
       }
 
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(log, e, "ERROR IN MULTI-THREAD JDBC! {}", e.getMessage());
+      throw CheeseRay.runtime(log, e, "MULTI-THREAD JDBC ERROR! {}", e.getMessage());
     } finally {
-      doneRetrieve();
+      doneMultiThreadRetrieve();
     }
 
     log.info("DONE: main extract thread");

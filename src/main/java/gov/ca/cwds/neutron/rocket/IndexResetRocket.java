@@ -62,7 +62,8 @@ public abstract class IndexResetRocket
           effectiveIndexName = effectiveIndexName.concat("_")
               .concat(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
         }
-        // Drop index first, if requested and name provided
+
+        // Initial Load no longer drops indexes. Intentionally a manual step.
         if (getFlightPlan().isDropIndex() && !StringUtils.isBlank(indexNameOverride)) {
           esDao.deleteIndex(effectiveIndexName);
         }
