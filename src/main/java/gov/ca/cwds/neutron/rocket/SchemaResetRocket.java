@@ -145,7 +145,9 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
   private boolean schemaRefreshCompleted(int waitTimeSeconds) {
     if (lock.tryLock()) {
       try {
-        condDone.await(waitTimeSeconds, TimeUnit.SECONDS);
+        if (!condDone.await(waitTimeSeconds, TimeUnit.SECONDS)) {
+          LOGGER.warn("schemaRefreshCompleted: UNABLE TO ACQUIRE LOCK");
+        }
       } catch (InterruptedException e) {
         fail();
         Thread.currentThread().interrupt();
@@ -191,15 +193,11 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     this.pollPeriodInSeconds = pollPeriodInSeconds;
   }
 
-  @Override
-  public void done() {
-    super.done();
-
+  protected void signalAll() {
     try {
       if (lock.tryLock(5, TimeUnit.SECONDS)) {
         try {
-          // notifyAll();
-          condDone.signal();
+          condDone.signalAll();
         } finally {
           lock.unlock();
         }
@@ -212,23 +210,15 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
   }
 
   @Override
-  public void fail() {
-    super.fail();
+  public void done() {
+    signalAll();
+    super.done();
+  }
 
-    try {
-      if (lock.tryLock(5, TimeUnit.SECONDS)) {
-        try {
-          // notifyAll();
-          condDone.signal();
-        } finally {
-          lock.unlock();
-        }
-      }
-    } catch (InterruptedException e) {
-      fail();
-      Thread.currentThread().interrupt();
-      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
-    }
+  @Override
+  public void fail() {
+    signalAll();
+    super.fail();
   }
 
   public int getTimeoutSeconds() {
