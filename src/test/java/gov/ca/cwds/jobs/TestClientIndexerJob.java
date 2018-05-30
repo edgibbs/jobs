@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
@@ -16,8 +17,9 @@ class TestClientIndexerJob extends ClientIndexerJob {
 
   public TestClientIndexerJob(ReplicatedClientDao dao, ElasticsearchDao esDao,
       String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-      FlightRecorder jobHistory, FlightPlan opts) {
-    super(dao, esDao, lastJobRunTimeFilename, mapper, opts);
+      FlightRecorder jobHistory, FlightPlan opts,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, lastJobRunTimeFilename, mapper, opts, launchDirector);
   }
 
   @Override

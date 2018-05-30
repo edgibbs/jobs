@@ -31,7 +31,7 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
 
     dao = mock(DbResetStatusDao.class);
     when(dao.getSessionFactory()).thenReturn(sessionFactory);
-    target = new SchemaResetRocket(dao, mapper, lastRunFile, flightPlan);
+    target = new SchemaResetRocket(dao, mapper, lastRunFile, flightPlan, launchDirector);
   }
 
   @Test

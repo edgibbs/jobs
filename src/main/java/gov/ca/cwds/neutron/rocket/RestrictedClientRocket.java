@@ -8,6 +8,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -31,11 +32,13 @@ public class RestrictedClientRocket extends ClientIndexerJob
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public RestrictedClientRocket(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 
   @Override

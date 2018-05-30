@@ -2,6 +2,7 @@ package gov.ca.cwds.neutron.rocket;
 
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -100,13 +101,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public CaseRocket(ReplicatedPersonCasesDao dao,
       @Named("elasticsearch.dao.people") ElasticsearchDao esDao, ReplicatedClientDao clientDao,
       StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile, ObjectMapper mapper,
-      FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan);
+      FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
 
     this.clientDao = clientDao;
     this.staffPersonDao = staffPersonDao;

@@ -153,7 +153,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     final Pair<String, String> p = pair;
 
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
-        sessionFactory, flightRecorder, flightPlan);
+        sessionFactory, flightRecorder, flightPlan, launchDirector);
     target.setTxn(transaction);
     target.pullRange(p, null);
   }
@@ -225,7 +225,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
     dao = mock(ReplicatedClientDao.class);
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
-        sessionFactory, flightRecorder, flightPlan);
+        sessionFactory, flightRecorder, flightPlan, launchDirector);
     target.setTxn(transaction);
     when(dao.find(any())).thenReturn(rep);
 

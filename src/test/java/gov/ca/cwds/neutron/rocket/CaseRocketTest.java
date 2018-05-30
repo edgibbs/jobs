@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,8 +59,9 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
     public TestCaseRocket(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
         ReplicatedClientDao clientDao, StaffPersonDao staffPersonDao, String lastRunFile,
-        ObjectMapper mapper, FlightPlan flightPlan) {
-      super(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper, flightPlan);
+        ObjectMapper mapper, FlightPlan flightPlan,
+        AtomLaunchDirector launchDirector) {
+      super(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper, flightPlan, launchDirector);
     }
 
     public void addStaffWorker(StaffPerson worker) {
@@ -197,7 +199,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     when(rsSelClient.getString("CLIENT_OPERATION")).thenReturn("U");
 
     target =
-        new TestCaseRocket(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper, flightPlan);
+        new TestCaseRocket(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 
   @Test
@@ -303,7 +305,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test(expected = NeutronCheckedException.class)
   public void readStaffWorkers_Args___T__NeutronException() throws Exception {
-    target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan);
+    target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan, launchDirector);
     target.readStaffWorkers();
   }
 
@@ -551,7 +553,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
   @Test
   public void test_readStaffWorkers_A$_T$NeutronException() throws Exception {
     try {
-      target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan);
+      target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan, launchDirector);
       target.readStaffWorkers();
       fail("Expected exception was not thrown!");
     } catch (NeutronCheckedException e) {

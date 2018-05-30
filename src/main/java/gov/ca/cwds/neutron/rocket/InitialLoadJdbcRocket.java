@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -17,9 +18,19 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
 
   private static final long serialVersionUID = 1L;
 
+  /**
+   *
+   * @param dao
+   * @param esDao
+   * @param lastRunFile
+   * @param mapper
+   * @param flightPlan
+   * @param launchDirector
+   */
   public InitialLoadJdbcRocket(BaseDaoImpl<T> dao, ElasticsearchDao esDao, String lastRunFile,
-      ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan);
+      ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 
   @Override

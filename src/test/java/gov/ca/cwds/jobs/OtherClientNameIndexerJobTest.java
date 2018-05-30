@@ -79,7 +79,7 @@ public class OtherClientNameIndexerJobTest
     denorms.add(m);
     when(qn.list()).thenReturn(denorms);
 
-    target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, MAPPER, flightPlan);
+    target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, MAPPER, flightPlan, launchDirector);
   }
 
   private ReplicatedOtherClientName makeReplicatedBean() throws IOException {

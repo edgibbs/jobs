@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -69,13 +70,14 @@ public class OtherClientNameIndexerJob
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public OtherClientNameIndexerJob(final ReplicatedAkaDao dao,
       final ReplicatedOtherClientNameDao denormDao,
       @Named("elasticsearch.dao.people") final ElasticsearchDao esDao, final ObjectMapper mapper,
-      FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
+      FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
     this.denormDao = denormDao;
   }
 

@@ -57,7 +57,7 @@ public class Mach1TestRocket extends BasePersonRocket<TestNormalizedEntity, Test
   public Mach1TestRocket(final BaseDaoImpl<TestNormalizedEntity> jobDao,
       @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper) {
-    super(jobDao, esDao, lastRunFile, mapper, null);
+    super(jobDao, esDao, lastRunFile, mapper, null, null);
   }
 
   @Override

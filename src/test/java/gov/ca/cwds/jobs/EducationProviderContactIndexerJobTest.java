@@ -24,7 +24,7 @@ public class EducationProviderContactIndexerJobTest
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedEducationProviderContactDao(this.sessionFactory);
-    target = new EducationProviderContactIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan);
+    target = new EducationProviderContactIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
   }
 
   @Test

@@ -1,6 +1,6 @@
-elasticsearch.host: localhost
-elasticsearch.port: 9300
 elasticsearch.cluster: elasticsearch
+#Comma "," separated List of host:port pairs. Example: host1:port1,host2:port2
+elasticsearch.nodes: localhost:9300
 elasticsearch.alias: people-summary
 elasticsearch.doctype: person-summary
 
@@ -9,6 +9,6 @@ elasticsearch.doctype: person-summary
 # elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_summary.json
 
 # X-Pack:
-# elasticsearch.xpack.user: neutron
-# elasticsearch.xpack.password: neutron
+elasticsearch.xpack.user: elastic
+elasticsearch.xpack.password: changeme
 

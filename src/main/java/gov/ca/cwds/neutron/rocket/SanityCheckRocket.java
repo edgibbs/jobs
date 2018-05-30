@@ -37,8 +37,6 @@ public class SanityCheckRocket
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(SanityCheckRocket.class);
 
-  private transient AtomLaunchDirector launchScheduler;
-
   /**
    * Construct rocket with all required dependencies.
    * 
@@ -46,15 +44,14 @@ public class SanityCheckRocket
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
-   * @param launchScheduler launch scheduler
+   * @param launchDirector launch scheduler
    * @param lastRunFile last run file
    */
   @Inject
   public SanityCheckRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan,
-      AtomLaunchDirector launchScheduler, @LastRunFile String lastRunFile) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan);
-    this.launchScheduler = launchScheduler;
+      AtomLaunchDirector launchDirector, @LastRunFile String lastRunFile) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 
   @Override
@@ -88,20 +85,12 @@ public class SanityCheckRocket
     LOGGER.info("total hits: {}", totalHits);
 
     try {
-      launchScheduler.stopScheduler(false);
+      launchDirector.stopScheduler(false);
     } catch (Exception e) {
       CheeseRay.runtime(LOGGER, e, "FAILED TO STOP SCHEDULER! {}", e.getMessage());
     }
 
     return lastSuccessfulRunTime;
-  }
-
-  public AtomLaunchDirector getLaunchScheduler() {
-    return launchScheduler;
-  }
-
-  public void setLaunchScheduler(AtomLaunchDirector launchScheduler) {
-    this.launchScheduler = launchScheduler;
   }
 
   /**
