@@ -399,10 +399,12 @@ public class ReferralHistoryIndexerJobTest
   @Test(expected = NeutronCheckedException.class)
   public void pullNextRange_Args__Pair__boom() throws Exception {
     final String schema = target.getDBSchemaName();
+
     final PreparedStatement stmtInsClient = mock(PreparedStatement.class);
     final PreparedStatement stmtSelClient = mock(PreparedStatement.class);
     final PreparedStatement stmtSelReferral = mock(PreparedStatement.class);
     final PreparedStatement stmtSelAllegation = mock(PreparedStatement.class);
+
     final ResultSet rsInsClient = mock(ResultSet.class);
     final ResultSet rsSelClient = mock(ResultSet.class);
     final ResultSet rsSelReferral = mock(ResultSet.class);
@@ -420,10 +422,12 @@ public class ReferralHistoryIndexerJobTest
     when(con.prepareStatement(sqlSelClient)).thenReturn(stmtSelClient);
     when(con.prepareStatement(sqlSelReferral)).thenReturn(stmtSelReferral);
     when(con.prepareStatement(selAllegation)).thenReturn(stmtSelAllegation);
+
     when(stmtInsClient.executeQuery()).thenReturn(rsInsClient);
     when(stmtSelClient.executeQuery()).thenReturn(rsSelClient);
     when(stmtSelReferral.executeQuery()).thenReturn(rsSelReferral);
     when(stmtSelAllegation.executeQuery()).thenReturn(rsSelAllegation);
+
     when(rsInsClient.next()).thenReturn(true).thenReturn(false);
     when(rsSelClient.next()).thenReturn(true).thenReturn(false);
     when(rsSelReferral.next()).thenReturn(false);

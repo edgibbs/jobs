@@ -570,7 +570,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   }
 
   protected ReplicatedPersonCases reduceClientCases(final String clientId,
-      final Map<String, ReplicatedClient> mapClients,
       final Map<String, EsCaseRelatedPerson> mapCases,
       final Map<String, Set<String>> mapClientCases,
       final Map<String, Map<String, FocusChildParent>> mapFocusChildParents) {
@@ -610,11 +609,10 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       addFocusChildren(mapCases, mapClients);
 
       // Boil down to JSON objects for Elasticsearch.
-      final Map<String, ReplicatedPersonCases> mapReadyClientCases =
-          mapClientCases.entrySet().stream()
-              .map(x -> reduceClientCases(x.getKey(), mapClients, mapCases, mapClientCases,
-                  mapFocusChildParents))
-              .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
+      final Map<String, ReplicatedPersonCases> mapReadyClientCases = mapClientCases.entrySet()
+          .stream()
+          .map(x -> reduceClientCases(x.getKey(), mapCases, mapClientCases, mapFocusChildParents))
+          .collect(Collectors.toMap(ReplicatedPersonCases::getGroupId, r -> r));
 
       // Index into Elasticsearch!
       mapReadyClientCases.values().stream().forEach(this::addToIndexQueue);
@@ -640,9 +638,12 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
       try {
         catchYourBreath(); // Let bulk processor finish
-        for (Pair<String, String> p : tests) {
-          LOGGER.info("TEST: name: {}\n{}", p.getLeft(),
-              ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get(p.getRight())));
+
+        if (LOGGER.isInfoEnabled()) {
+          for (Pair<String, String> p : tests) {
+            LOGGER.info("TEST: name: {}\n{}", p.getLeft(), ElasticSearchPerson.MAPPER
+                .writeValueAsString(mapReadyClientCases.get(p.getRight())));
+          }
         }
       } catch (IOException e) {
         fail();

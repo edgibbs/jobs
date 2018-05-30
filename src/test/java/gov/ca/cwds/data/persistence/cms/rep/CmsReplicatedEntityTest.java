@@ -17,7 +17,7 @@ public class CmsReplicatedEntityTest {
 
   private static class TestCmsReplicatedEntity implements CmsReplicatedEntity {
 
-    private EmbeddableCmsReplicatedEntity enbedded = new EmbeddableCmsReplicatedEntity();
+    private EmbeddableCmsReplicatedEntity embedded = new EmbeddableCmsReplicatedEntity();
 
     @Override
     public Serializable getPrimaryKey() {
@@ -42,7 +42,15 @@ public class CmsReplicatedEntityTest {
 
     @Override
     public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
-      return enbedded;
+      return embedded;
+    }
+
+    public EmbeddableCmsReplicatedEntity getEmbedded() {
+      return embedded;
+    }
+
+    public void setEmbedded(EmbeddableCmsReplicatedEntity embedded) {
+      this.embedded = embedded;
     }
 
   }
@@ -67,6 +75,14 @@ public class CmsReplicatedEntityTest {
   }
 
   @Test
+  public void isDelete_Args__CmsReplicatedEntity_null() throws Exception {
+    CmsReplicatedEntity t = null;
+    boolean actual = CmsReplicatedEntity.isDelete(t);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
   public void getReplicationOperation_Args__() throws Exception {
     CmsReplicatedEntity target = new TestCmsReplicatedEntity();
     CmsReplicationOperation actual = target.getReplicationOperation();
@@ -75,8 +91,26 @@ public class CmsReplicatedEntityTest {
   }
 
   @Test
+  public void getReplicationOperation_null() throws Exception {
+    TestCmsReplicatedEntity target = new TestCmsReplicatedEntity();
+    target.setEmbedded(null);
+    CmsReplicationOperation actual = target.getReplicationOperation();
+    CmsReplicationOperation expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
   public void getReplicationDate_Args__() throws Exception {
     CmsReplicatedEntity target = new TestCmsReplicatedEntity();
+    Date actual = target.getReplicationDate();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getReplicationDate_Args__null() throws Exception {
+    TestCmsReplicatedEntity target = new TestCmsReplicatedEntity();
+    target.setEmbedded(null);
     Date actual = target.getReplicationDate();
     Date expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -92,6 +126,14 @@ public class CmsReplicatedEntityTest {
   @Test
   public void setReplicationDate_Args__Date() throws Exception {
     CmsReplicatedEntity target = new TestCmsReplicatedEntity();
+    Date replicationDate = new Date();
+    target.setReplicationDate(replicationDate);
+  }
+
+  @Test
+  public void setReplicationDate_Args__Date_null() throws Exception {
+    CmsReplicatedEntity target = new TestCmsReplicatedEntity();
+    target.setReplicationDate(null);
     Date replicationDate = new Date();
     target.setReplicationDate(replicationDate);
   }

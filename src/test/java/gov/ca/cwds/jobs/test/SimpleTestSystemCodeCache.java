@@ -76,7 +76,7 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
 
   @Override
   public SystemCode getSystemCode(Number id) {
-    return this.mapSysCodes.get(id.shortValue());
+    return id != null && id.shortValue() != 0 ? this.mapSysCodes.get(id.shortValue()) : null;
   }
 
   @Override
@@ -112,4 +112,5 @@ public class SimpleTestSystemCodeCache implements SystemCodeCache {
   @Override
   public Short getSystemCodeId(String metaId, String shortDescription) {
     return null;
-  }}
+  }
+}

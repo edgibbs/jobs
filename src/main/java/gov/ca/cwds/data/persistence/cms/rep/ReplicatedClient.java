@@ -169,9 +169,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     }
   }
 
-  public void addClientCounty(Short clinetCountyId) {
-    if (clinetCountyId != null) {
-      this.clientCounties.add(clinetCountyId);
+  public void addClientCounty(Short clientCountyId) {
+    if (clientCountyId != null) {
+      this.clientCounties.add(clientCountyId);
     }
   }
 
@@ -246,6 +246,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
    */
   protected ElasticSearchSystemCode makeJsonAddressType() {
     return new ElasticSearchSystemCode();
+  }
+
+  public PlacementHomeAddress getActivePlacementHomeAddress() {
+    return activePlacementHomeAddress;
+  }
+
+  public void setActivePlacementHomeAddress(PlacementHomeAddress activePlacementHomeAddress) {
+    this.activePlacementHomeAddress = activePlacementHomeAddress;
   }
 
   // =================================
@@ -411,7 +419,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   public List<ElasticSearchPersonPhone> getPhones(ReplicatedClientAddress ca) {
     return ca.isActive()
         ? ca.getAddresses().stream().filter(Objects::nonNull).map(a -> getPhones(ca, a))
-        .flatMap(List::stream).collect(Collectors.toList())
+            .flatMap(List::stream).collect(Collectors.toList())
         : new ArrayList<>();
   }
 
@@ -534,7 +542,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   @Override
   public List<ElasticSearchSystemCode> getClientCounties() {
-    if (this.clientCounties == null || this.clientCounties.isEmpty()) {
+    if (this.clientCounties.isEmpty()) {
       return new ArrayList<>();
     }
 
@@ -570,14 +578,6 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
-  }
-
-  public PlacementHomeAddress getActivePlacementHomeAddress() {
-    return activePlacementHomeAddress;
-  }
-
-  public void setActivePlacementHomeAddress(PlacementHomeAddress activePlacementHomeAddress) {
-    this.activePlacementHomeAddress = activePlacementHomeAddress;
   }
 
 }

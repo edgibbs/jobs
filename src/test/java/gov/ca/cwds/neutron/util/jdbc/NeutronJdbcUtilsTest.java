@@ -32,6 +32,7 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
@@ -71,7 +72,7 @@ public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void makeTimestampString_Args__Date() throws Exception {
     Date date = mock(Date.class);
-    String actual = NeutronJdbcUtils.makeTimestampString(date);
+    String actual = NeutronDateUtils.makeTimestampString(date);
     String expected = "TIMESTAMP('1969-12-31 16:00:00.000')";
     assertThat(actual, is(equalTo(expected)));
   }
@@ -79,7 +80,7 @@ public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   public void makeSimpleTimestampString_Args__Date() throws Exception {
     Date date = new Date(1508521402357L);
-    String actual = NeutronJdbcUtils.makeSimpleTimestampString(date);
+    String actual = NeutronDateUtils.makeSimpleTimestampString(date);
     String expected = "2017-10-20 10:43:22.357";
     assertThat(actual, is(equalTo(expected)));
   }

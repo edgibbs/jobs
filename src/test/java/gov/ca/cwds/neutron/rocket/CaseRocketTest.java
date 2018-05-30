@@ -718,8 +718,8 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     mapClientCases.put(DEFAULT_CLIENT_ID, set);
 
     final Map mapFocusChildParents = new HashMap();
-    final ReplicatedPersonCases actual = target.reduceClientCases(clientId, mapClients, mapCases,
-        mapClientCases, mapFocusChildParents);
+    final ReplicatedPersonCases actual = target.reduceClientCases(clientId, mapCases, mapClientCases,
+        mapFocusChildParents);
     assertThat(actual, is(notNullValue()));
   }
 
