@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.List;
 
 import javax.persistence.Table;
@@ -56,12 +57,14 @@ public class IntakeScreeningJob extends BasePersonRocket<IntakeParticipant, EsIn
    * @param lastRunFile take a guess
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public IntakeScreeningJob(final IntakeParticipantDao dao, final EsIntakeScreeningDao viewDao,
       @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
     this.viewDao = viewDao;
   }
 

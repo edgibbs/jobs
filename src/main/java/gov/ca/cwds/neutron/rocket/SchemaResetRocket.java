@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -53,11 +54,13 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
    * @param mapper Jackson ObjectMapper
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public SchemaResetRocket(final DbResetStatusDao dao, final ObjectMapper mapper,
-      @LastRunFile String lastRunFile, FlightPlan flightPlan) {
-    super(dao, null, lastRunFile, mapper, flightPlan);
+      @LastRunFile String lastRunFile, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, null, lastRunFile, mapper, flightPlan, launchDirector);
     this.dao = dao;
   }
 
@@ -164,9 +167,9 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     boolean completed = false;
     final String status = findSchemaRefreshStatus();
 
-    if (status.equalsIgnoreCase("S")) { // success
+    if ("S".equalsIgnoreCase(status)) { // success
       completed = true;
-    } else if (status.equalsIgnoreCase("F")) { // fail
+    } else if ("F".equalsIgnoreCase(status)) { // fail
       throw new IllegalStateException("DB2 SCHEMA RESET OPERATION FAILED!");
     }
 

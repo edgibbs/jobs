@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -133,6 +134,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected FlightLog flightLog = new FlightLog();
 
+  protected transient AtomLaunchDirector launchDirector;
+
   /**
    * Queue of raw, denormalized records waiting to be normalized.
    * <p>
@@ -166,10 +169,12 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public BasePersonRocket(final BaseDaoImpl<N> jobDao, final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
     super(lastRunFile, flightPlan);
     this.jobDao = jobDao;
     this.esDao = esDao;
@@ -177,6 +182,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     this.sessionFactory = jobDao.getSessionFactory();
     this.bulkProcessorBuilder = new HoverCar(esDao, flightLog);
     this.flightLog.setRocketName(getClass().getSimpleName());
+    this.launchDirector = launchDirector;
   }
 
   /**
@@ -600,6 +606,28 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
+   * <a href="https://osi-cwds.atlassian.net/browse/INT-1723">INT-1723</a>: Neutron to create
+   * Elasticsearch Alias for people-summary index.
+   */
+  protected void determineIndexName() {
+    // The Launch Director has a global registry of flight plans.
+    if (launchDirector != null) {
+      final FlightPlan resetIndexFlightPlan =
+          launchDirector.getFlightPlanManger().getFlightPlan(IndexResetPeopleSummaryRocket.class);
+      final String globalIndexName =
+          LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
+
+      if (resetIndexFlightPlan != null
+          && StringUtils.isNotBlank(resetIndexFlightPlan.getIndexName())) {
+        LOGGER.info("\n\nTake index name from IndexResetRocket flight plan!\n\n");
+        flightPlan.setIndexName(resetIndexFlightPlan.getIndexName().trim());
+      } else if (!StringUtils.isBlank(globalIndexName)) {
+        LOGGER.info("\n\nTake index name from global flight plan!\n\n");
+        flightPlan.setIndexName(globalIndexName.trim());
+      }
+    }
+  }
+  /**
    * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
    * thread is available.
    * 
@@ -619,6 +647,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     Date ret;
 
     try {
+      determineIndexName();
       final Date lastRun = calcLastRunDate(lastSuccessfulRunTime);
       LOGGER.info("last run date/time: {}", lastRun);
 

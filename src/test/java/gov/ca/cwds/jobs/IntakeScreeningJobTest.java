@@ -36,7 +36,7 @@ public class IntakeScreeningJobTest extends Goddard<IntakeParticipant, EsIntakeS
 
     normalizedDao = new IntakeParticipantDao(sessionFactory);
     viewDao = new EsIntakeScreeningDao(sessionFactory);
-    target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, null, MAPPER, flightPlan);
+    target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, null, MAPPER, flightPlan, launchDirector);
   }
 
   @Test
@@ -115,7 +115,7 @@ public class IntakeScreeningJobTest extends Goddard<IntakeParticipant, EsIntakeS
     viewDao = mock(EsIntakeScreeningDao.class);
     when(viewDao.findAll()).thenReturn(results);
 
-    target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, null, MAPPER, flightPlan);
+    target = new IntakeScreeningJob(normalizedDao, viewDao, esDao, null, MAPPER, flightPlan, launchDirector);
 
     target.threadRetrieveByJdbc();
   }

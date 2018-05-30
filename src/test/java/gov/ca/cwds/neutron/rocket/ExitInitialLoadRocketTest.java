@@ -27,7 +27,7 @@ public class ExitInitialLoadRocketTest extends Goddard {
     super.setup();
 
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(sessionFactory);
-    target = new ExitInitialLoadRocket(dao, esDao, mapper, launchDirector, flightPlan);
+    target = new ExitInitialLoadRocket(dao, esDao, mapper, launchDirector, flightPlan, launchDirector);
   }
 
   @Test

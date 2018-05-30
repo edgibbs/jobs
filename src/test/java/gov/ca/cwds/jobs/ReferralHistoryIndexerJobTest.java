@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -52,8 +53,9 @@ public class ReferralHistoryIndexerJobTest
     private boolean throwOnRanges = false;
 
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
-        ElasticsearchDao esDao, String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan) {
-      super(clientDao, esDao, lastRunFile, mapper, flightPlan);
+        ElasticsearchDao esDao, String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan,
+        AtomLaunchDirector launchDirector) {
+      super(clientDao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
     }
 
     public static DB2SystemMonitor monitorStart(final Connection con) {
@@ -108,7 +110,7 @@ public class ReferralHistoryIndexerJobTest
 
     dao = new ReplicatedPersonReferralsDao(sessionFactory);
     target = new TestReferralHistoryIndexerJob(dao, esDao, lastRunFile, MAPPER,
-        FlightPlanTest.makeGeneric());
+        FlightPlanTest.makeGeneric(), launchDirector);
 
     when(rs.next()).thenReturn(true, true, false);
   }

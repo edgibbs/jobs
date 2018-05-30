@@ -22,7 +22,7 @@ public class RestrictedClientRocketTest extends Goddard<ReplicatedClient, EsClie
     super.setup();
 
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new RestrictedClientRocket(dao, esDao, lastRunFile, MAPPER, flightPlan);
+    target = new RestrictedClientRocket(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
   }
 
   @Test

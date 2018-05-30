@@ -28,7 +28,7 @@ public class IndexResetPeopleRocketTest
 
     flightPlan.setDropIndex(true);
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(sessionFactory);
-    target = new IndexResetPeopleRocket(dao, esDao, mapper, flightPlan);
+    target = new IndexResetPeopleRocket(dao, esDao, mapper, flightPlan, launchDirector);
   }
 
   @Test
