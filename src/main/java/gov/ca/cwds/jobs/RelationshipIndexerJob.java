@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -98,12 +99,14 @@ public class RelationshipIndexerJob
    * @param lastRunFile last run file
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public RelationshipIndexerJob(final ReplicatedRelationshipsDao dao,
       @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
-      @LastRunFile String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan);
+      @LastRunFile String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector );
     RelationshipTypeCache.getInstance().clearCache();
   }
 

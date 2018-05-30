@@ -29,7 +29,7 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
     super.setup();
 
     dao = new DbResetStatusDao(sessionFactory);
-    target = new SchemaResetRocket(dao, mapper, lastRunFile, flightPlan);
+    target = new SchemaResetRocket(dao, mapper, lastRunFile, flightPlan, launchDirector);
     target.setPollPeriodInSeconds(2);
     target.setTimeoutSeconds(5);
   }

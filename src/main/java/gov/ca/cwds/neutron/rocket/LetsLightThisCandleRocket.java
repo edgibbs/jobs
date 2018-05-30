@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +29,7 @@ public class LetsLightThisCandleRocket
   private static final ConditionalLogger LOGGER =
       new JetPackLogger(LetsLightThisCandleRocket.class);
 
-  private transient LaunchDirector launchDirector;
+  private transient LaunchDirector launchDirector1;
 
   /**
    * Construct rocket with all required dependencies.
@@ -36,15 +37,17 @@ public class LetsLightThisCandleRocket
    * @param dao random DAO for parent class
    * @param esDao ElasticSearch DAO for People Summary index
    * @param mapper Jackson ObjectMapper
-   * @param launchDirector command launch director
+   * @param launchDirector1 command launch director
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public LetsLightThisCandleRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
-      final ObjectMapper mapper, LaunchDirector launchDirector, FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
-    this.launchDirector = launchDirector;
+      final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
+    this.launchDirector1 = launchDirector1;
   }
 
   @Override
@@ -57,12 +60,12 @@ public class LetsLightThisCandleRocket
     return lastRunDate;
   }
 
-  public LaunchDirector getLaunchDirector() {
-    return launchDirector;
+  public LaunchDirector getLaunchDirector1() {
+    return launchDirector1;
   }
 
-  public void setLaunchDirector(LaunchDirector launchDirector) {
-    this.launchDirector = launchDirector;
+  public void setLaunchDirector1(LaunchDirector launchDirector1) {
+    this.launchDirector1 = launchDirector1;
   }
 
 }

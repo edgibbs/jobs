@@ -41,7 +41,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan);
+    target = new ClientIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 
   @Test
@@ -151,7 +151,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     final Pair<String, String> p = pair;
 
     TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
-        sessionFactory, flightRecorder, flightPlan);
+        sessionFactory, flightRecorder, flightPlan, launchDirector);
     target.setTxn(transaction);
     target.pullRange(p, null);
   }
@@ -223,7 +223,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
     dao = mock(ReplicatedClientDao.class);
     final TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
-        sessionFactory, flightRecorder, flightPlan);
+        sessionFactory, flightRecorder, flightPlan, launchDirector);
     target.setTxn(transaction);
     when(dao.find(any())).thenReturn(rep);
 

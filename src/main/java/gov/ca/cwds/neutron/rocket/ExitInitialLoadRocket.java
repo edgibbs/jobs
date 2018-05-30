@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +32,7 @@ public class ExitInitialLoadRocket
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ExitInitialLoadRocket.class);
 
-  private transient LaunchDirector launchDirector;
+  private transient LaunchDirector launchDirector1;
 
   /**
    * Construct rocket with all required dependencies.
@@ -41,13 +42,15 @@ public class ExitInitialLoadRocket
    * @param mapper Jackson ObjectMapper
    * @param launchDirector command launch director
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public ExitInitialLoadRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
-      final ObjectMapper mapper, LaunchDirector launchDirector, FlightPlan flightPlan) {
-    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan);
-    this.launchDirector = launchDirector;
+      final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
+    this.launchDirector1 = launchDirector1;
   }
 
   protected void logError(StandardFlightSchedule sched, FlightSummary summary) {
@@ -64,7 +67,7 @@ public class ExitInitialLoadRocket
     nameThread("exit_initial_load");
     if (LaunchCommand.isInitialMode()) {
       LOGGER.info("EXIT INITIAL LOAD!");
-      final AtomFlightRecorder flightRecorder = launchDirector.getFlightRecorder();
+      final AtomFlightRecorder flightRecorder = launchDirector1.getFlightRecorder();
 
       try {
         for (StandardFlightSchedule sched : StandardFlightSchedule.getInitialLoadRockets(true,

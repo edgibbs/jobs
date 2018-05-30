@@ -46,6 +46,13 @@ public class StandardFlightScheduleTest extends Goddard {
     expected.add(StandardFlightSchedule.RESET_PEOPLE_INDEX);
     expected.add(StandardFlightSchedule.RESET_PEOPLE_SUMMARY_INDEX);
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);
+    expected.add(StandardFlightSchedule.REPORTER_S);
+    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL_S);
+    expected.add(StandardFlightSchedule.SERVICE_PROVIDER_S);
+    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER_S);
+    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER_S);
+    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME_S);
+    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME_S);
     expected.add(StandardFlightSchedule.CLIENT);
     expected.add(StandardFlightSchedule.REPORTER);
     expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
@@ -70,6 +77,13 @@ public class StandardFlightScheduleTest extends Goddard {
 
     final List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);
+    expected.add(StandardFlightSchedule.REPORTER_S);
+    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL_S);
+    expected.add(StandardFlightSchedule.SERVICE_PROVIDER_S);
+    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER_S);
+    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER_S);
+    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME_S);
+    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME_S);
     expected.add(StandardFlightSchedule.CLIENT);
     expected.add(StandardFlightSchedule.REPORTER);
     expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
@@ -156,7 +170,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getInitialLoadOrder_Args__() throws Exception {
     final int actual = target.getInitialLoadOrder();
-    final int expected = 4;
+    final int expected = 11;
     assertThat(actual, is(equalTo(expected)));
   }
 

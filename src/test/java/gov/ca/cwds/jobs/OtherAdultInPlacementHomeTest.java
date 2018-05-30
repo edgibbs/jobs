@@ -26,7 +26,7 @@ public class OtherAdultInPlacementHomeTest
     super.setup();
     dao = new ReplicatedOtherAdultInPlacemtHomeDao(this.sessionFactory);
     target = new OtherAdultInPlacemtHomeIndexerJob(dao, esDao, lastRunFile, MAPPER,
-        flightPlan);
+        flightPlan, launchDirector);
   }
 
   @Test

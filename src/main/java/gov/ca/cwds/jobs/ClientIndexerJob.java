@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -60,12 +61,14 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * @param lastRunFile last run date in format yyyy-MM-dd HH:mm:ss
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
+   * @param launchDirector launch director
    */
   @Inject
   public ClientIndexerJob(final ReplicatedClientDao dao,
       @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
-      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan);
+      @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
+      AtomLaunchDirector launchDirector) {
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
     if (flightPlan.isLegacyPeopleMapping()) {
       EsClientAddress.setLegacyPeopleMapping(true);
     }
