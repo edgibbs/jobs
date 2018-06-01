@@ -29,7 +29,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
     name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherChildInPlacemtHome.findBucketRange",
     query = "SELECT z.IDENTIFIER, z.BIRTH_DT, z.GENDER_CD, trim(z.OTHCHLD_NM) OTHCHLD_NM, "
         + "z.LST_UPD_ID, z.LST_UPD_TS, z.FKPLC_HM_T, z.YR_INC_AMT, z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-        + "FROM {h-schema}OTH_KIDT z WHERE z.IDENTIFIER < :min_id AND z.IDENTIFIER <= :max_id "
+        + "FROM {h-schema}OTH_KIDT z WHERE z.IDENTIFIER BETWEEN :min_id AND :max_id "
         + "ORDER BY z.IDENTIFIER FOR READ ONLY WITH UR",
     resultClass = ReplicatedOtherChildInPlacemtHome.class, readOnly = true)
 @NamedNativeQuery(
