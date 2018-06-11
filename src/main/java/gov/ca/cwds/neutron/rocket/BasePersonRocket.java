@@ -160,7 +160,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(20000);
+  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(50000);
 
   /**
    * Construct rocket with all required dependencies.
@@ -818,7 +818,10 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       session.clear();
 
       // ImmutableList lacks a public constructor and setters to set starting size.
-      final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
+      // Repeatedly resizing collections may result in out of memory.
+
+      // final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
+      final List<N> results = new ArrayList<>(cnt);
 
       // Convert denormalized rows to normalized persistence objects.
       final List<D> groupRecs = new ArrayList<>(20);
@@ -848,7 +851,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       groupRecs.clear();
       txn.commit();
 
-      return results.build();
+      // return results.build(); // ImmutableList.Builder
+      return results;
     } catch (Exception h) {
       fail();
       txn.rollback();
