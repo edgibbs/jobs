@@ -734,7 +734,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     } catch (HibernateException h) {
       fail();
       LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
-      txn.rollback();
+      if (txn.getStatus().canRollback()) {
+        txn.rollback();
+      }
       throw new DaoException(h);
     } finally {
       doneRetrieve();
@@ -785,11 +787,11 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         flightPlan.isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
             : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
-    final Session session = jobDao.grabSession();
-    final Transaction txn = grabTransaction();
+    Transaction txn = null;
     Object lastId = new Object();
 
-    try {
+    try (final Session session = jobDao.grabSession()) {
+      txn = grabTransaction();
       // Insert into session temp table that drives a last change view.
       final int fetchSize = NeutronIntegerDefaults.FETCH_SIZE.getValue();
       prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
@@ -797,6 +799,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       q.setCacheMode(CacheMode.IGNORE);
       q.setFetchSize(fetchSize);
       q.setFlushMode(FlushMode.MANUAL);
+      q.setReadOnly(true);
+      q.setCacheable(false);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -814,16 +818,19 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
           session.flush();
           session.clear();
         }
+        session.flush();
+        session.clear();
+        txn.commit();
+      } catch (Exception h) {
+        fail();
+        if (txn.getStatus().canRollback()) {
+          txn.rollback();
+        }
+        throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
       }
 
-      session.flush();
-      session.clear();
-
-      // ImmutableList lacks a public constructor and setters to set starting size.
-      // Repeatedly resizing collections may result in out of memory.
-
-      // final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
-      final List<N> results = new ArrayList<>(cnt);
+      LOGGER.info("PULL VIEW: DATA RETRIEVAL DONE");
+      final List<N> results = new ArrayList<>(cnt); // Size appropriately
 
       // Convert denormalized rows to normalized persistence objects.
       final List<D> groupRecs = new ArrayList<>(20);
@@ -851,13 +858,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
 
       groupRecs.clear();
-      txn.commit();
-
-      // return results.build(); // ImmutableList.Builder
       return results;
     } catch (Exception h) {
       fail();
-      txn.rollback();
       throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } finally {
       doneRetrieve(); // Override in multi-thread mode to avoid killing the indexer thread
@@ -958,7 +961,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     } catch (HibernateException e) {
       fail();
       LOGGER.error("ERROR PULLING BUCKET RANGE! {}-{}: {}", minId, maxId, e.getMessage(), e);
-      txn.rollback();
+      if (txn.getStatus().canRollback()) {
+        txn.rollback();
+      }
       throw new DaoException(e);
     }
   }
