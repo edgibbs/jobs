@@ -1,8 +1,24 @@
 package gov.ca.cwds.jobs;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
@@ -28,19 +44,6 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * PEOPLE SUMMARY ROCKET! Let's light this candle!
@@ -164,6 +167,18 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
+  public String[] getPrepLastChangeSQLs() {
+    try {
+      final String[] ret = {getPrepLastChangeSQL(),
+          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
+              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime())};
+      return ret;
+    } catch (NeutronCheckedException e) {
+      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
+    }
+  }
+
+  @Override
   public boolean isInitialLoadJdbc() {
     return true;
   }
@@ -189,18 +204,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public List<ReplicatedClient> normalize(List<EsClientPerson> recs) {
     return EntityNormalizer.<ReplicatedClient, EsClientPerson>normalizeList(recs);
-  }
-
-  @Override
-  public String[] getPrepLastChangeSQLs() {
-    try {
-      final String[] ret = {getPrepLastChangeSQL(),
-          NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG,
-              determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime())};
-      return ret;
-    } catch (NeutronCheckedException e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
-    }
   }
 
   /**

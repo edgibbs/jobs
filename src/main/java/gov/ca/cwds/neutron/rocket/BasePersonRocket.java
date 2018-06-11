@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -24,6 +23,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.CacheMode;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -48,6 +48,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
 import gov.ca.cwds.neutron.atom.AtomTransform;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
@@ -627,6 +628,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
     }
   }
+
   /**
    * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
    * thread is available.
@@ -794,18 +796,26 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
       q.setCacheMode(CacheMode.IGNORE);
       q.setFetchSize(fetchSize);
+      q.setFlushMode(FlushMode.MANUAL);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
       // Iterate, process, flush.
+      int cnt = 0;
       List<D> recs = new ArrayList<>();
       try (final ScrollableResults scroll = q.scroll(ScrollMode.FORWARD_ONLY)) {
         recs = q.list();
         LOGGER.info("FOUND {} RECORDS", recs.size());
 
-        session.flush();
-        session.clear();
+        if (((++cnt) % NeutronIntegerDefaults.FETCH_SIZE.getValue()) == 0) {
+          LOGGER.info("recs read: {}", cnt);
+          session.flush(); // Flush every N records
+          session.clear();
+        }
       }
+
+      session.flush();
+      session.clear();
 
       // ImmutableList lacks a public constructor and setters to set starting size.
       final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
