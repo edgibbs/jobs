@@ -802,14 +802,16 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
       // Iterate, process, flush.
       int cnt = 0;
-      List<D> recs = new ArrayList<>();
+      List<D> recs = new ArrayList<>(210000); // Outrageous but necessary.
       try (final ScrollableResults scroll = q.scroll(ScrollMode.FORWARD_ONLY)) {
         recs = q.list();
         LOGGER.info("FOUND {} RECORDS", recs.size());
 
         if (((++cnt) % NeutronIntegerDefaults.FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
-          session.flush(); // Flush every N records
+
+          // Flush and clear every N records.
+          session.flush();
           session.clear();
         }
       }
