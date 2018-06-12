@@ -526,6 +526,9 @@ public final class ElasticTransformer {
     // Open case id
     ret.setOpenCaseId(buildOpenCase(p));
 
+    // Death date
+    ret.setDateOfDeath(DomainChef.cookDate(p.getDeathDate()));
+
     // Update time stamp
     ret.setIndexUpdateTime(DomainChef.cookStrictTimestamp(new Date()));
 
