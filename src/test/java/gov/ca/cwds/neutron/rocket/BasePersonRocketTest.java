@@ -263,7 +263,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = SQLException.class)
+  @Test(expected = NeutronRuntimeException.class)
   public void extractLastRunRecsFromView_Args__Date__SQLException() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);

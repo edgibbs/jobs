@@ -46,6 +46,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.procedure.ProcedureCall;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.type.StringType;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -228,6 +229,8 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(session.beginTransaction()).thenReturn(transaction);
     when(session.getTransaction()).thenReturn(transaction);
     when(session.createStoredProcedureCall(any(String.class))).thenReturn(proc);
+
+    when(transaction.getStatus()).thenReturn(TransactionStatus.MARKED_ROLLBACK);
 
     when(sfo.getServiceRegistry()).thenReturn(reg);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
