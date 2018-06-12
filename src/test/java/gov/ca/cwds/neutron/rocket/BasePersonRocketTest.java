@@ -223,7 +223,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     } finally {
       markTestDone();
     }
-
   }
 
   @Test
@@ -583,7 +582,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     } finally {
       markTestDone();
     }
-
   }
 
   @Test
@@ -956,7 +954,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     grpRecs.add(theLastId);
 
     target.queueNormalize.putLast(theLastId);
-
     int inCntr = 0;
     int actual = target.normalizeLoop(grpRecs, theLastId, inCntr);
     int expected = 2;
