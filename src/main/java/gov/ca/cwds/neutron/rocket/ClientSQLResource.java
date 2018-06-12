@@ -232,6 +232,7 @@ public class ClientSQLResource implements ApiMarker {
           + "FROM O_HM_PLT ohp \n"
           + "JOIN PLC_HM_T ph  ON ph.IDENTIFIER  = ohp.FKPLC_HM_T \n"
           + "WHERE ph.LST_UPD_TS BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + "AND CURRENT DATE BETWEEN OHP.START_DT AND NVL(OHP.END_DT, CURRENT DATE) \n"
     + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
           + "FROM O_HM_PLT ohp  \n"
           + "WHERE ohp.LST_UPD_TS BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'";

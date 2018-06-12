@@ -749,14 +749,15 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
+    NeutronJdbcUtils.standardQuerySettings(q);
     q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
         NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
     final List<D> deletionRecs = q.list();
     if (deletionRecs != null && !deletionRecs.isEmpty()) {
       for (D rec : deletionRecs) {
-        // Assuming group key represents ID of client to delete. This is true for client,
-        // referral history, case history jobs.
+        // Assuming group key represents ID of client to delete.
+        // True for client, referral history, case history jobs.
         Object groupKey = rec.getNormalizationGroupKey();
         if (groupKey != null) {
           deletionResults.add(groupKey.toString());
@@ -787,7 +788,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
             : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
     Transaction txn = null;
-    Object lastId = new Object();
 
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
@@ -805,10 +805,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         recs = q.list();
         LOGGER.info("FOUND {} RECORDS", recs.size());
 
+        // Flush and clear every N records.
         if (((++cnt) % NeutronIntegerDefaults.FETCH_SIZE.getValue()) == 0) {
           LOGGER.info("recs read: {}", cnt);
-
-          // Flush and clear every N records.
           session.flush();
           session.clear();
         }
@@ -825,6 +824,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
       // Release database resources. Don't hold on to the connection or transaction.
       LOGGER.info("PULL VIEW: DATA RETRIEVAL DONE");
+      Object lastId = new Object();
       final List<N> results = new ArrayList<>(cnt); // Size appropriately
 
       // Convert denormalized rows to normalized persistence objects.
