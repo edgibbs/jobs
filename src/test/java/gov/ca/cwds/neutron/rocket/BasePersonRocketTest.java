@@ -64,6 +64,7 @@ import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 
 public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+
   TestNormalizedEntityDao dao;
   TestIndexerJob target;
 
@@ -272,7 +273,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
   }
 
-  @Test(expected = HibernateException.class)
+  @Test(expected = NeutronRuntimeException.class)
   public void extractLastRunRecsFromView_Args__Date__HibernateException() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);

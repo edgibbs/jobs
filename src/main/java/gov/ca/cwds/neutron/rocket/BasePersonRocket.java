@@ -23,7 +23,6 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.hibernate.CacheMode;
-import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -719,7 +718,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     try {
       final NativeQuery<N> q = session.getNamedNativeQuery(namedQueryName);
-      q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+      NeutronJdbcUtils.standardQuerySettings(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -734,7 +733,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     } catch (HibernateException h) {
       fail();
       LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
-      if (txn.getStatus().canRollback()) {
+      if (txn != null && txn.getStatus().canRollback()) {
         txn.rollback();
       }
       throw new DaoException(h);
@@ -793,14 +792,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
       // Insert into session temp table that drives a last change view.
-      final int fetchSize = NeutronIntegerDefaults.FETCH_SIZE.getValue();
       prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
-      q.setCacheMode(CacheMode.IGNORE);
-      q.setFetchSize(fetchSize);
-      q.setFlushMode(FlushMode.MANUAL);
-      q.setReadOnly(true);
-      q.setCacheable(false);
+      NeutronJdbcUtils.standardQuerySettings(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -829,6 +823,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
       }
 
+      // Release database resources. Don't hold on to the connection or transaction.
       LOGGER.info("PULL VIEW: DATA RETRIEVAL DONE");
       final List<N> results = new ArrayList<>(cnt); // Size appropriately
 

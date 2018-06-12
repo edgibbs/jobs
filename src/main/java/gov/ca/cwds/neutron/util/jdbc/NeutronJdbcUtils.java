@@ -13,13 +13,17 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.CacheMode;
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
+import org.hibernate.query.Query;
 
 import gov.ca.cwds.jobs.util.jdbc.WorkPrepareLastChange;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
@@ -176,6 +180,14 @@ public final class NeutronJdbcUtils {
 
     session.doWork(work);
     session.clear();
+  }
+
+  public static void standardQuerySettings(Query<?> q) {
+    q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+    q.setCacheMode(CacheMode.IGNORE);
+    q.setFlushMode(FlushMode.MANUAL);
+    q.setReadOnly(true);
+    q.setCacheable(false);
   }
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitionCount,
