@@ -799,18 +799,10 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
       // Iterate, process, flush.
-      int cnt = 0;
       List<D> recs = new ArrayList<>(210000); // Outrageous but necessary.
       try (final ScrollableResults scroll = q.scroll(ScrollMode.FORWARD_ONLY)) {
         recs = q.list();
         LOGGER.info("FOUND {} RECORDS", recs.size());
-
-        // Flush and clear every N records.
-        if (((++cnt) % NeutronIntegerDefaults.FETCH_SIZE.getValue()) == 0) {
-          LOGGER.info("recs read: {}", cnt);
-          session.flush();
-          session.clear();
-        }
         session.flush();
         session.clear();
         txn.commit();
@@ -825,10 +817,10 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       // Release database resources. Don't hold on to the connection or transaction.
       LOGGER.info("PULL VIEW: DATA RETRIEVAL DONE");
       Object lastId = new Object();
-      final List<N> results = new ArrayList<>(cnt); // Size appropriately
+      final List<N> results = new ArrayList<>(recs.size()); // Size appropriately
 
       // Convert denormalized rows to normalized persistence objects.
-      final List<D> groupRecs = new ArrayList<>(20);
+      final List<D> groupRecs = new ArrayList<>(50);
       for (D m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(normalizeSingle(groupRecs));
@@ -927,6 +919,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       session.setFlushMode(FlushModeType.COMMIT);
 
       final NativeQuery<N> q = session.getNamedNativeQuery(namedQueryName);
+      NeutronJdbcUtils.standardQuerySettings(q);
       q.setParameter("min_id", minId, StringType.INSTANCE)
           .setParameter("max_id", maxId, StringType.INSTANCE)
           .setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
