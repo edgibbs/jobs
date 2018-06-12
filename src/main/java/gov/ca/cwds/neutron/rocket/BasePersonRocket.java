@@ -718,7 +718,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     try {
       final NativeQuery<N> q = session.getNamedNativeQuery(namedQueryName);
-      NeutronJdbcUtils.standardQuerySettings(q);
+      NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -749,7 +749,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
-    NeutronJdbcUtils.standardQuerySettings(q);
+    NeutronJdbcUtils.readOnlyQuery(q);
     q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
         NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -794,7 +794,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       // Insert into session temp table that drives a last change view.
       prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
-      NeutronJdbcUtils.standardQuerySettings(q);
+      NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -919,7 +919,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       session.setFlushMode(FlushModeType.COMMIT);
 
       final NativeQuery<N> q = session.getNamedNativeQuery(namedQueryName);
-      NeutronJdbcUtils.standardQuerySettings(q);
+      NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter("min_id", minId, StringType.INSTANCE)
           .setParameter("max_id", maxId, StringType.INSTANCE)
           .setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());

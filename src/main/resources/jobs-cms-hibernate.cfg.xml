@@ -32,6 +32,12 @@
 		<property name="hibernate.connection.loginTimeout">1000000</property>
 		<property name="hibernate.connection.keepAliveTimeOut">8</property>
 		<property name="hibernate.connection.enableRowsetSupport">1</property>
+		<property name="hibernate.connection.autocommit">false</property>
+		<property name="hibernate.cache.use_query_cache">false</property>
+		<property name="hibernate.cache.use_second_level_cache">false</property>
+		<property name="hibernate.connection.isolation">1</property>
+		<property name="hibernate.connection.provider_disables_autocommit">true</property>
+		
 		<property name="hibernate.connection.sqljAvoidTimeStampConversion">true</property>
 		<property name="hibernate.jdbc.time_zone">America/Los_Angeles</property>
 

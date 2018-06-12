@@ -182,10 +182,13 @@ public final class NeutronJdbcUtils {
     session.clear();
   }
 
-  public static void standardQuerySettings(Query<?> q) {
+  public static void readOnlyQuery(Query<?> q) {
     q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     q.setCacheMode(CacheMode.IGNORE);
+    q.setCacheable(false);
     q.setFlushMode(FlushMode.MANUAL);
+    q.setReadOnly(true);
+    q.setHibernateFlushMode(FlushMode.MANUAL);
     q.setReadOnly(true);
     q.setCacheable(false);
   }
