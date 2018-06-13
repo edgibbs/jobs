@@ -20,7 +20,7 @@ import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
  * @author CWDS API Team
  * @param <T> persistence type
  */
-public class WorkSecondaryResults<T extends PersistentObject> extends WorkConnectionStealer<T> {
+public class WorkSecondaryResults<T extends PersistentObject> extends NeutronWorkConnectionStealer {
 
   private final AtomLoadStepHandler<T> handler;
 

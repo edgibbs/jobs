@@ -171,6 +171,9 @@ public class PeopleSummaryThreadHandler
     addAll(rocket.extractLastRunRecsFromView(lastRunDate, deletionResults));
     LOGGER.info("After view: count: {}", normalized.size());
 
+    // TODO: add to extractLastRunRecsFromView()
+    // readPlacementAddress(stmtSelPlacementAddress);
+
     // Handle additional JDBC statements, if any.
     try (Connection con = NeutronJdbcUtils.prepConnection(rocket.getJobDao().getSessionFactory())) {
       try {
@@ -185,7 +188,7 @@ public class PeopleSummaryThreadHandler
       // Done reading data. Cleanse and index.
       handleJdbcDone(range);
       final List<ReplicatedClient> ret = getResults();
-      LOGGER.info("FETCHED LAST CHANGE RESULTS: count: {}", ret.size());
+      LOGGER.info("FETCHED {} LAST CHANGE RESULTS", ret.size());
       return ret;
     } catch (Exception e) {
       rocket.fail();
@@ -212,6 +215,9 @@ public class PeopleSummaryThreadHandler
     }
   }
 
+  /**
+   * Release memory early and often.
+   */
   protected void clear() {
     normalized.clear();
     placementHomeAddresses.clear();
@@ -227,7 +233,7 @@ public class PeopleSummaryThreadHandler
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
         .stream().map(e -> rocket.normalizeSingle(e.getValue()))
         .forEach(n -> normalized.put(n.getId(), n));
-    LOGGER.trace("normalized.size: {}", normalized.size());
+    // LOGGER.trace("normalized.size: {}", normalized.size());
   }
 
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,

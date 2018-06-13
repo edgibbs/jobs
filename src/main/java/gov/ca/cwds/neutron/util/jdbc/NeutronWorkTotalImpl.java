@@ -13,8 +13,8 @@ public abstract class NeutronWorkTotalImpl implements NeutronWorkTotal {
     this.prepStmtMaker = prepStmtMaker;
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * {@inheritDoc}
    * 
    * @see gov.ca.cwds.neutron.util.jdbc.NeutronWorkTotal#getTotalInserted()
    */

@@ -190,11 +190,22 @@ public final class NeutronJdbcUtils {
     session.clear();
   }
 
+  /**
+   * Make a Hibernate query read-only.
+   * 
+   * @param q query to make read-only
+   */
   public static void readOnlyQuery(Query<?> q) {
     optimizeQuery(q);
     q.setReadOnly(true);
   }
 
+  /**
+   * Optimize a Hibernate query for batch performance. Disable Hibernate caching, set flush mode to
+   * manual, and set fetch size to {@link NeutronIntegerDefaults.FETCH_SIZE}.
+   * 
+   * @param q query to optimize
+   */
   public static void optimizeQuery(Query<?> q) {
     q.setCacheable(false);
     q.setCacheMode(CacheMode.IGNORE);

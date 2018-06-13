@@ -6,16 +6,14 @@ import java.sql.SQLException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.jdbc.Work;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 
 /**
  * Steal a session's connection and make it available to the caller.
  * 
  * @author CWDS API Team
- * @param <T> persistence type
  */
-public class WorkConnectionStealer<T extends PersistentObject> implements Work {
+public class NeutronWorkConnectionStealer implements Work {
 
   private Connection conn;
 
@@ -24,7 +22,7 @@ public class WorkConnectionStealer<T extends PersistentObject> implements Work {
    * 
    * @param handler results handler
    */
-  public WorkConnectionStealer() {}
+  public NeutronWorkConnectionStealer() {}
 
   /**
    * Call {@link AtomLoadStepHandler#handleSecondaryJdbc(Connection, Pair)}.
