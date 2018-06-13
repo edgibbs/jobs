@@ -175,7 +175,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public String[] getPrepLastChangeSQLs() {
-    final String[] ret = {getPrepLastChangeSQL(), ClientSQLResource.INSERT_NEXT_BUNDLE};
+    final String[] ret = {getPrepLastChangeSQL()};
     return ret;
   }
 
@@ -194,6 +194,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
+
+      // ClientSQLResource.INSERT_NEXT_BUNDLE
 
       // Insert into session temp table that drives the last change view.
       prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());

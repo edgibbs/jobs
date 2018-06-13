@@ -169,6 +169,11 @@ public final class NeutronJdbcUtils {
     doWork(session, new WorkPrepareLastChange(lastRunTime, sql, func));
   }
 
+  public static void prepHibernateRownumBundle(final Session session, final String sql, int start,
+      int end, final Function<Connection, PreparedStatement> func) {
+    doWork(session, new WorkPrepareRownumBundle(sql, start, end, func));
+  }
+
   public static void doWork(final Session session, Work work) {
     try {
       // May fail without a transaction.
@@ -182,14 +187,12 @@ public final class NeutronJdbcUtils {
   }
 
   public static void readOnlyQuery(Query<?> q) {
-    q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
-    q.setCacheMode(CacheMode.IGNORE);
     q.setCacheable(false);
+    q.setCacheMode(CacheMode.IGNORE);
+    q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     q.setFlushMode(FlushMode.MANUAL);
-    q.setReadOnly(true);
     q.setHibernateFlushMode(FlushMode.MANUAL);
     q.setReadOnly(true);
-    q.setCacheable(false);
   }
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitionCount,

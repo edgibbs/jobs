@@ -220,4 +220,10 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     }
   }
 
+  default void prepHibernateRownumBundle(final Session session, String... sqls) {
+    for (String sql : sqls) {
+      NeutronJdbcUtils.prepHibernateRownumBundle(session, sql, getPreparedStatementMaker(sql));
+    }
+  }
+
 }
