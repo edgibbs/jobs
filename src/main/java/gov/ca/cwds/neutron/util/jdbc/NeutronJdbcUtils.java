@@ -17,10 +17,12 @@ import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.Query;
 
+import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
@@ -177,7 +179,7 @@ public final class NeutronJdbcUtils {
    */
   public static Connection prepConnection(final Session session) throws SQLException {
     final NeutronWorkConnectionStealer work = new NeutronWorkConnectionStealer();
-    session.doWork(work);
+    doWork(session, work);
     final Connection con = work.getConnection();
     NeutronDB2Utils.enableBatchSettings(con);
     return con;
@@ -230,6 +232,31 @@ public final class NeutronJdbcUtils {
   }
 
   /**
+   * "Work-around" (gentle euphemism for <strong>HACK</strong>) for annoying condition where a
+   * transaction should have started but did not.
+   * 
+   * <p>
+   * Get the current transaction from the current session or start a new transaction.
+   * </p>
+   * 
+   * @param dao DAO
+   * @return current, active transaction
+   */
+  public static Transaction grabTransaction(final BaseDaoImpl<?> dao) {
+    return grabTransaction(dao.grabSession());
+  }
+
+  public static Transaction grabTransaction(final Session session) {
+    Transaction txn = null;
+    try {
+      txn = session.beginTransaction();
+    } catch (Exception e) { // NOSONAR
+      txn = session.getTransaction();
+    }
+    return txn;
+  }
+
+  /**
    * Generic method to execute a Hibernate Work implementation (arbitrary JDBC through Hibernate).
    * 
    * @param session active Hibernate session
@@ -237,6 +264,7 @@ public final class NeutronJdbcUtils {
    */
   public static void doWork(final Session session, Work work) {
     clearSession(session);
+    grabTransaction(session);
     session.doWork(work);
     clearSession(session);
   }

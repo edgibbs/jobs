@@ -142,14 +142,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @return current, active transaction
    */
   default Transaction grabTransaction() {
-    Transaction txn = null;
-    final Session session = getJobDao().getSessionFactory().getCurrentSession();
-    try {
-      txn = session.beginTransaction();
-    } catch (Exception e) { // NOSONAR
-      txn = session.getTransaction();
-    }
-    return txn;
+    return NeutronJdbcUtils.grabTransaction(getJobDao());
   }
 
   /**
