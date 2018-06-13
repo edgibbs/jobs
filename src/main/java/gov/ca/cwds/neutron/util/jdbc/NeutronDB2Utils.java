@@ -42,7 +42,7 @@ public final class NeutronDB2Utils {
     con.setAutoCommit(false);
 
     if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
-      con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
+      new WorkDB2UserInfo().execute(con);
     }
   }
 

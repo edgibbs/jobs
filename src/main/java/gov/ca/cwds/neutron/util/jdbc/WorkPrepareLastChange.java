@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.util.jdbc;
+package gov.ca.cwds.neutron.util.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +11,6 @@ import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 /**

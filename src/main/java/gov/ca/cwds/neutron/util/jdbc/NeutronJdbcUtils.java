@@ -21,7 +21,6 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.Query;
 
-import gov.ca.cwds.jobs.util.jdbc.WorkPrepareLastChange;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;

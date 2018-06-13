@@ -1015,7 +1015,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * Mainly used for testing.
+   * Used for testing.
    * 
    * @return index queue implementation
    */
@@ -1024,7 +1024,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * Only used for testing.
+   * Used for testing.
    * 
    * @param queueIndex index queue implementation
    */

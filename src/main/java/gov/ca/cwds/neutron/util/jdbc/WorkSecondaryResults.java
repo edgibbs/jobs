@@ -1,4 +1,4 @@
-package gov.ca.cwds.jobs.util.jdbc;
+package gov.ca.cwds.neutron.util.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,7 +8,6 @@ import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 
 /**
  * Execute arbitrary SQL statements. Allows reuse of JDBC and Hibernate handlers when switching
