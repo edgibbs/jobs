@@ -233,7 +233,6 @@ public class PeopleSummaryThreadHandler
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
         .stream().map(e -> rocket.normalizeSingle(e.getValue()))
         .forEach(n -> normalized.put(n.getId(), n));
-    // LOGGER.trace("normalized.size: {}", normalized.size());
   }
 
   protected void prepAffectedClients(final PreparedStatement stmtInsClient,
@@ -254,7 +253,7 @@ public class PeopleSummaryThreadHandler
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
     LOGGER.info("read placement home address");
     stmt.setMaxRows(0);
-    stmt.setQueryTimeout(0);
+    stmt.setQueryTimeout(0); // NEXT: soft-code
     stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
     PlacementHomeAddress pha;

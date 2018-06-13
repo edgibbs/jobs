@@ -21,9 +21,7 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.Query;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
-import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -159,7 +157,10 @@ public final class NeutronJdbcUtils {
    * @param sessionFactory Hibernate SessionFactory
    * @return database Connection
    * @throws SQLException on database error
+   * @deprecated prefer method {@link #prepConnection(Session)}
+   * @see #prepConnection(Session)
    */
+  @Deprecated
   public static Connection prepConnection(final SessionFactory sessionFactory) throws SQLException {
     final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
@@ -167,6 +168,13 @@ public final class NeutronJdbcUtils {
     return con;
   }
 
+  /**
+   * Steal a connection from an active Hibernate session.
+   * 
+   * @param session active Hibernate session
+   * @return database Connection
+   * @throws SQLException on database error
+   */
   public static Connection prepConnection(final Session session) throws SQLException {
     final NeutronWorkConnectionStealer work = new NeutronWorkConnectionStealer();
     session.doWork(work);
@@ -189,13 +197,13 @@ public final class NeutronJdbcUtils {
     return work.getTotalProcessed();
   }
 
-  public static <T extends PersistentObject> void runStatementReturnResults(final Session session,
-      final String sql, final AtomLoadStepHandler<T> handler) {
-    // final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end,
-    // getPreparedStatementMaker(sql));
-    // doWork(session, work);
-  }
-
+  /**
+   * Prepare a statement through a Java Function to avoid vulnerability to SQL injection. Thanks a
+   * lot, SonarQube. Boo! Hiss!
+   * 
+   * @param sql SQL statement to prepare
+   * @return Java Function to execute the prepared statement
+   */
   public static Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
     return c -> {
       try {
@@ -207,22 +215,37 @@ public final class NeutronJdbcUtils {
     };
   }
 
-  public static void doWork(final Session session, Work work) {
+  /**
+   * Clear a Hibernate session and trap transaction errors.
+   * 
+   * @param session active Hibernate session
+   */
+  public static void clearSession(final Session session) {
     try {
-      // May fail without a transaction.
+      // Hibernate session clear may fail without a transaction.
       session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {
       LOGGER.warn("'clear' without transaction", e);
     }
+  }
 
+  /**
+   * Generic method to execute a Hibernate Work implementation (arbitrary JDBC through Hibernate).
+   * 
+   * @param session active Hibernate session
+   * @param work Hibernate Work instance
+   */
+  public static void doWork(final Session session, Work work) {
+    clearSession(session);
     session.doWork(work);
-    session.clear();
+    clearSession(session);
   }
 
   /**
    * Make a Hibernate query read-only.
    * 
    * @param q query to make read-only
+   * @see #optimizeQuery(Query)
    */
   public static void readOnlyQuery(Query<?> q) {
     optimizeQuery(q);
@@ -254,6 +277,7 @@ public final class NeutronJdbcUtils {
             .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
     if (LOGGER.isInfoEnabled()) {
+      // Print it. Show off to your friends.
       LOGGER.info(ToStringBuilder.reflectionToString(positions, ToStringStyle.MULTI_LINE_STYLE));
     }
 
@@ -288,24 +312,46 @@ public final class NeutronJdbcUtils {
       // Linux or small data set:
       // ORDER: 0,9,a,A,z,Z
       // ----------------------------
+
+      // Yep, you read that right: by default Linux sorts in ASCII order, not EBCIDIC.
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     }
 
     return ret;
   }
 
+  /**
+   * Partition strategy with 4 partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges4() {
     return buildPartitionsRanges(4, BASE_PARTITIONS);
   }
 
+  /**
+   * Partition strategy with 16 partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges16() {
     return buildPartitionsRanges(16, BASE_PARTITIONS);
   }
 
+  /**
+   * Partition strategy with 64 partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges64() {
     return buildPartitionsRanges(64, BASE_PARTITIONS);
   }
 
+  /**
+   * Partition strategy with 512 (ish) partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges512() {
     return buildPartitionsRanges(512, EXTENDED_PARTITIONS);
   }
@@ -327,6 +373,8 @@ public final class NeutronJdbcUtils {
 
   public static List<Pair<String, String>> getCommonPartitionRanges512(
       @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) throws NeutronCheckedException {
+    // Off by one. Close enough
+    // However, "close" only counts in horseshoes (outdoor game), hand grenades, and hydrogen bombs.
     return getCommonPartitionRanges(initialLoad, 511, EXTENDED_PARTITIONS);
   }
 
