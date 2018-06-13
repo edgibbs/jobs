@@ -11,13 +11,11 @@ import javax.persistence.Table;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.slf4j.Logger;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -184,15 +182,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @return prepared statement for last change pre-processing
    */
   default Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
-    return c -> {
-      final Logger log = getLogger();
-      try {
-        log.info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
-        return c.prepareStatement(sql);
-      } catch (SQLException e) {
-        throw CheeseRay.runtime(log, e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
-      }
-    };
+    return NeutronJdbcUtils.getPreparedStatementMaker(sql);
   }
 
   /**
@@ -232,6 +222,10 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
       NeutronJdbcUtils.runStatementInsertRownumBundle(session, sql, start, end,
           getPreparedStatementMaker(sql));
     }
+  }
+
+  default void runStatementReturnResults(final Session session, final String sql) {
+    NeutronJdbcUtils.runStatementReturnResults(session, sql);
   }
 
 }

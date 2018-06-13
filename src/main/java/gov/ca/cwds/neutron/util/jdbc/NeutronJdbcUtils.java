@@ -24,6 +24,7 @@ import org.hibernate.query.Query;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.util.transform.NeutronStreamUtils;
@@ -176,6 +177,23 @@ public final class NeutronJdbcUtils {
     final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end, func);
     doWork(session, work);
     return work.getTotalProcessed();
+  }
+
+  public static void runStatementReturnResults(final Session session, final String sql) {
+    // final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end,
+    // getPreparedStatementMaker(sql));
+    // doWork(session, work);
+  }
+
+  public static Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
+    return c -> {
+      try {
+        LOGGER.info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
+        return c.prepareStatement(sql);
+      } catch (SQLException e) {
+        throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
+      }
+    };
   }
 
   public static void doWork(final Session session, Work work) {
