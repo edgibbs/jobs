@@ -51,19 +51,19 @@ public class PeopleSummaryThreadHandler
 
   private final ClientPersonIndexerJob rocket;
 
-  private boolean doneHandlerRetrieve = false;
+  protected boolean doneHandlerRetrieve = false;
 
   protected Set<String> deletionResults;
 
   /**
    * key = client id
    */
-  private final Map<String, PlacementHomeAddress> placementHomeAddresses;
+  protected final Map<String, PlacementHomeAddress> placementHomeAddresses;
 
   /**
    * key = client id
    */
-  private final Map<String, ReplicatedClient> normalized;
+  protected final Map<String, ReplicatedClient> normalized;
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
@@ -24,6 +25,42 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   public PeopleSummaryLastChangeHandler(ClientPersonIndexerJob rocket) {
     super(rocket);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys
+   */
+  @Override
+  public List<ReplicatedClient> fetchLastRunNormalizedResults(Date lastRunDate,
+      Set<String> deletionResults) {
+    final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
+    handleStartRange(range);
+    this.deletionResults = deletionResults;
+
+    // Read from the view, old school.
+    // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
+    LOGGER.info("After view: count: {}", normalized.size());
+
+    // Handle additional JDBC statements, if any.
+    try (final Session session = getRocket().getJobDao().grabSession();
+        final Connection con = NeutronJdbcUtils.prepConnection(session)) {
+      handleSecondaryJdbc(con, range);
+
+      // Merge placement homes and index into Elasticsearch.
+      handleJdbcDone(range);
+      final List<ReplicatedClient> ret = getResults();
+      LOGGER.info("FETCHED {} LAST CHANGE RESULTS", ret.size());
+      return ret;
+    } catch (Exception e) {
+      getRocket().fail();
+      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
+    } finally {
+      handleFinishRange(range);
+      getRocket().getFlightLog().markRangeComplete(range);
+      getRocket().doneRetrieve();
+    }
   }
 
   /**
@@ -51,37 +88,29 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     int totalClientAddressRetrieved = 0;
     final int increment = 1000;
 
-    try (final Session session = rocket.getJobDao().grabSession();
-        final PreparedStatement stmtInsClient1 =
-            con.prepareStatement(ClientSQLResource.INSERT_CLIENT_LAST_CHG);
-        final PreparedStatement stmtInsClient2 =
-            con.prepareStatement(ClientSQLResource.INSERT_NEXT_BUNDLE);
-        final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
+    try (final Session session = rocket.getJobDao().grabSession()) {
+      final PreparedStatement stmtSelPlacementAddress =
+          con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS);
       con = NeutronJdbcUtils.prepConnection(session);
       txn = rocket.grabTransaction();
 
-      // STEP #1: Store all changed client keys into GT_REFR_CLT and record the total inserted.
+      // STEP #1: Store changed client keys in GT_REFR_CLT and record the total inserted.
+      LOGGER.info("STEP #1: Store changed client keys in GT_REFR_CLT");
       final int totalKeys =
           rocket.runInsertAllLastChangeKeys(session, lastRunTime, rocket.getPrepLastChangeSQLs());
       recs = new ArrayList<>(totalKeys * 4);
-
-      prepAffectedClients(stmtInsClient1, range);
-      prepAffectedClients(stmtInsClient2, range);
-      readPlacementAddress(stmtSelPlacementAddress);
+      LOGGER.info("total keys found: {}", totalKeys);
 
       // 1-1000, 1001-2000, 2001-3000, etc.
       for (int start = 1; start < totalKeys; start += increment) {
         final int end = start + increment - 1;
-        LOGGER.info("bundle: start: {}, end: {}", start, end);
-
-        // STEP #2: CLEAR GT_ID.
+        LOGGER.info("STEP #2: CLEAR GT_ID: bundle: start: {}, end: {}", start, end);
         session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
 
-        // STEP #3: SELECT next N keys into GT_ID.
+        LOGGER.info("STEP #3: SELECT next {} keys into GT_ID", increment);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
 
-        // STEP #4: Pull from view
+        LOGGER.info("STEP #4: Pull from client address view");
         final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(queryName);
         NeutronJdbcUtils.optimizeQuery(q);
 
@@ -98,7 +127,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           session.flush();
           session.clear();
 
-          // STEP #5: pull placement homes.
+          LOGGER.info("STEP #5: pull placement homes.");
           readPlacementAddress(stmtSelPlacementAddress);
         } finally {
           // leave it
