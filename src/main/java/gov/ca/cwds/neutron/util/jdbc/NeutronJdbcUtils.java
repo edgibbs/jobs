@@ -225,6 +225,7 @@ public final class NeutronJdbcUtils {
   public static void clearSession(final Session session) {
     try {
       // Hibernate session clear may fail without a transaction.
+      grabTransaction(session);
       session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {
       LOGGER.warn("'clear' without transaction", e);
@@ -246,6 +247,11 @@ public final class NeutronJdbcUtils {
     return grabTransaction(dao.grabSession());
   }
 
+  /**
+   * @param session active Hibernation session
+   * @return current, active transaction
+   * @see #grabTransaction(BaseDaoImpl)
+   */
   public static Transaction grabTransaction(final Session session) {
     Transaction txn = null;
     try {
