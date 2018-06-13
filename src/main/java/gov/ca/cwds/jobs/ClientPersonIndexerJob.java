@@ -44,6 +44,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
+import gov.ca.cwds.neutron.rocket.PeopleSummaryLastChangeHandler;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -460,11 +461,12 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   /**
-   * Both modes. Construct a handler for this thread.
+   * Both modes. Construct an appropriate handler for this thread.
    */
   public void allocateThreadHandler() {
     if (handler.get() == null) {
-      handler.set(new PeopleSummaryThreadHandler(this));
+      handler.set(getFlightPlan().isLastRunMode() ? new PeopleSummaryLastChangeHandler(this)
+          : new PeopleSummaryThreadHandler(this));
     }
   }
 

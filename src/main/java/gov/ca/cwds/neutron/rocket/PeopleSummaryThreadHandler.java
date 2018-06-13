@@ -46,7 +46,7 @@ public class PeopleSummaryThreadHandler
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PeopleSummaryThreadHandler.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(PeopleSummaryThreadHandler.class);
 
   private final ClientPersonIndexerJob rocket;
 
