@@ -21,7 +21,7 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
  * 
  * @author CWDS API Team
  */
-public class WorkPrepareLastChange extends NeutronWorkInsert {
+public class WorkPrepareLastChange extends NeutronWorkTotalImpl {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(WorkPrepareLastChange.class);
 
@@ -64,8 +64,8 @@ public class WorkPrepareLastChange extends NeutronWorkInsert {
       }
 
       LOGGER.info("Find keys changed since {}", strLastRunTime);
-      setTotalInserted(stmt.executeUpdate());
-      LOGGER.info("Total keys {} changed since {}", getTotalInserted(), strLastRunTime);
+      setTotalProcessed(stmt.executeUpdate());
+      LOGGER.info("Total keys {} changed since {}", getTotalProcessed(), strLastRunTime);
     }
   }
 

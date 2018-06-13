@@ -201,24 +201,25 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
 
-      // #2: SELECT next N keys into GT_ID
-      // #3: Pull from view, pull placement homes
-      // #4: DELETE FROM GT_ID
-      // #5: Repeat from step #2 until all keys are processed.
+      // STEP #2: SELECT next N keys into GT_ID
+      // STEP #3: Pull from view, pull placement homes
+      // STEP #4: DELETE FROM GT_ID
+      // STEP #5: Repeat from step #2 until all keys are processed.
 
-      // #1: INSERT all keys into GT_REFR_CLT and record total inserted.
+      // STEP #1: Store all keys into GT_REFR_CLT and record total inserted.
       // Store all changed client keys in GT_REFR_CLT.
-      runInsertAllLastChangeKeys(session, lastRunTime, getPrepLastChangeSQLs());
+      final int totalKeys =
+          runInsertAllLastChangeKeys(session, lastRunTime, getPrepLastChangeSQLs());
 
       // Store key bundle into GT_ID and pull from last change view.
       runInsertRownumBundle(session, position, position + increment - 1,
           ClientSQLResource.INSERT_NEXT_BUNDLE);
+
       final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(namedQueryName);
-      NeutronJdbcUtils.readOnlyQuery(q);
+      NeutronJdbcUtils.optimizeQuery(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
-      // Iterate, process, flush.
       try {
         recs = q.list(); // read from a key bundle
         final int recsRetrievedThisBundle = recs.size();
@@ -226,7 +227,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
         LOGGER.info("FOUND {} RECORDS FOR BUNDLE", recsRetrievedThisBundle);
         session.flush();
         session.clear();
-        txn.commit(); // only on last SELECT
       } catch (Exception h) {
         fail();
         if (txn.getStatus().canRollback()) {
@@ -234,6 +234,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
         }
         throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
       }
+
+      txn.commit(); // clear temp tables
 
       // Release database resources. Don't hold on to the connection or transaction.
       LOGGER.info("PULL VIEW: DATA RETRIEVAL DONE");

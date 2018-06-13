@@ -17,7 +17,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
  * 
  * @author CWDS API Team
  */
-public class WorkPrepareRownumBundle extends NeutronWorkInsert {
+public class WorkPrepareRownumBundle extends NeutronWorkTotalImpl {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(WorkPrepareRownumBundle.class);
 
@@ -51,8 +51,8 @@ public class WorkPrepareRownumBundle extends NeutronWorkInsert {
       stmt.setInt(1, start);
       stmt.setInt(2, end);
 
-      setTotalInserted(stmt.executeUpdate());
-      LOGGER.info("Total keys {} inserted", getTotalInserted());
+      setTotalProcessed(stmt.executeUpdate());
+      LOGGER.info("Total keys {} inserted", getTotalProcessed());
     }
   }
 

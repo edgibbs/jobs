@@ -216,16 +216,18 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @param lastRunTime last successful run datetime
    * @param sqls optional DML, roll-your-own SQL
    */
-  default void runInsertAllLastChangeKeys(final Session session, final Date lastRunTime,
+  default int runInsertAllLastChangeKeys(final Session session, final Date lastRunTime,
       String... sqls) {
+    int ret = 0;
     for (String sql : sqls) {
-      NeutronJdbcUtils.runStatementInsertLastChangeKeys(session, lastRunTime, sql,
+      ret += NeutronJdbcUtils.runStatementInsertLastChangeKeys(session, lastRunTime, sql,
           getPreparedStatementMaker(sql));
     }
+
+    return ret;
   }
 
-  default void runInsertRownumBundle(final Session session, int start, int end,
-      String... sqls) {
+  default void runInsertRownumBundle(final Session session, int start, int end, String... sqls) {
     for (String sql : sqls) {
       NeutronJdbcUtils.runStatementInsertRownumBundle(session, sql, start, end,
           getPreparedStatementMaker(sql));

@@ -164,16 +164,18 @@ public final class NeutronJdbcUtils {
     return con;
   }
 
-  public static void runStatementInsertLastChangeKeys(final Session session, final Date lastRunTime,
+  public static int runStatementInsertLastChangeKeys(final Session session, final Date lastRunTime,
       final String sql, final Function<Connection, PreparedStatement> func) {
-    doWork(session, new WorkPrepareLastChange(lastRunTime, sql, func));
+    final NeutronWorkTotalImpl work = new WorkPrepareLastChange(lastRunTime, sql, func);
+    doWork(session, work);
+    return work.getTotalProcessed();
   }
 
   public static int runStatementInsertRownumBundle(final Session session, final String sql,
       int start, int end, final Function<Connection, PreparedStatement> func) {
-    final WorkPrepareRownumBundle work = new WorkPrepareRownumBundle(start, end, func);
+    final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end, func);
     doWork(session, work);
-    return work.getTotalInserted();
+    return work.getTotalProcessed();
   }
 
   public static void doWork(final Session session, Work work) {
@@ -189,12 +191,16 @@ public final class NeutronJdbcUtils {
   }
 
   public static void readOnlyQuery(Query<?> q) {
+    optimizeQuery(q);
+    q.setReadOnly(true);
+  }
+
+  public static void optimizeQuery(Query<?> q) {
     q.setCacheable(false);
     q.setCacheMode(CacheMode.IGNORE);
     q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     q.setFlushMode(FlushMode.MANUAL);
     q.setHibernateFlushMode(FlushMode.MANUAL);
-    q.setReadOnly(true);
   }
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitionCount,

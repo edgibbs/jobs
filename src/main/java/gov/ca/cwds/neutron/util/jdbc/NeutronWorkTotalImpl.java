@@ -4,23 +4,27 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.function.Function;
 
-import org.hibernate.jdbc.Work;
-
-public abstract class NeutronWorkInsert implements Work {
+public abstract class NeutronWorkTotalImpl implements NeutronWorkTotal {
 
   private final Function<Connection, PreparedStatement> prepStmtMaker;
-  private int totalInserted = 0;
+  private int totalProcessed = 0;
 
-  public NeutronWorkInsert(Function<Connection, PreparedStatement> prepStmtMaker) {
+  public NeutronWorkTotalImpl(Function<Connection, PreparedStatement> prepStmtMaker) {
     this.prepStmtMaker = prepStmtMaker;
   }
 
-  public int getTotalInserted() {
-    return totalInserted;
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gov.ca.cwds.neutron.util.jdbc.NeutronWorkTotal#getTotalInserted()
+   */
+  @Override
+  public int getTotalProcessed() {
+    return totalProcessed;
   }
 
-  protected void setTotalInserted(int totalInserted) {
-    this.totalInserted = totalInserted;
+  protected void setTotalProcessed(int totalInserted) {
+    this.totalProcessed = totalInserted;
   }
 
   /**
