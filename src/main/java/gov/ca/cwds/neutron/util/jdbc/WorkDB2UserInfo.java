@@ -53,6 +53,7 @@ public class WorkDB2UserInfo implements Work {
       db2con.setClientInfo("ClientUser", program);
       db2con.setDB2ClientUser(program);
 
+      LOGGER.info("\n\n\nclient info properties\n\n\n");
       try (final ResultSet rs = db2con.getMetaData().getClientInfoProperties()) {
         while (rs.next()) {
           // NAME String=> The name of the client info property
@@ -60,7 +61,7 @@ public class WorkDB2UserInfo implements Work {
           // DEFAULT_VALUE String=> The default value of the property
           // DESCRIPTION String=> A description of the property. This will typically contain
           // information as to where this property is stored in the database.
-          LOGGER.info("client info props: name: {}, max len: {}, default: {}, description: {}",
+          LOGGER.info("client info prop: name: {}, max len: {}, default: {}, description: {}",
               rs.getString(1), rs.getInt(2), rs.getString(3), rs.getString(4));
         }
       } catch (Exception e) {
