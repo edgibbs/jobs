@@ -104,10 +104,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // 1-1000, 1001-2000, 2001-3000, etc.
       for (int start = 1; start < totalKeys; start += increment) {
         final int end = start + increment - 1;
-        LOGGER.info("STEP #2: CLEAR GT_ID: bundle: start: {}, end: {}", start, end);
+        LOGGER.info("STEP #2: CLEAR GT_ID");
         session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
 
-        LOGGER.info("STEP #3: SELECT next {} keys into GT_ID", increment);
+        LOGGER.info("STEP #3: SELECT keys into GT_ID, bundle: start: {}, end: {}", start, end);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
 
         LOGGER.info("STEP #4: Pull from client address view");
