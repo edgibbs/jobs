@@ -2,6 +2,11 @@ package com.google.inject;
 
 import java.lang.reflect.Field;
 
+/**
+ * Local test sandbox.
+ * 
+ * @author CWDS API Team
+ */
 public class EschewObfuscation {
 
   public static void main(String[] args) {

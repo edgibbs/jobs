@@ -1,10 +1,8 @@
 package gov.ca.cwds.jobs;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +12,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.NativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +43,6 @@ import gov.ca.cwds.neutron.rocket.PeopleSummaryLastChangeHandler;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.neutron.util.jdbc.NeutronWorkConnectionStealer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -177,140 +171,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   public String[] getPrepLastChangeSQLs() {
     final String[] ret = {getPrepLastChangeSQL()};
     return ret;
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public List<ReplicatedClient> extractLastRunRecsFromView(final Date lastRunTime,
-      final Set<String> deletionResults) {
-    LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
-    final Class<?> entityClass = getDenormalizedClass(); // view entity class
-    final String queryName =
-        flightPlan.isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
-            : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
-
-    Transaction txn = null;
-    List<EsClientPerson> recs = null;
-    int totalClientAddressRetrieved = 0;
-    final int increment = 1000;
-
-    try (final Session session = jobDao.grabSession()) {
-      Connection con = null;
-      {
-        final NeutronWorkConnectionStealer thief = new NeutronWorkConnectionStealer();
-        session.doWork(thief);
-        con = thief.getConnection();
-      }
-      txn = grabTransaction();
-      final PreparedStatement stmtSelPlacementAddress =
-          con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS);
-
-      // STEP #1: Store all changed client keys into GT_REFR_CLT and record the total inserted.
-      final int totalKeys =
-          runInsertAllLastChangeKeys(session, lastRunTime, getPrepLastChangeSQLs());
-      recs = new ArrayList<>(totalKeys * 4);
-
-      // 1-1000, 1001-2000, 2001-3000, etc.
-      for (int start = 1; start < totalKeys; start += increment) {
-        // STEP #2: CLEAR GT_ID.
-        session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
-
-        // STEP #3: SELECT next N keys into GT_ID.
-        final int end = start + increment - 1;
-        runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
-
-        // STEP #4: Pull from view
-        final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(queryName);
-        NeutronJdbcUtils.optimizeQuery(q);
-
-        try {
-          { // scope brace
-            final List<EsClientPerson> resultsClientAddress = q.list();
-            recs.addAll(resultsClientAddress); // read from key bundle
-            final int recsRetrievedThisBundle = resultsClientAddress.size();
-            totalClientAddressRetrieved += recsRetrievedThisBundle;
-            LOGGER.info("FOUND {} CLIENT ADDRESS RECORDS FOR BUNDLE: {} .. {}",
-                recsRetrievedThisBundle, start, end);
-          }
-
-          session.flush();
-          session.clear();
-
-          // STEP #5: pull placement homes.
-        } finally {
-          // leave it
-        }
-      }
-
-      // Release database resources.
-      txn.commit(); // clear temp tables
-    } catch (Exception e) {
-      fail();
-      if (txn.getStatus().canRollback()) {
-        txn.rollback();
-      }
-      throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
-    } finally {
-      doneRetrieve(); // Override in multi-thread mode to avoid killing the indexer thread
-    } // session goes out of scope
-
-    try {
-      LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
-      Object lastId = new Object();
-      final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
-
-      // ---------------------------
-      // NORMALIZATION:
-      // ---------------------------
-
-      // Convert denormalized rows to normalized persistence objects.
-      final List<EsClientPerson> groupRecs = new ArrayList<>(50);
-      for (EsClientPerson m : recs) {
-        if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
-          results.add(normalizeSingle(groupRecs));
-          groupRecs.clear();
-        }
-
-        groupRecs.add(m);
-        lastId = m.getNormalizationGroupKey();
-        if (lastId == null) {
-          // Could be a data error (invalid data in db).
-          LOGGER.warn("NULL Normalization Group Key: {}", m);
-          lastId = new Object();
-        }
-      }
-
-      if (!groupRecs.isEmpty()) {
-        results.add(normalizeSingle(groupRecs));
-      }
-
-      // ---------------------------
-      // NORMALIZATION DONE.
-      // ---------------------------
-
-      try (final Session session = jobDao.grabSession()) {
-        txn = grabTransaction();
-
-        if (mustDeleteLimitedAccessRecords()) {
-          LOGGER.info("OMIT LIMITED ACCESS RECORDS");
-          loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
-        }
-
-        txn.commit();
-      } finally {
-        if (txn.getStatus().canRollback()) {
-          txn.rollback();
-        }
-      } // session goes out of scope
-
-      groupRecs.clear();
-      return results;
-    } catch (Exception e) {
-      fail();
-      throw CheeseRay.runtime(LOGGER, e, "CLIENT GROUPING ERROR!: {}", e.getMessage());
-    } finally {
-      doneRetrieve(); // Override in multi-thread mode to avoid killing the indexer thread
-    }
   }
 
   @Override

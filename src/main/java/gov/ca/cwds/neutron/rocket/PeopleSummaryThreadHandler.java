@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
- * {@link AtomLoadStepHandler} for the People Summary rocket.
+ * {@link AtomLoadStepHandler} for the People Summary getRocket().
  * 
  * <p>
  * Loads {@link EsClientPerson} and {@link PlacementHomeAddress}, normalizes to
@@ -52,6 +53,8 @@ public class PeopleSummaryThreadHandler
 
   private boolean doneHandlerRetrieve = false;
 
+  protected Set<String> deletionResults;
+
   /**
    * key = client id
    */
@@ -63,7 +66,7 @@ public class PeopleSummaryThreadHandler
   private final Map<String, ReplicatedClient> normalized;
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
-    final boolean isLargeLoad = rocket.isLargeLoad();
+    final boolean isLargeLoad = getRocket().isLargeLoad();
 
     this.rocket = rocket;
     this.normalized = isLargeLoad ? new LinkedHashMap<>(150011) : new LinkedHashMap<>(20011);
@@ -76,10 +79,10 @@ public class PeopleSummaryThreadHandler
     EsClientPerson m;
     Object lastId = new Object();
     final List<EsClientPerson> grpRecs = new ArrayList<>();
-    final FlightLog flightLog = rocket.getFlightLog();
+    final FlightLog flightLog = getRocket().getFlightLog();
 
     // NOTE: Assumes that records are sorted by group key.
-    while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
+    while (!getRocket().isFailed() && rs.next() && (m = getRocket().extract(rs)) != null) {
       CheeseRay.logEvery(LOGGER, 5000, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
@@ -144,8 +147,8 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleStartRange(Pair<String, String> range) {
-    rocket.getFlightLog().markRangeStart(range);
-    rocket.doneTransform();
+    getRocket().getFlightLog().markRangeStart(range);
+    getRocket().doneTransform();
     clear();
   }
 
@@ -160,51 +163,62 @@ public class PeopleSummaryThreadHandler
     return normalized.values().stream().collect(Collectors.toList());
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys
+   */
   @Override
   public List<ReplicatedClient> fetchLastRunNormalizedResults(Date lastRunDate,
       Set<String> deletionResults) {
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
+    this.deletionResults = deletionResults;
 
-    // DB2 doesn't deal well with large sets of keys.
     // Read from the view, old school.
-    addAll(rocket.extractLastRunRecsFromView(lastRunDate, deletionResults));
+    // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
     LOGGER.info("After view: count: {}", normalized.size());
 
-    // TODO: add to extractLastRunRecsFromView()
+    // TODO: move from extractLastRunRecsFromView() to here.
     // readPlacementAddress(stmtSelPlacementAddress);
 
     // Handle additional JDBC statements, if any.
-    try (Connection con = NeutronJdbcUtils.prepConnection(rocket.getJobDao().getSessionFactory())) {
+    try (final Session session = getRocket().getJobDao().grabSession();
+        final Connection con = NeutronJdbcUtils.prepConnection(session);
+        final PreparedStatement stmtSelPlacementAddress =
+            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       try {
-        con.commit(); // clean up first
-        handleSecondaryJdbc(con, range);
-        con.commit(); // clear temp table
+        readPlacementAddress(stmtSelPlacementAddress);
       } catch (Exception e) {
         con.rollback();
         throw e;
       }
 
-      // Done reading data. Cleanse and index.
+      // Done reading data. Clear temp tables.
+      con.commit();
+
+      // Merge placement homes and index into Elasticsearch.
       handleJdbcDone(range);
       final List<ReplicatedClient> ret = getResults();
       LOGGER.info("FETCHED {} LAST CHANGE RESULTS", ret.size());
       return ret;
     } catch (Exception e) {
-      rocket.fail();
+      getRocket().fail();
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
-      rocket.getFlightLog().markRangeComplete(range);
+      getRocket().getFlightLog().markRangeComplete(range);
     }
   }
 
   protected String pickPrepDml(String sqlInitialLoad, String sqlLastChange)
       throws NeutronCheckedException {
-    final String preparedSql = rocket.getFlightPlan().isLastRunMode()
-        ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange, rocket.determineLastSuccessfulRunTime(),
-            rocket.getFlightPlan().getOverrideLastEndTime())
-        : sqlInitialLoad; // initial mode
+    final String preparedSql =
+        getRocket().getFlightPlan().isLastRunMode()
+            ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange,
+                getRocket().determineLastSuccessfulRunTime(),
+                getRocket().getFlightPlan().getOverrideLastEndTime())
+            : sqlInitialLoad; // initial mode
     LOGGER.info("Prep SQL: \n{}", preparedSql);
     return preparedSql;
   }
@@ -216,7 +230,7 @@ public class PeopleSummaryThreadHandler
   }
 
   /**
-   * Release memory early and often.
+   * Release unneeded heap memory early and often.
    */
   protected void clear() {
     normalized.clear();
@@ -231,7 +245,7 @@ public class PeopleSummaryThreadHandler
   protected void normalize(final List<EsClientPerson> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
-        .stream().map(e -> rocket.normalizeSingle(e.getValue()))
+        .stream().map(e -> getRocket().normalizeSingle(e.getValue()))
         .forEach(n -> normalized.put(n.getId(), n));
   }
 
@@ -240,7 +254,7 @@ public class PeopleSummaryThreadHandler
     stmtInsClient.setMaxRows(0);
     stmtInsClient.setQueryTimeout(0);
 
-    if (!rocket.getFlightPlan().isLastRunMode()) {
+    if (!getRocket().getFlightPlan().isLastRunMode()) {
       LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
       stmtInsClient.setString(1, p.getLeft());
       stmtInsClient.setString(2, p.getRight());
@@ -258,7 +272,7 @@ public class PeopleSummaryThreadHandler
 
     PlacementHomeAddress pha;
     final ResultSet rs = stmt.executeQuery(); // NOSONAR
-    while (!rocket.isFailed() && rs.next()) {
+    while (!getRocket().isFailed() && rs.next()) {
       pha = new PlacementHomeAddress(rs);
       placementHomeAddresses.put(pha.getClientId(), pha);
     }
@@ -276,6 +290,10 @@ public class PeopleSummaryThreadHandler
 
   protected void doneThreadRetrieve() {
     this.doneHandlerRetrieve = true;
+  }
+
+  public ClientPersonIndexerJob getRocket() {
+    return rocket;
   }
 
 }

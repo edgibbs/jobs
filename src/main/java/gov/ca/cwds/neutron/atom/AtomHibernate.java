@@ -224,8 +224,4 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     }
   }
 
-  // default void runStatementReturnResults(final Session session, final String sql) {
-  // NeutronJdbcUtils.runStatementReturnResults(session, sql);
-  // }
-
 }
