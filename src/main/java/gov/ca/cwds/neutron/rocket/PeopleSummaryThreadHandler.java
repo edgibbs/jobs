@@ -166,7 +166,7 @@ public class PeopleSummaryThreadHandler
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
 
-    // DB2 doesn't handle large blocks of client id's well.
+    // DB2 doesn't deal well with large sets of keys.
     // Read from the view, old school.
     addAll(rocket.extractLastRunRecsFromView(lastRunDate, deletionResults));
     LOGGER.info("After view: count: {}", normalized.size());
@@ -182,7 +182,7 @@ public class PeopleSummaryThreadHandler
         throw e;
       }
 
-      // Done reading data. Process data, like cleansing and normalizing.
+      // Done reading data. Cleanse and index.
       handleJdbcDone(range);
       final List<ReplicatedClient> ret = getResults();
       LOGGER.info("FETCHED LAST CHANGE RESULTS: count: {}", ret.size());

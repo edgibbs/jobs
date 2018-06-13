@@ -16,7 +16,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
-import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,6 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
-import gov.ca.cwds.neutron.enums.NeutronColumn;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -48,7 +46,6 @@ import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
@@ -191,56 +188,68 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
     Transaction txn = null;
     List<EsClientPerson> recs = null;
-    int totalRetrieved = 0;
-    int position = 0;
+    int totalClientAddressRetrieved = 0;
     final int increment = 1000;
-
-    int start = 0;
-    int end = 0;
 
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
-
-      // STEP #2: SELECT next N keys into GT_ID
-      // STEP #3: Pull from view, pull placement homes
-      // STEP #4: DELETE FROM GT_ID
-      // STEP #5: Repeat from step #2 until all keys are processed.
 
       // STEP #1: Store all keys into GT_REFR_CLT and record total inserted.
       // Store all changed client keys in GT_REFR_CLT.
       final int totalKeys =
           runInsertAllLastChangeKeys(session, lastRunTime, getPrepLastChangeSQLs());
 
-      // Store key bundle into GT_ID and pull from last change view.
-      runInsertRownumBundle(session, position, position + increment - 1,
-          ClientSQLResource.INSERT_NEXT_BUNDLE);
+      // 0001 .. 1000
+      // 1001 .. 2000
+      // 2001 .. 3000
+      // etc
+      for (int start = 1; start < totalKeys; start += increment) {
+        // STEP #2: SELECT next N keys into GT_ID
+        final int end = start + increment - 1;
+        runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
 
-      final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(namedQueryName);
-      NeutronJdbcUtils.optimizeQuery(q);
-      q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
-          NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
+        // STEP #3: Pull from view, pull placement homes
+        final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(namedQueryName);
+        NeutronJdbcUtils.optimizeQuery(q);
 
-      try {
-        recs = q.list(); // read from a key bundle
-        final int recsRetrievedThisBundle = recs.size();
-        totalRetrieved += recsRetrievedThisBundle;
-        LOGGER.info("FOUND {} RECORDS FOR BUNDLE", recsRetrievedThisBundle);
-        session.flush();
-        session.clear();
-      } catch (Exception h) {
-        fail();
-        if (txn.getStatus().canRollback()) {
-          txn.rollback();
+        try {
+          recs = q.list(); // read from a key bundle
+          final int recsRetrievedThisBundle = recs.size();
+          totalClientAddressRetrieved += recsRetrievedThisBundle;
+          LOGGER.info("FOUND {} CLIENT ADDRESS RECORDS FOR BUNDLE, {} .. {}",
+              recsRetrievedThisBundle, start, end);
+          session.flush();
+          session.clear();
+
+          // STEP #4: DELETE FROM GT_ID
+          session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
+
+        } catch (Exception h) {
+          fail();
+          if (txn.getStatus().canRollback()) {
+            txn.rollback();
+          }
+          throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
         }
-        throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
       }
 
+      // Release database resources.
       txn.commit(); // clear temp tables
+    } catch (Exception h) {
+      fail();
+      throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
+    } finally {
+      doneRetrieve(); // Override in multi-thread mode to avoid killing the indexer thread
+    } // session goes out of scope
 
-      // Release database resources. Don't hold on to the connection or transaction.
+    try {
       LOGGER.info("PULL VIEW: DATA RETRIEVAL DONE");
       Object lastId = new Object();
       final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
+
+      // ---------------------------
+      // NORMALIZATION:
+      // ---------------------------
 
       // Convert denormalized rows to normalized persistence objects.
       final List<EsClientPerson> groupRecs = new ArrayList<>(50);
@@ -263,9 +272,17 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
         results.add(normalizeSingle(groupRecs));
       }
 
-      if (mustDeleteLimitedAccessRecords()) {
-        loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
-      }
+      // ---------------------------
+      // NORMALIZATION DONE.
+      // ---------------------------
+
+      try (final Session session = jobDao.grabSession()) {
+        txn = grabTransaction();
+
+        if (mustDeleteLimitedAccessRecords()) {
+          loadRecsForDeletion(entityClass, session, lastRunTime, deletionResults);
+        }
+      } // session goes out of scope
 
       groupRecs.clear();
       return results;
