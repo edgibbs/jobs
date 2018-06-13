@@ -51,16 +51,24 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     int totalClientAddressRetrieved = 0;
     final int increment = 1000;
 
-    try (final Session session = rocket.getJobDao().grabSession()) {
+    try (final Session session = rocket.getJobDao().grabSession();
+        final PreparedStatement stmtInsClient1 =
+            con.prepareStatement(ClientSQLResource.INSERT_CLIENT_LAST_CHG);
+        final PreparedStatement stmtInsClient2 =
+            con.prepareStatement(ClientSQLResource.INSERT_NEXT_BUNDLE);
+        final PreparedStatement stmtSelPlacementAddress =
+            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       con = NeutronJdbcUtils.prepConnection(session);
       txn = rocket.grabTransaction();
-      final PreparedStatement stmtSelPlacementAddress =
-          con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS);
 
       // STEP #1: Store all changed client keys into GT_REFR_CLT and record the total inserted.
       final int totalKeys =
           rocket.runInsertAllLastChangeKeys(session, lastRunTime, rocket.getPrepLastChangeSQLs());
       recs = new ArrayList<>(totalKeys * 4);
+
+      prepAffectedClients(stmtInsClient1, range);
+      prepAffectedClients(stmtInsClient2, range);
+      readPlacementAddress(stmtSelPlacementAddress);
 
       // 1-1000, 1001-2000, 2001-3000, etc.
       for (int start = 1; start < totalKeys; start += increment) {
