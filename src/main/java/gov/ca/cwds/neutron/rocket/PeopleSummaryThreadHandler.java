@@ -109,7 +109,7 @@ public class PeopleSummaryThreadHandler
                 ClientSQLResource.INSERT_CLIENT_LAST_CHG));
         final PreparedStatement stmtInsClient2 =
             con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL,
-                ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG));
+                ClientSQLResource.INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       prepAffectedClients(stmtInsClient1, range);
@@ -166,6 +166,7 @@ public class PeopleSummaryThreadHandler
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
 
+    // DB2 doesn't handle large blocks of client id's well.
     // Read from the view, old school.
     addAll(rocket.extractLastRunRecsFromView(lastRunDate, deletionResults));
     LOGGER.info("After view: count: {}", normalized.size());
