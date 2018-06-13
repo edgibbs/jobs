@@ -20,13 +20,13 @@ import com.ibm.db2.jcc.DB2Connection;
  * 
  * @author CWDS API Team
  */
-public class WorkDB2UserInfo implements Work {
+public class WorkSetDB2UserInfo implements Work {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(WorkDB2UserInfo.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(WorkSetDB2UserInfo.class);
 
   private static final String NAME = "Neutron";
 
-  public WorkDB2UserInfo() {
+  public WorkSetDB2UserInfo() {
     // Default, no-op
   }
 
@@ -65,7 +65,7 @@ public class WorkDB2UserInfo implements Work {
               rs.getString(1), rs.getInt(2), rs.getString(3), rs.getString(4));
         }
       } catch (Exception e) {
-        LOGGER.warn("TROUBLE READING CLIENT INFO PROPERTIES!", e);
+        LOGGER.warn("ERROR READING CLIENT INFO PROPERTIES!", e);
       }
 
       // ALTERNATIVE: call proc SYSPROC.WLM_SET_CLIENT_INFO.

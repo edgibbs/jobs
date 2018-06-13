@@ -165,7 +165,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   default boolean isLargeDataSet() throws NeutronCheckedException {
     final String schema = getDBSchemaName().toUpperCase().trim();
 
-    // Not the best idea to check by replication schema name, but lack other options.
+    // Not the best idea to check by replication schema name, but we lack other options.
     return isDB2OnZOS()
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("RSS"));
   }
@@ -224,8 +224,8 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     }
   }
 
-  default void runStatementReturnResults(final Session session, final String sql) {
-    NeutronJdbcUtils.runStatementReturnResults(session, sql);
-  }
+  // default void runStatementReturnResults(final Session session, final String sql) {
+  // NeutronJdbcUtils.runStatementReturnResults(session, sql);
+  // }
 
 }

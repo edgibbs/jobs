@@ -198,7 +198,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       {
         final NeutronWorkConnectionStealer thief = new NeutronWorkConnectionStealer();
         session.doWork(thief);
-        con = thief.getConn();
+        con = thief.getConnection();
       }
       txn = grabTransaction();
       final PreparedStatement stmtSelPlacementAddress =

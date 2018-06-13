@@ -9,7 +9,7 @@ import org.hibernate.jdbc.Work;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 
 /**
- * Steal a session's connection and make it available to the caller.
+ * Steal a connection from a Hibernate session and make it available to the caller.
  * 
  * @author CWDS API Team
  */
@@ -35,11 +35,11 @@ public class NeutronWorkConnectionStealer implements Work {
     NeutronDB2Utils.enableBatchSettings(con);
   }
 
-  public Connection getConn() {
+  public Connection getConnection() {
     return conn;
   }
 
-  public void setConn(Connection conn) {
+  public void setConnection(Connection conn) {
     this.conn = conn;
   }
 

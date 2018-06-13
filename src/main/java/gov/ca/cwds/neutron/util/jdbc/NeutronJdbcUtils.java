@@ -21,7 +21,9 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 import org.hibernate.query.Query;
 
+import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
+import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -165,6 +167,14 @@ public final class NeutronJdbcUtils {
     return con;
   }
 
+  public static Connection prepConnection(final Session session) throws SQLException {
+    final NeutronWorkConnectionStealer work = new NeutronWorkConnectionStealer();
+    session.doWork(work);
+    final Connection con = work.getConnection();
+    NeutronDB2Utils.enableBatchSettings(con);
+    return con;
+  }
+
   public static int runStatementInsertLastChangeKeys(final Session session, final Date lastRunTime,
       final String sql, final Function<Connection, PreparedStatement> func) {
     final NeutronWorkTotalImpl work = new WorkPrepareLastChange(lastRunTime, sql, func);
@@ -179,7 +189,8 @@ public final class NeutronJdbcUtils {
     return work.getTotalProcessed();
   }
 
-  public static void runStatementReturnResults(final Session session, final String sql) {
+  public static <T extends PersistentObject> void runStatementReturnResults(final Session session,
+      final String sql, final AtomLoadStepHandler<T> handler) {
     // final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end,
     // getPreparedStatementMaker(sql));
     // doWork(session, work);

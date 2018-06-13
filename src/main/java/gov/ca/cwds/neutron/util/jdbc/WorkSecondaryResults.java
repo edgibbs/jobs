@@ -40,7 +40,7 @@ public class WorkSecondaryResults<T extends PersistentObject> extends NeutronWor
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    setConn(con);
+    setConnection(con);
     NeutronDB2Utils.enableBatchSettings(con);
     handler.handleSecondaryJdbc(con, Pair.<String, String>of("a", "b"));
   }
