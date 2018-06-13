@@ -66,9 +66,9 @@ public class PeopleSummaryThreadHandler
   private final Map<String, ReplicatedClient> normalized;
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
-    final boolean isLargeLoad = getRocket().isLargeLoad();
-
     this.rocket = rocket;
+
+    final boolean isLargeLoad = getRocket().isLargeLoad();
     this.normalized = isLargeLoad ? new LinkedHashMap<>(150011) : new LinkedHashMap<>(20011);
     this.placementHomeAddresses = isLargeLoad ? new HashMap<>(5011) : new HashMap<>(2003);
   }
