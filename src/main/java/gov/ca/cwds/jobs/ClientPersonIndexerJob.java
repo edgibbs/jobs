@@ -191,9 +191,16 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
     Transaction txn = null;
     List<EsClientPerson> recs = null;
+    int count = 0;
 
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
+
+      // #1: INSERT all keys into GT_REFR_CLT, get total inserted.
+      // #2: SELECT next N keys into GT_ID
+      // #3: Pull from view, pull placement homes
+      // #4: DELETE FROM GT_ID
+      // #5: Repeat from step #2 until all keys are processed.
 
       // ClientSQLResource.INSERT_NEXT_BUNDLE
 
@@ -206,7 +213,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
       // Iterate, process, flush.
       try {
-        recs = q.list();
+        recs = q.list(); // read from a modestly sized key bundle
         LOGGER.info("FOUND {} RECORDS", recs.size());
         session.flush();
         session.clear();

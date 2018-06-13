@@ -100,7 +100,7 @@ public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDeno
     Date lastRunTime = mock(Date.class);
     String sqlInsertLastChange = null;
     Function<Connection, PreparedStatement> func = mock(Function.class);
-    NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sqlInsertLastChange, func);
+    NeutronJdbcUtils.prepStatementLastChange(session, lastRunTime, sqlInsertLastChange, func);
   }
 
   @Test

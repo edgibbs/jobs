@@ -215,14 +215,16 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   default void prepHibernateLastChange(final Session session, final Date lastRunTime,
       String... sqls) {
     for (String sql : sqls) {
-      NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql,
+      NeutronJdbcUtils.prepStatementLastChange(session, lastRunTime, sql,
           getPreparedStatementMaker(sql));
     }
   }
 
-  default void prepHibernateRownumBundle(final Session session, String... sqls) {
+  default void prepHibernateRownumBundle(final Session session, int start, int end,
+      String... sqls) {
     for (String sql : sqls) {
-      NeutronJdbcUtils.prepHibernateRownumBundle(session, sql, getPreparedStatementMaker(sql));
+      NeutronJdbcUtils.prepStatementRownumBundle(session, sql, start, end,
+          getPreparedStatementMaker(sql));
     }
   }
 

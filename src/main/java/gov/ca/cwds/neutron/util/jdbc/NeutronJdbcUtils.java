@@ -164,12 +164,12 @@ public final class NeutronJdbcUtils {
     return con;
   }
 
-  public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
+  public static void prepStatementLastChange(final Session session, final Date lastRunTime,
       final String sql, final Function<Connection, PreparedStatement> func) {
     doWork(session, new WorkPrepareLastChange(lastRunTime, sql, func));
   }
 
-  public static void prepHibernateRownumBundle(final Session session, final String sql, int start,
+  public static void prepStatementRownumBundle(final Session session, final String sql, int start,
       int end, final Function<Connection, PreparedStatement> func) {
     doWork(session, new WorkPrepareRownumBundle(sql, start, end, func));
   }
