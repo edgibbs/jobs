@@ -5,13 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.function.Function;
 
-import org.hibernate.jdbc.Work;
-
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 /**
- * Execute DML prior to retrieving records, typically for last change runs.
+ * Execute DML prior to retrieving records by integer range, typically for last change runs.
  * 
  * <p>
  * Examples include populating a global temporary table prior to reading from a view.
@@ -19,46 +17,29 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
  * 
  * @author CWDS API Team
  */
-public class WorkPrepareRownumBundle implements Work {
+public class WorkPrepareRownumBundle extends NeutronWorkInsert {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(WorkPrepareRownumBundle.class);
 
-  private final String sql;
   private final int start;
   private final int end;
-  private final Function<Connection, PreparedStatement> prepStmtMaker;
 
   /**
    * Constructor.
    * 
-   * @param lastRunTime last successful run time
-   * @param sql SQL to run
+   * @param start beginning of range
+   * @param end end of range
    * @param prepStmtMaker Function to produce prepared statement
    */
-  public WorkPrepareRownumBundle(String sql, int start, int end,
+  public WorkPrepareRownumBundle(int start, int end,
       final Function<Connection, PreparedStatement> prepStmtMaker) {
-    this.sql = sql;
+    super(prepStmtMaker);
     this.start = start;
     this.end = end;
-    this.prepStmtMaker = prepStmtMaker;
-  }
-
-  /**
-   * Apply the {@link #prepStmtMaker} function to the connection.
-   * 
-   * @param con current database connection
-   * @return prepared statement
-   */
-  protected PreparedStatement createPreparedStatement(Connection con) {
-    return prepStmtMaker.apply(con);
   }
 
   /**
    * Execute the PreparedStatement.
-   * 
-   * <p>
-   * <strong>WARNING!</strong>. DB2 may not optimize a PreparedStatement the same as regular SQL.
-   * </p>
    * 
    * @param con current database connection
    */
@@ -70,8 +51,8 @@ public class WorkPrepareRownumBundle implements Work {
       stmt.setInt(1, start);
       stmt.setInt(2, end);
 
-      final int cntNewChanged = stmt.executeUpdate();
-      LOGGER.info("Total keys {} inserted", cntNewChanged);
+      setTotalInserted(stmt.executeUpdate());
+      LOGGER.info("Total keys {} inserted", getTotalInserted());
     }
   }
 

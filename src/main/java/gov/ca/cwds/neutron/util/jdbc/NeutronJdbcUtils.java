@@ -164,14 +164,16 @@ public final class NeutronJdbcUtils {
     return con;
   }
 
-  public static void prepStatementLastChange(final Session session, final Date lastRunTime,
+  public static void runStatementInsertLastChangeKeys(final Session session, final Date lastRunTime,
       final String sql, final Function<Connection, PreparedStatement> func) {
     doWork(session, new WorkPrepareLastChange(lastRunTime, sql, func));
   }
 
-  public static void prepStatementRownumBundle(final Session session, final String sql, int start,
-      int end, final Function<Connection, PreparedStatement> func) {
-    doWork(session, new WorkPrepareRownumBundle(sql, start, end, func));
+  public static int runStatementInsertRownumBundle(final Session session, final String sql,
+      int start, int end, final Function<Connection, PreparedStatement> func) {
+    final WorkPrepareRownumBundle work = new WorkPrepareRownumBundle(start, end, func);
+    doWork(session, work);
+    return work.getTotalInserted();
   }
 
   public static void doWork(final Session session, Work work) {

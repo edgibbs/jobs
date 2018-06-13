@@ -176,6 +176,10 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * Return Function that creates a prepared statement for last change pre-processing, such as
    * inserting identifiers into a global temporary table.
    * 
+   * <p>
+   * Exists primarily to appease SonarQube over "vulnerabilities."
+   * </p>
+   * 
    * @param sql SQL to prepare
    * @return prepared statement for last change pre-processing
    */
@@ -212,18 +216,18 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @param lastRunTime last successful run datetime
    * @param sqls optional DML, roll-your-own SQL
    */
-  default void prepHibernateLastChange(final Session session, final Date lastRunTime,
+  default void runInsertAllLastChangeKeys(final Session session, final Date lastRunTime,
       String... sqls) {
     for (String sql : sqls) {
-      NeutronJdbcUtils.prepStatementLastChange(session, lastRunTime, sql,
+      NeutronJdbcUtils.runStatementInsertLastChangeKeys(session, lastRunTime, sql,
           getPreparedStatementMaker(sql));
     }
   }
 
-  default void prepHibernateRownumBundle(final Session session, int start, int end,
+  default void runInsertRownumBundle(final Session session, int start, int end,
       String... sqls) {
     for (String sql : sqls) {
-      NeutronJdbcUtils.prepStatementRownumBundle(session, sql, start, end,
+      NeutronJdbcUtils.runStatementInsertRownumBundle(session, sql, start, end,
           getPreparedStatementMaker(sql));
     }
   }

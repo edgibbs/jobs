@@ -132,6 +132,7 @@ public final class NeutronDB2Utils {
    * @param con database connection
    * @return DB2 monitor
    */
+  @SuppressWarnings({"fb-contrib:JVR_JDBC_VENDOR_RELIANCE", "squid:CallToDeprecatedMethod"})
   public static DB2SystemMonitor monitorStart(final Connection con) {
     DB2SystemMonitor ret = null;
     try {

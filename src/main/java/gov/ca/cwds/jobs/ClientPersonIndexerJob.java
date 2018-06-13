@@ -191,21 +191,28 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
     Transaction txn = null;
     List<EsClientPerson> recs = null;
-    int count = 0;
+    int totalRetrieved = 0;
+    int position = 0;
+    final int increment = 1000;
+
+    int start = 0;
+    int end = 0;
 
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
 
-      // #1: INSERT all keys into GT_REFR_CLT, get total inserted.
       // #2: SELECT next N keys into GT_ID
       // #3: Pull from view, pull placement homes
       // #4: DELETE FROM GT_ID
       // #5: Repeat from step #2 until all keys are processed.
 
-      // ClientSQLResource.INSERT_NEXT_BUNDLE
+      // #1: INSERT all keys into GT_REFR_CLT and record total inserted.
+      // Store all changed client keys in GT_REFR_CLT.
+      runInsertAllLastChangeKeys(session, lastRunTime, getPrepLastChangeSQLs());
 
-      // Insert into session temp table that drives the last change view.
-      prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
+      // Store key bundle into GT_ID and pull from last change view.
+      runInsertRownumBundle(session, position, position + increment - 1,
+          ClientSQLResource.INSERT_NEXT_BUNDLE);
       final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(namedQueryName);
       NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
@@ -213,8 +220,10 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
       // Iterate, process, flush.
       try {
-        recs = q.list(); // read from a modestly sized key bundle
-        LOGGER.info("FOUND {} RECORDS", recs.size());
+        recs = q.list(); // read from a key bundle
+        final int recsRetrievedThisBundle = recs.size();
+        totalRetrieved += recsRetrievedThisBundle;
+        LOGGER.info("FOUND {} RECORDS FOR BUNDLE", recsRetrievedThisBundle);
         session.flush();
         session.clear();
         txn.commit(); // only on last SELECT

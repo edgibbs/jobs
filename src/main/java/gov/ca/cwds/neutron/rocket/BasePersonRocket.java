@@ -792,7 +792,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     try (final Session session = jobDao.grabSession()) {
       txn = grabTransaction();
       // Insert into session temp table that drives a last change view.
-      prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
+      runInsertAllLastChangeKeys(session, lastRunTime, getPrepLastChangeSQLs());
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
       NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
@@ -800,7 +800,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
       // Iterate, process, flush.
       List<D> recs = new ArrayList<>(210000); // Outrageous but necessary.
-      try (final ScrollableResults scroll = q.scroll(ScrollMode.FORWARD_ONLY)) {
+      try {
         recs = q.list();
         LOGGER.info("FOUND {} RECORDS", recs.size());
         session.flush();
