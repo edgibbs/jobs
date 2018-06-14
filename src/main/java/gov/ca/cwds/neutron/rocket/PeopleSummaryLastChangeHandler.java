@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.CacheMode;
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
@@ -64,6 +66,17 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   }
 
   /**
+   * Jiggle the handle, flush and clear session.
+   * 
+   * @param session active Hibernate session
+   */
+  protected void surfThePorcelainExpress(final Session session) {
+    LOGGER.info("Flush and clear session");
+    session.clear();
+    session.flush();
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * <p>
@@ -89,6 +102,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final int increment = 1000;
 
     try (final Session session = rocket.getJobDao().grabSession()) {
+      session.setCacheMode(CacheMode.IGNORE);
+      session.setDefaultReadOnly(true);
+      session.setHibernateFlushMode(FlushMode.MANUAL);
+
       final PreparedStatement stmtSelPlacementAddress =
           con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS);
       con = NeutronJdbcUtils.prepConnection(session);
@@ -110,36 +127,46 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         LOGGER.info("STEP #3: SELECT keys into GT_ID, bundle: start: {}, end: {}", start, end);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
 
-        LOGGER.info("STEP #4: Pull from client address view");
-        final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(queryName);
-        NeutronJdbcUtils.optimizeQuery(q);
-
         try {
           { // scope brace
+            this.surfThePorcelainExpress(session);
+
+            LOGGER.info("STEP #4a: prep query for client address view");
+            final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(queryName);
+            NeutronJdbcUtils.readOnlyQuery(q);
+
+            LOGGER.info("STEP #4b: pull from client address view");
             final List<EsClientPerson> resultsClientAddress = q.list();
             recs.addAll(resultsClientAddress); // read from key bundle
+
             final int recsRetrievedThisBundle = resultsClientAddress.size();
             totalClientAddressRetrieved += recsRetrievedThisBundle;
             LOGGER.info("FOUND {} CLIENT ADDRESS RECORDS FOR BUNDLE: {} .. {}",
                 recsRetrievedThisBundle, start, end);
           }
 
-          session.flush();
-          session.clear();
-
-          LOGGER.info("STEP #5: pull placement homes.");
+          this.surfThePorcelainExpress(session);
+          LOGGER.info("STEP #5: pull placement homes");
           readPlacementAddress(stmtSelPlacementAddress);
+        } catch (Exception e) {
+          LOGGER.error("OOPS!", e);
+          rocket.fail();
+          if (txn != null && txn.getStatus().canRollback()) {
+            txn.rollback();
+            txn = null;
+          }
+          throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
         } finally {
           // leave it
         }
       }
 
-      // Release database resources.
-      txn.commit(); // clear temp tables
+      txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
-      if (txn.getStatus().canRollback()) {
+      if (txn != null && txn.getStatus().canRollback()) {
         txn.rollback();
+        txn = null;
       }
       throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
     } finally {
