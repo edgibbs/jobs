@@ -92,6 +92,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         ? entityClass.getName() + ".findAllUpdatedAfter"
         : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
+    LOGGER.info("query name: {}", queryName);
     handleStartRange(range);
 
     Transaction txn = null;
