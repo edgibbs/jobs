@@ -287,7 +287,7 @@ public final class NeutronJdbcUtils {
 
   /**
    * Optimize a Hibernate query for batch performance. Disable Hibernate caching, set flush mode to
-   * manual, and set fetch size to {@link NeutronIntegerDefaults.FETCH_SIZE}.
+   * manual, and set fetch size to {@code NeutronIntegerDefaults.FETCH_SIZE}.
    * 
    * @param q query to optimize
    */

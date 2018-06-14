@@ -19,8 +19,6 @@ public class NeutronWorkConnectionStealer implements Work {
 
   /**
    * Constructor.
-   * 
-   * @param handler results handler
    */
   public NeutronWorkConnectionStealer() {}
 

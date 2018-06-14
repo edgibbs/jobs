@@ -16,7 +16,7 @@ public abstract class NeutronWorkTotalImpl implements NeutronWorkTotal {
   /**
    * {@inheritDoc}
    * 
-   * @see gov.ca.cwds.neutron.util.jdbc.NeutronWorkTotal#getTotalInserted()
+   * @see gov.ca.cwds.neutron.util.jdbc.NeutronWorkTotal#getTotalProcessed()
    */
   @Override
   public int getTotalProcessed() {
