@@ -146,7 +146,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
         .append(" x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' ");
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
-      buf.append(" AND x.CLT_SENSTV_IND = 'ReplicatedClient' ");
+      buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
