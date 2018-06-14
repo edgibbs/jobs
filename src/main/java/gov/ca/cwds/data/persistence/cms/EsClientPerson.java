@@ -35,7 +35,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 /**
- * Entity bean for the People Summary index.
+ * Entity bean for the People Summary index, CWS/CMS view VW_LST_CLIENT_ADDRESS.
  * 
  * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
