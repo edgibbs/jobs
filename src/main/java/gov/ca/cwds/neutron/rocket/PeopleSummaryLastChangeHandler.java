@@ -175,6 +175,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     try {
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
+
       final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
 
       // ---------------------------
@@ -202,6 +203,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         results.add(rocket.normalizeSingle(groupRecs));
       }
 
+      groupRecs.clear();
+
       // ---------------------------
       // NORMALIZATION DONE.
       // ---------------------------
@@ -222,11 +225,16 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         }
       } // session goes out of scope
 
-      groupRecs.clear();
+      // Keep 'em.
+      addAll(results);
+
+      // Remove sealed and sensitive, if not permitted to view them.
+      if (!deletionResults.isEmpty()) {
+        deletionResults.stream().forEach(normalized::remove);
+      }
 
       // Merge placement homes and index into Elasticsearch.
       handleJdbcDone(range);
-
     } catch (Exception e) {
       rocket.fail();
       throw CheeseRay.runtime(LOGGER, e, "CLIENT GROUPING ERROR!: {}", e.getMessage());
@@ -235,6 +243,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       rocket.doneRetrieve();
     }
 
+    LOGGER.info("PeopleSummaryLastChangeHandler.handleSecondaryJdbc: DONE");
   }
 
 }

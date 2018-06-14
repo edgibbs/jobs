@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,13 +62,12 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
-  protected final Map<String, ReplicatedClient> normalized;
+  protected Map<String, ReplicatedClient> normalized = new HashMap<>();
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
 
     final boolean isLargeLoad = getRocket().isLargeLoad();
-    this.normalized = isLargeLoad ? new LinkedHashMap<>(150011) : new LinkedHashMap<>(20011);
     this.placementHomeAddresses = isLargeLoad ? new HashMap<>(5011) : new HashMap<>(2003);
   }
 
@@ -225,6 +223,9 @@ public class PeopleSummaryThreadHandler
 
   public void addAll(Collection<ReplicatedClient> collection) {
     if (!collection.isEmpty()) {
+      if (normalized.size() < collection.size()) {
+        this.normalized = new HashMap<String, ReplicatedClient>(collection.size());
+      }
       collection.stream().forEach(c -> normalized.put(c.getId(), c));
     }
   }
