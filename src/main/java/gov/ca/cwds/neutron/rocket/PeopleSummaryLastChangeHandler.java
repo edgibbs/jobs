@@ -23,6 +23,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
+  private static final int BUNDLE_KEY_COUNT = 500;
+
   public PeopleSummaryLastChangeHandler(ClientPersonIndexerJob rocket) {
     super(rocket);
   }
@@ -98,7 +100,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     Transaction txn = null;
     List<EsClientPerson> recs = null;
     int totalClientAddressRetrieved = 0;
-    final int increment = 1000;
 
     try (final Session session = rocket.getJobDao().grabSession()) {
       NeutronJdbcUtils.enableBatchSettings(session);
@@ -117,8 +118,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("total keys found: {}", totalKeys);
 
       // 1-1000, 1001-2000, 2001-3000, etc.
-      for (int start = 1; start < totalKeys; start += increment) {
-        final int end = start + increment - 1;
+      for (int start = 1; start < totalKeys; start += BUNDLE_KEY_COUNT) {
+        final int end = start + BUNDLE_KEY_COUNT - 1;
         LOGGER.info("STEP #2: CLEAR GT_ID");
         session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
 
@@ -209,7 +210,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         txn = rocket.grabTransaction();
 
         if (rocket.mustDeleteLimitedAccessRecords()) {
-          LOGGER.info("OMIT LIMITED ACCESS RECORDS");
+          LOGGER.info("OMIT LIMITED ACCESS RECORDS: count: {}", deletionResults.size());
           rocket.loadRecsForDeletion(entityClass, session,
               rocket.getFlightPlan().getOverrideLastRunStartTime(), deletionResults);
         }
