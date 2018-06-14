@@ -61,6 +61,7 @@ import gov.ca.cwds.neutron.rocket.cases.FocusChildParent;
 import gov.ca.cwds.neutron.rocket.referral.ReferralJobRanges;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -684,7 +685,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     // Retrieve records.
     try (final Connection con = getConnection()) {
       final String schema = getDBSchemaName();
-      NeutronDB2Utils.enableBatchSettings(con);
+      NeutronJdbcUtils.enableBatchSettings(con);
 
       final String sqlAffectedClients = buildAffectedClientsSQL();
       LOGGER.info("Case History affected clients SQL:\n {}", sqlAffectedClients);

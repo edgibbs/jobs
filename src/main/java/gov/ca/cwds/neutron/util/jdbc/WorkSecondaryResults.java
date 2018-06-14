@@ -1,14 +1,12 @@
-package gov.ca.cwds.jobs.util.jdbc;
+package gov.ca.cwds.neutron.util.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.jdbc.Work;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 
 /**
  * Execute arbitrary SQL statements. Allows reuse of JDBC and Hibernate handlers when switching
@@ -22,10 +20,9 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
  * @author CWDS API Team
  * @param <T> persistence type
  */
-public class WorkSecondaryResults<T extends PersistentObject> implements Work {
+public class WorkSecondaryResults<T extends PersistentObject> extends NeutronWorkConnectionStealer {
 
   private final AtomLoadStepHandler<T> handler;
-  private Connection conn;
 
   /**
    * Constructor.
@@ -43,13 +40,9 @@ public class WorkSecondaryResults<T extends PersistentObject> implements Work {
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    conn = con;
-    NeutronDB2Utils.enableBatchSettings(con);
+    setConnection(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
     handler.handleSecondaryJdbc(con, Pair.<String, String>of("a", "b"));
-  }
-
-  public Connection getConn() {
-    return conn;
   }
 
 }

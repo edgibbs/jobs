@@ -122,18 +122,12 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void normalizeAndQueueIndex_A$List() throws Exception {
-  // final List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
-  // target.normalizeAndQueueIndex(grpRecs);
-  // }
-
   @Test
   public void getInitialLoadQuery_A$String() throws Exception {
-    final String dbSchemaName = null;
-    final String actual = target.getInitialLoadQuery(dbSchemaName);
+    final String dbSchemaName = "CWSRS4";
+    final String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ");
     final String expected =
-        "SELECT x.* FROM null.MQT_CLIENT_ADDRESS x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId'  AND x.CLT_SENSTV_IND = 'N'  ORDER BY X.CLT_IDENTIFIER  FOR READ ONLY WITH UR ";
+        "SELECT x.* FROM CWSRS4.MQT_CLIENT_ADDRESS x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' AND x.CLT_SENSTV_IND = 'N' ORDER BY X.CLT_IDENTIFIER FOR READ ONLY WITH UR ";
     assertThat(actual, is(equalTo(expected)));
   }
 

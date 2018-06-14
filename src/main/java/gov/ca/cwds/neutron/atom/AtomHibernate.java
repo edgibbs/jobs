@@ -11,13 +11,11 @@ import javax.persistence.Table;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.slf4j.Logger;
 
 import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -144,14 +142,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @return current, active transaction
    */
   default Transaction grabTransaction() {
-    Transaction txn = null;
-    final Session session = getJobDao().getSessionFactory().getCurrentSession();
-    try {
-      txn = session.beginTransaction();
-    } catch (Exception e) { // NOSONAR
-      txn = session.getTransaction();
-    }
-    return txn;
+    return NeutronJdbcUtils.grabTransaction(getJobDao());
   }
 
   /**
@@ -167,7 +158,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   default boolean isLargeDataSet() throws NeutronCheckedException {
     final String schema = getDBSchemaName().toUpperCase().trim();
 
-    // Not the best idea to check by replication schema name, but lack other options.
+    // Not the best idea to check by replication schema name, but we lack other options.
     return isDB2OnZOS()
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("RSS"));
   }
@@ -176,19 +167,15 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * Return Function that creates a prepared statement for last change pre-processing, such as
    * inserting identifiers into a global temporary table.
    * 
+   * <p>
+   * Exists primarily to appease SonarQube over "vulnerabilities."
+   * </p>
+   * 
    * @param sql SQL to prepare
    * @return prepared statement for last change pre-processing
    */
   default Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
-    return c -> {
-      final Logger log = getLogger();
-      try {
-        log.info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
-        return c.prepareStatement(sql);
-      } catch (SQLException e) {
-        throw CheeseRay.runtime(log, e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
-      }
-    };
+    return NeutronJdbcUtils.getPreparedStatementMaker(sql);
   }
 
   /**
@@ -211,11 +198,22 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @param session current Hibernate session
    * @param lastRunTime last successful run datetime
    * @param sqls optional DML, roll-your-own SQL
+   * @return number of rows inserted
    */
-  default void prepHibernateLastChange(final Session session, final Date lastRunTime,
+  default int runInsertAllLastChangeKeys(final Session session, final Date lastRunTime,
       String... sqls) {
+    int ret = 0;
     for (String sql : sqls) {
-      NeutronJdbcUtils.prepHibernateLastChange(session, lastRunTime, sql,
+      ret += NeutronJdbcUtils.runStatementInsertLastChangeKeys(session, lastRunTime, sql,
+          getPreparedStatementMaker(sql));
+    }
+
+    return ret;
+  }
+
+  default void runInsertRownumBundle(final Session session, int start, int end, String... sqls) {
+    for (String sql : sqls) {
+      NeutronJdbcUtils.runStatementInsertRownumBundle(session, sql, start, end,
           getPreparedStatementMaker(sql));
     }
   }

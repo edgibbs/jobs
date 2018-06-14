@@ -10,17 +10,24 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
+import org.hibernate.CacheMode;
+import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
+import org.hibernate.query.Query;
 
-import gov.ca.cwds.jobs.util.jdbc.WorkPrepareLastChange;
+import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.util.transform.NeutronStreamUtils;
@@ -153,30 +160,145 @@ public final class NeutronJdbcUtils {
    * @param sessionFactory Hibernate SessionFactory
    * @return database Connection
    * @throws SQLException on database error
+   * @deprecated prefer method {@link #prepConnection(Session)}
+   * @see #prepConnection(Session)
    */
+  @Deprecated
   public static Connection prepConnection(final SessionFactory sessionFactory) throws SQLException {
     final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
-    NeutronDB2Utils.enableBatchSettings(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
     return con;
   }
 
-  public static void prepHibernateLastChange(final Session session, final Date lastRunTime,
-      final String sql, final Function<Connection, PreparedStatement> func) {
-    doWork(session, new WorkPrepareLastChange(lastRunTime, sql, func));
+  /**
+   * Steal a connection from an active Hibernate session.
+   * 
+   * @param session active Hibernate session
+   * @return database Connection
+   * @throws SQLException on database error
+   */
+  public static Connection prepConnection(final Session session) throws SQLException {
+    final NeutronWorkConnectionStealer work = new NeutronWorkConnectionStealer();
+    doWork(session, work);
+    return work.getConnection();
   }
 
-  public static void doWork(final Session session, Work work) {
+  public static int runStatementInsertLastChangeKeys(final Session session, final Date lastRunTime,
+      final String sql, final Function<Connection, PreparedStatement> func) {
+    final NeutronWorkTotalImpl work = new WorkPrepareLastChange(lastRunTime, sql, func);
+    doWork(session, work);
+    return work.getTotalProcessed();
+  }
+
+  public static int runStatementInsertRownumBundle(final Session session, final String sql,
+      int start, int end, final Function<Connection, PreparedStatement> func) {
+    final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end, func);
+    doWork(session, work);
+    return work.getTotalProcessed();
+  }
+
+  /**
+   * Prepare a statement through a Java Function to avoid vulnerability to SQL injection. Thanks a
+   * lot, SonarQube. Boo! Hiss!
+   * 
+   * @param sql SQL statement to prepare
+   * @return Java Function to execute the prepared statement
+   */
+  public static Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
+    return c -> {
+      try {
+        LOGGER.info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
+        return c.prepareStatement(sql);
+      } catch (SQLException e) {
+        throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
+      }
+    };
+  }
+
+  /**
+   * Clear a Hibernate session and trap transaction errors.
+   * 
+   * @param session active Hibernate session
+   */
+  public static void clearSession(final Session session) {
     try {
-      // May fail without a transaction.
+      // Hibernate session clear may fail without a transaction.
+      grabTransaction(session);
       session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {
       LOGGER.warn("'clear' without transaction", e);
     }
-
-    session.doWork(work);
-    session.clear();
   }
+
+  /**
+   * "Work-around" (gentle euphemism for <strong>HACK</strong>) for annoying condition where a
+   * transaction should have started but did not.
+   * 
+   * <p>
+   * Get the current transaction from the current session or start a new transaction.
+   * </p>
+   * 
+   * @param dao DAO
+   * @return current, active transaction
+   */
+  public static Transaction grabTransaction(final BaseDaoImpl<?> dao) {
+    return grabTransaction(dao.grabSession());
+  }
+
+  /**
+   * @param session active Hibernation session
+   * @return current, active transaction
+   * @see #grabTransaction(BaseDaoImpl)
+   */
+  public static Transaction grabTransaction(final Session session) {
+    Transaction txn = null;
+    try {
+      txn = session.beginTransaction();
+    } catch (Exception e) { // NOSONAR
+      txn = session.getTransaction();
+    }
+    return txn;
+  }
+
+  /**
+   * Generic method to execute a Hibernate Work implementation (arbitrary JDBC through Hibernate).
+   * 
+   * @param session active Hibernate session
+   * @param work Hibernate Work instance
+   */
+  public static void doWork(final Session session, Work work) {
+    clearSession(session);
+    grabTransaction(session);
+    session.doWork(work);
+    clearSession(session);
+  }
+
+  /**
+   * Make a Hibernate query read-only.
+   * 
+   * @param q query to make read-only
+   * @see #optimizeQuery(Query)
+   */
+  public static void readOnlyQuery(Query<?> q) {
+    optimizeQuery(q);
+    q.setReadOnly(true);
+  }
+
+  /**
+   * Optimize a Hibernate query for batch performance. Disable Hibernate caching, set flush mode to
+   * manual, and set fetch size to {@code NeutronIntegerDefaults.FETCH_SIZE}.
+   * 
+   * @param q query to optimize
+   */
+  public static void optimizeQuery(Query<?> q) {
+    q.setCacheable(false);
+    q.setCacheMode(CacheMode.IGNORE);
+    q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+    q.setHibernateFlushMode(FlushMode.MANUAL);
+  }
+
+  // public static void batch
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitionCount,
       String[] partitions) {
@@ -189,6 +311,7 @@ public final class NeutronJdbcUtils {
             .sorted().sequential().collect(Collectors.toList()).toArray(new Integer[0]);
 
     if (LOGGER.isInfoEnabled()) {
+      // Print it. Show off to your friends.
       LOGGER.info(ToStringBuilder.reflectionToString(positions, ToStringStyle.MULTI_LINE_STYLE));
     }
 
@@ -223,24 +346,46 @@ public final class NeutronJdbcUtils {
       // Linux or small data set:
       // ORDER: 0,9,a,A,z,Z
       // ----------------------------
+
+      // Yep, you read that right: by default Linux sorts in ASCII order, not EBCIDIC.
       ret.add(Pair.of("0000000000", "ZZZZZZZZZZ"));
     }
 
     return ret;
   }
 
+  /**
+   * Partition strategy with 4 partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges4() {
     return buildPartitionsRanges(4, BASE_PARTITIONS);
   }
 
+  /**
+   * Partition strategy with 16 partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges16() {
     return buildPartitionsRanges(16, BASE_PARTITIONS);
   }
 
+  /**
+   * Partition strategy with 64 partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges64() {
     return buildPartitionsRanges(64, BASE_PARTITIONS);
   }
 
+  /**
+   * Partition strategy with 512 (ish) partitions.
+   * 
+   * @return partition range pairs
+   */
   public static List<Pair<String, String>> getPartitionRanges512() {
     return buildPartitionsRanges(512, EXTENDED_PARTITIONS);
   }
@@ -262,7 +407,32 @@ public final class NeutronJdbcUtils {
 
   public static List<Pair<String, String>> getCommonPartitionRanges512(
       @SuppressWarnings("rawtypes") AtomInitialLoad initialLoad) throws NeutronCheckedException {
+    // Off by one. Close enough
+    // However, "close" only counts in horseshoes (outdoor game), hand grenades, and hydrogen bombs.
     return getCommonPartitionRanges(initialLoad, 511, EXTENDED_PARTITIONS);
+  }
+
+  public static void enableBatchSettings(final Session session) {
+    session.setCacheMode(CacheMode.IGNORE);
+    session.setDefaultReadOnly(true);
+    session.setHibernateFlushMode(FlushMode.MANUAL);
+  }
+
+  /**
+   * Enable DB2 parallelism. Ignored for other databases.
+   * 
+   * @param con connection
+   * @throws SQLException connection error
+   */
+  public static void enableBatchSettings(Connection con) throws SQLException {
+    final String dbProductName = con.getMetaData().getDatabaseProductName();
+    con.setSchema(getDBSchemaName());
+    con.setAutoCommit(false);
+
+    if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
+      NeutronDB2Utils.LOGGER.info("Apply DB2 batch settings");
+      new WorkSetDB2UserInfo().execute(con);
+    }
   }
 
 }

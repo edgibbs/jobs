@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +11,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.flight.FlightSummary;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -40,6 +40,7 @@ public class ExitInitialLoadRocket
    * @param dao random DAO for parent class
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
+   * @param launchDirector1 another launch director
    * @param launchDirector command launch director
    * @param flightPlan command line options
    * @param launchDirector launch director

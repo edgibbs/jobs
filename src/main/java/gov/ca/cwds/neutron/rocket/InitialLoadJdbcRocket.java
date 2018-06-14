@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -10,26 +9,32 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
+/**
+ * Common routines for Initial Load.
+ * 
+ * @author CWDS API Team
+ */
 public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends BasePersonRocket<T, M> {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   *
-   * @param dao
-   * @param esDao
-   * @param lastRunFile
-   * @param mapper
-   * @param flightPlan
-   * @param launchDirector
+   * Preferred ctor.
+   * 
+   * @param dao main DAO
+   * @param esDao Elasticsearch DAO
+   * @param lastRunFile timestamp file
+   * @param mapper object mapper
+   * @param flightPlan this rocket's flight plan
+   * @param launchDirector common launch director
    */
   public InitialLoadJdbcRocket(BaseDaoImpl<T> dao, ElasticsearchDao esDao, String lastRunFile,
-      ObjectMapper mapper, FlightPlan flightPlan,
-      AtomLaunchDirector launchDirector) {
+      ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 

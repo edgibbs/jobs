@@ -5,8 +5,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.ibm.db2.jcc.DB2Connection;
 import com.ibm.db2.jcc.DB2SystemMonitor;
 
@@ -24,26 +22,10 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
  */
 public final class NeutronDB2Utils {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
+  static final ConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
 
   private NeutronDB2Utils() {
     // Default no-op.
-  }
-
-  /**
-   * Enable DB2 parallelism. Ignored for other databases.
-   * 
-   * @param con connection
-   * @throws SQLException connection error
-   */
-  public static void enableBatchSettings(Connection con) throws SQLException {
-    final String dbProductName = con.getMetaData().getDatabaseProductName();
-    con.setSchema(NeutronJdbcUtils.getDBSchemaName());
-    con.setAutoCommit(false);
-
-    if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
-      con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
-    }
   }
 
   /**
@@ -131,6 +113,7 @@ public final class NeutronDB2Utils {
    * @param con database connection
    * @return DB2 monitor
    */
+  @SuppressWarnings({"fb-contrib:JVR_JDBC_VENDOR_RELIANCE", "squid:CallToDeprecatedMethod"})
   public static DB2SystemMonitor monitorStart(final Connection con) {
     DB2SystemMonitor ret = null;
     try {

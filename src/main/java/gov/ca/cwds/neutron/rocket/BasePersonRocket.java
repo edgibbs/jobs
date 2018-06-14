@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -48,6 +47,7 @@ import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomDocumentSecurity;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomPersonDocPrep;
 import gov.ca.cwds.neutron.atom.AtomTransform;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
@@ -64,7 +64,6 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
@@ -159,7 +158,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(20000);
+  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(50000);
 
   /**
    * Construct rocket with all required dependencies.
@@ -364,7 +363,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       LOGGER.info("query: {}", query);
 
       // Enable parallelism for underlying database.
-      NeutronDB2Utils.enableBatchSettings(con);
+      NeutronJdbcUtils.enableBatchSettings(con);
 
       D m;
       try (final Statement stmt = con.createStatement()) {
@@ -627,6 +626,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
     }
   }
+
   /**
    * Lambda runs a number of threads up to max processor cores. Queued jobs wait until a worker
    * thread is available.
@@ -717,7 +717,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     try {
       final NativeQuery<N> q = session.getNamedNativeQuery(namedQueryName);
-      q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+      NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
@@ -732,7 +732,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     } catch (HibernateException h) {
       fail();
       LOGGER.error("EXTRACT ERROR! {}", h.getMessage(), h);
-      txn.rollback();
+      if (txn != null && txn.getStatus().canRollback()) {
+        txn.rollback();
+      }
       throw new DaoException(h);
     } finally {
       doneRetrieve();
@@ -746,14 +748,15 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     final String namedQueryNameForDeletion =
         entityClass.getName() + ".findAllUpdatedAfterWithLimitedAccess";
     final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryNameForDeletion);
+    NeutronJdbcUtils.readOnlyQuery(q);
     q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
         NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
     final List<D> deletionRecs = q.list();
     if (deletionRecs != null && !deletionRecs.isEmpty()) {
       for (D rec : deletionRecs) {
-        // Assuming group key represents ID of client to delete. This is true for client,
-        // referral history, case history jobs.
+        // Assuming group key represents ID of client to delete.
+        // True for client, referral history, case history jobs.
         Object groupKey = rec.getNormalizationGroupKey();
         if (groupKey != null) {
           deletionResults.add(groupKey.toString());
@@ -783,35 +786,40 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         flightPlan.isLoadSealedAndSensitive() ? entityClass.getName() + ".findAllUpdatedAfter"
             : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
-    final Session session = jobDao.grabSession();
-    final Transaction txn = grabTransaction();
-    Object lastId = new Object();
+    Transaction txn = null;
 
-    try {
+    try (final Session session = jobDao.grabSession()) {
+      txn = grabTransaction();
       // Insert into session temp table that drives a last change view.
-      final int fetchSize = NeutronIntegerDefaults.FETCH_SIZE.getValue();
-      prepHibernateLastChange(session, lastRunTime, getPrepLastChangeSQLs());
+      runInsertAllLastChangeKeys(session, lastRunTime, getPrepLastChangeSQLs());
       final NativeQuery<D> q = session.getNamedNativeQuery(namedQueryName);
-      q.setCacheMode(CacheMode.IGNORE);
-      q.setFetchSize(fetchSize);
+      NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter(NeutronColumn.SQL_COLUMN_AFTER.getValue(),
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
       // Iterate, process, flush.
-      List<D> recs = new ArrayList<>();
-      try (final ScrollableResults scroll = q.scroll(ScrollMode.FORWARD_ONLY)) {
+      List<D> recs = new ArrayList<>(210000); // Outrageous but necessary.
+      try {
         recs = q.list();
         LOGGER.info("FOUND {} RECORDS", recs.size());
-
         session.flush();
         session.clear();
+        txn.commit();
+      } catch (Exception h) {
+        fail();
+        if (txn.getStatus().canRollback()) {
+          txn.rollback();
+        }
+        throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
       }
 
-      // ImmutableList lacks a public constructor and setters to set starting size.
-      final ImmutableList.Builder<N> results = new ImmutableList.Builder<>();
+      // Release database resources. Don't hold on to the connection or transaction.
+      LOGGER.info("PULL VIEW: DATA RETRIEVAL DONE");
+      Object lastId = new Object();
+      final List<N> results = new ArrayList<>(recs.size()); // Size appropriately
 
       // Convert denormalized rows to normalized persistence objects.
-      final List<D> groupRecs = new ArrayList<>(20);
+      final List<D> groupRecs = new ArrayList<>(50);
       for (D m : recs) {
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(normalizeSingle(groupRecs));
@@ -836,12 +844,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
 
       groupRecs.clear();
-      txn.commit();
-
-      return results.build();
+      return results;
     } catch (Exception h) {
       fail();
-      txn.rollback();
       throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
     } finally {
       doneRetrieve(); // Override in multi-thread mode to avoid killing the indexer thread
@@ -913,6 +918,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       session.setFlushMode(FlushModeType.COMMIT);
 
       final NativeQuery<N> q = session.getNamedNativeQuery(namedQueryName);
+      NeutronJdbcUtils.readOnlyQuery(q);
       q.setParameter("min_id", minId, StringType.INSTANCE)
           .setParameter("max_id", maxId, StringType.INSTANCE)
           .setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
@@ -942,7 +948,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     } catch (HibernateException e) {
       fail();
       LOGGER.error("ERROR PULLING BUCKET RANGE! {}-{}: {}", minId, maxId, e.getMessage(), e);
-      txn.rollback();
+      if (txn.getStatus().canRollback()) {
+        txn.rollback();
+      }
       throw new DaoException(e);
     }
   }
@@ -1006,7 +1014,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * Mainly used for testing.
+   * Used for testing.
    * 
    * @return index queue implementation
    */
@@ -1015,7 +1023,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * Only used for testing.
+   * Used for testing.
    * 
    * @param queueIndex index queue implementation
    */

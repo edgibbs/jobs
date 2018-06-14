@@ -20,6 +20,7 @@ import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.util.jdbc.WorkPrepareLastChange;
 
 public class WorkPrepareLastChangeTest extends Goddard<ReplicatedPersonCases, EsPersonCase> {
 

@@ -61,9 +61,10 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+
   TestNormalizedEntityDao dao;
   TestIndexerJob target;
 
@@ -222,7 +223,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     } finally {
       markTestDone();
     }
-
   }
 
   @Test
@@ -262,7 +262,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, notNullValue());
   }
 
-  @Test(expected = SQLException.class)
+  @Test(expected = NeutronRuntimeException.class)
   public void extractLastRunRecsFromView_Args__Date__SQLException() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
@@ -272,7 +272,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
         target.extractLastRunRecsFromView(lastRunTime, new HashSet<String>());
   }
 
-  @Test(expected = HibernateException.class)
+  @Test(expected = NeutronRuntimeException.class)
   public void extractLastRunRecsFromView_Args__Date__HibernateException() throws Exception {
     final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any())).thenReturn(qn);
@@ -582,7 +582,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     } finally {
       markTestDone();
     }
-
   }
 
   @Test
@@ -664,7 +663,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.prepHibernateLastChange(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_LAST_CHG);
+    target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_LAST_CHG);
   }
 
   @Test
@@ -698,7 +697,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    NeutronDB2Utils.enableBatchSettings(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
   }
 
   @Test
@@ -955,7 +954,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     grpRecs.add(theLastId);
 
     target.queueNormalize.putLast(theLastId);
-
     int inCntr = 0;
     int actual = target.normalizeLoop(grpRecs, theLastId, inCntr);
     int expected = 2;

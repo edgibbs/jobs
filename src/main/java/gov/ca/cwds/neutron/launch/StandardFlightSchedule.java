@@ -1,5 +1,17 @@
 package gov.ca.cwds.neutron.launch;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.quartz.JobKey;
+import org.quartz.listeners.JobChainingJobListener;
+
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
@@ -28,16 +40,6 @@ import gov.ca.cwds.neutron.rocket.IndexResetPeopleRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.LetsLightThisCandleRocket;
 import gov.ca.cwds.neutron.rocket.SchemaResetRocket;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.quartz.JobKey;
-import org.quartz.listeners.JobChainingJobListener;
 
 /**
  * Standard rocket settings for Initial Load and On-going (continuous) modes.
@@ -105,43 +107,43 @@ public enum StandardFlightSchedule {
   /**
    * Document root: Reporter.
    */
-  REPORTER_S(ReporterSIndexerJob.class, "reporter", 14, 30, 950, null, true, true, false),
+  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 14, 30, 950, null, true, true, false),
 
   /**
    * Document root: Collateral Individual.
    */
-  COLLATERAL_INDIVIDUAL_S(CollateralIndividualSIndexerJob.class, "collateral_individual", 20, 30,
+  COLLATERAL_INDIVIDUAL_S(CollateralIndividualSIndexerJob.class, "ps_collateral_individual", 20, 30,
       90, null, true, true, false),
 
   /**
    * Document root: Service Provider.
    */
-  SERVICE_PROVIDER_S(ServiceProviderSIndexerJob.class, "service_provider", 25, 120, 85, null, true,
-      true, false),
+  SERVICE_PROVIDER_S(ServiceProviderSIndexerJob.class, "ps_service_provider", 25, 120, 85, null,
+      true, true, false),
 
   /**
    * Document root: Substitute Care Provider.
    */
-  SUBSTITUTE_CARE_PROVIDER_S(SubstituteCareProviderSIndexJob.class, "substitute_care_provider", 30, 25,
-      80, null, true, true, false),
+  SUBSTITUTE_CARE_PROVIDER_S(SubstituteCareProviderSIndexJob.class, "ps_substitute_care_provider",
+      30, 25, 80, null, true, true, false),
 
   /**
    * Document root: Education Provider.
    */
-  EDUCATION_PROVIDER_S(EducationProviderContactSIndexerJob.class, "education_provider", 42, 120, 75,
-      null, true, true, false),
+  EDUCATION_PROVIDER_S(EducationProviderContactSIndexerJob.class, "ps_education_provider", 42, 120,
+      75, null, true, true, false),
 
   /**
    * Document root: Other Adult in Home.
    */
-  OTHER_ADULT_IN_HOME_S(OtherAdultInPlacemtHomeSIndexerJob.class, "other_adult", 50, 120, 70, null,
-      true, true, false),
+  OTHER_ADULT_IN_HOME_S(OtherAdultInPlacemtHomeSIndexerJob.class, "ps_other_adult", 50, 120, 70,
+      null, true, true, false),
 
   /**
    * Document root: Other Child in Home.
    */
-  OTHER_CHILD_IN_HOME_S(OtherChildInPlacemtHomeSIndexerJob.class, "other_child", 55, 120, 65, null,
-      true, true, false),
+  OTHER_CHILD_IN_HOME_S(OtherChildInPlacemtHomeSIndexerJob.class, "ps_other_child", 55, 120, 65,
+      null, true, true, false),
 
   // =======================
   // PEOPLE INDEX ROCKETS:

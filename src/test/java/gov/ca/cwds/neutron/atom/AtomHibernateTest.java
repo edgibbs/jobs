@@ -167,13 +167,13 @@ public class AtomHibernateTest extends Goddard<TestNormalizedEntity, TestDenorma
   @Test
   public void prepHibernateLastChange_Args__Session__Transaction__Date() throws Exception {
     Date lastRunTime = new Date();
-    target.prepHibernateLastChange(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_FULL);
+    target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_FULL);
   }
 
   @Test
   public void prepHibernateLastChange_Args__Session__Date() throws Exception {
     Date lastRunTime = new Date();
-    target.prepHibernateLastChange(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_FULL);
+    target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_FULL);
   }
 
 }

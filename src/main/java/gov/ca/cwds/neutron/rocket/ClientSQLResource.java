@@ -205,36 +205,47 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String INSERT_CLIENT_LAST_CHG =
-     "INSERT INTO GT_ID (IDENTIFIER) \n"
-          + "SELECT DISTINCT CLT.IDENTIFIER \n"
-          + "FROM CLIENT_T clt \n"
-          + "WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-    + "UNION SELECT DISTINCT cla.FKCLIENT_T AS IDENTIFIER \n"
-          + "FROM CL_ADDRT cla \n"
-          + "WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-    + "UNION SELECT DISTINCT cla.FKCLIENT_T AS IDENTIFIER \n"
-          + "FROM CL_ADDRT cla \n"
-          + "JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
-          + "WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-    + "UNION SELECT DISTINCT eth.ESTBLSH_ID AS IDENTIFIER \n"
-          + "FROM CLSCP_ET eth \n"
-          + "WHERE ETH.ESTBLSH_CD = 'C' \n"
-          + "AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'";
+        "INSERT INTO GT_REFR_CLT (FKREFERL_T,FKCLIENT_T,SENSTV_IND) \n"
+          + "SELECT DISTINCT '' AS FKREFERL_T, s1.CLIENT_ID, '' AS SENSTV_IND FROM ( \n"
+          + "     SELECT DISTINCT CLT.IDENTIFIER AS CLIENT_ID \n"
+          + "     FROM CLIENT_T clt \n"
+          + "     WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT cla.FKCLIENT_T AS CLIENT_ID \n"
+          + "     FROM CL_ADDRT cla \n"
+          + "     WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT cla.FKCLIENT_T AS CLIENT_ID \n"
+          + "     FROM CL_ADDRT cla \n"
+          + "     JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER  \n"
+          + "     WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT eth.ESTBLSH_ID AS CLIENT_ID \n"
+          + "     FROM CLSCP_ET eth \n"
+          + "     WHERE ETH.ESTBLSH_CD = 'C' \n"
+          + "     AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + ") s1 \n"
+          + "UNION \n"
+          + "SELECT DISTINCT '' AS FKREFERL_T, s2.CLIENT_ID, '' AS SENSTV_IND FROM ( \n"
+          + "     SELECT DISTINCT pe.FKCLIENT_T AS CLIENT_ID \n"
+          + "     FROM PLC_EPST pe \n"
+          + "     WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT ohp.FKPLC_EPST AS CLIENT_ID \n"
+          + "     FROM O_HM_PLT ohp \n"
+          + "     JOIN PLC_HM_T ph ON ph.IDENTIFIER = ohp.FKPLC_HM_T \n"
+          + "     WHERE ph.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + "     AND CURRENT DATE BETWEEN OHP.START_DT AND NVL(OHP.END_DT, CURRENT DATE) \n"
+          + " UNION SELECT DISTINCT ohp.FKPLC_EPST AS CLIENT_ID \n"
+          + "     FROM O_HM_PLT ohp \n"
+          + "     WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + ") s2 ";
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_PLACEMENT_HOME_CLIENT_LAST_CHG =
-     "INSERT INTO GT_ID (IDENTIFIER) \n"
-          + "SELECT DISTINCT pe.FKCLIENT_T \n"
-          + "FROM PLC_EPST pe \n"
-          + "WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-    + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
-          + "FROM O_HM_PLT ohp \n"
-          + "JOIN PLC_HM_T ph  ON ph.IDENTIFIER  = ohp.FKPLC_HM_T \n"
-          + "WHERE ph.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-    + "UNION SELECT DISTINCT ohp.FKPLC_EPST \n"
-          + "FROM O_HM_PLT ohp  \n"
-          + "WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'";
+  public static final String INSERT_NEXT_BUNDLE =
+      "INSERT INTO GT_ID (IDENTIFIER) \n"
+        + "SELECT x.IDENTIFIER FROM ( \n"
+        + "   SELECT rc.FKCLIENT_T AS IDENTIFIER, ROW_NUMBER() OVER(ORDER BY rc.FKCLIENT_T) AS rn \n"
+        + "   FROM GT_REFR_CLT rc \n"
+        + ") x \n"
+        + "WHERE x.rn BETWEEN ? AND ? ";
   //@formatter:on
 
 }
