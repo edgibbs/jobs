@@ -181,9 +181,7 @@ public final class NeutronJdbcUtils {
   public static Connection prepConnection(final Session session) throws SQLException {
     final NeutronWorkConnectionStealer work = new NeutronWorkConnectionStealer();
     doWork(session, work);
-    final Connection con = work.getConnection();
-    NeutronJdbcUtils.enableBatchSettings(con);
-    return con;
+    return work.getConnection();
   }
 
   public static int runStatementInsertLastChangeKeys(final Session session, final Date lastRunTime,

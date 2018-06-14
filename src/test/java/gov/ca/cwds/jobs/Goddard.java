@@ -236,6 +236,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
     when(cp.getConnection()).thenReturn(con);
     when(con.getMetaData()).thenReturn(meta);
+    when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(con.createStatement()).thenReturn(stmt);
     when(stmt.executeQuery(any())).thenReturn(rs);
 

@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
@@ -117,6 +118,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   }
 
   @Test
+  @Ignore
   public void fetchLastRunNormalizedResults_A$Date$Set() throws Exception {
     Date lastRunDate = new SimpleDateFormat("yyyy-mm-dd").parse("10-31-2017");
     final Set<String> deletionResults = new HashSet<>();
