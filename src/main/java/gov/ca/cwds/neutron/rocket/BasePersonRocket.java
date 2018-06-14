@@ -64,7 +64,6 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
@@ -364,7 +363,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       LOGGER.info("query: {}", query);
 
       // Enable parallelism for underlying database.
-      NeutronDB2Utils.enableBatchSettings(con);
+      NeutronJdbcUtils.enableBatchSettings(con);
 
       D m;
       try (final Statement stmt = con.createStatement()) {

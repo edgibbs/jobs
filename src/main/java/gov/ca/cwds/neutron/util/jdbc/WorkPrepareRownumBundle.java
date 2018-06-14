@@ -45,8 +45,6 @@ public class WorkPrepareRownumBundle extends NeutronWorkTotalImpl {
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    NeutronDB2Utils.enableBatchSettings(con);
-
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       stmt.setInt(1, start);
       stmt.setInt(2, end);

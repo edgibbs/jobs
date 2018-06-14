@@ -513,7 +513,7 @@ public class ReferralHistoryIndexerJob
     releaseLocalMemory(listAllegations, mapReferrals, listClientReferralKeys, listReadyToNorm);
 
     try (final Connection con = getConnection()) {
-      NeutronDB2Utils.enableBatchSettings(con);
+      NeutronJdbcUtils.enableBatchSettings(con);
 
       final DB2SystemMonitor monitor = NeutronDB2Utils.monitorStart(con);
       final String schema = getDBSchemaName();

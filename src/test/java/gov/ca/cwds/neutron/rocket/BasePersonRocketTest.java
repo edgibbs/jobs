@@ -61,7 +61,7 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
 
@@ -697,7 +697,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void enableParallelism_Args__Connection() throws Exception {
-    NeutronDB2Utils.enableBatchSettings(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
   }
 
   @Test

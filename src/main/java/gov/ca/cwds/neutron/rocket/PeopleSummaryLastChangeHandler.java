@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.CacheMode;
-import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.NativeQuery;
@@ -102,9 +100,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final int increment = 1000;
 
     try (final Session session = rocket.getJobDao().grabSession()) {
-      session.setCacheMode(CacheMode.IGNORE);
-      session.setDefaultReadOnly(true);
-      session.setHibernateFlushMode(FlushMode.MANUAL);
+      NeutronJdbcUtils.enableBatchSettings(session);
+      NeutronJdbcUtils.enableBatchSettings(con);
 
       final PreparedStatement stmtSelPlacementAddress =
           con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS);

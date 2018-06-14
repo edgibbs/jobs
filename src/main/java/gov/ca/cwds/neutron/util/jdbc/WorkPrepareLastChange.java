@@ -53,7 +53,7 @@ public class WorkPrepareLastChange extends NeutronWorkTotalImpl {
    */
   @Override
   public void execute(Connection con) throws SQLException {
-    NeutronDB2Utils.enableBatchSettings(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
 
     final String strLastRunTime = NeutronDateUtils.makeTimestampStringLookBack(lastRunTime);
     LOGGER.info("strLastRunTime: {}", strLastRunTime);

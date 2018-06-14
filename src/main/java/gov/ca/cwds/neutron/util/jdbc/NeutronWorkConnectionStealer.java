@@ -32,7 +32,7 @@ public class NeutronWorkConnectionStealer implements Work {
   @Override
   public void execute(Connection con) throws SQLException {
     conn = con;
-    NeutronDB2Utils.enableBatchSettings(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
   }
 
   public Connection getConnection() {

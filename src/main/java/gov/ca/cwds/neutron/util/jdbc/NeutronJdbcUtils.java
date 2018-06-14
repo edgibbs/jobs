@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
@@ -166,7 +167,7 @@ public final class NeutronJdbcUtils {
   public static Connection prepConnection(final SessionFactory sessionFactory) throws SQLException {
     final Connection con = sessionFactory.getSessionFactoryOptions().getServiceRegistry()
         .getService(ConnectionProvider.class).getConnection();
-    NeutronDB2Utils.enableBatchSettings(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
     return con;
   }
 
@@ -181,7 +182,7 @@ public final class NeutronJdbcUtils {
     final NeutronWorkConnectionStealer work = new NeutronWorkConnectionStealer();
     doWork(session, work);
     final Connection con = work.getConnection();
-    NeutronDB2Utils.enableBatchSettings(con);
+    NeutronJdbcUtils.enableBatchSettings(con);
     return con;
   }
 
@@ -296,9 +297,10 @@ public final class NeutronJdbcUtils {
     q.setCacheable(false);
     q.setCacheMode(CacheMode.IGNORE);
     q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
-    q.setFlushMode(FlushMode.MANUAL);
     q.setHibernateFlushMode(FlushMode.MANUAL);
   }
+
+  // public static void batch
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitionCount,
       String[] partitions) {
@@ -410,6 +412,29 @@ public final class NeutronJdbcUtils {
     // Off by one. Close enough
     // However, "close" only counts in horseshoes (outdoor game), hand grenades, and hydrogen bombs.
     return getCommonPartitionRanges(initialLoad, 511, EXTENDED_PARTITIONS);
+  }
+
+  public static void enableBatchSettings(final Session session) {
+    session.setCacheMode(CacheMode.IGNORE);
+    session.setDefaultReadOnly(true);
+    session.setHibernateFlushMode(FlushMode.MANUAL);
+  }
+
+  /**
+   * Enable DB2 parallelism. Ignored for other databases.
+   * 
+   * @param con connection
+   * @throws SQLException connection error
+   */
+  public static void enableBatchSettings(Connection con) throws SQLException {
+    final String dbProductName = con.getMetaData().getDatabaseProductName();
+    con.setSchema(getDBSchemaName());
+    con.setAutoCommit(false);
+
+    if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
+      NeutronDB2Utils.LOGGER.info("Apply DB2 batch settings");
+      new WorkSetDB2UserInfo().execute(con);
+    }
   }
 
 }
