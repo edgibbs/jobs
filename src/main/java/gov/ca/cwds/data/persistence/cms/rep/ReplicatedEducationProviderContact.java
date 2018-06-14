@@ -92,7 +92,7 @@ public class ReplicatedEducationProviderContact extends BaseEducationProviderCon
   @Override
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
-        LegacyTable.EDUCATION_PROVIDER);
+        LegacyTable.EDUCATION_PROVIDER_CONTACT);
   }
 
   @Override
