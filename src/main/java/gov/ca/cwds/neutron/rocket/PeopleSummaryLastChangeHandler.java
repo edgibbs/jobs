@@ -168,7 +168,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     try {
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
-
       final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
 
       // ---------------------------
