@@ -148,13 +148,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           LOGGER.info("STEP #5: pull placement homes");
           readPlacementAddress(stmtSelPlacementAddress);
         } catch (Exception e) {
-          LOGGER.error("OOPS!", e);
           rocket.fail();
-          if (txn != null && txn.getStatus().canRollback()) {
-            txn.rollback();
-            txn = null;
-          }
-          throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
+          throw CheeseRay.runtime(LOGGER, e,
+              "PeopleSummaryLastChangeHandler.handleSecondaryJdbc: EXTRACT ERROR!: {}",
+              e.getMessage());
         } finally {
           // leave it
         }
@@ -163,10 +160,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
-      if (txn != null && txn.getStatus().canRollback()) {
-        txn.rollback();
-        txn = null;
-      }
       throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
     } finally {
       // session goes out of scope
@@ -220,12 +213,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
         txn.commit();
       } finally {
-        if (txn.getStatus().canRollback()) {
-          txn.rollback();
-        }
-      } // session goes out of scope
+        // session goes out of scope
+      }
 
-      // Keep 'em.
+      // Keep normalized records.
       addAll(results);
 
       // Remove sealed and sensitive, if not permitted to view them.
