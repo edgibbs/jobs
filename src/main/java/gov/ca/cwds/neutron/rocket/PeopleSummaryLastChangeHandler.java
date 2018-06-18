@@ -16,15 +16,27 @@ import org.hibernate.query.NativeQuery;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
+import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
+/**
+ * Last change logic for {@link ClientPersonIndexerJob}.
+ * 
+ * @author CWDS API Team
+ * @see AtomLoadStepHandler
+ */
 public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
   private static final int BUNDLE_KEY_COUNT = 500;
 
+  /**
+   * Preferred ctor.
+   * 
+   * @param rocket parent people summary rocket
+   */
   public PeopleSummaryLastChangeHandler(ClientPersonIndexerJob rocket) {
     super(rocket);
   }
@@ -57,7 +69,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       return ret;
     } catch (Exception e) {
       getRocket().fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
       getRocket().getFlightLog().markRangeComplete(range);
