@@ -150,7 +150,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         } catch (Exception e) {
           rocket.fail();
           throw CheeseRay.runtime(LOGGER, e,
-              "PeopleSummaryLastChangeHandler.handleSecondaryJdbc: EXTRACT ERROR!: {}",
+              "PeopleSummaryLastChangeHandler.handleSecondaryJdbc: INNER EXTRACT ERROR!: {}",
               e.getMessage());
         } finally {
           // leave it
@@ -160,7 +160,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
-      throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "OUTER EXTRACT ERROR!: {}", e.getMessage());
     } finally {
       // session goes out of scope
     }
