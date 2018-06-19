@@ -261,7 +261,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
-    boolean ret = false;
+    boolean ret = true;
     if (flightPlan.isValidateAfterIndexing()) {
       try {
         final String clientId = person.getId();
