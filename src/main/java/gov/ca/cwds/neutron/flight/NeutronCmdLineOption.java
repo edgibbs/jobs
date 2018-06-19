@@ -144,7 +144,7 @@ public enum NeutronCmdLineOption {
 
   FORCE_PARTITIONS(
       NeutronCmdLineParser.makeOpt("P", NeutronLongCmdLineName.CMD_LINE_FORCE_PARTITIONS,
-          "force number of partitions (-P=500)", false, 4, Integer.class, ',')),
+          "force number of partitions (-P=4)", false, 1, Integer.class, ',')),
 
   VALIDATE_INDEXED_DOCS(
       NeutronCmdLineParser.makeOpt("V", NeutronLongCmdLineName.CMD_LINE_VALIDATE_INDEXED_DOCS,

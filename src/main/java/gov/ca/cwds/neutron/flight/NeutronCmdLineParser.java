@@ -52,7 +52,7 @@ public class NeutronCmdLineParser {
     ret.addOption(NeutronCmdLineOption.EXCLUDE_ROCKETS.getOpt());
     ret.addOption(NeutronCmdLineOption.KEY_BUNDLE_SIZE.getOpt());
     ret.addOption(NeutronCmdLineOption.VALIDATE_INDEXED_DOCS.getOpt());
-    ret.addOption(NeutronCmdLineOption.KEY_BUNDLE_SIZE.getOpt());
+    ret.addOption(NeutronCmdLineOption.FORCE_PARTITIONS.getOpt());
 
     ret.addOption(NeutronCmdLineOption.BUCKET_RANGE.getOpt());
     ret.addOption(NeutronCmdLineOption.MIN_ID.getOpt());
