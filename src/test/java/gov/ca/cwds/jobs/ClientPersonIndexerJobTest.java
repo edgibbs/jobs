@@ -215,7 +215,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     target.setTxn(transaction);
 
     final boolean actual = target.validateDocument(person);
-    final boolean expected = false;
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
