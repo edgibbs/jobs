@@ -16,15 +16,27 @@ import org.hibernate.query.NativeQuery;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
+import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
+/**
+ * Last change logic for {@link ClientPersonIndexerJob}.
+ * 
+ * @author CWDS API Team
+ * @see AtomLoadStepHandler
+ */
 public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
   private static final int BUNDLE_KEY_COUNT = 500;
 
+  /**
+   * Preferred ctor.
+   * 
+   * @param rocket parent people summary rocket
+   */
   public PeopleSummaryLastChangeHandler(ClientPersonIndexerJob rocket) {
     super(rocket);
   }
@@ -57,7 +69,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       return ret;
     } catch (Exception e) {
       getRocket().fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
       getRocket().getFlightLog().markRangeComplete(range);
@@ -148,13 +160,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           LOGGER.info("STEP #5: pull placement homes");
           readPlacementAddress(stmtSelPlacementAddress);
         } catch (Exception e) {
-          LOGGER.error("OOPS!", e);
           rocket.fail();
-          if (txn != null && txn.getStatus().canRollback()) {
-            txn.rollback();
-            txn = null;
-          }
-          throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
+          throw CheeseRay.runtime(LOGGER, e,
+              "PeopleSummaryLastChangeHandler.handleSecondaryJdbc: INNER EXTRACT ERROR!: {}",
+              e.getMessage());
         } finally {
           // leave it
         }
@@ -163,11 +172,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
-      if (txn != null && txn.getStatus().canRollback()) {
-        txn.rollback();
-        txn = null;
-      }
-      throw CheeseRay.runtime(LOGGER, e, "EXTRACT SQL ERROR!: {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "OUTER EXTRACT ERROR!: {}", e.getMessage());
     } finally {
       // session goes out of scope
     }
@@ -175,7 +180,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     try {
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
-
       final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
 
       // ---------------------------
@@ -220,12 +224,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
         txn.commit();
       } finally {
-        if (txn.getStatus().canRollback()) {
-          txn.rollback();
-        }
-      } // session goes out of scope
+        // session goes out of scope
+      }
 
-      // Keep 'em.
+      // Keep normalized records.
       addAll(results);
 
       // Remove sealed and sensitive, if not permitted to view them.

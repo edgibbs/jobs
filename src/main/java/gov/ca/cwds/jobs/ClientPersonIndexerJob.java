@@ -261,23 +261,28 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
-    try {
-      final String clientId = person.getId();
-      LOGGER.info("Validate client: {}", clientId);
+    boolean ret = true;
+    if (flightPlan.isValidateAfterIndexing()) {
+      try {
+        final String clientId = person.getId();
+        LOGGER.info("Validate client: {}", clientId);
 
-      // HACK: Initialize transaction. Fix DAO impl instead.
-      grabTransaction();
-      final ReplicatedClient client = getJobDao().find(clientId);
+        // HACK: Initialize transaction. Fix DAO impl instead.
+        grabTransaction();
+        final ReplicatedClient client = getJobDao().find(clientId);
 
-      return StringUtils.equals(client.getCommonFirstName(), person.getFirstName())
-          && StringUtils.equals(client.getCommonLastName(), person.getLastName())
-          && StringUtils.equals(client.getCommonMiddleName(), person.getMiddleName())
-          && validateAddresses(client, person);
-    } catch (Exception e) {
-      LOGGER.warn("PEOPLE SUMMARY VALIDATION ERROR!", e);
-      failValidation(); // fail optional validation without aborting the flight
-      return false;
+        ret = StringUtils.equals(client.getCommonFirstName(), person.getFirstName())
+            && StringUtils.equals(client.getCommonLastName(), person.getLastName())
+            && StringUtils.equals(client.getCommonMiddleName(), person.getMiddleName())
+            && validateAddresses(client, person);
+      } catch (Exception e) {
+        LOGGER.warn("PEOPLE SUMMARY VALIDATION ERROR!", e);
+        failValidation(); // fail optional validation without aborting the flight
+        ret = false;
+      }
     }
+
+    return ret;
   }
 
   /**

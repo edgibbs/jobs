@@ -123,6 +123,8 @@ public class FlightPlan implements ApiMarker {
 
   private boolean dropIndex;
 
+  private boolean validateAfterIndexing = false;
+
   private Set<StandardFlightSchedule> excludedRockets = new HashSet<>();
 
   /**
@@ -584,6 +586,14 @@ public class FlightPlan implements ApiMarker {
 
   public void setOptPeopleRockets(Set<StandardFlightSchedule> setExcludedRockets) {
     this.excludedRockets = setExcludedRockets;
+  }
+
+  public boolean isValidateAfterIndexing() {
+    return validateAfterIndexing;
+  }
+
+  public void setValidateAfterIndexing(boolean validateAfterIndexing) {
+    this.validateAfterIndexing = validateAfterIndexing;
   }
 
   @Override
