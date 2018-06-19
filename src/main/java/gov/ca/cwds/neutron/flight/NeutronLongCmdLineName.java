@@ -1,5 +1,10 @@
 package gov.ca.cwds.neutron.flight;
 
+/**
+ * Long strings for command line arguments.
+ * 
+ * @author CWDS API Team
+ */
 public class NeutronLongCmdLineName {
 
   public static final String CMD_LINE_ES_CONFIG_PEOPLE = "config-people";
@@ -27,8 +32,11 @@ public class NeutronLongCmdLineName {
   public static final String CMD_LINE_EXCLUDE_ROCKETS = "exclude_rockets";
 
   public static final String CMD_LINE_SIMULATE_LAUNCH = "simulate_launch";
-
   public static final String CMD_LINE_ALT_INPUT_FILE = "alt-input-file";
+
+  public static final String CMD_LINE_FORCE_PARTITIONS = "force-partitions";
+  public static final String CMD_LINE_KEY_BUNDLE_SIZE = "key-bundle-size";
+  public static final String CMD_LINE_VALIDATE_INDEXED_DOCS = "validate-indexed-docs";
 
   /**
    * Obsolete, no longer in use.

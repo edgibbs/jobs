@@ -128,12 +128,27 @@ public enum NeutronCmdLineOption {
       "Do NOT launch People index rockets", false, 0, Boolean.class, ',')),
 
   /**
-   * Do not launch exclude rockets.
+   * Do NOT launch (i.e., exclude) rockets.
    * 
    * @see StandardFlightSchedule
    */
   EXCLUDE_ROCKETS(NeutronCmdLineParser.makeOpt("e", NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS,
       "exclude rockets (-e=referral,case,relationship)", false, 1, String.class, ',')),
+
+  /**
+   * Set last-change key bundle size for People Summary. Rocket will process N client id's at a
+   * time. Default is 500.
+   */
+  KEY_BUNDLE_SIZE(NeutronCmdLineParser.makeOpt("B", NeutronLongCmdLineName.CMD_LINE_KEY_BUNDLE_SIZE,
+      "key bundle size (-B=500)", false, 1, Integer.class, ',')),
+
+  FORCE_PARTITIONS(
+      NeutronCmdLineParser.makeOpt("P", NeutronLongCmdLineName.CMD_LINE_FORCE_PARTITIONS,
+          "force number of partitions (-P=500)", false, 4, Integer.class, ',')),
+
+  VALIDATE_INDEXED_DOCS(
+      NeutronCmdLineParser.makeOpt("V", NeutronLongCmdLineName.CMD_LINE_VALIDATE_INDEXED_DOCS,
+          "Validate indexed documents (-V=N)", false, 1, Boolean.class, ',')),
 
   /**
    * Test mode!
