@@ -213,6 +213,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // NORMALIZATION DONE.
       // ---------------------------
 
+      LOGGER.info("NORMALIZATION DONE");
       try (final Session session = rocket.getJobDao().grabSession()) {
         txn = rocket.grabTransaction();
 
@@ -227,7 +228,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         // session goes out of scope
       }
 
-      // Keep normalized records.
+      LOGGER.info("Keep normalized records");
       addAll(results);
 
       // Remove sealed and sensitive, if not permitted to view them.
