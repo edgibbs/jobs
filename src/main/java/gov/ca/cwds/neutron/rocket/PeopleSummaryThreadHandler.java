@@ -141,6 +141,7 @@ public class PeopleSummaryThreadHandler
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
+    LOGGER.info("\nhandleJdbcDone: FINISHED\n");
   }
 
   @Override
@@ -176,9 +177,6 @@ public class PeopleSummaryThreadHandler
     // Read from the view, old school.
     // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
     LOGGER.info("After view: count: {}", normalized.size());
-
-    // TODO: move from extractLastRunRecsFromView() to here.
-    // readPlacementAddress(stmtSelPlacementAddress);
 
     // Handle additional JDBC statements, if any.
     try (final Session session = getRocket().getJobDao().grabSession();

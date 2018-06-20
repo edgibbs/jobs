@@ -318,8 +318,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     final List<Thread> threads = new ArrayList<>();
 
     try {
-      nameThread("initial_load");
       LOGGER.info("INITIAL LOAD WITH JDBC!");
+      nameThread("initial_load");
       addThread(true, this::threadIndex, threads);
       addThread(useTransformThread(), this::threadNormalize, threads);
       addThread(true, this::threadRetrieveByJdbc, threads);

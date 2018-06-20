@@ -169,6 +169,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         }
       }
 
+      LOGGER.info("commit transaction, data pull");
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
@@ -177,7 +178,15 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // session goes out of scope
     }
 
+    final List<Thread> threads = new ArrayList<>();
+    rocket.addThread(true, rocket::threadIndex, threads);
+
     try {
+      LOGGER.info("START INDEXER THREAD");
+      for (Thread t : threads) {
+        t.start();
+      }
+
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
       final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
@@ -187,8 +196,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // ---------------------------
 
       // Convert denormalized rows to normalized persistence objects.
+      LOGGER.info("NORMALIZE");
+      int cntr = 0;
       final List<EsClientPerson> groupRecs = new ArrayList<>(50);
       for (EsClientPerson m : recs) {
+        CheeseRay.logEvery(LOGGER, ++cntr, "Normalize", "recs");
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(rocket.normalizeSingle(groupRecs));
           groupRecs.clear();
@@ -208,13 +220,17 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       groupRecs.clear();
+      recs = new ArrayList<>();
 
       // ---------------------------
       // NORMALIZATION DONE.
       // ---------------------------
 
+      LOGGER.info("NORMALIZATION DONE");
       try (final Session session = rocket.getJobDao().grabSession()) {
+        LOGGER.info("Grabbed session");
         txn = rocket.grabTransaction();
+        LOGGER.info("Grabbed transaction");
 
         if (rocket.mustDeleteLimitedAccessRecords()) {
           LOGGER.info("OMIT LIMITED ACCESS RECORDS: count: {}", deletionResults.size());
@@ -222,12 +238,13 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
               rocket.getFlightPlan().getOverrideLastRunStartTime(), deletionResults);
         }
 
+        LOGGER.info("commit transaction, deleted record check");
         txn.commit();
       } finally {
         // session goes out of scope
       }
 
-      // Keep normalized records.
+      LOGGER.info("Keep normalized records");
       addAll(results);
 
       // Remove sealed and sensitive, if not permitted to view them.
@@ -236,9 +253,18 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       // Merge placement homes and index into Elasticsearch.
+      LOGGER.info("call handleJdbcDone");
       handleJdbcDone(range);
+      rocket.doneRetrieve();
+
+      // Wait for threads to finish.
+      for (Thread t : threads) {
+        t.join();
+      }
+
     } catch (Exception e) {
       rocket.fail();
+      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "CLIENT GROUPING ERROR!: {}", e.getMessage());
     } finally {
       // Override in multi-thread mode to avoid killing the indexer thread.
