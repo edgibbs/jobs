@@ -178,7 +178,15 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // session goes out of scope
     }
 
+    final List<Thread> threads = new ArrayList<>();
+    rocket.addThread(true, rocket::threadIndex, threads);
+
     try {
+      LOGGER.info("START INDEXER THREAD");
+      for (Thread t : threads) {
+        t.start();
+      }
+
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
       final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
@@ -247,8 +255,16 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // Merge placement homes and index into Elasticsearch.
       LOGGER.info("call handleJdbcDone");
       handleJdbcDone(range);
+      rocket.doneRetrieve();
+
+      // Wait for threads to finish.
+      for (Thread t : threads) {
+        t.join();
+      }
+
     } catch (Exception e) {
       rocket.fail();
+      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "CLIENT GROUPING ERROR!: {}", e.getMessage());
     } finally {
       // Override in multi-thread mode to avoid killing the indexer thread.
