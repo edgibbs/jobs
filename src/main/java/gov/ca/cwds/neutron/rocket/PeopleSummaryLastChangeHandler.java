@@ -169,6 +169,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         }
       }
 
+      LOGGER.info("commit transaction, data pull");
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
@@ -187,8 +188,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // ---------------------------
 
       // Convert denormalized rows to normalized persistence objects.
+      LOGGER.info("NORMALIZE");
+      int cntr = 0;
       final List<EsClientPerson> groupRecs = new ArrayList<>(50);
       for (EsClientPerson m : recs) {
+        CheeseRay.logEvery(LOGGER, ++cntr, "Normalize", "recs");
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(rocket.normalizeSingle(groupRecs));
           groupRecs.clear();
@@ -208,6 +212,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       groupRecs.clear();
+      recs = new ArrayList<>();
 
       // ---------------------------
       // NORMALIZATION DONE.
@@ -215,7 +220,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       LOGGER.info("NORMALIZATION DONE");
       try (final Session session = rocket.getJobDao().grabSession()) {
+        LOGGER.info("Grabbed session");
         txn = rocket.grabTransaction();
+        LOGGER.info("Grabbed transaction");
 
         if (rocket.mustDeleteLimitedAccessRecords()) {
           LOGGER.info("OMIT LIMITED ACCESS RECORDS: count: {}", deletionResults.size());
@@ -223,6 +230,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
               rocket.getFlightPlan().getOverrideLastRunStartTime(), deletionResults);
         }
 
+        LOGGER.info("commit transaction, deleted record check");
         txn.commit();
       } finally {
         // session goes out of scope
@@ -237,6 +245,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       // Merge placement homes and index into Elasticsearch.
+      LOGGER.info("call handleJdbcDone");
       handleJdbcDone(range);
     } catch (Exception e) {
       rocket.fail();
