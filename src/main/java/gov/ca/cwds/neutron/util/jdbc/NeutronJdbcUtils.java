@@ -431,7 +431,7 @@ public final class NeutronJdbcUtils {
 
     if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
       NeutronDB2Utils.LOGGER.info("Apply DB2 batch settings");
-      new WorkSetDB2UserInfo().execute(con);
+      new WorkDB2UserInfo().execute(con);
     }
   }
 
