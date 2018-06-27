@@ -335,6 +335,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
     when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
+
     final List<BatchBucket> buckets = new ArrayList<>();
     final BatchBucket b = new BatchBucket();
     b.setBucket(1);
@@ -343,6 +344,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     b.setMaxId("2");
     buckets.add(b);
     when(q.getResultList()).thenReturn(buckets);
+
     final NativeQuery<TestDenormalizedEntity> nq = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
@@ -354,15 +356,18 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(nq.setCacheMode(any(CacheMode.class))).thenReturn(nq);
     when(nq.setFetchSize(any(Integer.class))).thenReturn(nq);
     when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
+
     final ScrollableResults results = mock(ScrollableResults.class);
     when(nq.scroll(any(ScrollMode.class))).thenReturn(results);
     when(results.next()).thenReturn(true).thenReturn(false);
+
     final TestNormalizedEntity[] entities = new TestNormalizedEntity[1];
     TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     entity.setFirstName("Fred");
     entity.setLastName("Meyer");
     entities[0] = entity;
     when(results.get()).thenReturn(entities);
+
     target.setFakeRanges(true);
     int actual = target.extractHibernate();
     int expected = 2;
@@ -663,7 +668,8 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_LAST_CHG);
+    target.runInsertAllLastChangeKeys(session, lastRunTime,
+        ClientSQLResource.INSERT_CLIENT_LAST_CHG);
   }
 
   @Test

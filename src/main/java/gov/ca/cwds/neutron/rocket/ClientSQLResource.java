@@ -186,7 +186,7 @@ public class ClientSQLResource implements ApiMarker {
       + ") X \n"
       + "WHERE X.RN = 1 \n"
       + "ORDER BY CLIENT_ID, START_DT \n"
-      + "WITH UR";  
+      + "FOR READ ONLY WITH UR";
   //@formatter:on
 
   //@formatter:off
