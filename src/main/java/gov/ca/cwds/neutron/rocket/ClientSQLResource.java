@@ -316,7 +316,7 @@ public class ClientSQLResource implements ApiMarker {
       + "    ) LAST_CHG \n"
       + "FROM      {h-schema}GT_ID       gt \n"
       + "JOIN      {h-schema}CLIENT_T    clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
-      + "LEFT JOIN {h-schema}CL_ADDRT    cla ON clt.IDENTIFIER = cla.FKCLIENT_T  \n"
+      + "LEFT JOIN {h-schema}CL_ADDRT    cla ON clt.IDENTIFIER = cla.FKCLIENT_T AND cla.EFF_END_DT IS NULL \n"
       + "LEFT JOIN {h-schema}ADDRS_T     adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
       + "LEFT JOIN {h-schema}CLSCP_ET    eth ON clt.IDENTIFIER = eth.ESTBLSH_ID AND eth.ESTBLSH_CD = 'C' \n"
       + "LEFT JOIN {h-schema}CLIENT_CNTY clc ON clt.IDENTIFIER = clc.CLIENT_ID \n"
