@@ -123,7 +123,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       final String sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(
           ClientSQLResource.SELECT_PLACEMENT_ADDRESS, rocket.determineLastSuccessfulRunTime(),
           rocket.getFlightPlan().getOverrideLastEndTime());
-      LOGGER.info("sqlPlacementAddress: \n{}", sqlPlacementAddress);
+      LOGGER.info("SQL for Placement Address: \n{}", sqlPlacementAddress);
       final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
       con = NeutronJdbcUtils.prepConnection(session);
       txn = rocket.grabTransaction();
@@ -131,7 +131,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("STEP #1: Store changed client keys in GT_REFR_CLT");
       final int totalKeys =
           rocket.runInsertAllLastChangeKeys(session, lastRunTime, rocket.getPrepLastChangeSQLs());
-      recs = new ArrayList<>(totalKeys * 4);
+      recs = new ArrayList<>(totalKeys * 3);
       LOGGER.info("total keys found: {}", totalKeys);
 
       // 1-1000, 1001-2000, 2001-3000, etc.
@@ -140,7 +140,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         LOGGER.info("STEP #2: CLEAR GT_ID");
         session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
 
-        LOGGER.info("STEP #3: SELECT keys into GT_ID, bundle: start: {}, end: {}", start, end);
+        LOGGER.info("STEP #3: INSERT keys into GT_ID, bundle: start: {}, end: {}", start, end);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
 
         try {
@@ -162,8 +162,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           }
 
           this.clearSession(session);
+
           LOGGER.info("STEP #6: read placement home addresses: \n{}", sqlPlacementAddress);
           readPlacementAddress(stmtSelPlacementAddress);
+
+          // ======================================
+          // ADD NEW SQL RETRIEVAL STEPS HERE!
+          // ======================================
+
         } catch (Exception e) {
           rocket.fail();
           throw CheeseRay.runtime(LOGGER, e,
