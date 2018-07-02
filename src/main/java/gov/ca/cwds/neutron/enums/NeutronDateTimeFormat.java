@@ -11,6 +11,11 @@ public enum NeutronDateTimeFormat {
   LAST_RUN_DATE_FORMAT("yyyy-MM-dd HH:mm:ss"),
 
   /**
+   * Date format for legacy DB2.
+   */
+  LEGACY_DATE_FORMAT("yyyy-MM-dd"),
+
+  /**
    * Timestamp format for legacy DB2.
    */
   LEGACY_TIMESTAMP_FORMAT("yyyy-MM-dd HH:mm:ss.SSS");

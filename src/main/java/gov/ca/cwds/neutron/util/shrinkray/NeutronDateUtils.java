@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.util.shrinkray;
 
+import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_DATE_FORMAT;
 import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT;
 
 import java.text.DateFormat;
@@ -12,6 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
+/**
+ * Date and timestamp utilities, mainly for DB2.
+ * 
+ * @author CWDS API Team
+ */
 public class NeutronDateUtils {
 
   private NeutronDateUtils() {
@@ -53,10 +59,14 @@ public class NeutronDateUtils {
     return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date);
   }
 
+  public static String makeSimpleDateString(final Date date) {
+    return new SimpleDateFormat(LEGACY_DATE_FORMAT.getFormat()).format(date);
+  }
+
   public static String makeTimestampStringLookBack(final Date date) {
     String ret;
     final DateFormat fmt = new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat());
-  
+
     if (date != null) {
       ret = fmt.format(lookBack(date));
     } else {
@@ -64,7 +74,7 @@ public class NeutronDateUtils {
       cal.add(Calendar.MINUTE, 5);
       ret = fmt.format(lookBack(cal.getTime()));
     }
-  
+
     return ret;
   }
 

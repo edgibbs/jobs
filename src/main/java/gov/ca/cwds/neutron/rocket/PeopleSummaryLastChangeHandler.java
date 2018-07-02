@@ -123,6 +123,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       final String sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(
           ClientSQLResource.SELECT_PLACEMENT_ADDRESS, rocket.determineLastSuccessfulRunTime(),
           rocket.getFlightPlan().getOverrideLastEndTime());
+      LOGGER.info("sqlPlacementAddress: \n{}", sqlPlacementAddress);
       final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
       con = NeutronJdbcUtils.prepConnection(session);
       txn = rocket.grabTransaction();
