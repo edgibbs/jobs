@@ -460,7 +460,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     int cntr = 0;
 
     try {
-      while (!isFailed() && !(isRetrieveDone() && isTransformDone() && queueIndex.isEmpty())) {
+      while (isRunning() && !(isRetrieveDone() && isTransformDone() && queueIndex.isEmpty())) {
         cntr = bulkPrepare(bp, cntr);
       }
 

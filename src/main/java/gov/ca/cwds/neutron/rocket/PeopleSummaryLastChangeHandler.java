@@ -31,7 +31,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_COUNT = 500;
+  private static final int BUNDLE_KEY_COUNT = 300;
 
   /**
    * Preferred ctor.
@@ -182,11 +182,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     rocket.addThread(true, rocket::threadIndex, threads);
 
     try {
-      LOGGER.info("START INDEXER THREAD");
-      for (Thread t : threads) {
-        t.start();
-      }
-
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
       List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
@@ -257,7 +252,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         deletionResults.stream().forEach(normalized::remove);
       }
 
-      // Merge placement homes and index into Elasticsearch.
+      LOGGER.info("START INDEXER THREAD");
+      for (Thread t : threads) {
+        t.start();
+      }
+
       LOGGER.info("Merge placement homes into client records and queue index");
       handleJdbcDone(range);
 
