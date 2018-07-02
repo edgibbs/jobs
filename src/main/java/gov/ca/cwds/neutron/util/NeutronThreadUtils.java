@@ -47,4 +47,23 @@ public final class NeutronThreadUtils {
     }
   }
 
+  /**
+   * Track memory for large file processing.
+   * 
+   * @return free memory in MB
+   */
+  public static long calcMemory() {
+    final Runtime runtime = Runtime.getRuntime();
+    final long maxMemory = runtime.maxMemory();
+    final long allocatedMemory = runtime.totalMemory();
+    final long freeMemory = runtime.freeMemory();
+    return (freeMemory + (maxMemory - allocatedMemory)) / 1024L;
+  }
+
+  public static void freeMemory() {
+    LOGGER.info("Free memory, before gc: {} MB", calcMemory());
+    Runtime.getRuntime().gc();
+    LOGGER.info("Free memory, after  gc: {} MB", calcMemory());
+  }
+
 }

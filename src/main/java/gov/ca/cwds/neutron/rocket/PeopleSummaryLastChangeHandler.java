@@ -18,6 +18,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
@@ -30,7 +31,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_COUNT = 300;
+  private static final int BUNDLE_KEY_COUNT = 500;
 
   /**
    * Preferred ctor.
@@ -219,7 +220,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       groupRecs.clear();
-      recs = new ArrayList<>();
+      recs = new ArrayList<>(); // release memory
+      NeutronThreadUtils.freeMemory();
 
       // ---------------------------
       // NORMALIZATION DONE.
@@ -246,6 +248,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("check access limitations");
       addAll(results);
       results = new ArrayList<>(); // release memory
+      NeutronThreadUtils.freeMemory();
 
       // Remove sealed and sensitive, if not permitted to view them.
       int cntDelete = 0;
@@ -261,6 +264,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("Retrieval done, waiting on indexing");
       doneThreadRetrieve();
       rocket.doneRetrieve();
+      NeutronThreadUtils.freeMemory();
 
       // Wait for threads to finish.
       for (Thread t : threads) {
