@@ -494,6 +494,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected int bulkPrepare(final BulkProcessor bp, int cntr)
       throws IOException, InterruptedException {
+    LOGGER.debug("Indexer thread: bulkPrepare");
     int i = cntr;
     N t;
 
