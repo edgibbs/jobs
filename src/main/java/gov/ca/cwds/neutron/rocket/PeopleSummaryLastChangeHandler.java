@@ -113,6 +113,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     Transaction txn = null;
     List<EsClientPerson> recs = null;
     int totalClientAddressRetrieved = 0;
+    NeutronThreadUtils.freeMemory();
 
     try (final Session session = rocket.getJobDao().grabSession()) {
       NeutronJdbcUtils.enableBatchSettings(session);
@@ -253,10 +254,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         deletionResults.stream().forEach(normalized::remove);
       }
 
-      LOGGER.info("START INDEXER THREAD");
-      for (Thread t : threads) {
-        t.start();
-      }
+      // LOGGER.info("START INDEXER THREAD");
+      // for (Thread t : threads) {
+      // t.start();
+      // }
 
       LOGGER.info("Merge placement homes into client records and queue index");
       handleJdbcDone(range);
@@ -267,10 +268,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronThreadUtils.freeMemory();
 
       // Wait for threads to finish.
-      for (Thread t : threads) {
-        LOGGER.info("Wait for indexer thread");
-        t.join(120000); // safety, two minutes tops
-      }
+      // for (Thread t : threads) {
+      // LOGGER.info("Wait for indexer thread");
+      // t.join(120000); // safety, two minutes tops
+      // }
 
     } catch (Exception e) {
       rocket.fail();
