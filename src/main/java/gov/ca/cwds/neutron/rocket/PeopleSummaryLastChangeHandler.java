@@ -116,6 +116,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     int totalClientAddressRetrieved = 0;
     NeutronThreadUtils.freeMemory();
 
+    // ---------------------------
+    // RETRIEVE DATA
+    // ---------------------------
+
     try (final Session session = rocket.getJobDao().grabSession()) {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
@@ -198,7 +202,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
 
       // ---------------------------
-      // NORMALIZATION:
+      // NORMALIZE
       // ---------------------------
 
       // Convert denormalized rows to normalized persistence objects.
@@ -228,12 +232,12 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       groupRecs.clear();
       recs = new ArrayList<>(); // release memory
       NeutronThreadUtils.freeMemory();
-
-      // ---------------------------
-      // NORMALIZATION DONE.
-      // ---------------------------
-
       LOGGER.info("NORMALIZATION DONE, scan for limited access");
+
+      // ---------------------------
+      // CHECK LIMITED ACCESS
+      // ---------------------------
+
       try (final Session session = rocket.getJobDao().grabSession()) {
         LOGGER.info("Grabbed session");
         txn = rocket.grabTransaction();
@@ -257,11 +261,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronThreadUtils.freeMemory();
 
       // Remove sealed and sensitive, if not permitted to view them.
-      int cntDelete = 0;
       if (!deletionResults.isEmpty()) {
-        CheeseRay.logEvery(LOGGER, ++cntDelete, "Delete limited access", "recs");
-        deletionResults.stream().forEach(normalized::remove);
+        LOGGER.info("Delete limited access records");
+        deletionResults.stream().sequential().forEach(normalized::remove);
       }
+
+      // ---------------------------
+      // INDEX DOCUMENTS
+      // ---------------------------
 
       LOGGER.info("START INDEXER THREAD");
       for (Thread t : threads) {
