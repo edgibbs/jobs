@@ -597,7 +597,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       queueIndex = new LinkedBlockingDeque<>(75000);
     } else {
       queueNormalize = new LinkedBlockingDeque<>(8000);
-      queueIndex = new LinkedBlockingDeque<>(20000);
+      queueIndex = new LinkedBlockingDeque<>(50000);
     }
   }
 

@@ -19,6 +19,7 @@ import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
+import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
@@ -119,8 +120,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
 
-      final PreparedStatement stmtSelPlacementAddress =
-          con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS);
+      final String sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(
+          ClientSQLResource.SELECT_PLACEMENT_ADDRESS, rocket.determineLastSuccessfulRunTime(),
+          rocket.getFlightPlan().getOverrideLastEndTime());
+      final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
       con = NeutronJdbcUtils.prepConnection(session);
       txn = rocket.grabTransaction();
 
@@ -158,7 +161,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           }
 
           this.clearSession(session);
-          LOGGER.info("STEP #6: pull placement homes");
+          LOGGER.info("STEP #6: read placement home addresses: \n{}", sqlPlacementAddress);
           readPlacementAddress(stmtSelPlacementAddress);
         } catch (Exception e) {
           rocket.fail();
