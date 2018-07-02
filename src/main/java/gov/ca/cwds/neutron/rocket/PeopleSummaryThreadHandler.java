@@ -137,11 +137,11 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("\nhandleJdbcDone: normalized.size(): {}\n", normalized.size());
 
     // Merge placement home addresses.
-    placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
+    placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
-    LOGGER.info("\nhandleJdbcDone: FINISHED\n");
+    LOGGER.info("handleJdbcDone: FINISHED");
   }
 
   @Override

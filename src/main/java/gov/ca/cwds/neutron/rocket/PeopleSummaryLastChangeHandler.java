@@ -30,7 +30,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_COUNT = 500;
+  private static final int BUNDLE_KEY_COUNT = 300;
 
   /**
    * Preferred ctor.
@@ -78,7 +78,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   }
 
   /**
-   * Jiggle the handle, flush and clear session.
+   * Jiggle the handle, flush, and clear session.
    * 
    * @param session active Hibernate session
    */
@@ -122,7 +122,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       con = NeutronJdbcUtils.prepConnection(session);
       txn = rocket.grabTransaction();
 
-      // STEP #1: Store changed client keys in GT_REFR_CLT and record the total inserted.
       LOGGER.info("STEP #1: Store changed client keys in GT_REFR_CLT");
       final int totalKeys =
           rocket.runInsertAllLastChangeKeys(session, lastRunTime, rocket.getPrepLastChangeSQLs());
@@ -142,11 +141,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           { // scope brace
             this.surfThePorcelainExpress(session);
 
-            LOGGER.info("STEP #4a: prep query for client address view");
+            LOGGER.info("STEP #4: prep query for client address view");
             final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(queryName);
             NeutronJdbcUtils.readOnlyQuery(q);
 
-            LOGGER.info("STEP #4b: pull from client address view");
+            LOGGER.info("STEP #5: pull from client address view");
             final List<EsClientPerson> resultsClientAddress = q.list();
             recs.addAll(resultsClientAddress); // read from key bundle
 
@@ -157,7 +156,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           }
 
           this.surfThePorcelainExpress(session);
-          LOGGER.info("STEP #5: pull placement homes");
+          LOGGER.info("STEP #6: pull placement homes");
           readPlacementAddress(stmtSelPlacementAddress);
         } catch (Exception e) {
           rocket.fail();
@@ -169,7 +168,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         }
       }
 
-      LOGGER.info("commit transaction, data pull");
+      LOGGER.info(" ***** commit transaction, DONE pulling data *****");
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
@@ -189,7 +188,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
-      final List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
+      List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
 
       // ---------------------------
       // NORMALIZATION:
@@ -226,7 +225,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // NORMALIZATION DONE.
       // ---------------------------
 
-      LOGGER.info("NORMALIZATION DONE");
+      LOGGER.info("NORMALIZATION DONE, scan for limited access");
       try (final Session session = rocket.getJobDao().grabSession()) {
         LOGGER.info("Grabbed session");
         txn = rocket.grabTransaction();
@@ -238,7 +237,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
               rocket.getFlightPlan().getOverrideLastRunStartTime(), deletionResults);
         }
 
-        LOGGER.info("commit transaction, deleted record check");
+        LOGGER.info("commit transaction, limited access check");
         txn.commit();
       } finally {
         // session goes out of scope
@@ -246,26 +245,33 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       LOGGER.info("Keep normalized records");
       addAll(results);
+      results = new ArrayList<>(); // release memory
 
       // Remove sealed and sensitive, if not permitted to view them.
+      int cntDelete = 0;
       if (!deletionResults.isEmpty()) {
+        CheeseRay.logEvery(LOGGER, ++cntDelete, "Delete limited access", "recs");
         deletionResults.stream().forEach(normalized::remove);
       }
 
       // Merge placement homes and index into Elasticsearch.
-      LOGGER.info("call handleJdbcDone");
-      handleJdbcDone(range);
+      LOGGER.info("Merge placement homes into client records and queue index");
+      handleJdbcDone(range); //
+
+      LOGGER.info("Retrieval done, waiting on indexing");
+      doneThreadRetrieve();
       rocket.doneRetrieve();
 
       // Wait for threads to finish.
       for (Thread t : threads) {
-        t.join();
+        LOGGER.info("Wait for indexer thread");
+        t.join(120000); // safety, two minutes tops
       }
 
     } catch (Exception e) {
       rocket.fail();
       Thread.currentThread().interrupt();
-      throw CheeseRay.runtime(LOGGER, e, "CLIENT GROUPING ERROR!: {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "LAST CHANGE ERROR!: {}", e.getMessage());
     } finally {
       // Override in multi-thread mode to avoid killing the indexer thread.
       rocket.doneRetrieve();
