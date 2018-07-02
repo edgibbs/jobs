@@ -31,7 +31,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_COUNT = 300;
+  private static final int BUNDLE_KEY_COUNT = 500;
 
   /**
    * Preferred ctor.
@@ -83,7 +83,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
    * 
    * @param session active Hibernate session
    */
-  protected void surfThePorcelainExpress(final Session session) {
+  protected void clearSession(final Session session) {
     LOGGER.info("Flush and clear session");
     session.clear();
     session.flush();
@@ -140,7 +140,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
         try {
           { // scope brace
-            this.surfThePorcelainExpress(session);
+            this.clearSession(session);
 
             LOGGER.info("STEP #4: prep query for client address view");
             final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(queryName);
@@ -156,7 +156,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
                 recsRetrievedThisBundle, start, end);
           }
 
-          this.surfThePorcelainExpress(session);
+          this.clearSession(session);
           LOGGER.info("STEP #6: pull placement homes");
           readPlacementAddress(stmtSelPlacementAddress);
         } catch (Exception e) {
@@ -180,6 +180,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
     final List<Thread> threads = new ArrayList<>();
     rocket.addThread(true, rocket::threadIndex, threads);
+    NeutronThreadUtils.freeMemory();
 
     try {
       LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
