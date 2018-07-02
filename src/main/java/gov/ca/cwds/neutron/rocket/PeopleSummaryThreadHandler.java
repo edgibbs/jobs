@@ -264,7 +264,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
-    LOGGER.info("read placement home address");
+    LOGGER.info("read placement home address: {}", ClientSQLResource.SELECT_PLACEMENT_ADDRESS);
     stmt.setMaxRows(0);
     stmt.setQueryTimeout(0); // NEXT: soft-code
     stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
