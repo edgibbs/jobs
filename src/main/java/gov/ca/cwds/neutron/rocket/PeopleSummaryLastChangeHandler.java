@@ -243,7 +243,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         // session goes out of scope
       }
 
-      LOGGER.info("Keep normalized records");
+      LOGGER.info("check access limitations");
       addAll(results);
       results = new ArrayList<>(); // release memory
 
@@ -256,7 +256,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // Merge placement homes and index into Elasticsearch.
       LOGGER.info("Merge placement homes into client records and queue index");
-      handleJdbcDone(range); //
+      handleJdbcDone(range);
 
       LOGGER.info("Retrieval done, waiting on indexing");
       doneThreadRetrieve();
