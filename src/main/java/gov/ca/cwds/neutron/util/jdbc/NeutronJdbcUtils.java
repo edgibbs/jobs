@@ -296,6 +296,7 @@ public final class NeutronJdbcUtils {
     q.setCacheMode(CacheMode.IGNORE);
     q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     q.setHibernateFlushMode(FlushMode.MANUAL);
+    q.setTimeout(120); // 2 minutes tops
   }
 
   // public static void batch

@@ -256,8 +256,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       LOGGER.info("check access limitations");
-      addAll(results);
-      results = new ArrayList<>(); // release memory
+      addAll(results); // push to normalized map
+      results = new ArrayList<>(); // free memory
       NeutronThreadUtils.freeMemory();
 
       // Remove sealed and sensitive, if not permitted to view them.
