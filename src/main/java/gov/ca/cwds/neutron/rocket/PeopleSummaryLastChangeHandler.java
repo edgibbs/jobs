@@ -139,14 +139,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         final int end = start + BUNDLE_KEY_COUNT - 1;
         LOGGER.info("STEP #2: CLEAR GT_ID");
         session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
+        this.clearSession(session);
 
         LOGGER.info("STEP #3: INSERT keys into GT_ID, bundle: start: {}, end: {}", start, end);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
+        this.clearSession(session);
 
         try {
           { // scope brace
-            this.clearSession(session);
-
             LOGGER.info("STEP #4: prep query for client address view");
             final NativeQuery<EsClientPerson> q = session.getNamedNativeQuery(queryName);
             NeutronJdbcUtils.readOnlyQuery(q);
@@ -161,9 +161,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
                 recsRetrievedThisBundle, start, end);
           }
 
-          this.clearSession(session);
-
           LOGGER.info("STEP #6: read placement home addresses: \n{}", sqlPlacementAddress);
+          this.clearSession(session);
           readPlacementAddress(stmtSelPlacementAddress);
 
           // ======================================

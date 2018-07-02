@@ -95,7 +95,7 @@ public final class NeutronDB2Utils {
   public static boolean isDB2OnZOS(final BaseDaoImpl<?> dao) throws NeutronCheckedException {
     boolean ret = false;
 
-    try (final Connection con = NeutronJdbcUtils.prepConnection(dao.getSessionFactory())) {
+    try (final Connection con = NeutronJdbcUtils.prepConnection(dao.grabSession())) {
       final DatabaseMetaData meta = con.getMetaData();
       LOGGER.debug("meta: product name: {}, production version: {}, major: {}, minor: {}",
           meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
