@@ -254,31 +254,32 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         deletionResults.stream().forEach(normalized::remove);
       }
 
-      // LOGGER.info("START INDEXER THREAD");
-      // for (Thread t : threads) {
-      // t.start();
-      // }
+      LOGGER.info("START INDEXER THREAD");
+      for (Thread t : threads) {
+        t.start();
+      }
 
       LOGGER.info("Merge placement homes into client records and queue index");
       handleJdbcDone(range);
-
-      LOGGER.info("Retrieval done, waiting on indexing");
       doneThreadRetrieve();
       rocket.doneRetrieve();
+
+      // free memory
+      this.placementHomeAddresses.clear();
+      this.normalized.clear();
       NeutronThreadUtils.freeMemory();
 
-      // Wait for threads to finish.
-      // for (Thread t : threads) {
-      // LOGGER.info("Wait for indexer thread");
-      // t.join(120000); // safety, two minutes tops
-      // }
+      LOGGER.info("Retrieval done, waiting on indexing");
+      for (Thread t : threads) {
+        LOGGER.info("Wait for indexer thread");
+        t.join(120000); // safety, two minutes tops
+      }
 
     } catch (Exception e) {
       rocket.fail();
       Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "LAST CHANGE ERROR!: {}", e.getMessage());
     } finally {
-      // Override in multi-thread mode to avoid killing the indexer thread.
       rocket.doneRetrieve();
     }
 
