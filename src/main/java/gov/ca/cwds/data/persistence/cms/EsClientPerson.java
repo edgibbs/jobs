@@ -48,15 +48,31 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 // @formatter:off
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfter",
     query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
+        + "FROM      {h-schema}GT_ID        gt \n"
+        + "JOIN      {h-schema}CLIENT_T    clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}CL_ADDRT    cla ON clt.IDENTIFIER = cla.FKCLIENT_T \n"
+        + "LEFT JOIN {h-schema}ADDRS_T     adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}CLSCP_ET    eth ON clt.IDENTIFIER = eth.ESTBLSH_ID AND eth.ESTBLSH_CD = 'C' \n"
+        + "LEFT JOIN {h-schema}CLIENT_CNTY clc ON clt.IDENTIFIER = clc.CLIENT_ID \n"
+        + "LEFT JOIN {h-schema}SAF_ALRT    sal ON sal.FKCLIENT_T = clt.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}OCL_NM_T    onm ON onm.FKCLIENT_T = clt.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}CASE_T      cas ON cas.FKCHLD_CLT = clt.IDENTIFIER AND cas.END_DT IS NULL \n"        
         + "ORDER BY CLT_IDENTIFIER \n "
-        + "FOR READ ONLY WITH UR ",
+        + "FOR READ ONLY WITH UR",
     resultClass = EsClientPerson.class, readOnly = true)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithUnlimitedAccess",
     query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
+        + "FROM      {h-schema}GT_ID        gt \n"
+        + "JOIN      {h-schema}CLIENT_T    clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}CL_ADDRT    cla ON clt.IDENTIFIER = cla.FKCLIENT_T \n"
+        + "LEFT JOIN {h-schema}ADDRS_T     adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}CLSCP_ET    eth ON clt.IDENTIFIER = eth.ESTBLSH_ID AND eth.ESTBLSH_CD = 'C' \n"
+        + "LEFT JOIN {h-schema}CLIENT_CNTY clc ON clt.IDENTIFIER = clc.CLIENT_ID \n"
+        + "LEFT JOIN {h-schema}SAF_ALRT    sal ON sal.FKCLIENT_T = clt.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}OCL_NM_T    onm ON onm.FKCLIENT_T = clt.IDENTIFIER \n"
+        + "LEFT JOIN {h-schema}CASE_T      cas ON cas.FKCHLD_CLT = clt.IDENTIFIER AND cas.END_DT IS NULL \n"        
         + "ORDER BY CLT_IDENTIFIER \n "
         + "FOR READ ONLY WITH UR",
     resultClass = EsClientPerson.class, readOnly = true)
