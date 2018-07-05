@@ -415,7 +415,8 @@ public class ClientSQLResource implements ApiMarker {
         + "   SELECT rc.FKCLIENT_T AS IDENTIFIER, ROW_NUMBER() OVER(ORDER BY rc.FKCLIENT_T) AS rn \n"
         + "   FROM GT_REFR_CLT rc \n"
         + ") x \n"
-        + "WHERE x.rn BETWEEN ? AND ? ";
+        + "WHERE x.rn BETWEEN ? AND ? \n"
+        + "OPTIMIZE FOR 500 ROWS";
   //@formatter:on
 
 }
