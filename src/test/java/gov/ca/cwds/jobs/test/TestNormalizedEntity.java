@@ -214,6 +214,11 @@ public class TestNormalizedEntity extends ApiObjectIdentity
   }
 
   @Override
+  public String getOpenCaseResponsibleAgencyCode() {
+    return "";
+  }
+
+  @Override
   public List<ElasticSearchSystemCode> getClientCounties() {
     List<ElasticSearchSystemCode> counties = new ArrayList<>();
     final ElasticSearchSystemCode county = new ElasticSearchSystemCode();
