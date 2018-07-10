@@ -152,6 +152,7 @@ public class ClientSQLResource implements ApiMarker {
       + " x.ONM_IBMSNAP_OPERATION,\n"
       + " x.ONM_IBMSNAP_LOGMARKER,\n"
       + " x.CAS_IDENTIFIER,\n"
+      + " x.CAS_RSP_AGY_CD,\n"
       + " x.CAS_IBMSNAP_OPERATION,\n"
       + " x.CAS_IBMSNAP_LOGMARKER,\n"
       + " x.LAST_CHG ";  

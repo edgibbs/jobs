@@ -3,7 +3,6 @@ package gov.ca.cwds.dao;
 /**
  * @author CWDS API Team
  */
-@FunctionalInterface
 public interface ApiClientCaseAware {
 
   /**
@@ -12,5 +11,12 @@ public interface ApiClientCaseAware {
    * @return The open case id
    */
   String getOpenCaseId();
+
+  /**
+   * Get responsible agency code for open case.
+   * 
+   * @return Responsible agency code for open case.
+   */
+  String getOpenCaseResponsibleAgencyCode();
 
 }

@@ -138,6 +138,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   private String openCaseId;
 
   @Transient
+  private String openCaseResponsibleAgencyCode;
+
+  @Transient
   private PlacementHomeAddress activePlacementHomeAddress;
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
@@ -236,6 +239,25 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
    */
   public void setOpenCaseId(String openCaseId) {
     this.openCaseId = openCaseId;
+  }
+
+  /**
+   * Get responsible agency code for open case.
+   * 
+   * @return Responsible agency code for open case.
+   */
+  @Override
+  public String getOpenCaseResponsibleAgencyCode() {
+    return openCaseResponsibleAgencyCode;
+  }
+
+  /**
+   * Set responsible agency code for open case.
+   * 
+   * @param openCaseResponsibleAgencyCode Responsible agency code for open case.
+   */
+  public void setOpenCaseResponsibleAgencyCode(String openCaseResponsibleAgencyCode) {
+    this.openCaseResponsibleAgencyCode = openCaseResponsibleAgencyCode;
   }
 
   /**

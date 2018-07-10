@@ -443,11 +443,20 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  protected static String buildOpenCase(ApiPersonAware p) {
+  protected static String buildOpenCaseId(ApiPersonAware p) {
     String ret = null;
     if (p instanceof ApiClientCaseAware) {
       ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
       ret = caseAware.getOpenCaseId();
+    }
+    return ret;
+  }
+
+  protected static String buildOpenCaseResponsibleAgencyCode(ApiPersonAware p) {
+    String ret = null;
+    if (p instanceof ApiClientCaseAware) {
+      ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
+      ret = caseAware.getOpenCaseResponsibleAgencyCode();
     }
     return ret;
   }
@@ -524,7 +533,10 @@ public final class ElasticTransformer {
     ret.setSafetyAlerts(buildSafetyAlerts(p));
 
     // Open case id
-    ret.setOpenCaseId(buildOpenCase(p));
+    ret.setOpenCaseId(buildOpenCaseId(p));
+
+    // Open case responsible agency code
+    ret.setOpenCaseResponsibleAgencyCode(buildOpenCaseResponsibleAgencyCode(p));
 
     // Death date
     ret.setDateOfDeath(DomainChef.cookDate(p.getDeathDate()));
