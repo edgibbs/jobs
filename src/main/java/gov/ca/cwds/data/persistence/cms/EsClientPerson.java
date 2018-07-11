@@ -168,6 +168,9 @@ public class EsClientPerson extends BaseEsClient
   @Column(name = "CAS_IDENTIFIER")
   private String openCaseId;
 
+  @Column(name = "CAS_RSP_AGY_CD")
+  private String openCaseResponsibleAgencyCode;
+
   /**
    * Build an EsClient from the incoming ResultSet.
    * 
@@ -217,6 +220,8 @@ public class EsClientPerson extends BaseEsClient
     //
     ret.openCaseId = rs.getString("CAS_IDENTIFIER");
 
+    ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
+
     //
     // Last change (overall)
     //
@@ -247,6 +252,8 @@ public class EsClientPerson extends BaseEsClient
 
     // Open case id
     ret.setOpenCaseId(this.openCaseId);
+
+    ret.setOpenCaseResponsibleAgencyCode(this.openCaseResponsibleAgencyCode);
 
     map.put(ret.getId(), ret);
     return ret;
