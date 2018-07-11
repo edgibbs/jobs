@@ -221,7 +221,8 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);
     when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
-    when(sessionFactory.getCurrentSession()).thenReturn(session);
+    when(sessionFactory.openSession()).thenReturn(session);
+    when(sessionFactory.isOpen()).thenReturn(true);
     when(sessionFactory.getProperties()).thenReturn(sessionProperties);
 
     when(session.getSessionFactory()).thenReturn(sessionFactory);
