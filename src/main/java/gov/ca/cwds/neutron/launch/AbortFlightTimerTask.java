@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.TimerTask;
 
 import org.quartz.JobExecutionContext;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,7 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
 /**
- * Timer task to abort runaway rockets.
+ * Timer task to abort stalled or runaway rockets.
  * 
  * @author CWDS API Team
  */
@@ -34,23 +33,26 @@ public class AbortFlightTimerTask extends TimerTask {
   protected void abortRunningJob(JobExecutionContext ctx) {
     final NeutronRocket job = (NeutronRocket) ctx.getJobInstance();
     final FlightLog flightLog = job.getRocket().getFlightLog();
-    final int fifteenMinutes = (15 * 60 * 1000);
+    final int timeToAbort = (15 * 60 * 1000); // fifteen minutes
     final BasePersonRocket<?, ?> rocket = job.getRocket();
     final FlightPlan flightPlan = job.getRocket().getFlightPlan();
 
-    if (flightPlan.isLastRunMode()
-        && (flightLog.isRunning() && ctx.getJobRunTime() > fifteenMinutes)
+    if (flightPlan.isLastRunMode() && (flightLog.isRunning() && ctx.getJobRunTime() > timeToAbort)
         || flightLog.isFailed()) {
       LOGGER.warn("ABORT ROCKET! rocket: {}", rocket.getClass());
+      try {
+        director.getScheduler().interrupt(ctx.getJobDetail().getKey());
+      } catch (SchedulerException e) {
+        LOGGER.error("FAILED TO ABORT! {} : {}", rocket.getClass(), e.getMessage(), e);
+      }
     }
   }
 
   @Override
   public void run() {
-    final Scheduler scheduler = director.getScheduler();
-
     try {
-      final List<JobExecutionContext> currentlyExecuting = scheduler.getCurrentlyExecutingJobs();
+      final List<JobExecutionContext> currentlyExecuting =
+          director.getScheduler().getCurrentlyExecutingJobs();
       currentlyExecuting.stream().sequential().forEach(this::abortRunningJob);
     } catch (SchedulerException e) {
       LOGGER.warn("SCHEDULER ERROR! {}", e.getMessage(), e);
