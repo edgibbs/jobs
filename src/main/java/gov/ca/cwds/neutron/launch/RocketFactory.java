@@ -85,14 +85,14 @@ public class RocketFactory implements AtomRocketFactory {
       throw new SchedulerException("NO SUCH ROCKET CLASS!", e);
     }
 
-    LOGGER.info("LAUNCH! {}", klazz);
+    LOGGER.info("LAUNCH! rocket class: {}", klazz);
     NeutronRocket ret;
     try {
       final FlightPlan flightPlan = flightPlanRegistry.getFlightPlan(klazz);
       ret = new NeutronRocket(fuelRocket(klazz, flightPlan),
           StandardFlightSchedule.lookupByRocketClass(klazz), flightRecorder);
     } catch (NeutronCheckedException e) {
-      throw new SchedulerException("NO ROCKET SETTINGS!", e);
+      throw new SchedulerException("NO ROCKET SETTINGS! klazz=" + klazz, e);
     }
 
     return ret;

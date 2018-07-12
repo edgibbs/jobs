@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,7 +45,7 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
 /**
- * Everything required to launch a rocket.
+ * Everything required to launch a rocket and Quartz scheduling to monitor or control the flight.
  * 
  * <p>
  * Exposes methods to JMX via Vox.
@@ -123,16 +124,15 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Override
   @Managed(description = "Schedule rocket launch")
   public void schedule() throws NeutronCheckedException {
-    LOGGER.debug("ATTEMPT TO SCHEDULE LAUNCH! {}", rocketName);
+    LOGGER.debug("SCHEDULE LAUNCH! {}", rocketName);
     try {
       if (scheduler.checkExists(this.jobKey)) {
         LOGGER.warn("ROCKET ALREADY SCHEDULED! rocket: {}", rocketName);
         return;
       }
 
-      final String rocketClass = flightSchedule.getRocketClass().getName();
-
       // Rocket detail.
+      final String rocketClass = flightSchedule.getRocketClass().getName();
       jd = newJob(NeutronRocket.class)
           .withIdentity(rocketName,
               LaunchCommand.isInitialMode() ? NeutronSchedulerConstants.GRP_FULL_LOAD
@@ -141,6 +141,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
       // Schedule triggers.
       if (!LaunchCommand.isInitialMode()) {
+        // Last change mode.
         scheduler.scheduleJob(jd,
             newTrigger().withIdentity(triggerName, NeutronSchedulerConstants.GRP_LST_CHG)
                 .withPriority(flightSchedule.getLastRunPriority())
@@ -150,8 +151,8 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
                 .build());
         LOGGER.info("Scheduled trigger {}", rocketName);
       } else {
-        // HACK: cleaner way?
         if (flightSchedule.getInitialLoadOrder() == 0) {
+          // Initial load.
           final Trigger trigger =
               newTrigger().withIdentity(rocketName, NeutronSchedulerConstants.GRP_FULL_LOAD)
                   .startAt(DateTime.now().toDate()).build();
@@ -259,7 +260,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
     final boolean fileExists = f.exists();
 
     if (fileExists) {
-      FileUtils.writeStringToFile(f, fmt.format(now));
+      FileUtils.writeStringToFile(f, fmt.format(now), Charset.defaultCharset());
     } else {
       LOGGER.warn("MISSING TIMESTAMP FILE?? {}", timestampFileName);
     }

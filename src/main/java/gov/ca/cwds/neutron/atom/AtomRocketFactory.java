@@ -6,6 +6,11 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
+/**
+ * Neutron implementation of Quartz {@link JobFactory}.
+ * 
+ * @author CWDS API Team
+ */
 public interface AtomRocketFactory extends JobFactory {
 
   /**
@@ -23,8 +28,8 @@ public interface AtomRocketFactory extends JobFactory {
   /**
    * Prepare a registered rocket. Convenient overload of {@link #fuelRocket(Class, FlightPlan)}.
    * 
-   * @param rocketName rocket class
-   * @param flightPlan command line arguments
+   * @param rocketName rocket class name
+   * @param flightPlan flight plan from command line arguments
    * @return the rocket
    * @throws NeutronCheckedException unexpected runtime error
    */
