@@ -325,6 +325,7 @@ public class ClientSQLResource implements ApiMarker {
       + "LEFT JOIN {h-schema}OCL_NM_T    onm ON onm.FKCLIENT_T = clt.IDENTIFIER \n"
       + "LEFT JOIN {h-schema}CASE_T      cas ON cas.FKCHLD_CLT = clt.IDENTIFIER AND cas.END_DT IS NULL \n"
       + "ORDER BY CLT_IDENTIFIER \n"
+      + "OPTIMIZE FOR 1 ROWS \n"
       + "FOR READ ONLY WITH UR";
   //@formatter:on
 
@@ -357,6 +358,7 @@ public class ClientSQLResource implements ApiMarker {
       + ") X \n"
       + "WHERE X.RN = 1 \n"
       + "ORDER BY CLIENT_ID, START_DT \n"
+      + "OPTIMIZE FOR 1 ROWS \n"
       + "FOR READ ONLY WITH UR";
   //@formatter:on
 
@@ -416,8 +418,7 @@ public class ClientSQLResource implements ApiMarker {
         + "   SELECT rc.FKCLIENT_T AS IDENTIFIER, ROW_NUMBER() OVER(ORDER BY rc.FKCLIENT_T) AS rn \n"
         + "   FROM GT_REFR_CLT rc \n"
         + ") x \n"
-        + "WHERE x.rn BETWEEN ? AND ? \n"
-        + "OPTIMIZE FOR 500 ROWS";
+        + "WHERE x.rn BETWEEN ? AND ?";
   //@formatter:on
 
 }

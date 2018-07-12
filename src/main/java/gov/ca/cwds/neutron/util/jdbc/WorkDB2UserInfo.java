@@ -23,7 +23,7 @@ public class WorkDB2UserInfo implements Work {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WorkDB2UserInfo.class);
 
-  private static final String NAME = "CARES Neutron";
+  private static final String NAME = "Neutron";
 
   public WorkDB2UserInfo() {
     // Default, no-op
@@ -42,8 +42,7 @@ public class WorkDB2UserInfo implements Work {
 
       final DB2Connection db2con = (DB2Connection) con;
       db2con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
-      db2con.setAutoCommit(false);
-      db2con.setReadOnly(true);
+      db2con.setReadOnly(false);
       db2con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 
       db2con.setDB2ClientDebugInfo(userId);
