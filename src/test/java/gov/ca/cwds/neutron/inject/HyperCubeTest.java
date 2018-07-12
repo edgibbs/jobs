@@ -14,7 +14,6 @@ import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
@@ -35,13 +34,16 @@ import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
 import gov.ca.cwds.neutron.flight.FlightPlan;
+import gov.ca.cwds.neutron.launch.AbortFlightTimerTask;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalizedEntity> {
+
   public static class TestHyperCube extends HyperCube {
+
     Goddard lastTest;
     Configuration configuration;
 
@@ -109,7 +111,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   public void setup() throws Exception {
     super.setup();
     flightPlan = new FlightPlan();
-    flightPlan.setEsConfigLoc("config"+File.separator+"local.yaml");
+    flightPlan.setEsConfigLoc("config" + File.separator + "local.yaml");
     target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastRunFile);
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
@@ -369,11 +371,14 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void configureQuartz_Args__Injector__AtomFlightRecorder__AtomRocketFactory__AtomFlightPlanManager()
       throws Exception {
-    Injector injector = mock(Injector.class);
-    AtomFlightRecorder flightRecorder = mock(AtomFlightRecorder.class);
-    AtomRocketFactory rocketFactory = mock(AtomRocketFactory.class);
-    AtomFlightPlanManager flightPlanMgr = mock(AtomFlightPlanManager.class);
-    AtomLaunchDirector actual =
+    final Injector injector = mock(Injector.class);
+    final AtomFlightRecorder flightRecorder = mock(AtomFlightRecorder.class);
+    final AtomRocketFactory rocketFactory = mock(AtomRocketFactory.class);
+    final AtomFlightPlanManager flightPlanMgr = mock(AtomFlightPlanManager.class);
+    final AbortFlightTimerTask timerTask = mock(AbortFlightTimerTask.class);
+    when(injector.getInstance(AbortFlightTimerTask.class)).thenReturn(timerTask);
+
+    final AtomLaunchDirector actual =
         target.configureQuartz(injector, flightRecorder, rocketFactory, flightPlanMgr);
     assertThat(actual, is(notNullValue()));
   }

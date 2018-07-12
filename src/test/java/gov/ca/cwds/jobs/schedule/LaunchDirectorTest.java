@@ -48,7 +48,6 @@ public class LaunchDirectorTest extends Goddard {
 
   LaunchDirector target;
 
-
   @Override
   @Before
   public void setup() throws Exception {
