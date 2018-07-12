@@ -242,13 +242,19 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(sfo.getServiceRegistry()).thenReturn(reg);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
     when(cp.getConnection()).thenReturn(con);
+
     when(con.getMetaData()).thenReturn(meta);
-    when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(con.createStatement()).thenReturn(stmt);
+
+    when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(stmt.executeQuery(any())).thenReturn(rs);
+    when(stmt.executeUpdate(any(String.class))).thenReturn(1);
 
     preparedStatement = mock(PreparedStatement.class);
     when(con.prepareStatement(any(String.class))).thenReturn(preparedStatement);
+    when(con.prepareStatement(any())).thenReturn(preparedStatement);
+    when(con.prepareStatement(any(String.class), any(int[].class))).thenReturn(preparedStatement);
+
     when(preparedStatement.executeQuery()).thenReturn(rs);
     when(preparedStatement.executeQuery(any())).thenReturn(rs);
     when(preparedStatement.executeUpdate()).thenReturn(1);
@@ -366,7 +372,6 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         .thenReturn(mach1Rocket);
 
     when(scheduler.getListenerManager()).thenReturn(listenerManager);
-
     mbean = mock(VoxLaunchPadMBean.class);
 
     doAnswer(new Answer<Void>() {
