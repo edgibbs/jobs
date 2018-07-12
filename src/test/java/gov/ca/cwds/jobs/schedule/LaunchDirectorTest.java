@@ -58,7 +58,7 @@ public class LaunchDirectorTest extends Goddard {
     rocketOptions = mock(FlightPlanRegistry.class);
     scheduler = mock(Scheduler.class);
     launchPad = mock(LaunchPad.class);
-    timerTask = mock(AbortFlightTimerTask.class);
+    timerTask = new AbortFlightTimerTask(scheduler);
 
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     target = new LaunchDirector(jobHistory, rocketFactory, rocketOptions, timerTask);
