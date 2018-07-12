@@ -4,6 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.function.Function;
 
+import org.hibernate.jdbc.Work;
+
+/**
+ * Abstract Hibernate {@link Work} tracks total records processed.
+ * 
+ * @author CWDS API Team
+ */
 public abstract class NeutronWorkTotalImpl implements NeutronWorkTotal {
 
   private final Function<Connection, PreparedStatement> prepStmtMaker;
@@ -23,8 +30,8 @@ public abstract class NeutronWorkTotalImpl implements NeutronWorkTotal {
     return totalProcessed;
   }
 
-  protected void setTotalProcessed(int totalInserted) {
-    this.totalProcessed = totalInserted;
+  protected void setTotalProcessed(int totalProcessed) {
+    this.totalProcessed = totalProcessed;
   }
 
   /**

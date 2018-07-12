@@ -46,7 +46,8 @@ public class WorkPrepareLastChange extends NeutronWorkTotalImpl {
    * Execute the PreparedStatement.
    * 
    * <p>
-   * <strong>WARNING!</strong>. DB2 may not optimize a PreparedStatement the same as regular SQL.
+   * <strong>WARNING!</strong>. DB2 may not optimize a PreparedStatement the same as dynamic SQL and
+   * vice versa.
    * </p>
    * 
    * @param con current database connection
