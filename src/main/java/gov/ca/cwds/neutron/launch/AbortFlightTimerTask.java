@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.TimerTask;
 
 import org.quartz.JobExecutionContext;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +24,11 @@ public class AbortFlightTimerTask extends TimerTask {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AbortFlightTimerTask.class);
 
-  private final LaunchDirector director;
+  private final Scheduler scheduler;
 
   @Inject
-  public AbortFlightTimerTask(LaunchDirector director) {
-    this.director = director;
+  public AbortFlightTimerTask(Scheduler scheduler) {
+    this.scheduler = scheduler;
   }
 
   protected void abortRunningJob(JobExecutionContext ctx) {
@@ -41,7 +42,7 @@ public class AbortFlightTimerTask extends TimerTask {
         || flightLog.isFailed()) {
       LOGGER.warn("ABORT ROCKET! rocket: {}", rocket.getClass());
       try {
-        director.getScheduler().interrupt(ctx.getJobDetail().getKey());
+        scheduler.interrupt(ctx.getJobDetail().getKey());
       } catch (SchedulerException e) {
         LOGGER.error("FAILED TO ABORT! {} : {}", rocket.getClass(), e.getMessage(), e);
       }
@@ -51,8 +52,7 @@ public class AbortFlightTimerTask extends TimerTask {
   @Override
   public void run() {
     try {
-      final List<JobExecutionContext> currentlyExecuting =
-          director.getScheduler().getCurrentlyExecutingJobs();
+      final List<JobExecutionContext> currentlyExecuting = scheduler.getCurrentlyExecutingJobs();
       currentlyExecuting.stream().sequential().forEach(this::abortRunningJob);
     } catch (SchedulerException e) {
       LOGGER.warn("SCHEDULER ERROR! {}", e.getMessage(), e);

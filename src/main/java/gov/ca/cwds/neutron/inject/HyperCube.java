@@ -91,6 +91,7 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.launch.AbortFlightTimerTask;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
@@ -314,6 +315,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
     bind(AtomCommandCenterConsole.class).to(XRaySpex.class);
+    bind(AbortFlightTimerTask.class);
   }
 
   /**
@@ -572,7 +574,8 @@ public class HyperCube extends NeutronGuiceModule {
       final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
-    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr);
+    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
+        HyperCube.getInjector().getInstance(AbortFlightTimerTask.class));
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
 
