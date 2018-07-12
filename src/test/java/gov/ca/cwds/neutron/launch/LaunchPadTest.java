@@ -121,7 +121,9 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void history_Args__() throws Exception {
-    launchDirector = new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager);
+    final AbortFlightTimerTask timerTask = mock(AbortFlightTimerTask.class);
+    launchDirector =
+        new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask);
     launchDirector.setScheduler(scheduler);
     final String actual = target.history();
     assertThat(actual, is(notNullValue()));

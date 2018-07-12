@@ -58,14 +58,17 @@ public class LaunchDirector implements AtomLaunchDirector {
    */
   private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
 
-  private Timer runawayFlightTimer;
+  private Timer abortFlightTimer;
 
   @Inject
   public LaunchDirector(final AtomFlightRecorder flightRecorder,
-      final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager) {
+      final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager,
+      AbortFlightTimerTask timerTask) {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
     this.flightPlanManger = flightPlanManager;
+    this.abortFlightTimer = new Timer("abort_rocker_timer", true);
+    this.abortFlightTimer.scheduleAtFixedRate(timerTask, 900000, 60000);
   }
 
   /**
