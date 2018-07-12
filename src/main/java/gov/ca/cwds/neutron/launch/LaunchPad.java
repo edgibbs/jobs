@@ -26,6 +26,7 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
@@ -289,6 +290,10 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       unschedule();
       final JobKey key = new JobKey(rocketName, NeutronSchedulerConstants.GRP_LST_CHG);
       scheduler.interrupt(key);
+    } catch (UnableToInterruptJobException e) {
+      final String msg = "UNABLE TO INTERRUPT JOB! rocketName: " + rocketName;
+      LOGGER.trace(msg, e);
+      LOGGER.warn(msg);
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "FAILED TO ABORT FLIGHT! rocket: {}", rocketName);
     }

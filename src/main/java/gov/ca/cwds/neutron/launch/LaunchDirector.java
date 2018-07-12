@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.launch;
 
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.quartz.Scheduler;
@@ -56,6 +57,8 @@ public class LaunchDirector implements AtomLaunchDirector {
    * </p>
    */
   private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
+
+  private Timer runawayFlightTimer;
 
   @Inject
   public LaunchDirector(final AtomFlightRecorder flightRecorder,
