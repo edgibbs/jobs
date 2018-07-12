@@ -44,15 +44,19 @@
 		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
 		<property name="hibernate.c3p0.min_size">4</property>
 		<property name="hibernate.c3p0.max_size">12</property>
-		<property name="hibernate.c3p0.maxAdministrativeTaskTime">90</property>
-		<property name="hibernate.c3p0.timeout">180</property>  <!-- seconds -->
-		<property name="hibernate.c3p0.statementCacheNumDeferredCloseThreads">1</property>
 		<property name="hibernate.c3p0.statementCacheNumDeferredCloseThreads">1</property>
 		<property name="hibernate.c3p0.max_statements">0</property>
 		<property name="hibernate.c3p0.maxStatementsPerConnection">0</property>
-		<property name="hibernate.c3p0.idle_test_period">300</property>  <!-- seconds -->
 		<property name="hibernate.c3p0.acquire_increment">3</property>
 		<property name="hibernate.c3p0.preferredTestQuery">SELECT 1 FROM SYSIBM.SYSDUMMY1 FOR READ ONLY WITH UR</property>
+		<property name="hibernate.c3p0.testConnectionOnCheckout">true</property>
+		<property name="hibernate.c3p0.maxIdleTimeExcessConnections">900</property>
+		<property name="hibernate.c3p0.maxAdministrativeTaskTime">90</property>
+		<property name="hibernate.c3p0.unreturnedConnectionTimeout">120</property>
+		<property name="hibernate.c3p0.checkoutTimeout">120000</property>
+		<property name="hibernate.c3p0.idleConnectionTestPeriod">60</property>
+		<property name="hibernate.c3p0.timeout">180</property>  <!-- seconds -->
+		<property name="hibernate.c3p0.idle_test_period">300</property>  <!-- seconds -->
 
 	</session-factory>
 
