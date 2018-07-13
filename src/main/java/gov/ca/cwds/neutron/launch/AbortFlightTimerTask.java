@@ -26,15 +26,17 @@ public class AbortFlightTimerTask extends TimerTask {
 
   private final Scheduler scheduler;
 
+  private final int timeToAbort;
+
   @Inject
-  public AbortFlightTimerTask(Scheduler scheduler) {
+  public AbortFlightTimerTask(Scheduler scheduler, int timeToAbort) {
     this.scheduler = scheduler;
+    this.timeToAbort = timeToAbort > 0 ? timeToAbort : (15 * 60 * 1000); // default: fifteen minutes
   }
 
   protected void abortRunningJob(JobExecutionContext ctx) {
     final NeutronRocket job = (NeutronRocket) ctx.getJobInstance();
     final FlightLog flightLog = job.getRocket().getFlightLog();
-    final int timeToAbort = (15 * 60 * 1000); // fifteen minutes
     final BasePersonRocket<?, ?> rocket = job.getRocket();
     final FlightPlan flightPlan = job.getRocket().getFlightPlan();
 
