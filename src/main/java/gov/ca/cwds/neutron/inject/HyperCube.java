@@ -315,7 +315,6 @@ public class HyperCube extends NeutronGuiceModule {
     bind(AtomFlightPlanManager.class).to(FlightPlanRegistry.class).asEagerSingleton();
     bind(AtomRocketFactory.class).to(RocketFactory.class).asEagerSingleton();
     bind(AtomCommandCenterConsole.class).to(XRaySpex.class);
-    bind(AbortFlightTimerTask.class);
   }
 
   /**
@@ -428,6 +427,11 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected SystemCodeCache scaffoldSystemCodeCache() {
     return null;
+  }
+
+  @Provides
+  protected AbortFlightTimerTask provideAbortFlightTimerTask(Scheduler scheduler) {
+    return new AbortFlightTimerTask(scheduler, 90000);
   }
 
   @Provides
