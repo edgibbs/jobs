@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.FlushModeType;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -49,12 +50,12 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfter",
     query = ClientSQLResource.SELECT_CLIENT_VIEW_LAST_CHANGE,
-    resultClass = EsClientPerson.class, readOnly = true)
+    resultClass = EsClientPerson.class, readOnly = true, cacheable=false, flushMode=FlushModeType.MANUAL)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithUnlimitedAccess",
     query = ClientSQLResource.SELECT_CLIENT_VIEW_LAST_CHANGE,
-    resultClass = EsClientPerson.class, readOnly = true)
+    resultClass = EsClientPerson.class, readOnly = true, cacheable=false, flushMode=FlushModeType.MANUAL)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithLimitedAccess",
@@ -63,7 +64,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "WHERE x.CLT_SENSTV_IND != 'N' \n "
         + "ORDER BY CLT_IDENTIFIER \n"
         + "FOR READ ONLY WITH UR ",
-    resultClass = EsClientPerson.class, readOnly = true)
+    resultClass = EsClientPerson.class, readOnly = true, cacheable=false, flushMode=FlushModeType.MANUAL)
 // @formatter:on
 public class EsClientPerson extends BaseEsClient
     implements Comparable<EsClientPerson>, Comparator<EsClientPerson> {
