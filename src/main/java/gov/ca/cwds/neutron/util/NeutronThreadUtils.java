@@ -6,7 +6,12 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 
-public final class NeutronThreadUtils {
+/**
+ * Methods to manage threads and memory.
+ * 
+ * @author CWDS API Team
+ */
+public class NeutronThreadUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronThreadUtils.class);
 
@@ -44,6 +49,7 @@ public final class NeutronThreadUtils {
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
+      LOGGER.trace("Interrupted", e);
     }
   }
 
@@ -60,6 +66,9 @@ public final class NeutronThreadUtils {
     return (freeMemory + (maxMemory - allocatedMemory)) / 1024L;
   }
 
+  /**
+   * Log available memory, request garbage collection, then log memory again.
+   */
   public static void freeMemory() {
     LOGGER.info("Free memory, before gc: {} MB", calcMemory());
     Runtime.getRuntime().gc();

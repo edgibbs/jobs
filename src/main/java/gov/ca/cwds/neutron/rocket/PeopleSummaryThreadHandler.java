@@ -116,16 +116,16 @@ public class PeopleSummaryThreadHandler
     }
 
     try (
-        final PreparedStatement stmtInsClient1 =
+        final PreparedStatement stmtInsClient =
             con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_CLIENT_FULL,
                 ClientSQLResource.INSERT_CLIENT_LAST_CHG));
-        final PreparedStatement stmtInsClient2 =
+        final PreparedStatement stmtInsClientPlacementHome =
             con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL,
                 ClientSQLResource.INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(sqlPlacementAddress)) {
-      prepAffectedClients(stmtInsClient1, range);
-      prepAffectedClients(stmtInsClient2, range);
+      prepAffectedClients(stmtInsClient, range);
+      prepAffectedClients(stmtInsClientPlacementHome, range);
       LOGGER.info("");
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
@@ -185,9 +185,6 @@ public class PeopleSummaryThreadHandler
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
     this.deletionResults = deletionResults;
-
-    // Read from the view, old school.
-    // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
     LOGGER.info("After view: count: {}", normalized.size());
 
     // Handle additional JDBC statements, if any.
@@ -282,7 +279,7 @@ public class PeopleSummaryThreadHandler
 
     PlacementHomeAddress pha;
     final ResultSet rs = stmt.executeQuery(); // NOSONAR
-    while (!getRocket().isFailed() && rs.next()) {
+    while (getRocket().isRunning() && rs.next()) {
       pha = new PlacementHomeAddress(rs);
       placementHomeAddresses.put(pha.getClientId(), pha);
     }
