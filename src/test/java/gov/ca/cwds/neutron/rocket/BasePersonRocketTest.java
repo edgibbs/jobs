@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Query;
@@ -531,9 +531,9 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test(expected = NeutronRuntimeException.class)
   public void addToIndexQueue_Args__interrupt() throws Exception {
     TestNormalizedEntity norm = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    LinkedBlockingDeque deque = mock(LinkedBlockingDeque.class);
+    ConcurrentLinkedDeque deque = mock(ConcurrentLinkedDeque.class);
     when(deque.add(any(TestNormalizedEntity.class))).thenThrow(InterruptedException.class);
-    doThrow(new InterruptedException()).when(deque).putLast(any(TestNormalizedEntity.class));
+    doThrow(new InterruptedException()).when(deque).add(any(TestNormalizedEntity.class));
     target.setQueueIndex(deque);
     target.addToIndexQueue(norm);
   }
@@ -813,7 +813,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getQueueIndex() throws Exception {
-    final LinkedBlockingDeque<TestNormalizedEntity> actual = target.getQueueIndex();
+    final ConcurrentLinkedDeque<TestNormalizedEntity> actual = target.getQueueIndex();
     assertThat(actual, notNullValue());
   }
 
@@ -1129,13 +1129,14 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getQueueIndex_A$() throws Exception {
-    final LinkedBlockingDeque<TestNormalizedEntity> actual = target.getQueueIndex();
+    final ConcurrentLinkedDeque<TestNormalizedEntity> actual = target.getQueueIndex();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setQueueIndex_A$LinkedBlockingDeque() throws Exception {
-    final LinkedBlockingDeque<TestNormalizedEntity> queueIndex = mock(LinkedBlockingDeque.class);
+    final ConcurrentLinkedDeque<TestNormalizedEntity> queueIndex =
+        mock(ConcurrentLinkedDeque.class);
     target.setQueueIndex(queueIndex);
   }
 

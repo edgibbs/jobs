@@ -217,4 +217,12 @@ public class LaunchDirector implements AtomLaunchDirector {
     return flightRecorder;
   }
 
+  public Timer getAbortFlightTimer() {
+    return abortFlightTimer;
+  }
+
+  public void setAbortFlightTimer(Timer abortFlightTimer) {
+    this.abortFlightTimer = abortFlightTimer;
+  }
+
 }

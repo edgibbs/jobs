@@ -431,7 +431,7 @@ public class HyperCube extends NeutronGuiceModule {
 
   @Provides
   protected AbortFlightTimerTask provideAbortFlightTimerTask(Scheduler scheduler) {
-    return new AbortFlightTimerTask(scheduler, 90000);
+    return new AbortFlightTimerTask(scheduler, 90000); // NEXT
   }
 
   @Provides
@@ -561,6 +561,27 @@ public class HyperCube extends NeutronGuiceModule {
   // QUARTZ SCHEDULER:
   // =========================
 
+  @Provides
+  @Singleton
+  protected Scheduler makeScheduler(final Injector injector, AtomRocketFactory rocketFactory)
+      throws SchedulerException {
+    final boolean initialMode = LaunchCommand.isInitialMode();
+    final Properties p = new Properties();
+    p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
+
+    // NEXT: make configurable.
+    p.put("org.quartz.threadPool.threadCount",
+        initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
+    final StdSchedulerFactory factory = new StdSchedulerFactory(p);
+    final Scheduler scheduler = factory.getScheduler();
+
+    // NEXT: inject scheduler and rocket factory.
+    scheduler.setJobFactory(rocketFactory);
+
+    // Quartz scheduler listeners.
+    return scheduler;
+  }
+
   /**
    * Configure Quartz scheduling. Quartz operates as a singleton.
    * 
@@ -575,25 +596,14 @@ public class HyperCube extends NeutronGuiceModule {
   @Singleton
   protected AtomLaunchDirector configureQuartz(final Injector injector,
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
-      final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
+      final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
+      AbortFlightTimerTask abortFlightTimerTask) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
-    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        HyperCube.getInjector().getInstance(AbortFlightTimerTask.class));
-    final Properties p = new Properties();
-    p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
+    final LaunchDirector ret =
+        new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr, abortFlightTimerTask);
 
-    // NEXT: make configurable.
-    p.put("org.quartz.threadPool.threadCount",
-        initialMode ? "1" : NeutronSchedulerConstants.SCHEDULER_THREAD_COUNT);
-    final StdSchedulerFactory factory = new StdSchedulerFactory(p);
-    final Scheduler scheduler = factory.getScheduler();
-
-    // NEXT: inject scheduler and rocket factory.
-    scheduler.setJobFactory(rocketFactory);
     ret.setScheduler(scheduler);
-
-    // Quartz scheduler listeners.
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();
     final ListenerManager mgr = ret.getScheduler().getListenerManager();
     mgr.addSchedulerListener(new NeutronSchedulerListener());

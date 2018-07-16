@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -146,7 +147,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>MOVE</strong> to another unit.
    * </p>
    */
-  protected LinkedBlockingDeque<D> queueNormalize = new LinkedBlockingDeque<>(2000);
+  protected LinkedBlockingDeque<D> queueNormalize = new LinkedBlockingDeque<>();
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
@@ -158,7 +159,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(50000);
+  protected ConcurrentLinkedDeque<N> queueIndex = new ConcurrentLinkedDeque<>();
 
   /**
    * Construct rocket with all required dependencies.
@@ -204,8 +205,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   public void addToIndexQueue(N norm) {
     try {
       CheeseRay.logEvery(flightLog.markQueuedToIndex(), "index queue", "recs");
-      queueIndex.putLast(norm);
-    } catch (InterruptedException e) {
+      queueIndex.add(norm);
+    } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
@@ -375,7 +376,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         int cntr = 0;
         while (isRunning() && rs.next() && (m = extract(rs)) != null) {
           CheeseRay.logEvery(++cntr, "Retrieved", "recs");
-          queueNormalize.putLast(m);
+          queueNormalize.add(m);
         }
 
         con.commit();
@@ -406,7 +407,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       // End of group. Normalize these group records.
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
           && (t = normalizeSingle(grpRecs)) != null) {
-        queueIndex.putLast(t);
+        queueIndex.add(t);
         grpRecs.clear(); // Single thread, re-use memory.
       }
 
@@ -416,7 +417,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     // Last bundle.
     if (!grpRecs.isEmpty() && (t = normalizeSingle(grpRecs)) != null) {
-      queueIndex.putLast(t);
+      queueIndex.add(t);
       grpRecs.clear(); // Single thread, re-use memory.
     }
 
@@ -498,8 +499,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     int i = cntr;
     N t;
 
-    while (isRunning() && (t = queueIndex.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
-        TimeUnit.MILLISECONDS)) != null) {
+    while (isRunning() && (t = queueIndex.pollFirst()) != null) {
       CheeseRay.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
@@ -592,13 +592,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
   protected void sizeQueues(final Date lastRun) {
     // Configure queue sizes for last run or initial load.
-    if (determineInitialLoad(lastRun)) {
-      queueNormalize = new LinkedBlockingDeque<>(50000);
-      queueIndex = new LinkedBlockingDeque<>(75000);
-    } else {
-      queueNormalize = new LinkedBlockingDeque<>(8000);
-      queueIndex = new LinkedBlockingDeque<>(50000);
-    }
+    // queueNormalize = new LinkedBlockingDeque<>();
+    // queueIndex = new LinkedBlockingDeque<>();
   }
 
   protected boolean determineInitialLoad(final Date lastRun) {
@@ -1019,7 +1014,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @return index queue implementation
    */
-  protected LinkedBlockingDeque<N> getQueueIndex() {
+  protected ConcurrentLinkedDeque<N> getQueueIndex() {
     return queueIndex;
   }
 
@@ -1028,7 +1023,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @param queueIndex index queue implementation
    */
-  protected void setQueueIndex(LinkedBlockingDeque<N> queueIndex) {
+  protected void setQueueIndex(ConcurrentLinkedDeque<N> queueIndex) {
     this.queueIndex = queueIndex;
   }
 
