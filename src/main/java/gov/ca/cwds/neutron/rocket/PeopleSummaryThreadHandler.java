@@ -104,6 +104,17 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    String sqlPlacementAddress;
+    try {
+      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(
+          ClientSQLResource.SELECT_PLACEMENT_ADDRESS, rocket.determineLastSuccessfulRunTime(),
+          rocket.getFlightPlan().getOverrideLastEndTime());
+      LOGGER.info("SQL for Placement Address: \n{}", sqlPlacementAddress);
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREP PLACEMENT ADDRESS SQL! {}", e.getMessage(),
+          e);
+    }
+
     try (
         final PreparedStatement stmtInsClient1 =
             con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_CLIENT_FULL,
@@ -112,9 +123,10 @@ public class PeopleSummaryThreadHandler
             con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL,
                 ClientSQLResource.INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
+            con.prepareStatement(sqlPlacementAddress)) {
       prepAffectedClients(stmtInsClient1, range);
       prepAffectedClients(stmtInsClient2, range);
+      LOGGER.info("");
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
       con.rollback();
