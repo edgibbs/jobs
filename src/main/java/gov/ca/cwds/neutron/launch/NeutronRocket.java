@@ -21,7 +21,7 @@ import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 
 /**
- * Implementation of Quartz InterruptableJob for scheduled flights.
+ * Neutron implementation of Quartz {@link InterruptableJob} for scheduled flights.
  * 
  * @author CWDS API Team
  * @see LaunchCommand
@@ -42,7 +42,7 @@ public class NeutronRocket implements InterruptableJob {
 
   private final StandardFlightSchedule flightSchedule;
 
-  private FlightLog flightLog; // volatile shows changes immediately across threads
+  private volatile FlightLog flightLog; // "volatile" shows changes immediately across threads
 
   /**
    * Constructor.
@@ -75,6 +75,7 @@ public class NeutronRocket implements InterruptableJob {
       flightLog.start();
       MDC.put("rocketLog", rocketName);
 
+      // Job parameter data:
       map.put("opts", flight.getFlightPlan());
       map.put("track", flightLog);
       context.setResult(flightLog);

@@ -495,14 +495,23 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected int bulkPrepare(final BulkProcessor bp, int cntr)
       throws IOException, InterruptedException {
-    LOGGER.debug("Indexer thread: bulkPrepare");
+    LOGGER.trace("Indexer thread: bulkPrepare");
     int i = cntr;
-    N t;
+    N t; // Normalized type
 
     while (isRunning() && (t = queueIndex.pollFirst()) != null) {
       CheeseRay.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
+
+    if (isRunning()) {
+      final int sleepForMillis = NeutronIntegerDefaults.SLEEP_MILLIS.getValue();
+      LOGGER.debug(
+          "Indexer thread: bulkPrepare: queue empty, waiting for data: sleep for {} millis",
+          sleepForMillis);
+      Thread.sleep(sleepForMillis);
+    }
+
     return i;
   }
 
