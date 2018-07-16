@@ -533,7 +533,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     TestNormalizedEntity norm = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     ConcurrentLinkedDeque deque = mock(ConcurrentLinkedDeque.class);
     when(deque.add(any(TestNormalizedEntity.class))).thenThrow(InterruptedException.class);
-    doThrow(new InterruptedException()).when(deque).add(any(TestNormalizedEntity.class));
+    doThrow(new IllegalStateException()).when(deque).add(any(TestNormalizedEntity.class));
     target.setQueueIndex(deque);
     target.addToIndexQueue(norm);
   }
@@ -587,7 +587,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     }
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void threadIndex_Args() throws Exception {
     runKillThread(target);
     final BulkProcessor bp = mock(BulkProcessor.class);
@@ -780,7 +780,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, notNullValue());
   }
 
-  @Test
+  @Test(expected = InterruptedException.class)
   public void testNormalizeLoop() throws Exception {
     final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
     final int cntr = 0;
