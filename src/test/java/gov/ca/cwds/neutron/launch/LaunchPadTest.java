@@ -42,7 +42,6 @@ public class LaunchPadTest extends Goddard {
     super.setup();
 
     when(launchDirector.getFlightRecorder()).thenReturn(flightRecorder);
-
     sched = StandardFlightSchedule.REPORTER;
     target = new LaunchPad(launchDirector, sched, flightPlan);
   }
@@ -121,7 +120,7 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void history_Args__() throws Exception {
-    final AbortFlightTimerTask timerTask = mock(AbortFlightTimerTask.class);
+    final AbortFlightTimerTask timerTask = new AbortFlightTimerTask(scheduler, 90000);
     launchDirector =
         new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask);
     launchDirector.setScheduler(scheduler);

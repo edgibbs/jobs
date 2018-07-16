@@ -500,7 +500,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     N t; // Normalized type
 
     while (isRunning() && (t = queueIndex.pollFirst()) != null) {
-      CheeseRay.logEvery(++i, "Indexed", "recs to ES");
+      CheeseRay.logEvery(i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
 
