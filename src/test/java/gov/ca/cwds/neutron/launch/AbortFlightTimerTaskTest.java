@@ -27,7 +27,7 @@ public class AbortFlightTimerTaskTest extends Goddard {
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new AbortFlightTimerTask(scheduler, 300);
+    target = new AbortFlightTimerTask(scheduler, "240000");
   }
 
   @Test

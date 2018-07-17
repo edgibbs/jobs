@@ -31,9 +31,11 @@ public class AbortFlightTimerTask extends TimerTask {
 
   @Inject
   public AbortFlightTimerTask(Scheduler scheduler,
-      @Named("zombie.killer.killAtMillis") int timeToAbort) {
+      @Named("zombie.killer.killAtMillis") String strTimeToAbort) {
     this.scheduler = scheduler;
-    this.timeToAbort = timeToAbort > 0 ? timeToAbort : (15 * 60 * 1000); // default: fifteen minutes
+
+    final int iTimeToAbort = Integer.parseInt(strTimeToAbort);
+    this.timeToAbort = iTimeToAbort > 0 ? iTimeToAbort : (15 * 60 * 1000); // fifteen minutes
   }
 
   protected void abortRunningJob(JobExecutionContext ctx) {
