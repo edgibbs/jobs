@@ -54,7 +54,7 @@ public class NeutronThreadUtils {
   }
 
   /**
-   * Track memory for large file processing.
+   * Calculate memory usage for batch processing.
    * 
    * @return free memory in MB
    */

@@ -430,7 +430,7 @@ public class HyperCube extends NeutronGuiceModule {
   }
 
   @Provides
-  protected AbortFlightTimerTask provideAbortFlightTimerTask(Scheduler scheduler) {
+  public AbortFlightTimerTask provideAbortFlightTimerTask(Scheduler scheduler) {
     return new AbortFlightTimerTask(scheduler, 90000); // NEXT: soft-code
   }
 
