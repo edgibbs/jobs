@@ -313,6 +313,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
         .toInstance(makeNsSessionFactory());
 
+    // Data Access Objects:
     bindDaos();
 
     // Inject annotations.

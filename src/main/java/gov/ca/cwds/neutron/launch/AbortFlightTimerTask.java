@@ -43,18 +43,19 @@ public class AbortFlightTimerTask extends TimerTask {
     final NeutronRocket job = (NeutronRocket) ctx.getJobInstance();
     final FlightLog flightLog = job.getRocket().getFlightLog();
     final BasePersonRocket<?, ?> rocket = job.getRocket();
-    final FlightPlan flightPlan = job.getRocket().getFlightPlan();
+    final FlightPlan flightPlan = rocket.getFlightPlan();
+    final Class<?> klass = rocket.getClass();
 
     if (flightPlan.isLastRunMode() && (flightLog.isRunning() && ctx.getJobRunTime() > timeToAbort)
         || flightLog.isFailed()) {
       try {
-        LOGGER.warn("ABORT ROCKET! rocket: {}", rocket.getClass());
+        LOGGER.warn("ABORT ROCKET! rocket: {}", klass);
         scheduler.interrupt(ctx.getJobDetail().getKey());
       } catch (SchedulerException e) {
-        LOGGER.error("FAILED TO ABORT! {} : {}", rocket.getClass(), e.getMessage(), e);
+        LOGGER.error("FAILED TO ABORT! {} : {}", klass, e.getMessage(), e);
       }
     } else {
-      LOGGER.debug("Keep flying. rocket: {}", rocket.getClass());
+      LOGGER.info("Keep flying. rocket: {}", klass);
     }
   }
 
