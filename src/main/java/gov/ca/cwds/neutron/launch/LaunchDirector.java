@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
@@ -63,12 +64,15 @@ public class LaunchDirector implements AtomLaunchDirector {
   @Inject
   public LaunchDirector(final AtomFlightRecorder flightRecorder,
       final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager,
-      AbortFlightTimerTask timerTask) {
+      AbortFlightTimerTask timerTask,
+      @Named("zombie.killer.checkEveryMillis") String zombieKillerMillis) {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
     this.flightPlanManger = flightPlanManager;
-    this.abortFlightTimer = new Timer("abort_rocker_timer", true);
-    this.abortFlightTimer.scheduleAtFixedRate(timerTask, 900000, 60000);
+    this.abortFlightTimer = new Timer("abort_rocket_timer", true);
+
+    final int iZombieKillerMillis = Integer.parseInt(zombieKillerMillis);
+    this.abortFlightTimer.scheduleAtFixedRate(timerTask, iZombieKillerMillis, iZombieKillerMillis);
   }
 
   /**

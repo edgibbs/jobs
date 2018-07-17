@@ -60,7 +60,7 @@ public class LaunchDirectorTest extends Goddard {
     timerTask = new AbortFlightTimerTask(scheduler, 90000);
 
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
-    target = new LaunchDirector(jobHistory, rocketFactory, rocketOptions, timerTask);
+    target = new LaunchDirector(jobHistory, rocketFactory, rocketOptions, timerTask, "60000");
     target.setScheduler(scheduler);
     target.setFlightPlan(flightPlan);
 

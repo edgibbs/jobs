@@ -26,6 +26,7 @@ import com.google.inject.NeutronGuiceModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.common.ApiFileAssistant;
@@ -185,6 +186,16 @@ public class HyperCube extends NeutronGuiceModule {
     // Optional initialization, mostly for testing.
   }
 
+  protected void bindSystemProperties() {
+    final Properties defaults = new Properties();
+    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // 1 minute
+    defaults.setProperty("zombie.killer.killAtMillis", "240000"); // 4 minutes
+
+    final Properties props = new Properties(defaults);
+    props.putAll(System.getProperties());
+    Names.bindProperties(binder(), props);
+  }
+
   public static synchronized HyperCube buildCube(final FlightPlan opts) {
     HyperCube ret;
 
@@ -287,6 +298,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Override
   protected void configure() {
     LOGGER.debug("HyperCube.configure");
+    bindSystemProperties();
     bind(FlightPlan.class).toInstance(this.flightPlan);
 
     // DB2 session factory:
@@ -600,8 +612,8 @@ public class HyperCube extends NeutronGuiceModule {
       AbortFlightTimerTask abortFlightTimerTask) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
-    final LaunchDirector ret =
-        new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr, abortFlightTimerTask);
+    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
+        abortFlightTimerTask, "60000");
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();

@@ -122,7 +122,7 @@ public class LaunchPadTest extends Goddard {
   public void history_Args__() throws Exception {
     final AbortFlightTimerTask timerTask = new AbortFlightTimerTask(scheduler, 90000);
     launchDirector =
-        new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask);
+        new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask, "60000");
     launchDirector.setScheduler(scheduler);
     final String actual = target.history();
     assertThat(actual, is(notNullValue()));
