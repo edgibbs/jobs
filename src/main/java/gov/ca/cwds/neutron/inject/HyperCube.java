@@ -186,6 +186,9 @@ public class HyperCube extends NeutronGuiceModule {
     // Optional initialization, mostly for testing.
   }
 
+  /**
+   * Bind optional system properties not found in {@link FlightPlan}.
+   */
   protected void bindSystemProperties() {
     final Properties defaults = new Properties();
     defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // 1 minute
@@ -198,13 +201,14 @@ public class HyperCube extends NeutronGuiceModule {
 
   public static synchronized HyperCube buildCube(final FlightPlan opts) {
     HyperCube ret;
-
     LOGGER.debug("HyperCube.buildCube");
+
     if (instance != null) {
       ret = instance;
     } else {
       final boolean usePeopleIndex = StringUtils.isNotBlank(opts.getEsConfigLoc());
       if (usePeopleIndex) {
+        // ApiFileAssistant prohibits sneaky tricks with paths.
         new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc());
       }
       ret = new HyperCube(opts, usePeopleIndex ? new File(opts.getEsConfigLoc()) : null,
@@ -609,11 +613,12 @@ public class HyperCube extends NeutronGuiceModule {
   protected AtomLaunchDirector configureQuartz(final Injector injector,
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
-      AbortFlightTimerTask abortFlightTimerTask) throws SchedulerException {
+      AbortFlightTimerTask abortFlightTimerTask,
+      @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        abortFlightTimerTask, "60000");
+        abortFlightTimerTask, strTimeToAbort);
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();

@@ -26,6 +26,19 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronClassFinder;
 
+/**
+ * Singleton implementation of {@link AtomLaunchDirector}. Runs the Quartz scheduler, tracks
+ * {@link LaunchPad}'s, and schedules rocket launches.
+ * 
+ * <p>
+ * Schedules an instance of {@link AbortFlightTimerTask} to run every
+ * {@code "zombie.killer.checkEveryMillis"} and abort zombie flights running longer than
+ * {@code "zombie.killer.killAtMillis"}.
+ * </p>
+ * 
+ * @author CWDS API Team
+ * @see AtomFlightRecorder
+ */
 @Singleton
 public class LaunchDirector implements AtomLaunchDirector {
 
@@ -71,6 +84,7 @@ public class LaunchDirector implements AtomLaunchDirector {
     this.flightPlanManger = flightPlanManager;
     this.abortFlightTimer = new Timer("abort_rocket_timer", true);
 
+    LOGGER.info("Schedule Zombie Killer: zombieKillerMillis: {}", zombieKillerMillis);
     final int iZombieKillerMillis = Integer.parseInt(zombieKillerMillis);
     this.abortFlightTimer.scheduleAtFixedRate(timerTask, iZombieKillerMillis, iZombieKillerMillis);
   }
@@ -105,7 +119,7 @@ public class LaunchDirector implements AtomLaunchDirector {
 
   @Override
   public void prepareLaunchPads() {
-    // TODO: FINISH ME!
+    // Not in use.
   }
 
   @Override

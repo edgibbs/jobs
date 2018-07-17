@@ -35,6 +35,7 @@ public class AbortFlightTimerTask extends TimerTask {
     this.scheduler = scheduler;
 
     final int iTimeToAbort = Integer.parseInt(strTimeToAbort);
+    LOGGER.info("Zombie Killer! iTimeToAbort: {}", iTimeToAbort);
     this.timeToAbort = iTimeToAbort > 0 ? iTimeToAbort : (15 * 60 * 1000); // fifteen minutes
   }
 
@@ -46,19 +47,21 @@ public class AbortFlightTimerTask extends TimerTask {
 
     if (flightPlan.isLastRunMode() && (flightLog.isRunning() && ctx.getJobRunTime() > timeToAbort)
         || flightLog.isFailed()) {
-      LOGGER.warn("ABORT ROCKET! rocket: {}", rocket.getClass());
       try {
+        LOGGER.warn("ABORT ROCKET! rocket: {}", rocket.getClass());
         scheduler.interrupt(ctx.getJobDetail().getKey());
       } catch (SchedulerException e) {
         LOGGER.error("FAILED TO ABORT! {} : {}", rocket.getClass(), e.getMessage(), e);
       }
+    } else {
+      LOGGER.debug("Keep flying. rocket: {}", rocket.getClass());
     }
   }
 
   @Override
   public void run() {
     try {
-      LOGGER.debug("Run zombie killer");
+      LOGGER.info("Run zombie killer!");
       final List<JobExecutionContext> currentlyExecuting = scheduler.getCurrentlyExecutingJobs();
       currentlyExecuting.stream().sequential().forEach(this::abortRunningJob);
     } catch (SchedulerException e) {
