@@ -19,6 +19,11 @@ import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 /**
  * Timer task to abort stalled or runaway rockets.
  * 
+ * <p>
+ * This zombie killer only kills jobs in Last Change mode, <strong>not Initial Load</strong>, since
+ * the latter runs much longer than the former.
+ * </p>
+ * 
  * @author CWDS API Team
  */
 public class ZombieKillerTimerTask extends TimerTask {
@@ -46,7 +51,7 @@ public class ZombieKillerTimerTask extends TimerTask {
     final FlightPlan flightPlan = rocket.getFlightPlan();
     final Class<?> klass = rocket.getClass();
 
-    if (flightPlan.isLastRunMode() && (flightLog.isRunning() && ctx.getJobRunTime() > timeToAbort)
+    if ((flightPlan.isLastRunMode() && (flightLog.isRunning() && ctx.getJobRunTime() > timeToAbort))
         || flightLog.isFailed()) {
       try {
         LOGGER.warn("ABORT ROCKET! rocket: {}", klass);
