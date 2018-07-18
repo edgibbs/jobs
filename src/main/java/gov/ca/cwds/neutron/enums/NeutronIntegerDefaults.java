@@ -9,7 +9,7 @@ public enum NeutronIntegerDefaults {
   /**
    * Default wait time when polling thread queues. Mostly used in initial load.
    */
-  POLL_MILLIS(2000),
+  POLL_MILLIS(3000),
 
   DEFAULT_BUCKETS(1),
 

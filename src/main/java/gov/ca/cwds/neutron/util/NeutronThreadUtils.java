@@ -1,5 +1,9 @@
 package gov.ca.cwds.neutron.util;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Phaser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,12 +48,21 @@ public class NeutronThreadUtils {
     Thread.currentThread().setName(obj.getClass().getSimpleName() + "_" + title);
   }
 
+  /**
+   * Super lame but sometimes effective approach to thread management, especially when
+   * thread/connection pools warm up or other resources initialize.
+   * 
+   * <p>
+   * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
+   * {@link Condition}.
+   * </p>
+   */
   public static void catchYourBreath() {
     try {
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      LOGGER.trace("Interrupted", e);
+      LOGGER.trace("Interrupted", e); // appease SonarQube
     }
   }
 
@@ -60,10 +73,7 @@ public class NeutronThreadUtils {
    */
   public static long calcMemory() {
     final Runtime runtime = Runtime.getRuntime();
-    final long maxMemory = runtime.maxMemory();
-    final long allocatedMemory = runtime.totalMemory();
-    final long freeMemory = runtime.freeMemory();
-    return (freeMemory + (maxMemory - allocatedMemory)) / 1024L;
+    return (runtime.freeMemory() + (runtime.maxMemory() - runtime.totalMemory())) / 1024L;
   }
 
   /**
@@ -71,7 +81,7 @@ public class NeutronThreadUtils {
    */
   public static void freeMemory() {
     LOGGER.info("Free memory, before gc: {} MB", calcMemory());
-    Runtime.getRuntime().gc();
+    System.gc();
     LOGGER.info("Free memory, after  gc: {} MB", calcMemory());
   }
 

@@ -87,7 +87,7 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  * <h3>Command Line:</h3>
  * 
  * <pre>
- * {@code java gov.ca.cwds.jobs.ClientIndexerJob -c config/local.yaml -l /Users/mylittlepony/client.time}
+ * {@code java gov.ca.cwds.jobs.ClientIndexerJob -c config/local.yaml -l /Users/voldemort/people_summary.time}
  * </pre>
  * 
  * @author CWDS API Team
@@ -122,10 +122,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
   /**
    * Primary Hibernate session factory. Rockets could potentially read from multiple datasources.
-   * 
-   * <p>
-   * OPTION: get this from Hibernate.
-   * </p>
    */
   protected final SessionFactory sessionFactory;
 
@@ -205,7 +201,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   public void addToIndexQueue(N norm) {
     try {
       CheeseRay.logEvery(flightLog.markQueuedToIndex(), "index queue", "recs");
-      queueIndex.add(norm);
+      queueIndex.add(norm); // unbounded
     } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
@@ -357,6 +353,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     nameThread("jdbc");
     LOGGER.info("BEGIN: jdbc thread");
 
+    // Close the connection automatically.
     try (final Connection con = NeutronJdbcUtils.prepConnection(jobDao.grabSession())) {
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
@@ -376,7 +373,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         int cntr = 0;
         while (isRunning() && rs.next() && (m = extract(rs)) != null) {
           CheeseRay.logEvery(++cntr, "Retrieved", "recs");
-          queueNormalize.add(m);
+          queueNormalize.offer(m, NeutronIntegerDefaults.POLL_MILLIS.getValue(),
+              TimeUnit.MILLISECONDS);
         }
 
         con.commit();
@@ -407,6 +405,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       // End of group. Normalize these group records.
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
           && (t = normalizeSingle(grpRecs)) != null) {
+
+        // Unbounded:
         queueIndex.add(t);
         grpRecs.clear(); // Single thread, re-use memory.
       }
@@ -417,7 +417,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     // Last bundle.
     if (!grpRecs.isEmpty() && (t = normalizeSingle(grpRecs)) != null) {
-      queueIndex.add(t);
+      queueIndex.add(t); // unbounded
       grpRecs.clear(); // Single thread, re-use memory.
     }
 
