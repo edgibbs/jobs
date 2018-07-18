@@ -28,6 +28,8 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
@@ -70,6 +72,8 @@ public class EsClientPerson extends BaseEsClient
     implements Comparable<EsClientPerson>, Comparator<EsClientPerson> {
 
   private static final long serialVersionUID = 1L;
+
+  private static final ConditionalLogger LOGGER = new JetPackLogger(EsClientPerson.class);
 
   // ================================
   // SAF_ALRT: (safety alerts)
@@ -221,7 +225,11 @@ public class EsClientPerson extends BaseEsClient
     //
     ret.openCaseId = rs.getString("CAS_IDENTIFIER");
 
-    ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
+    try {
+      ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
+    } catch (Exception e) {
+      LOGGER.trace("COLUMN 'CAS_RSP_AGY_CD' NOT IN SCHEMA!", e);
+    }
 
     //
     // Last change (overall)
