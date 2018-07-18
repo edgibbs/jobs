@@ -299,8 +299,6 @@ public final class NeutronJdbcUtils {
     q.setTimeout(120); // 2 minutes tops
   }
 
-  // public static void batch
-
   private static List<Pair<String, String>> buildPartitionsRanges(int partitionCount,
       String[] partitions) {
     final int len = partitions.length;
@@ -341,7 +339,8 @@ public final class NeutronJdbcUtils {
       // z/OS, small data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      ret.add(Pair.of(Z_OS_START, Z_OS_END));
+      // ret.add(Pair.of(Z_OS_START, Z_OS_END));
+      ret = initialLoad.limitRange(buildPartitionsRanges(4, partitions));
     } else {
       // ----------------------------
       // Linux or small data set:

@@ -438,12 +438,6 @@ public class HyperCube extends NeutronGuiceModule {
     }
   }
 
-  // @Provides
-  // public ZombieKillerTimerTask provideAbortFlightTimerTask(Scheduler scheduler,
-  // @Named("zombie.killer.killAtMillis") String strTimeToAbort) {
-  // return new ZombieKillerTimerTask(scheduler, strTimeToAbort);
-  // }
-
   @Provides
   @Singleton
   public CmsSystemCodeSerializer provideCmsSystemCodeSerializer(SystemCodeCache systemCodeCache) {

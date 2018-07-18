@@ -12,7 +12,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.FlushModeType;
@@ -484,11 +487,22 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     LOGGER.info("STOP indexer thread");
   }
 
-  protected void waitOnQueue(String threadName) throws InterruptedException {
+  /**
+   * Super lame but sometimes effective approach to thread management, especially when
+   * thread/connection pools warm up or other resources initialize.
+   * 
+   * <p>
+   * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
+   * {@link Condition}.
+   * </p>
+   * 
+   * @throws InterruptedException on thread interruption
+   */
+  protected void waitOnQueue() throws InterruptedException {
     if (isRunning()) {
       final int sleepForMillis = NeutronIntegerDefaults.SLEEP_MILLIS.getValue();
-      LOGGER.debug("thread {}: bulkPrepare: queue empty, waiting for data: sleep for {} millis",
-          threadName, sleepForMillis);
+      LOGGER.trace("thread {}: bulkPrepare: queue empty, waiting for data: sleep for {} millis",
+          Thread.currentThread().getName(), sleepForMillis);
       Thread.sleep(sleepForMillis);
     }
   }
@@ -513,7 +527,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       prepareDocument(bp, t);
     }
 
-    waitOnQueue("indexer");
+    waitOnQueue();
     return i;
   }
 
