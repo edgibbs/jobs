@@ -49,7 +49,7 @@
 		</sift>
 	</appender>
 
-	<logger name="gov.ca.cwds" level="info" additivity="false">
+	<logger name="gov.ca.cwds" level="debug" additivity="false">
 		<appender-ref ref="FILE-THREAD" />
 		<appender-ref ref="STDOUT" />
 	</logger>
