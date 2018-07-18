@@ -21,16 +21,16 @@ import gov.ca.cwds.neutron.rocket.BasePersonRocket;
  * 
  * @author CWDS API Team
  */
-public class AbortFlightTimerTask extends TimerTask {
+public class ZombieKillerTimerTask extends TimerTask {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AbortFlightTimerTask.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ZombieKillerTimerTask.class);
 
   private final Scheduler scheduler;
 
   private final int timeToAbort;
 
   @Inject
-  public AbortFlightTimerTask(Scheduler scheduler,
+  public ZombieKillerTimerTask(Scheduler scheduler,
       @Named("zombie.killer.killAtMillis") String strTimeToAbort) {
     this.scheduler = scheduler;
 

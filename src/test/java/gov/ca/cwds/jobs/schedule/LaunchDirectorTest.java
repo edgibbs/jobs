@@ -26,7 +26,7 @@ import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
-import gov.ca.cwds.neutron.launch.AbortFlightTimerTask;
+import gov.ca.cwds.neutron.launch.ZombieKillerTimerTask;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
@@ -44,7 +44,7 @@ public class LaunchDirectorTest extends Goddard {
   TriggerKey key;
   Scheduler scheduler;
   LaunchPad launchPad;
-  AbortFlightTimerTask timerTask;
+  ZombieKillerTimerTask timerTask;
 
   LaunchDirector target;
 
@@ -57,7 +57,7 @@ public class LaunchDirectorTest extends Goddard {
     rocketOptions = mock(FlightPlanRegistry.class);
     scheduler = mock(Scheduler.class);
     launchPad = mock(LaunchPad.class);
-    timerTask = new AbortFlightTimerTask(scheduler, "240000");
+    timerTask = new ZombieKillerTimerTask(scheduler, "240000");
 
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
     target = new LaunchDirector(jobHistory, rocketFactory, rocketOptions, timerTask, "60000");

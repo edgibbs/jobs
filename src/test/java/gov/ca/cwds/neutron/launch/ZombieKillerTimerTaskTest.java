@@ -19,20 +19,20 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 
-public class AbortFlightTimerTaskTest extends Goddard {
+public class ZombieKillerTimerTaskTest extends Goddard {
 
-  AbortFlightTimerTask target;
+  ZombieKillerTimerTask target;
 
   @Override
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new AbortFlightTimerTask(scheduler, "240000");
+    target = new ZombieKillerTimerTask(scheduler, "240000");
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(AbortFlightTimerTask.class, notNullValue());
+    assertThat(ZombieKillerTimerTask.class, notNullValue());
   }
 
   @Test

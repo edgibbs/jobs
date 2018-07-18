@@ -92,7 +92,7 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.launch.AbortFlightTimerTask;
+import gov.ca.cwds.neutron.launch.ZombieKillerTimerTask;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
@@ -447,8 +447,8 @@ public class HyperCube extends NeutronGuiceModule {
   }
 
   @Provides
-  public AbortFlightTimerTask provideAbortFlightTimerTask(Scheduler scheduler) {
-    return new AbortFlightTimerTask(scheduler, "240000"); // NEXT: soft-code
+  public ZombieKillerTimerTask provideAbortFlightTimerTask(Scheduler scheduler) {
+    return new ZombieKillerTimerTask(scheduler, "240000"); // NEXT: soft-code
   }
 
   @Provides
@@ -614,7 +614,7 @@ public class HyperCube extends NeutronGuiceModule {
   protected AtomLaunchDirector configureQuartz(final Injector injector,
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
-      AbortFlightTimerTask abortFlightTimerTask,
+      ZombieKillerTimerTask abortFlightTimerTask,
       @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();

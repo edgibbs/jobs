@@ -120,7 +120,7 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void history_Args__() throws Exception {
-    final AbortFlightTimerTask timerTask = new AbortFlightTimerTask(scheduler, "240000");
+    final ZombieKillerTimerTask timerTask = new ZombieKillerTimerTask(scheduler, "240000");
     launchDirector =
         new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask, "60000");
     launchDirector.setScheduler(scheduler);

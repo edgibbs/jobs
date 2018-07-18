@@ -31,7 +31,7 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronClassFinder;
  * {@link LaunchPad}'s, and schedules rocket launches.
  * 
  * <p>
- * Schedules an instance of {@link AbortFlightTimerTask} to run every
+ * Schedules an instance of {@link ZombieKillerTimerTask} to run every
  * {@code "zombie.killer.checkEveryMillis"} and abort zombie flights running longer than
  * {@code "zombie.killer.killAtMillis"}.
  * </p>
@@ -77,7 +77,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   @Inject
   public LaunchDirector(final AtomFlightRecorder flightRecorder,
       final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager,
-      AbortFlightTimerTask timerTask,
+      ZombieKillerTimerTask timerTask,
       @Named("zombie.killer.checkEveryMillis") String zombieKillerMillis) {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
