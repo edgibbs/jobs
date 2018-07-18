@@ -484,6 +484,15 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     LOGGER.info("STOP indexer thread");
   }
 
+  protected void waitOnQueue(String threadName) throws InterruptedException {
+    if (isRunning()) {
+      final int sleepForMillis = NeutronIntegerDefaults.SLEEP_MILLIS.getValue();
+      LOGGER.debug("thread {}: bulkPrepare: queue empty, waiting for data: sleep for {} millis",
+          threadName, sleepForMillis);
+      Thread.sleep(sleepForMillis);
+    }
+  }
+
   /**
    * Poll the index queue, track counts, and bulk prepare documents.
    * 
@@ -504,14 +513,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       prepareDocument(bp, t);
     }
 
-    if (isRunning()) {
-      final int sleepForMillis = NeutronIntegerDefaults.SLEEP_MILLIS.getValue();
-      LOGGER.debug(
-          "Indexer thread: bulkPrepare: queue empty, waiting for data: sleep for {} millis",
-          sleepForMillis);
-      Thread.sleep(sleepForMillis);
-    }
-
+    waitOnQueue("indexer");
     return i;
   }
 
