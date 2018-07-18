@@ -92,13 +92,13 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.launch.ZombieKillerTimerTask;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
+import gov.ca.cwds.neutron.launch.ZombieKillerTimerTask;
 import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
@@ -438,14 +438,6 @@ public class HyperCube extends NeutronGuiceModule {
     }
   }
 
-  protected boolean isScaffoldSystemCodeCache() {
-    return false;
-  }
-
-  protected SystemCodeCache scaffoldSystemCodeCache() {
-    return null;
-  }
-
   @Provides
   public ZombieKillerTimerTask provideAbortFlightTimerTask(Scheduler scheduler) {
     return new ZombieKillerTimerTask(scheduler, "240000"); // NEXT: soft-code
@@ -691,6 +683,14 @@ public class HyperCube extends NeutronGuiceModule {
 
   public File getEsConfigPeople() {
     return esConfigPeople;
+  }
+
+  protected boolean isScaffoldSystemCodeCache() {
+    return false;
+  }
+
+  protected SystemCodeCache scaffoldSystemCodeCache() {
+    return null;
   }
 
 }

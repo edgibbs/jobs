@@ -20,7 +20,7 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
  * 
  * @author CWDS API Team
  */
-public final class NeutronDB2Utils {
+public class NeutronDB2Utils {
 
   static final ConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
 
