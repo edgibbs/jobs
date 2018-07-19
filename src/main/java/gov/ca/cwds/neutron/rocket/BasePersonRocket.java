@@ -146,7 +146,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>MOVE</strong> to another unit.
    * </p>
    */
-  protected LinkedBlockingDeque<D> queueNormalize = new LinkedBlockingDeque<>();
+  protected LinkedBlockingDeque<D> queueNormalize = new LinkedBlockingDeque<>(50000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
