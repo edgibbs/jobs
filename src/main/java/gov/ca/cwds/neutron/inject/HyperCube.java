@@ -29,7 +29,6 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
 import gov.ca.cwds.ObjectMapperUtils;
-import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.DbResetStatusDao;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
@@ -206,12 +205,8 @@ public class HyperCube extends NeutronGuiceModule {
     if (instance != null) {
       ret = instance;
     } else {
-      final boolean usePeopleIndex = StringUtils.isNotBlank(opts.getEsConfigLoc());
-      if (usePeopleIndex) {
-        // ApiFileAssistant prohibits sneaky tricks with paths.
-        new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc());
-      }
-      ret = new HyperCube(opts, usePeopleIndex ? new File(opts.getEsConfigLoc()) : null,
+      ret = new HyperCube(opts,
+          StringUtils.isNotBlank(opts.getEsConfigLoc()) ? new File(opts.getEsConfigLoc()) : null,
           opts.getLastRunLoc());
     }
 
