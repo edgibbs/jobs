@@ -54,7 +54,7 @@ public class NeutronThreadUtils {
    * 
    * <p>
    * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
-   * {@link Condition}.
+   * Condition.
    * </p>
    */
   public static void catchYourBreath() {

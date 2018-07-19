@@ -589,6 +589,9 @@ public class HyperCube extends NeutronGuiceModule {
    * @param flightRecorder flight recorder
    * @param rocketFactory rocket factory
    * @param flightPlanMgr flight plan manager
+   * @param scheduler Quartz scheduler
+   * @param zombieKillerTimerTask zombie killer
+   * @param strTimeToAbort how long to wait before aborting a flight
    * @return configured launch scheduler
    * @throws SchedulerException if unable to configure Quartz
    */
@@ -597,12 +600,12 @@ public class HyperCube extends NeutronGuiceModule {
   protected AtomLaunchDirector configureQuartz(final Injector injector,
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
-      ZombieKillerTimerTask abortFlightTimerTask,
+      ZombieKillerTimerTask zombieKillerTimerTask,
       @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        abortFlightTimerTask, strTimeToAbort);
+        zombieKillerTimerTask, strTimeToAbort);
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();

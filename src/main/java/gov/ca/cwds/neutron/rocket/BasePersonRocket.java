@@ -305,7 +305,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * <strong>ENTRY POINT FOR INITIAL LOAD<strong>
+   * <strong>ENTRY POINT FOR INITIAL LOAD</strong>
    * 
    * <p>
    * Run threads to extract, transform, and index.
@@ -493,7 +493,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * <p>
    * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
-   * {@link Condition}.
+   * Condition.
    * </p>
    * 
    * @throws InterruptedException on thread interruption
