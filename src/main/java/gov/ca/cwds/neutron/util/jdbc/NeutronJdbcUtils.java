@@ -339,8 +339,8 @@ public final class NeutronJdbcUtils {
       // z/OS, small data set:
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
-      // ret.add(Pair.of(Z_OS_START, Z_OS_END));
-      ret = initialLoad.limitRange(buildPartitionsRanges(4, partitions));
+      ret.add(Pair.of(Z_OS_START, Z_OS_END));
+      // ret = initialLoad.limitRange(buildPartitionsRanges(4, partitions));
     } else {
       // ----------------------------
       // Linux or small data set:
