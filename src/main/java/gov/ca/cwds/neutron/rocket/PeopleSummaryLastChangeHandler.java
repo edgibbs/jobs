@@ -210,7 +210,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       int cntr = 0;
       final List<EsClientPerson> groupRecs = new ArrayList<>(50);
       for (EsClientPerson m : recs) {
-        CheeseRay.logEvery(LOGGER, ++cntr, "Normalize", "recs");
+        CheeseRay.logEvery(LOGGER, ++cntr, "Normalize last change", "recs");
         if (!lastId.equals(m.getNormalizationGroupKey()) && !groupRecs.isEmpty()) {
           results.add(rocket.normalizeSingle(groupRecs));
           groupRecs.clear();

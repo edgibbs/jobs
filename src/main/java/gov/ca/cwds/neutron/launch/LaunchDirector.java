@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -82,11 +83,14 @@ public class LaunchDirector implements AtomLaunchDirector {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
     this.flightPlanManger = flightPlanManager;
-    this.abortFlightTimer = new Timer("abort_rocket_timer", true);
 
-    LOGGER.info("Schedule Zombie Killer: zombieKillerMillis: {}", zombieKillerMillis);
-    final int iZombieKillerMillis = Integer.parseInt(zombieKillerMillis);
-    this.abortFlightTimer.scheduleAtFixedRate(timerTask, iZombieKillerMillis, iZombieKillerMillis);
+    if (!LaunchCommand.isInitialMode()) {
+      LOGGER.warn("Schedule Zombie Killer: zombieKillerMillis: {}", zombieKillerMillis);
+      this.abortFlightTimer = new Timer("abort_rocket_timer", true);
+      final int iZombieKillerMillis = Integer.parseInt(zombieKillerMillis);
+      this.abortFlightTimer.scheduleAtFixedRate(timerTask, iZombieKillerMillis,
+          iZombieKillerMillis);
+    }
   }
 
   /**
