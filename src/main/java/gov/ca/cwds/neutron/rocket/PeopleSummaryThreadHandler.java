@@ -125,7 +125,6 @@ public class PeopleSummaryThreadHandler
             con.prepareStatement(sqlPlacementAddress)) {
       prepAffectedClients(stmtInsClient, range);
       prepAffectedClients(stmtInsClientPlacementHome, range);
-      LOGGER.info("");
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
       con.rollback();
@@ -275,10 +274,12 @@ public class PeopleSummaryThreadHandler
     stmt.setMaxRows(0);
     stmt.setQueryTimeout(0); // NEXT: soft-code
     stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+    int cntr = 0;
 
     PlacementHomeAddress pha;
     final ResultSet rs = stmt.executeQuery(); // NOSONAR
     while (getRocket().isRunning() && rs.next()) {
+      CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes retrieved", "recs");
       pha = new PlacementHomeAddress(rs);
       placementHomeAddresses.put(pha.getClientId(), pha);
     }
