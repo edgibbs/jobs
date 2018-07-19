@@ -44,7 +44,7 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
   @Override
   @SuppressWarnings("unchecked")
   public SystemCode[] findByForeignKeyMetaTable(String foreignKeyMetaTable) {
-    LOGGER.info("XaSystemCodeDao.findByForeignKeyMetaTable: meta: {}", foreignKeyMetaTable);
+    LOGGER.info("NeutronSystemCodeDao.findByForeignKeyMetaTable: meta: {}", foreignKeyMetaTable);
     SystemCode[] ret;
 
     final String namedQueryName = SystemCode.class.getName() + ".findByForeignKeyMetaTable";
@@ -56,13 +56,13 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
           .setString("foreignKeyMetaTable", foreignKeyMetaTable).setReadOnly(true)
           .setCacheable(false).setHibernateFlushMode(FlushMode.MANUAL);
       ret = query.list().toArray(new SystemCode[0]);
-      LOGGER.info("XaSystemCodeDao.findByForeignKeyMetaTable: meta: {}, count: {}",
+      LOGGER.info("NeutronSystemCodeDao.findByForeignKeyMetaTable: meta: {}, count: {}",
           foreignKeyMetaTable, ret.length);
 
       // txn.commit();
       // session.close();
     } catch (Exception h) {
-      LOGGER.error("XaSystemCodeDao.findByForeignKeyMetaTable: ERROR! {}", h.getMessage(), h);
+      LOGGER.error("NeutronSystemCodeDao.findByForeignKeyMetaTable: ERROR! {}", h.getMessage(), h);
       throw new DaoException(h);
     }
 
@@ -72,7 +72,7 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
   @Override
   @SuppressWarnings("unchecked")
   public SystemCode findBySystemCodeId(Number systemCodeId) {
-    LOGGER.info("XaSystemCodeDao.findBySystemCodeId: systemCodeId: {}", systemCodeId);
+    LOGGER.info("NeutronSystemCodeDao.findBySystemCodeId: systemCodeId: {}", systemCodeId);
     final String namedQueryName = SystemCode.class.getName() + ".findBySystemCodeId";
     final Session session = grabSession();
     final Transaction txn = joinTransaction(session);
@@ -87,7 +87,7 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
       // txn.commit();
       // session.close();
     } catch (Exception h) {
-      LOGGER.error("XaSystemCodeDao.findBySystemCodeId: ERROR! {}", h.getMessage(), h);
+      LOGGER.error("NeutronSystemCodeDao.findBySystemCodeId: ERROR! {}", h.getMessage(), h);
       throw new DaoException(h);
     }
 
