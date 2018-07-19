@@ -37,6 +37,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.StringType;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -546,6 +547,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   }
 
   @Test
+  @Ignore
   public void doInitialLoadJdbc_Args__() throws Exception {
     runKillThread(target);
     target.doInitialLoadJdbc();

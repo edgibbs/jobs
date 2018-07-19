@@ -305,7 +305,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * ENTRY POINT FOR INITIAL LOAD.
+   * <strong>ENTRY POINT FOR INITIAL LOAD<strong>
    * 
    * <p>
    * Run threads to extract, transform, and index.

@@ -396,6 +396,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
       try {
         lock.lockInterruptibly();
         await("kill thread").atMost(sleepMillis, TimeUnit.MILLISECONDS).untilTrue(isRunwayClear);
+        target.doneRetrieve();
+        target.doneTransform();
+        target.doneIndex();
         target.done();
       } catch (Exception e) {
         e.printStackTrace();
