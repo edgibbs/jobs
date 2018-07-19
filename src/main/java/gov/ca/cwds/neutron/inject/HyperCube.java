@@ -31,6 +31,7 @@ import com.google.inject.name.Names;
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.DbResetStatusDao;
+import gov.ca.cwds.dao.cms.NeutronSystemCodeDao;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
@@ -358,7 +359,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(EsIntakeScreeningDao.class);
 
     // CMS system codes.
-    bind(SystemCodeDao.class);
+    bind(SystemCodeDao.class).to(NeutronSystemCodeDao.class);
     bind(SystemMetaDao.class);
   }
 
