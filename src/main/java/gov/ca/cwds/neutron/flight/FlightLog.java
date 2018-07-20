@@ -233,22 +233,21 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   @Override
   public void fail() {
-    if (this.status != FlightStatus.FAILED) {
-      this.status = FlightStatus.FAILED;
-      this.endTime = System.currentTimeMillis();
-
-      this.fatalError = true;
-      done();
-    }
+    this.status = FlightStatus.FAILED;
+    this.fatalError = true;
+    done();
   }
 
   @Override
   public void done() {
+    // Once failed, it cannot be rescinded.
     if (this.status != FlightStatus.FAILED) {
       this.status = FlightStatus.SUCCEEDED;
     }
 
     this.endTime = System.currentTimeMillis();
+
+    // Done with ALL steps.
     this.doneRetrieve = true;
     this.doneIndex = true;
     this.doneTransform = true;

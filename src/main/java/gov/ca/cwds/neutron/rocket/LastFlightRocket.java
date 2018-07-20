@@ -154,7 +154,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   }
 
   /**
-   * Write the time stamp <strong>IF</strong> the rocket succeeded.
+   * Write the last run timestamp <strong>IF</strong> the rocket's flight succeeded.
    * 
    * @param datetime date and time to store
    * @throws NeutronCheckedException I/O or parse error
@@ -243,7 +243,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   @Override
   public void doneRetrieve() {
-    LOGGER.warn("\n\n\t\t *********** RETRIEVAL DONE ***********\n");
+    LOGGER.warn("\n\t\t *********** RETRIEVAL DONE ***********\n");
     getFlightLog().doneRetrieve();
   }
 
@@ -260,7 +260,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   @Override
   public void doneIndex() {
-    LOGGER.warn("\n\n\t\t *********** INDEXING DONE ***********\n");
+    LOGGER.warn("\n\t\t *********** INDEXING DONE ***********\n");
     getFlightLog().doneIndex();
   }
 
