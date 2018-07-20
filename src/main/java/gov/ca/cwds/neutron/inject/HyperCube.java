@@ -26,11 +26,12 @@ import com.google.inject.NeutronGuiceModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 import gov.ca.cwds.ObjectMapperUtils;
-import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.dao.cms.BatchBucket;
 import gov.ca.cwds.dao.cms.DbResetStatusDao;
+import gov.ca.cwds.dao.cms.NeutronSystemCodeDao;
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedCollateralIndividualDao;
@@ -97,6 +98,7 @@ import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
+import gov.ca.cwds.neutron.launch.ZombieKillerTimerTask;
 import gov.ca.cwds.neutron.launch.listener.NeutronJobListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
@@ -184,18 +186,28 @@ public class HyperCube extends NeutronGuiceModule {
     // Optional initialization, mostly for testing.
   }
 
+  /**
+   * Bind optional system properties not found in {@link FlightPlan}.
+   */
+  protected void bindSystemProperties() {
+    final Properties defaults = new Properties();
+    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // 1 minute
+    defaults.setProperty("zombie.killer.killAtMillis", "240000"); // 4 minutes
+
+    final Properties props = new Properties(defaults);
+    props.putAll(System.getProperties());
+    Names.bindProperties(binder(), props);
+  }
+
   public static synchronized HyperCube buildCube(final FlightPlan opts) {
     HyperCube ret;
-
     LOGGER.debug("HyperCube.buildCube");
+
     if (instance != null) {
       ret = instance;
     } else {
-      final boolean usePeopleIndex = StringUtils.isNotBlank(opts.getEsConfigLoc());
-      if (usePeopleIndex) {
-        new ApiFileAssistant().validateFileLocation(opts.getEsConfigLoc());
-      }
-      ret = new HyperCube(opts, usePeopleIndex ? new File(opts.getEsConfigLoc()) : null,
+      ret = new HyperCube(opts,
+          StringUtils.isNotBlank(opts.getEsConfigLoc()) ? new File(opts.getEsConfigLoc()) : null,
           opts.getLastRunLoc());
     }
 
@@ -286,6 +298,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Override
   protected void configure() {
     LOGGER.debug("HyperCube.configure");
+    bindSystemProperties();
     bind(FlightPlan.class).toInstance(this.flightPlan);
 
     // DB2 session factory:
@@ -296,6 +309,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(SessionFactory.class).annotatedWith(NsSessionFactory.class)
         .toInstance(makeNsSessionFactory());
 
+    // Data Access Objects:
     bindDaos();
 
     // Inject annotations.
@@ -345,7 +359,7 @@ public class HyperCube extends NeutronGuiceModule {
     bind(EsIntakeScreeningDao.class);
 
     // CMS system codes.
-    bind(SystemCodeDao.class);
+    bind(SystemCodeDao.class).to(NeutronSystemCodeDao.class);
     bind(SystemMetaDao.class);
   }
 
@@ -418,14 +432,6 @@ public class HyperCube extends NeutronGuiceModule {
       ret.register();
       return ret;
     }
-  }
-
-  protected boolean isScaffoldSystemCodeCache() {
-    return false;
-  }
-
-  protected SystemCodeCache scaffoldSystemCodeCache() {
-    return null;
   }
 
   @Provides
@@ -555,24 +561,11 @@ public class HyperCube extends NeutronGuiceModule {
   // QUARTZ SCHEDULER:
   // =========================
 
-  /**
-   * Configure Quartz scheduling. Quartz operates as a singleton.
-   * 
-   * @param injector Guice dependency injection
-   * @param flightRecorder flight recorder
-   * @param rocketFactory rocket factory
-   * @param flightPlanMgr flight plan manager
-   * @return configured launch scheduler
-   * @throws SchedulerException if unable to configure Quartz
-   */
   @Provides
   @Singleton
-  protected AtomLaunchDirector configureQuartz(final Injector injector,
-      final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
-      final AtomFlightPlanManager flightPlanMgr) throws SchedulerException {
-    LOGGER.debug("HyperCube.configureQuartz");
+  protected Scheduler makeScheduler(final Injector injector, AtomRocketFactory rocketFactory)
+      throws SchedulerException {
     final boolean initialMode = LaunchCommand.isInitialMode();
-    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr);
     final Properties p = new Properties();
     p.put("org.quartz.scheduler.instanceName", NeutronSchedulerConstants.SCHEDULER_INSTANCE_NAME);
 
@@ -584,9 +577,37 @@ public class HyperCube extends NeutronGuiceModule {
 
     // NEXT: inject scheduler and rocket factory.
     scheduler.setJobFactory(rocketFactory);
-    ret.setScheduler(scheduler);
 
     // Quartz scheduler listeners.
+    return scheduler;
+  }
+
+  /**
+   * Configure Quartz scheduling. Quartz operates as a singleton.
+   * 
+   * @param injector Guice dependency injection
+   * @param flightRecorder flight recorder
+   * @param rocketFactory rocket factory
+   * @param flightPlanMgr flight plan manager
+   * @param scheduler Quartz scheduler
+   * @param zombieKillerTimerTask zombie killer
+   * @param strTimeToAbort how long to wait before aborting a flight
+   * @return configured launch scheduler
+   * @throws SchedulerException if unable to configure Quartz
+   */
+  @Provides
+  @Singleton
+  protected AtomLaunchDirector configureQuartz(final Injector injector,
+      final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
+      final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
+      ZombieKillerTimerTask zombieKillerTimerTask,
+      @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
+    LOGGER.debug("HyperCube.configureQuartz");
+    final boolean initialMode = LaunchCommand.isInitialMode();
+    final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
+        zombieKillerTimerTask, strTimeToAbort);
+
+    ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();
     final ListenerManager mgr = ret.getScheduler().getListenerManager();
     mgr.addSchedulerListener(new NeutronSchedulerListener());
@@ -656,6 +677,14 @@ public class HyperCube extends NeutronGuiceModule {
 
   public File getEsConfigPeople() {
     return esConfigPeople;
+  }
+
+  protected boolean isScaffoldSystemCodeCache() {
+    return false;
+  }
+
+  protected SystemCodeCache scaffoldSystemCodeCache() {
+    return null;
   }
 
 }

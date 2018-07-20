@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.launch;
 
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.quartz.Scheduler;
@@ -11,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -24,6 +27,19 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronClassFinder;
 
+/**
+ * Singleton implementation of {@link AtomLaunchDirector}. Runs the Quartz scheduler, tracks
+ * {@link LaunchPad}'s, and schedules rocket launches.
+ * 
+ * <p>
+ * Schedules an instance of {@link ZombieKillerTimerTask} to run every
+ * {@code "zombie.killer.checkEveryMillis"} and abort zombie flights running longer than
+ * {@code "zombie.killer.killAtMillis"}.
+ * </p>
+ * 
+ * @author CWDS API Team
+ * @see AtomFlightRecorder
+ */
 @Singleton
 public class LaunchDirector implements AtomLaunchDirector {
 
@@ -57,12 +73,24 @@ public class LaunchDirector implements AtomLaunchDirector {
    */
   private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
 
+  private Timer abortFlightTimer;
+
   @Inject
   public LaunchDirector(final AtomFlightRecorder flightRecorder,
-      final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager) {
+      final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager,
+      ZombieKillerTimerTask timerTask,
+      @Named("zombie.killer.checkEveryMillis") String zombieKillerMillis) {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
     this.flightPlanManger = flightPlanManager;
+
+    if (!LaunchCommand.isInitialMode()) {
+      LOGGER.warn("Schedule Zombie Killer: zombieKillerMillis: {}", zombieKillerMillis);
+      this.abortFlightTimer = new Timer("abort_rocket_timer", true);
+      final int iZombieKillerMillis = Integer.parseInt(zombieKillerMillis);
+      this.abortFlightTimer.scheduleAtFixedRate(timerTask, iZombieKillerMillis,
+          iZombieKillerMillis);
+    }
   }
 
   /**
@@ -95,7 +123,7 @@ public class LaunchDirector implements AtomLaunchDirector {
 
   @Override
   public void prepareLaunchPads() {
-    // TODO: FINISH ME!
+    // Not in use.
   }
 
   @Override
@@ -209,6 +237,14 @@ public class LaunchDirector implements AtomLaunchDirector {
   @Override
   public AtomFlightRecorder getFlightRecorder() {
     return flightRecorder;
+  }
+
+  public Timer getAbortFlightTimer() {
+    return abortFlightTimer;
+  }
+
+  public void setAbortFlightTimer(Timer abortFlightTimer) {
+    this.abortFlightTimer = abortFlightTimer;
   }
 
 }

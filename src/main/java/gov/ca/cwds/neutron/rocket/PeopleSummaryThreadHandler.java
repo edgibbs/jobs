@@ -66,9 +66,8 @@ public class PeopleSummaryThreadHandler
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
-
-    final boolean isLargeLoad = getRocket().isLargeLoad();
-    this.placementHomeAddresses = isLargeLoad ? new HashMap<>(5011) : new HashMap<>(2003);
+    this.placementHomeAddresses =
+        getRocket().isLargeLoad() ? new HashMap<>(5011) : new HashMap<>(2003);
   }
 
   @Override
@@ -81,7 +80,7 @@ public class PeopleSummaryThreadHandler
 
     // NOTE: Assumes that records are sorted by group key.
     while (!getRocket().isFailed() && rs.next() && (m = getRocket().extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, 5000, ++cntr, "Retrieved", "recs");
+      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
@@ -104,17 +103,28 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    String sqlPlacementAddress;
+    try {
+      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(
+          ClientSQLResource.SELECT_PLACEMENT_ADDRESS, rocket.determineLastSuccessfulRunTime(),
+          rocket.getFlightPlan().getOverrideLastEndTime());
+      LOGGER.info("SQL for Placement Address: \n{}", sqlPlacementAddress);
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREP PLACEMENT ADDRESS SQL! {}", e.getMessage(),
+          e);
+    }
+
     try (
-        final PreparedStatement stmtInsClient1 =
+        final PreparedStatement stmtInsClient =
             con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_CLIENT_FULL,
                 ClientSQLResource.INSERT_CLIENT_LAST_CHG));
-        final PreparedStatement stmtInsClient2 =
+        final PreparedStatement stmtInsClientPlacementHome =
             con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL,
                 ClientSQLResource.INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
-      prepAffectedClients(stmtInsClient1, range);
-      prepAffectedClients(stmtInsClient2, range);
+            con.prepareStatement(sqlPlacementAddress)) {
+      prepAffectedClients(stmtInsClient, range);
+      prepAffectedClients(stmtInsClientPlacementHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
       con.rollback();
@@ -137,11 +147,11 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("\nhandleJdbcDone: normalized.size(): {}\n", normalized.size());
 
     // Merge placement home addresses.
-    placementHomeAddresses.values().stream().forEachOrdered(this::mapReplicatedClient);
+    placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
-    LOGGER.info("\nhandleJdbcDone: FINISHED\n");
+    LOGGER.info("handleJdbcDone: FINISHED");
   }
 
   @Override
@@ -173,9 +183,6 @@ public class PeopleSummaryThreadHandler
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
     this.deletionResults = deletionResults;
-
-    // Read from the view, old school.
-    // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
     LOGGER.info("After view: count: {}", normalized.size());
 
     // Handle additional JDBC statements, if any.
@@ -264,14 +271,15 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
-    LOGGER.info("read placement home address");
     stmt.setMaxRows(0);
     stmt.setQueryTimeout(0); // NEXT: soft-code
     stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+    int cntr = 0;
 
     PlacementHomeAddress pha;
     final ResultSet rs = stmt.executeQuery(); // NOSONAR
-    while (!getRocket().isFailed() && rs.next()) {
+    while (getRocket().isRunning() && rs.next()) {
+      CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes retrieved", "recs");
       pha = new PlacementHomeAddress(rs);
       placementHomeAddresses.put(pha.getClientId(), pha);
     }

@@ -11,7 +11,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.FlushModeType;
@@ -86,7 +90,7 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
  * <h3>Command Line:</h3>
  * 
  * <pre>
- * {@code java gov.ca.cwds.jobs.ClientIndexerJob -c config/local.yaml -l /Users/mylittlepony/client.time}
+ * {@code java gov.ca.cwds.jobs.ClientIndexerJob -c config/local.yaml -l /Users/voldemort/people_summary.time}
  * </pre>
  * 
  * @author CWDS API Team
@@ -121,10 +125,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
   /**
    * Primary Hibernate session factory. Rockets could potentially read from multiple datasources.
-   * 
-   * <p>
-   * OPTION: get this from Hibernate.
-   * </p>
    */
   protected final SessionFactory sessionFactory;
 
@@ -146,7 +146,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>MOVE</strong> to another unit.
    * </p>
    */
-  protected LinkedBlockingDeque<D> queueNormalize = new LinkedBlockingDeque<>(2000);
+  protected LinkedBlockingDeque<D> queueNormalize = new LinkedBlockingDeque<>(50000);
 
   /**
    * Queue of normalized records waiting to publish to Elasticsearch.
@@ -158,7 +158,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected LinkedBlockingDeque<N> queueIndex = new LinkedBlockingDeque<>(50000);
+  protected ConcurrentLinkedDeque<N> queueIndex = new ConcurrentLinkedDeque<>();
 
   /**
    * Construct rocket with all required dependencies.
@@ -204,8 +204,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   public void addToIndexQueue(N norm) {
     try {
       CheeseRay.logEvery(flightLog.markQueuedToIndex(), "index queue", "recs");
-      queueIndex.putLast(norm);
-    } catch (InterruptedException e) {
+      queueIndex.add(norm); // unbounded
+    } catch (Exception e) {
       fail();
       Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
@@ -305,7 +305,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * ENTRY POINT FOR INITIAL LOAD.
+   * <strong>ENTRY POINT FOR INITIAL LOAD</strong>
    * 
    * <p>
    * Run threads to extract, transform, and index.
@@ -356,7 +356,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     nameThread("jdbc");
     LOGGER.info("BEGIN: jdbc thread");
 
-    try (final Connection con = NeutronJdbcUtils.prepConnection(jobDao.getSessionFactory())) {
+    // Close the connection automatically.
+    try (final Connection con = NeutronJdbcUtils.prepConnection(jobDao.grabSession())) {
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName());
@@ -375,7 +376,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         int cntr = 0;
         while (isRunning() && rs.next() && (m = extract(rs)) != null) {
           CheeseRay.logEvery(++cntr, "Retrieved", "recs");
-          queueNormalize.putLast(m);
+          queueNormalize.offer(m, NeutronIntegerDefaults.POLL_MILLIS.getValue(),
+              TimeUnit.MILLISECONDS);
         }
 
         con.commit();
@@ -406,7 +408,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       // End of group. Normalize these group records.
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1
           && (t = normalizeSingle(grpRecs)) != null) {
-        queueIndex.putLast(t);
+
+        // Unbounded:
+        queueIndex.add(t);
         grpRecs.clear(); // Single thread, re-use memory.
       }
 
@@ -416,7 +420,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
     // Last bundle.
     if (!grpRecs.isEmpty() && (t = normalizeSingle(grpRecs)) != null) {
-      queueIndex.putLast(t);
+      queueIndex.add(t); // unbounded
       grpRecs.clear(); // Single thread, re-use memory.
     }
 
@@ -480,7 +484,27 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       doneIndex();
     }
 
-    LOGGER.info("DONE: indexer thread");
+    LOGGER.info("STOP indexer thread");
+  }
+
+  /**
+   * Super lame but sometimes effective approach to thread management, especially when
+   * thread/connection pools warm up or other resources initialize.
+   * 
+   * <p>
+   * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
+   * Condition.
+   * </p>
+   * 
+   * @throws InterruptedException on thread interruption
+   */
+  protected void waitOnQueue() throws InterruptedException {
+    if (isRunning()) {
+      final int sleepForMillis = NeutronIntegerDefaults.SLEEP_MILLIS.getValue();
+      LOGGER.trace("thread {}: bulkPrepare: queue empty, waiting for data: sleep for {} millis",
+          Thread.currentThread().getName(), sleepForMillis);
+      Thread.sleep(sleepForMillis);
+    }
   }
 
   /**
@@ -494,14 +518,16 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected int bulkPrepare(final BulkProcessor bp, int cntr)
       throws IOException, InterruptedException {
+    LOGGER.trace("Indexer thread: bulkPrepare");
     int i = cntr;
-    N t;
+    N t; // Normalized type
 
-    while (isRunning() && (t = queueIndex.pollFirst(NeutronIntegerDefaults.POLL_MILLIS.getValue(),
-        TimeUnit.MILLISECONDS)) != null) {
+    while (isRunning() && (t = queueIndex.pollFirst()) != null) {
       CheeseRay.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
+
+    waitOnQueue();
     return i;
   }
 
@@ -591,13 +617,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
   protected void sizeQueues(final Date lastRun) {
     // Configure queue sizes for last run or initial load.
-    if (determineInitialLoad(lastRun)) {
-      queueNormalize = new LinkedBlockingDeque<>(50000);
-      queueIndex = new LinkedBlockingDeque<>(75000);
-    } else {
-      queueNormalize = new LinkedBlockingDeque<>(8000);
-      queueIndex = new LinkedBlockingDeque<>(20000);
-    }
+    // queueNormalize = new LinkedBlockingDeque<>();
+    // queueIndex = new LinkedBlockingDeque<>();
   }
 
   protected boolean determineInitialLoad(final Date lastRun) {
@@ -1018,7 +1039,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @return index queue implementation
    */
-  protected LinkedBlockingDeque<N> getQueueIndex() {
+  protected ConcurrentLinkedDeque<N> getQueueIndex() {
     return queueIndex;
   }
 
@@ -1027,7 +1048,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @param queueIndex index queue implementation
    */
-  protected void setQueueIndex(LinkedBlockingDeque<N> queueIndex) {
+  protected void setQueueIndex(ConcurrentLinkedDeque<N> queueIndex) {
     this.queueIndex = queueIndex;
   }
 

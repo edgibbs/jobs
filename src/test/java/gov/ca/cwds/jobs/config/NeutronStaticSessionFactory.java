@@ -113,6 +113,7 @@ public class NeutronStaticSessionFactory {
       return sf.createEntityManager(synchronizationType, map);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public StatelessSessionBuilder withStatelessOptions() {
       return sf.withStatelessOptions();
@@ -158,6 +159,7 @@ public class NeutronStaticSessionFactory {
       return sf.getCache();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Set getDefinedFilterNames() {
       return sf.getDefinedFilterNames();
@@ -191,6 +193,7 @@ public class NeutronStaticSessionFactory {
       return sf.getTypeHelper();
     }
 
+    @SuppressWarnings({"deprecation", "rawtypes"})
     @Override
     public ClassMetadata getClassMetadata(Class entityClass) {
       return sf.getClassMetadata(entityClass);

@@ -296,9 +296,8 @@ public final class NeutronJdbcUtils {
     q.setCacheMode(CacheMode.IGNORE);
     q.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     q.setHibernateFlushMode(FlushMode.MANUAL);
+    q.setTimeout(120); // 2 minutes tops
   }
-
-  // public static void batch
 
   private static List<Pair<String, String>> buildPartitionsRanges(int partitionCount,
       String[] partitions) {
@@ -341,6 +340,7 @@ public final class NeutronJdbcUtils {
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
       ret.add(Pair.of(Z_OS_START, Z_OS_END));
+      // ret = initialLoad.limitRange(buildPartitionsRanges(4, partitions));
     } else {
       // ----------------------------
       // Linux or small data set:
@@ -431,7 +431,7 @@ public final class NeutronJdbcUtils {
 
     if (StringUtils.containsIgnoreCase(dbProductName, "db2")) {
       NeutronDB2Utils.LOGGER.info("Apply DB2 batch settings");
-      new WorkSetDB2UserInfo().execute(con);
+      new WorkDB2UserInfo().execute(con);
     }
   }
 

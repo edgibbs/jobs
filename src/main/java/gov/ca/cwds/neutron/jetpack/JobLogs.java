@@ -18,7 +18,7 @@ public class JobLogs {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(JobLogs.class);
 
-  protected static final int DEFAULT_LOG_EVERY = 5000;
+  protected static final int DEFAULT_LOG_EVERY = 1000;
 
   protected JobLogs() {
     // Static methods only; do not instantiate.

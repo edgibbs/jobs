@@ -64,7 +64,7 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
    * @throws SQLException on database error
    */
   protected synchronized Connection getConnection() throws SQLException {
-    return NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory());
+    return NeutronJdbcUtils.prepConnection(getJobDao().grabSession());
   }
 
 }

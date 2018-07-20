@@ -42,7 +42,6 @@ public class LaunchPadTest extends Goddard {
     super.setup();
 
     when(launchDirector.getFlightRecorder()).thenReturn(flightRecorder);
-
     sched = StandardFlightSchedule.REPORTER;
     target = new LaunchPad(launchDirector, sched, flightPlan);
   }
@@ -121,7 +120,9 @@ public class LaunchPadTest extends Goddard {
 
   @Test
   public void history_Args__() throws Exception {
-    launchDirector = new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager);
+    final ZombieKillerTimerTask timerTask = new ZombieKillerTimerTask(scheduler, "240000");
+    launchDirector =
+        new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask, "60000");
     launchDirector.setScheduler(scheduler);
     final String actual = target.history();
     assertThat(actual, is(notNullValue()));

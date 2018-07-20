@@ -15,6 +15,7 @@ import gov.ca.cwds.neutron.util.NeutronThreadUtils;
  * Shared features of all Elasticsearch indexer rockets.
  * 
  * @author CWDS API Team
+ * @see NeutronThreadUtils
  */
 public interface AtomShared extends ApiMarker {
 
@@ -66,6 +67,13 @@ public interface AtomShared extends ApiMarker {
     return new RocketSpecification();
   }
 
+  /**
+   * Common threading methods.
+   * 
+   * <p>
+   * CONSIDER: move to another interface.
+   * </p>
+   */
   default void catchYourBreath() {
     NeutronThreadUtils.catchYourBreath();
   }

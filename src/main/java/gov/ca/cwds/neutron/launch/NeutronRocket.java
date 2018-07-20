@@ -21,7 +21,7 @@ import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 
 /**
- * Implementation of Quartz InterruptableJob for scheduled flights.
+ * Neutron implementation of Quartz {@link InterruptableJob} for scheduled flights.
  * 
  * @author CWDS API Team
  * @see LaunchCommand
@@ -42,7 +42,7 @@ public class NeutronRocket implements InterruptableJob {
 
   private final StandardFlightSchedule flightSchedule;
 
-  private FlightLog flightLog; // volatile shows changes immediately across threads
+  private volatile FlightLog flightLog; // "volatile" shows changes immediately across threads
 
   /**
    * Constructor.
@@ -75,28 +75,29 @@ public class NeutronRocket implements InterruptableJob {
       flightLog.start();
       MDC.put("rocketLog", rocketName);
 
+      // Job parameter data:
       map.put("opts", flight.getFlightPlan());
       map.put("track", flightLog);
       context.setResult(flightLog);
 
       flight.run();
-      flightLog.done();
-      LOGGER.info("HAPPY LANDING! {}", rocketName);
+      flight.done();
+      LOGGER.info("HAPPY LANDING! rocket: {}", rocketName);
     } catch (Exception e) {
       flightLog.fail();
-      LOGGER.error("LAUNCH FAILURE! {}", rocketName, e);
-      throw new JobExecutionException("FAILED TO LAUNCH! " + rocketName, e);
+      LOGGER.error("LAUNCH FAILURE! rocket: {}", rocketName, e);
+      throw new JobExecutionException("FAILED TO LAUNCH! rocket: " + rocketName, e);
     } finally {
       flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
-      LOGGER.info("FLIGHT SUMMARY: {}\n{}", rocketName, flightLog);
+      LOGGER.info("FLIGHT SUMMARY: rocket: {}\n{}", rocketName, flightLog);
       MDC.remove("rocketLog"); // remove the logging context, no matter what happens
     }
   }
 
   @Override
   public void interrupt() throws UnableToInterruptJobException {
-    LOGGER.warn("ABORT FLIGHT!");
+    LOGGER.warn("ABORT FLIGHT! rocket: {}", this.getRocket().getClass());
   }
 
   public FlightLog getFlightLog() {

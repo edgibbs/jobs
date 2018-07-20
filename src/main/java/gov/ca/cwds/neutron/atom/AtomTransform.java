@@ -63,7 +63,8 @@ public interface AtomTransform<T extends PersistentObject, M extends ApiGroupNor
    * Increment normalized record count.
    */
   default void incrementNormalizeCount() {
-    CheeseRay.logEvery(getFlightLog().incrementNormalized(), "Normalize", "single");
+    CheeseRay.logEvery(getFlightLog().incrementNormalized(), "Normalize: increment count",
+        "single");
   }
 
   /**

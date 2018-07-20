@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,6 +24,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
@@ -118,6 +118,7 @@ public class ClientCountyRocket extends ClientIndexerJob
 
   /**
    * Read records from the given key range, typically within a single partition on large tables.
+   * 
    * @param p partition range to read
    */
   @Override
@@ -127,7 +128,7 @@ public class ClientCountyRocket extends ClientIndexerJob
     nameThread(threadName);
     getLogger().info("BEGIN: extract thread {}", threadName);
 
-    try (Connection con = NeutronJdbcUtils.prepConnection(getJobDao().getSessionFactory())) {
+    try (Connection con = NeutronJdbcUtils.prepConnection(getJobDao().grabSession())) {
       processStatement(p, con);
     } catch (Exception e) {
       fail();

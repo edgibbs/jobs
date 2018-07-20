@@ -3,14 +3,17 @@ package gov.ca.cwds.jobs;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -44,6 +47,7 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.spi.SessionFactoryOptions;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.jdbc.Work;
 import org.hibernate.procedure.ProcedureCall;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -53,6 +57,8 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 
@@ -219,9 +225,10 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     sessionProperties.put("hibernate.default_schema", "CWSRS1");
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
+    when(sessionFactory.openSession()).thenReturn(session);
     when(sessionFactory.createEntityManager()).thenReturn(em);
     when(sessionFactory.getSessionFactoryOptions()).thenReturn(sfo);
-    when(sessionFactory.getCurrentSession()).thenReturn(session);
+    when(sessionFactory.isOpen()).thenReturn(true);
     when(sessionFactory.getProperties()).thenReturn(sessionProperties);
 
     when(session.getSessionFactory()).thenReturn(sessionFactory);
@@ -235,13 +242,19 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(sfo.getServiceRegistry()).thenReturn(reg);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
     when(cp.getConnection()).thenReturn(con);
+
     when(con.getMetaData()).thenReturn(meta);
-    when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(con.createStatement()).thenReturn(stmt);
+
+    when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(stmt.executeQuery(any())).thenReturn(rs);
+    when(stmt.executeUpdate(any(String.class))).thenReturn(1);
 
     preparedStatement = mock(PreparedStatement.class);
     when(con.prepareStatement(any(String.class))).thenReturn(preparedStatement);
+    when(con.prepareStatement(any())).thenReturn(preparedStatement);
+    when(con.prepareStatement(any(String.class), any(int[].class))).thenReturn(preparedStatement);
+
     when(preparedStatement.executeQuery()).thenReturn(rs);
     when(preparedStatement.executeQuery(any())).thenReturn(rs);
     when(preparedStatement.executeUpdate()).thenReturn(1);
@@ -335,8 +348,8 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(hits.getHits()).thenReturn(hitArray);
 
     when(hit.docId()).thenReturn(12345);
-    when(hit.getSourceAsString())
-        .thenReturn(IOUtils.toString(getClass().getResourceAsStream("/fixtures/es_person.json")));
+    when(hit.getSourceAsString()).thenReturn(IOUtils.toString(
+        getClass().getResourceAsStream("/fixtures/es_person.json"), Charset.forName("UTF-8")));
 
     systemCodeDao = mock(SystemCodeDao.class);
     systemMetaDao = mock(SystemMetaDao.class);
@@ -359,9 +372,23 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         .thenReturn(mach1Rocket);
 
     when(scheduler.getListenerManager()).thenReturn(listenerManager);
-
     mbean = mock(VoxLaunchPadMBean.class);
-    markTestDone();
+
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) {
+        final Work w = (Work) invocation.getArguments()[0];
+        try {
+          w.execute(con);
+        } catch (SQLException e) {
+          // eat it
+        }
+        return null;
+      }
+    }).when(session).doWork(any(Work.class));
+
+
+    markTestDone(); // reset
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target, long sleepMillis) {
@@ -369,6 +396,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
       try {
         lock.lockInterruptibly();
         await("kill thread").atMost(sleepMillis, TimeUnit.MILLISECONDS).untilTrue(isRunwayClear);
+        target.doneRetrieve();
+        target.doneTransform();
+        target.doneIndex();
         target.done();
       } catch (Exception e) {
         e.printStackTrace();
@@ -382,7 +412,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target) {
-    return runKillThread(target, 1100L);
+    return runKillThread(target, 1400L);
   }
 
   public void markTestDone() {

@@ -20,7 +20,7 @@ import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
  * 
  * @author CWDS API Team
  */
-public final class NeutronDB2Utils {
+public class NeutronDB2Utils {
 
   static final ConditionalLogger LOGGER = new JetPackLogger(NeutronDB2Utils.class);
 
@@ -38,11 +38,13 @@ public final class NeutronDB2Utils {
    * @return DB2 timestamp string
    */
   public static String prepLastChangeSQL(String sql, Date lastRunStartDate, Date lastRunEndDate) {
+    final String strLastRunDate = NeutronDateUtils.makeSimpleDateString(lastRunStartDate);
     final String strStartDate = NeutronDateUtils.makeTimestampStringLookBack(lastRunStartDate);
     final String strEndDate = NeutronDateUtils.makeTimestampStringLookBack(lastRunEndDate);
     return sql.replaceAll("XYZ", strStartDate).replaceAll("LAST_RUN_START", strStartDate)
         .replaceAll("LAST_RUN_END", strEndDate)
-        .replaceAll("'CURRENT TIMESTAMP'", "CURRENT TIMESTAMP");
+        .replaceAll("'CURRENT TIMESTAMP'", "CURRENT TIMESTAMP")
+        .replaceAll("LAST_RUN_DATE", strLastRunDate);
   }
 
   /**
@@ -93,7 +95,8 @@ public final class NeutronDB2Utils {
   public static boolean isDB2OnZOS(final BaseDaoImpl<?> dao) throws NeutronCheckedException {
     boolean ret = false;
 
-    try (final Connection con = NeutronJdbcUtils.prepConnection(dao.getSessionFactory())) {
+    try {
+      final Connection con = NeutronJdbcUtils.prepConnection(dao.grabSession()); // DO NOT CLOSE!!!
       final DatabaseMetaData meta = con.getMetaData();
       LOGGER.debug("meta: product name: {}, production version: {}, major: {}, minor: {}",
           meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),

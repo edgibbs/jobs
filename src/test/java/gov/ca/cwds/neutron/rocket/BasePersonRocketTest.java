@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Query;
@@ -335,6 +335,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(em.createNativeQuery(any(String.class), any(Class.class))).thenReturn(q);
     when(q.getResultList()).thenReturn(new ArrayList<TestDenormalizedEntity>());
     when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
+
     final List<BatchBucket> buckets = new ArrayList<>();
     final BatchBucket b = new BatchBucket();
     b.setBucket(1);
@@ -343,6 +344,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     b.setMaxId("2");
     buckets.add(b);
     when(q.getResultList()).thenReturn(buckets);
+
     final NativeQuery<TestDenormalizedEntity> nq = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
@@ -354,15 +356,18 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     when(nq.setCacheMode(any(CacheMode.class))).thenReturn(nq);
     when(nq.setFetchSize(any(Integer.class))).thenReturn(nq);
     when(nq.setCacheable(any(Boolean.class))).thenReturn(nq);
+
     final ScrollableResults results = mock(ScrollableResults.class);
     when(nq.scroll(any(ScrollMode.class))).thenReturn(results);
     when(results.next()).thenReturn(true).thenReturn(false);
+
     final TestNormalizedEntity[] entities = new TestNormalizedEntity[1];
     TestNormalizedEntity entity = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     entity.setFirstName("Fred");
     entity.setLastName("Meyer");
     entities[0] = entity;
     when(results.get()).thenReturn(entities);
+
     target.setFakeRanges(true);
     int actual = target.extractHibernate();
     int expected = 2;
@@ -527,9 +532,9 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test(expected = NeutronRuntimeException.class)
   public void addToIndexQueue_Args__interrupt() throws Exception {
     TestNormalizedEntity norm = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    LinkedBlockingDeque deque = mock(LinkedBlockingDeque.class);
+    ConcurrentLinkedDeque deque = mock(ConcurrentLinkedDeque.class);
     when(deque.add(any(TestNormalizedEntity.class))).thenThrow(InterruptedException.class);
-    doThrow(new InterruptedException()).when(deque).putLast(any(TestNormalizedEntity.class));
+    doThrow(new IllegalStateException()).when(deque).add(any(TestNormalizedEntity.class));
     target.setQueueIndex(deque);
     target.addToIndexQueue(norm);
   }
@@ -584,7 +589,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     }
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void threadIndex_Args() throws Exception {
     runKillThread(target);
     final BulkProcessor bp = mock(BulkProcessor.class);
@@ -663,7 +668,8 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INSERT_CLIENT_LAST_CHG);
+    target.runInsertAllLastChangeKeys(session, lastRunTime,
+        ClientSQLResource.INSERT_CLIENT_LAST_CHG);
   }
 
   @Test
@@ -776,7 +782,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, notNullValue());
   }
 
-  @Test
+  @Test(expected = InterruptedException.class)
   public void testNormalizeLoop() throws Exception {
     final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
     final int cntr = 0;
@@ -809,7 +815,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getQueueIndex() throws Exception {
-    final LinkedBlockingDeque<TestNormalizedEntity> actual = target.getQueueIndex();
+    final ConcurrentLinkedDeque<TestNormalizedEntity> actual = target.getQueueIndex();
     assertThat(actual, notNullValue());
   }
 
@@ -944,8 +950,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     target.addThread(make, target_, threads);
   }
 
-  @Test
-  @Ignore
+  @Test(expected = InterruptedException.class)
   public void normalizeLoop_A$List$Object$int() throws Exception {
     runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 3500L);
 
@@ -1126,13 +1131,14 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getQueueIndex_A$() throws Exception {
-    final LinkedBlockingDeque<TestNormalizedEntity> actual = target.getQueueIndex();
+    final ConcurrentLinkedDeque<TestNormalizedEntity> actual = target.getQueueIndex();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setQueueIndex_A$LinkedBlockingDeque() throws Exception {
-    final LinkedBlockingDeque<TestNormalizedEntity> queueIndex = mock(LinkedBlockingDeque.class);
+    final ConcurrentLinkedDeque<TestNormalizedEntity> queueIndex =
+        mock(ConcurrentLinkedDeque.class);
     target.setQueueIndex(queueIndex);
   }
 

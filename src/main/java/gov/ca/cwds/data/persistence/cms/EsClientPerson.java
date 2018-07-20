@@ -17,6 +17,7 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.FlushModeType;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
 
@@ -27,6 +28,8 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
@@ -46,37 +49,31 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @Entity
 @Table(name = "VW_LST_CLIENT_ADDRESS")
 // @formatter:off
-@NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfter",
-    query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
-//      + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
-        + "ORDER BY CLT_IDENTIFIER \n "
-        + "FOR READ ONLY WITH UR ",
-    resultClass = EsClientPerson.class, readOnly = true)
+@NamedNativeQuery(
+    name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfter",
+    query = ClientSQLResource.SELECT_CLIENT_VIEW_LAST_CHANGE,
+    resultClass = EsClientPerson.class, readOnly = true, cacheable=false, flushMode=FlushModeType.MANUAL)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithUnlimitedAccess",
-    query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
-        + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
-//      + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
-        + "ORDER BY CLT_IDENTIFIER \n "
-        + "FOR READ ONLY WITH UR",
-    resultClass = EsClientPerson.class, readOnly = true)
+    query = ClientSQLResource.SELECT_CLIENT_VIEW_LAST_CHANGE,
+    resultClass = EsClientPerson.class, readOnly = true, cacheable=false, flushMode=FlushModeType.MANUAL)
 
 @NamedNativeQuery(
     name = "gov.ca.cwds.data.persistence.cms.EsClientPerson.findAllUpdatedAfterWithLimitedAccess",
     query = "SELECT " + ClientSQLResource.LAST_CHG_COLUMNS + "\n"
         + "FROM {h-schema}VW_LST_CLIENT_ADDRESS x \n"
-//      + "WHERE (1=1 OR x.LAST_CHG > :after) \n"
         + "WHERE x.CLT_SENSTV_IND != 'N' \n "
         + "ORDER BY CLT_IDENTIFIER \n"
         + "FOR READ ONLY WITH UR ",
-    resultClass = EsClientPerson.class, readOnly = true)
+    resultClass = EsClientPerson.class, readOnly = true, cacheable=false, flushMode=FlushModeType.MANUAL)
 // @formatter:on
 public class EsClientPerson extends BaseEsClient
     implements Comparable<EsClientPerson>, Comparator<EsClientPerson> {
 
   private static final long serialVersionUID = 1L;
+
+  private static final ConditionalLogger LOGGER = new JetPackLogger(EsClientPerson.class);
 
   // ================================
   // SAF_ALRT: (safety alerts)
@@ -228,7 +225,11 @@ public class EsClientPerson extends BaseEsClient
     //
     ret.openCaseId = rs.getString("CAS_IDENTIFIER");
 
-    ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
+    try {
+      ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
+    } catch (Exception e) {
+      LOGGER.trace("COLUMN 'CAS_RSP_AGY_CD' NOT IN SCHEMA!", e);
+    }
 
     //
     // Last change (overall)

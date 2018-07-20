@@ -238,7 +238,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       this.endTime = System.currentTimeMillis();
 
       this.fatalError = true;
-      this.doneFlight = true;
+      done();
     }
   }
 
