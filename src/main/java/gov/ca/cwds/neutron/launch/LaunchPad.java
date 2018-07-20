@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -261,7 +260,8 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
     final boolean fileExists = f.exists();
 
     if (fileExists) {
-      FileUtils.writeStringToFile(f, fmt.format(now), Charset.forName("UTF-8"));
+      final String charset = null;
+      FileUtils.writeStringToFile(f, fmt.format(now), charset); // Jenkins charset problem
     } else {
       LOGGER.warn("MISSING TIMESTAMP FILE?? {}", timestampFileName);
     }
@@ -292,7 +292,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       scheduler.interrupt(key);
     } catch (UnableToInterruptJobException e) {
       final String msg = "UNABLE TO INTERRUPT JOB! rocketName: " + rocketName;
-      LOGGER.trace(msg, e);
+      LOGGER.trace(msg, e); // appease SonarQube
       LOGGER.warn(msg);
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "FAILED TO ABORT FLIGHT! rocket: {}", rocketName);
