@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +54,7 @@ public class PeopleSummaryThreadHandler
 
   protected boolean doneHandlerRetrieve = false;
 
-  protected Set<String> deletionResults;
+  protected Set<String> deletionResults = new HashSet<>();
 
   /**
    * key = client id
