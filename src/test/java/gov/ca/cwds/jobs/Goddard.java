@@ -8,7 +8,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -348,8 +347,10 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(hits.getHits()).thenReturn(hitArray);
 
     when(hit.docId()).thenReturn(12345);
-    when(hit.getSourceAsString()).thenReturn(IOUtils.toString(
-        getClass().getResourceAsStream("/fixtures/es_person.json"), Charset.forName("UTF-8")));
+
+    final String useDefaultCharSet = null;
+    when(hit.getSourceAsString()).thenReturn(IOUtils
+        .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
 
     systemCodeDao = mock(SystemCodeDao.class);
     systemMetaDao = mock(SystemMetaDao.class);
