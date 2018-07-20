@@ -176,9 +176,8 @@ public final class NeutronJdbcUtils {
    * 
    * @param session active Hibernate session
    * @return database Connection
-   * @throws SQLException on database error
    */
-  public static Connection prepConnection(final Session session) throws SQLException {
+  public static Connection prepConnection(final Session session) {
     final NeutronWorkConnectionStealer work = new NeutronWorkConnectionStealer();
     doWork(session, work);
     return work.getConnection();

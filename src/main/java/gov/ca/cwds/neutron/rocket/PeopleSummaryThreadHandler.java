@@ -58,7 +58,7 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
-  protected final Map<String, PlacementHomeAddress> placementHomeAddresses;
+  protected final Map<String, PlacementHomeAddress> placementHomeAddresses = new HashMap<>(5011);
 
   /**
    * key = client id
@@ -67,8 +67,6 @@ public class PeopleSummaryThreadHandler
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
-    this.placementHomeAddresses =
-        getRocket().isLargeLoad() ? new HashMap<>(5011) : new HashMap<>(2003);
   }
 
   @Override
