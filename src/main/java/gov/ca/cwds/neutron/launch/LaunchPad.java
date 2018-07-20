@@ -261,7 +261,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
     final boolean fileExists = f.exists();
 
     if (fileExists) {
-      FileUtils.writeStringToFile(f, fmt.format(now), Charset.defaultCharset());
+      FileUtils.writeStringToFile(f, fmt.format(now), Charset.forName("UTF-8"));
     } else {
       LOGGER.warn("MISSING TIMESTAMP FILE?? {}", timestampFileName);
     }
