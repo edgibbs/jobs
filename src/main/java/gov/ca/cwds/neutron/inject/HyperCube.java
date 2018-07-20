@@ -121,6 +121,7 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  * 
  * @author CWDS API Team
  */
+@SuppressWarnings({"findsecbugs:PATH_TRAVERSAL_IN"})
 public class HyperCube extends NeutronGuiceModule {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HyperCube.class);

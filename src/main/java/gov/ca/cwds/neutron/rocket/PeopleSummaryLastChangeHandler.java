@@ -28,6 +28,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * @author CWDS API Team
  * @see AtomLoadStepHandler
  */
+@SuppressWarnings({"findsecbugs:SQL_INJECTION_JDBC"})
 public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
@@ -230,7 +231,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       groupRecs.clear();
-      recs = new ArrayList<>(); // release memory
+      recs = null; // release memory
       NeutronThreadUtils.freeMemory();
       LOGGER.info("NORMALIZATION DONE, scan for limited access");
 
@@ -257,7 +258,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       LOGGER.info("check access limitations");
       addAll(results); // push to normalized map
-      results = new ArrayList<>(); // free memory
+      results = null; // free memory
       NeutronThreadUtils.freeMemory();
 
       // Remove sealed and sensitive, if not permitted to view them.

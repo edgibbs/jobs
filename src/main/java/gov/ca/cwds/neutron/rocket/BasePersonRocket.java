@@ -376,8 +376,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         int cntr = 0;
         while (isRunning() && rs.next() && (m = extract(rs)) != null) {
           CheeseRay.logEvery(++cntr, "Retrieved", "recs");
-          queueNormalize.offer(m, NeutronIntegerDefaults.POLL_MILLIS.getValue(),
-              TimeUnit.MILLISECONDS);
+          final boolean addedToQueue = queueNormalize.offer(m,
+              NeutronIntegerDefaults.POLL_MILLIS.getValue(), TimeUnit.MILLISECONDS);
+          LOGGER.trace("addedToQueue: {}", addedToQueue);
         }
 
         con.commit();

@@ -2,7 +2,6 @@ package gov.ca.cwds.neutron.rocket;
 
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,6 +49,7 @@ import gov.ca.cwds.data.persistence.cms.rep.EmbeddableStaffWorker;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
@@ -73,6 +73,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * 
  * @author CWDS API Team
  */
+@SuppressWarnings({"findsecbugs:SQL_INJECTION_JDBC"})
 public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsCaseRelatedPerson>
     implements AtomRowMapper<EsCaseRelatedPerson> {
 
@@ -108,8 +109,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
   public CaseRocket(ReplicatedPersonCasesDao dao,
       @Named("elasticsearch.dao.people") ElasticsearchDao esDao, ReplicatedClientDao clientDao,
       StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile, ObjectMapper mapper,
-      FlightPlan flightPlan,
-      AtomLaunchDirector launchDirector) {
+      FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
 
     this.clientDao = clientDao;

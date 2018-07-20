@@ -2,7 +2,7 @@ package gov.ca.cwds.neutron.rocket;
 
 import gov.ca.cwds.data.std.ApiMarker;
 
-@SuppressWarnings("squid:S1192")
+@SuppressWarnings({"squid:S1192", "findbugs:HSC_HUGE_SHARED_STRING_CONSTANT"})
 public class ClientSQLResource implements ApiMarker {
 
   private static final long serialVersionUID = 1L;

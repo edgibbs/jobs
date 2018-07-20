@@ -15,6 +15,7 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
  * 
  * @author CWDS API Team
  */
+@SuppressWarnings({"findbugs:DM_GC", "fb-contrib:PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS"})
 public class NeutronThreadUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronThreadUtils.class);

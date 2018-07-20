@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * 
  * @author CWDS API Team
  */
+@SuppressWarnings({"findsecbugs:SQL_INJECTION_JDBC"})
 public class PeopleSummaryThreadHandler
     implements ApiMarker, AtomLoadStepHandler<ReplicatedClient> {
 
@@ -52,12 +54,12 @@ public class PeopleSummaryThreadHandler
 
   protected boolean doneHandlerRetrieve = false;
 
-  protected Set<String> deletionResults;
+  protected Set<String> deletionResults = new HashSet<>();
 
   /**
    * key = client id
    */
-  protected final Map<String, PlacementHomeAddress> placementHomeAddresses;
+  protected final Map<String, PlacementHomeAddress> placementHomeAddresses = new HashMap<>(5011);
 
   /**
    * key = client id
@@ -66,8 +68,6 @@ public class PeopleSummaryThreadHandler
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
-    this.placementHomeAddresses =
-        getRocket().isLargeLoad() ? new HashMap<>(5011) : new HashMap<>(2003);
   }
 
   @Override

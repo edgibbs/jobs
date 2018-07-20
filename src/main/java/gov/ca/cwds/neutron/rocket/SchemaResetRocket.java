@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -19,6 +18,7 @@ import com.google.inject.Inject;
 import gov.ca.cwds.dao.cms.DbResetStatusDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
@@ -28,6 +28,10 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 /**
  * Refreshes a <strong>TEST</strong> transactional schema and its companion, replicated schema.
+ * 
+ * <p>
+ * Execution <strong>PROHIBITED</strong> in higher order environments!
+ * </p>
  * 
  * @author CWDS API Team
  */
@@ -58,8 +62,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
    */
   @Inject
   public SchemaResetRocket(final DbResetStatusDao dao, final ObjectMapper mapper,
-      @LastRunFile String lastRunFile, FlightPlan flightPlan,
-      AtomLaunchDirector launchDirector) {
+      @LastRunFile String lastRunFile, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, null, lastRunFile, mapper, flightPlan, launchDirector);
     this.dao = dao;
   }
@@ -148,7 +151,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
   private boolean schemaRefreshCompleted(int waitTimeSeconds) {
     if (lock.tryLock()) {
       try {
-        condDone.await(waitTimeSeconds, TimeUnit.SECONDS);
+        final boolean timeExceeded = condDone.await(waitTimeSeconds, TimeUnit.SECONDS);
+        LOGGER.trace("timeExceeded: {}", timeExceeded);
       } catch (InterruptedException e) {
         fail();
         Thread.currentThread().interrupt();
@@ -201,8 +205,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     try {
       if (lock.tryLock(5, TimeUnit.SECONDS)) {
         try {
-          // notifyAll();
-          condDone.signal();
+          condDone.signalAll();
         } finally {
           lock.unlock();
         }
@@ -221,8 +224,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     try {
       if (lock.tryLock(5, TimeUnit.SECONDS)) {
         try {
-          // notifyAll();
-          condDone.signal();
+          condDone.signalAll();
         } finally {
           lock.unlock();
         }
