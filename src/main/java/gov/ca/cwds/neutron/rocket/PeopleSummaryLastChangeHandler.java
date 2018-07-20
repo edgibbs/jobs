@@ -28,6 +28,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * @author CWDS API Team
  * @see AtomLoadStepHandler
  */
+@SuppressWarnings({"findsecbugs:SQL_INJECTION_JDBC"})
 public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;

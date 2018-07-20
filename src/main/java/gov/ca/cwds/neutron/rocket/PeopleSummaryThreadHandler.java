@@ -41,6 +41,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * 
  * @author CWDS API Team
  */
+@SuppressWarnings({"findsecbugs:SQL_INJECTION_JDBC"})
 public class PeopleSummaryThreadHandler
     implements ApiMarker, AtomLoadStepHandler<ReplicatedClient> {
 
