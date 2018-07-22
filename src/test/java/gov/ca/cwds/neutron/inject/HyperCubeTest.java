@@ -19,7 +19,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -528,16 +527,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
-  @Ignore
-  public void makeElasticsearchDaoPeople_A$_T$NeutronCheckedException() throws Exception {
-    try {
-      target.makeElasticsearchDaoPeople();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
-  }
-
-  @Test
   public void makeElasticsearchDaoPeopleSummary_A$Client$ElasticsearchConfiguration()
       throws Exception {
     final Client client = mock(Client.class);
@@ -560,30 +549,10 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
-  @Ignore
-  public void elasticSearchConfigPeople_A$_T$NeutronCheckedException() throws Exception {
-    try {
-      target.elasticSearchConfigPeople();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
-  }
-
-  @Test
   public void elasticSearchConfigPeopleSummary_A$() throws Exception {
     final ElasticsearchConfiguration actual = target.elasticSearchConfigPeopleSummary();
     final ElasticsearchConfiguration expected = null;
     assertThat(actual, is(equalTo(expected)));
-  }
-
-  @Test
-  @Ignore
-  public void elasticSearchConfigPeopleSummary_A$_T$NeutronCheckedException() throws Exception {
-    try {
-      target.elasticSearchConfigPeopleSummary();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
   }
 
   @Test
