@@ -708,4 +708,8 @@ public class HyperCube extends NeutronGuiceModule {
     return null;
   }
 
+  public void setEsConfigPeople(File esConfigPeople) {
+    this.esConfigPeople = esConfigPeople;
+  }
+
 }

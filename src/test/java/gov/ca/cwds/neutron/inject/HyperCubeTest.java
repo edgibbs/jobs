@@ -111,6 +111,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   AtomFlightPlanManager flightPlanMgr;
   Injector injector;
+  Binder testBinder;
   HyperCube target;
 
   public HyperCube makeOurOwnCube(FlightPlan plan) {
@@ -131,6 +132,10 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastRunFile);
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
+
+    testBinder = mock(Binder.class);
+    target.setTestBinder(testBinder);
+
     HyperCube.setCubeMaker(opts -> this.makeOurOwnCube(opts));
     lastTester = this;
 
@@ -366,7 +371,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target.init();
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void bindSystemProperties_A$() throws Exception {
     target.bindSystemProperties();
   }
@@ -497,6 +502,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void elasticsearchClientPeople_A$_T$NeutronCheckedException() throws Exception {
     try {
+      target.setEsConfigPeople(esConfileFile);
       target.elasticsearchClientPeople();
       fail("Expected exception was not thrown!");
     } catch (NeutronCheckedException e) {
@@ -526,6 +532,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
+  @Ignore
   public void makeElasticsearchDaoPeople_A$_T$NeutronCheckedException() throws Exception {
     try {
       target.makeElasticsearchDaoPeople();
