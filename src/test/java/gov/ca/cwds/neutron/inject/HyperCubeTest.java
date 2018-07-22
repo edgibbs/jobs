@@ -33,6 +33,7 @@ import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -44,6 +45,7 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.ZombieKillerTimerTask;
+import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
@@ -120,6 +122,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   public void setup() throws Exception {
     super.setup();
 
+    LaunchCommand.setStandardFlightPlan(null);
     flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config" + File.separator + "local.yaml");
 
@@ -404,17 +407,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void newRocket_A$Class$FlightPlan_T$NeutronCheckedException() throws Exception {
-    final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
-    try {
-      HyperCube.newRocket(klass, flightPlan);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    final Class<BasePersonRocket> klass = BasePersonRocket.class;
+    HyperCube.newRocket(klass, flightPlan);
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void newRocket_A$Class$StringArray() throws Exception {
     final Class<Mach1TestRocket> klass = Mach1TestRocket.class;
     final String[] args = new String[] {};
@@ -425,6 +424,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void configure_A$() throws Exception {
+    final Binder binder = mock(Binder.class);
+    target.setTestBinder(binder);
     target.configure();
   }
 
@@ -450,8 +451,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void makeCmsSessionFactory_A$() throws Exception {
     SessionFactory actual = target.makeCmsSessionFactory();
-    SessionFactory expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -612,10 +612,11 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void configureQuartz_A$Injector$AtomFlightRecorder$AtomRocketFactory$AtomFlightPlanManager$Scheduler$ZombieKillerTimerTask$String()
       throws Exception {
-    ZombieKillerTimerTask zombieKillerTimerTask = mock(ZombieKillerTimerTask.class);
-    String strTimeToAbort = "120000";
-    AtomLaunchDirector actual = target.configureQuartz(injector, flightRecorder, rocketFactory,
-        flightPlanMgr, scheduler, zombieKillerTimerTask, strTimeToAbort);
+    LaunchCommand.setStandardFlightPlan(flightPlan);
+    final ZombieKillerTimerTask zombieKillerTimerTask = mock(ZombieKillerTimerTask.class);
+    final String strTimeToAbort = "120000";
+    final AtomLaunchDirector actual = target.configureQuartz(injector, flightRecorder,
+        rocketFactory, flightPlanMgr, scheduler, zombieKillerTimerTask, strTimeToAbort);
     AtomLaunchDirector expected = null;
     assertThat(actual, is(equalTo(expected)));
   }

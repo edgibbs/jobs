@@ -287,7 +287,7 @@ public class HyperCube extends NeutronGuiceModule {
       final T ret = buildInjector(flightPlan).getInstance(klass);
       ret.setFlightPlan(flightPlan);
       return ret;
-    } catch (CreationException e) {
+    } catch (NullPointerException | CreationException e) {
       throw CheeseRay.checked(LOGGER, e, "FAILED TO BUILD ROCKET!: {}", e.getMessage());
     }
   }
