@@ -89,10 +89,10 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
     try {
       finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
     } catch (NeutronCheckedException e) {
-      throw new NeutronRuntimeException("ABORT LANDING!", e);
+      throw new NeutronRuntimeException("ABORT FLIGHT!", e);
     }
 
-    // SLF4J does not yet support conditional invocation.
+    // Sorry, SonarQube. SLF4J does not yet support conditional invocation.
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info(flightLog.toString());
     }
