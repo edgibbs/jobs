@@ -1,5 +1,10 @@
 package com.google.inject;
 
+/**
+ * Guice abstract module to facilitate unit tests.
+ * 
+ * @author CWDS API Team
+ */
 public abstract class NeutronGuiceModule extends AbstractModule {
 
   private Binder testBinder;

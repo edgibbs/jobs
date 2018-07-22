@@ -127,7 +127,6 @@ public class HyperCube extends NeutronGuiceModule {
   private static final Logger LOGGER = LoggerFactory.getLogger(HyperCube.class);
 
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
-
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
 
   /**
@@ -189,11 +188,32 @@ public class HyperCube extends NeutronGuiceModule {
 
   /**
    * Bind optional system properties not found in {@link FlightPlan}.
+   * 
+   * <p>
+   * Optional system parameters
+   * </p>
+   * <table summary="System Parameters">
+   * <tr>
+   * <th align="justify">Param</th>
+   * <th align="justify">Purpose</th>
+   * <th align="justify">Default</th>
+   * </tr>
+   * <tr>
+   * <td align="justify">{@code zombie.killer.checkEveryMillis}</td>
+   * <td align="justify">60000</td>
+   * <td align="justify">Check for zombie jobs every N milliseconds</td>
+   * </tr>
+   * <tr>
+   * <td>{@code zombie.killer.killAtMillis}</td>
+   * <td>240000</td>
+   * <td>Kill for zombie jobs after N milliseconds</td>
+   * </tr>
+   * </table>
    */
   protected void bindSystemProperties() {
     final Properties defaults = new Properties();
-    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // 1 minute
-    defaults.setProperty("zombie.killer.killAtMillis", "240000"); // 4 minutes
+    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // default to 1 minute
+    defaults.setProperty("zombie.killer.killAtMillis", "240000"); // default to 4 minutes
 
     final Properties props = new Properties(defaults);
     props.putAll(System.getProperties());
@@ -267,7 +287,7 @@ public class HyperCube extends NeutronGuiceModule {
       final T ret = buildInjector(flightPlan).getInstance(klass);
       ret.setFlightPlan(flightPlan);
       return ret;
-    } catch (CreationException e) {
+    } catch (NullPointerException | CreationException e) {
       throw CheeseRay.checked(LOGGER, e, "FAILED TO BUILD ROCKET!: {}", e.getMessage());
     }
   }
@@ -578,8 +598,6 @@ public class HyperCube extends NeutronGuiceModule {
 
     // NEXT: inject scheduler and rocket factory.
     scheduler.setJobFactory(rocketFactory);
-
-    // Quartz scheduler listeners.
     return scheduler;
   }
 
@@ -686,6 +704,10 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected SystemCodeCache scaffoldSystemCodeCache() {
     return null;
+  }
+
+  public void setEsConfigPeople(File esConfigPeople) {
+    this.esConfigPeople = esConfigPeople;
   }
 
 }

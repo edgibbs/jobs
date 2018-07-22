@@ -23,7 +23,8 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
- * Last change logic for {@link ClientPersonIndexerJob}.
+ * Last change logic for {@link ClientPersonIndexerJob}, Client loader rocket for the People Summary
+ * index.
  * 
  * @author CWDS API Team
  * @see AtomLoadStepHandler
