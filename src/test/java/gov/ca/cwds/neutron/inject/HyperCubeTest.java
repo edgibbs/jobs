@@ -427,7 +427,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void configure_A$() throws Exception {
     final Binder binder = mock(Binder.class);
     target.setTestBinder(binder);
@@ -441,49 +441,49 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void additionalDaos_A$Configuration() throws Exception {
-    Configuration config = mock(Configuration.class);
-    Configuration actual = target.additionalDaos(config);
-    Configuration expected = null;
+    final Configuration config = mock(Configuration.class);
+    final Configuration actual = target.additionalDaos(config);
+    final Configuration expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void commandCenterSettings_A$() throws Exception {
-    LaunchCommandSettings actual = target.commandCenterSettings();
+    final LaunchCommandSettings actual = target.commandCenterSettings();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void makeCmsSessionFactory_A$() throws Exception {
-    SessionFactory actual = target.makeCmsSessionFactory();
+    final SessionFactory actual = target.makeCmsSessionFactory();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void makeNsSessionFactory_A$() throws Exception {
-    SessionFactory actual = target.makeNsSessionFactory();
+    final SessionFactory actual = target.makeNsSessionFactory();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void provideSystemCodeCache_A$SystemCodeDao$SystemMetaDao() throws Exception {
-    SystemCodeDao systemCodeDao = mock(SystemCodeDao.class);
-    SystemMetaDao systemMetaDao = mock(SystemMetaDao.class);
-    SystemCodeCache actual = target.provideSystemCodeCache(systemCodeDao, systemMetaDao);
+    final SystemCodeDao systemCodeDao = mock(SystemCodeDao.class);
+    final SystemMetaDao systemMetaDao = mock(SystemMetaDao.class);
+    final SystemCodeCache actual = target.provideSystemCodeCache(systemCodeDao, systemMetaDao);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void provideCmsSystemCodeSerializer_A$SystemCodeCache() throws Exception {
-    SystemCodeCache systemCodeCache = mock(SystemCodeCache.class);
-    CmsSystemCodeSerializer actual = target.provideCmsSystemCodeSerializer(systemCodeCache);
+    final SystemCodeCache systemCodeCache = mock(SystemCodeCache.class);
+    final CmsSystemCodeSerializer actual = target.provideCmsSystemCodeSerializer(systemCodeCache);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void buildElasticsearchClient_A$ElasticsearchConfiguration() throws Exception {
-    ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    TransportClient actual = target.buildElasticsearchClient(config);
+    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
+    final TransportClient actual = target.buildElasticsearchClient(config);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -495,7 +495,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void elasticsearchClientPeople_A$() throws Exception {
-    Client actual = target.elasticsearchClientPeople();
+    final Client actual = target.elasticsearchClientPeople();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -509,25 +509,21 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     }
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void elasticsearchClientPeopleSummary_A$() throws Exception {
     Client actual = target.elasticsearchClientPeopleSummary();
     Client expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void elasticsearchClientPeopleSummary_A$_T$NeutronCheckedException() throws Exception {
-    try {
-      target.elasticsearchClientPeopleSummary();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target.elasticsearchClientPeopleSummary();
   }
 
   @Test
   public void makeElasticsearchDaoPeople_A$() throws Exception {
-    ElasticsearchDao actual = target.makeElasticsearchDaoPeople();
+    final ElasticsearchDao actual = target.makeElasticsearchDaoPeople();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -544,33 +540,22 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void makeElasticsearchDaoPeopleSummary_A$Client$ElasticsearchConfiguration()
       throws Exception {
-    Client client = mock(Client.class);
-    ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    ElasticsearchDao actual = target.makeElasticsearchDaoPeopleSummary(client, config);
+    final Client client = mock(Client.class);
+    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
+    final ElasticsearchDao actual = target.makeElasticsearchDaoPeopleSummary(client, config);
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void loadElasticSearchConfig_A$File() throws Exception {
-    File esConfig = mock(File.class);
-    ElasticsearchConfiguration actual = target.loadElasticSearchConfig(esConfig);
-    ElasticsearchConfiguration expected = null;
+    final ElasticsearchConfiguration actual = target.loadElasticSearchConfig(esConfileFile);
+    final ElasticsearchConfiguration expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
-  public void loadElasticSearchConfig_A$File_T$NeutronCheckedException() throws Exception {
-    File esConfig = mock(File.class);
-    try {
-      target.loadElasticSearchConfig(esConfig);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
-  }
-
-  @Test
   public void elasticSearchConfigPeople_A$() throws Exception {
-    ElasticsearchConfiguration actual = target.elasticSearchConfigPeople();
+    final ElasticsearchConfiguration actual = target.elasticSearchConfigPeople();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -586,8 +571,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void elasticSearchConfigPeopleSummary_A$() throws Exception {
-    ElasticsearchConfiguration actual = target.elasticSearchConfigPeopleSummary();
-    ElasticsearchConfiguration expected = null;
+    final ElasticsearchConfiguration actual = target.elasticSearchConfigPeopleSummary();
+    final ElasticsearchConfiguration expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -608,15 +593,6 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
-  public void makeScheduler_A$Injector$AtomRocketFactory_T$SchedulerException() throws Exception {
-    try {
-      target.makeScheduler(injector, rocketFactory);
-      fail("Expected exception was not thrown!");
-    } catch (SchedulerException e) {
-    }
-  }
-
-  @Test
   public void configureQuartz_A$Injector$AtomFlightRecorder$AtomRocketFactory$AtomFlightPlanManager$Scheduler$ZombieKillerTimerTask$String()
       throws Exception {
     LaunchCommand.setStandardFlightPlan(flightPlan);
@@ -624,8 +600,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     final String strTimeToAbort = "120000";
     final AtomLaunchDirector actual = target.configureQuartz(injector, flightRecorder,
         rocketFactory, flightPlanMgr, scheduler, zombieKillerTimerTask, strTimeToAbort);
-    AtomLaunchDirector expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test(expected = SchedulerException.class)
@@ -640,32 +615,32 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void getFlightPlan_A$() throws Exception {
-    FlightPlan actual = target.getFlightPlan();
+    final FlightPlan actual = target.getFlightPlan();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void setFlightPlan_A$FlightPlan() throws Exception {
-    FlightPlan opts = mock(FlightPlan.class);
+    final FlightPlan opts = mock(FlightPlan.class);
     target.setFlightPlan(opts);
   }
 
   @Test
   public void getInjector_A$() throws Exception {
-    Injector actual = HyperCube.getInjector();
+    final Injector actual = HyperCube.getInjector();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getHibernateConfigCms_A$() throws Exception {
-    String actual = target.getHibernateConfigCms();
-    String expected = "test-h2-cms.xml";
+    final String actual = target.getHibernateConfigCms();
+    final String expected = "test-h2-cms.xml";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void setHibernateConfigCms_A$String() throws Exception {
-    String hibernateConfigCms = null;
+    final String hibernateConfigCms = null;
     target.setHibernateConfigCms(hibernateConfigCms);
   }
 
@@ -678,7 +653,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void setHibernateConfigNs_A$String() throws Exception {
-    String hibernateConfigNs = null;
+    final String hibernateConfigNs = null;
     target.setHibernateConfigNs(hibernateConfigNs);
   }
 
@@ -690,7 +665,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void setInstance_A$HyperCube() throws Exception {
-    HyperCube instance = mock(HyperCube.class);
+    final HyperCube instance = mock(HyperCube.class);
     HyperCube.setInstance(instance);
   }
 
@@ -713,8 +688,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void getEsConfigPeopleSummary_A$() throws Exception {
-    File actual = target.getEsConfigPeopleSummary();
-    File expected = null;
+    final File actual = target.getEsConfigPeopleSummary();
+    final File expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -727,14 +702,14 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void isScaffoldSystemCodeCache_A$() throws Exception {
-    boolean actual = target.isScaffoldSystemCodeCache();
-    boolean expected = true;
+    final boolean actual = target.isScaffoldSystemCodeCache();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void scaffoldSystemCodeCache_A$() throws Exception {
-    SystemCodeCache actual = target.scaffoldSystemCodeCache();
+    final SystemCodeCache actual = target.scaffoldSystemCodeCache();
     assertThat(actual, is(notNullValue()));
   }
 

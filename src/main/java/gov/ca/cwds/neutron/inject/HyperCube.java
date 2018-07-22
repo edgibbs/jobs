@@ -598,8 +598,6 @@ public class HyperCube extends NeutronGuiceModule {
 
     // NEXT: inject scheduler and rocket factory.
     scheduler.setJobFactory(rocketFactory);
-
-    // Quartz scheduler listeners.
     return scheduler;
   }
 
