@@ -72,7 +72,7 @@ public class NeutronDateUtils {
       ret = fmt.format(lookBack(date));
     } else {
       final Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.MINUTE, 5);
+      cal.add(Calendar.MINUTE, -11);
       ret = fmt.format(lookBack(cal.getTime()));
     }
 
