@@ -264,7 +264,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       log.info("refresh MQT proc: status: {}, msg: {}", returnStatus, returnMsg);
 
       if (returnStatus.charAt(0) != '0') {
-        CheeseRay.runtime(log, "MQT REFRESH ERROR! {}", returnMsg);
+        throw CheeseRay.runtime(log, "MQT REFRESH ERROR! {}", returnMsg);
       }
     }
   }

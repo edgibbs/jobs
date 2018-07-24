@@ -56,7 +56,15 @@ public class NeutronDateUtils {
   }
 
   public static String makeSimpleTimestampString(final Date date) {
-    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date);
+    Date useThisDate = date;
+
+    if (date == null) {
+      final Calendar cal = Calendar.getInstance();
+      cal.add(Calendar.MINUTE, 2); // in case server time doesn't match database
+      useThisDate = cal.getTime();
+    }
+
+    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(useThisDate);
   }
 
   public static String makeSimpleDateString(final Date date) {
@@ -71,7 +79,7 @@ public class NeutronDateUtils {
       ret = fmt.format(lookBack(date));
     } else {
       final Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.MINUTE, 5);
+      cal.add(Calendar.MINUTE, NeutronIntegerDefaults.LOOKBACK_MINUTES.getValue());
       ret = fmt.format(lookBack(cal.getTime()));
     }
 
