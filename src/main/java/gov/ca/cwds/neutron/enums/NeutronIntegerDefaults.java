@@ -17,7 +17,7 @@ public enum NeutronIntegerDefaults {
    * To avoid missing changed records, look N minutes before the last successful run timestamp.
    * NOTE: make configurable.
    */
-  LOOKBACK_MINUTES(-13),
+  LOOKBACK_MINUTES(-11),
 
   /**
    * Default fetch size for Hibernate and JDBC. Pull records in bulk in order to minimize network
