@@ -56,7 +56,8 @@ public class NeutronDateUtils {
   }
 
   public static String makeSimpleTimestampString(final Date date) {
-    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date);
+    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat())
+        .format(date != null ? date : new Date());
   }
 
   public static String makeSimpleDateString(final Date date) {
