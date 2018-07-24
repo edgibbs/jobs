@@ -61,6 +61,7 @@ public class NeutronDateUtils {
     if (date == null) {
       final Calendar cal = Calendar.getInstance();
       cal.add(Calendar.MINUTE, 2); // in case server time doesn't match database
+      useThisDate = cal.getTime();
     }
 
     return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(useThisDate);
