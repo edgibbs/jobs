@@ -87,30 +87,35 @@ public class ReporterIndexerJobTest
 
   @Test
   public void getPrepLastChangeSQL_A$() throws Exception {
-    String actual = target.getPrepLastChangeSQL();
-    String expected =
-        "INSERT INTO GT_ID (IDENTIFIER)\n SELECT DISTINCT R.FKREFERL_T\n FROM REPTR_T R \n WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000'";
+    final String actual = target.getPrepLastChangeSQL();
+    //@formatter:off
+    final String expected =
+        "INSERT INTO GT_ID (IDENTIFIER)\n "
+        + "SELECT DISTINCT R.FKREFERL_T\n "
+        + "FROM REPTR_T R \n "
+        + "WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000'";
+    //@formatter:on
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void isViewNormalizer_A$() throws Exception {
-    boolean actual = target.isViewNormalizer();
-    boolean expected = true;
+    final boolean actual = target.isViewNormalizer();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getDenormalizedClass_A$() throws Exception {
-    Object actual = target.getDenormalizedClass();
-    Object expected = ReplicatedReporter.class;
+    final Object actual = target.getDenormalizedClass();
+    final Object expected = ReplicatedReporter.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getIdColumn_A$() throws Exception {
-    String actual = target.getIdColumn();
-    String expected = "FKREFERL_T";
+    final String actual = target.getIdColumn();
+    final String expected = "FKREFERL_T";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -124,7 +129,7 @@ public class ReporterIndexerJobTest
 
   @Test(expected = NeutronCheckedException.class)
   public void main_A$StringArray() throws Exception {
-    String[] args = new String[] {};
+    final String[] args = new String[] {};
     ReporterIndexerJob.main(args);
   }
 

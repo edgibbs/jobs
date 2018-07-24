@@ -32,7 +32,8 @@ public class CollateralIndividualIndexerJobTest
     super.setup();
 
     dao = new ReplicatedCollateralIndividualDao(sessionFactory);
-    target = new CollateralIndividualIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
+    target = new CollateralIndividualIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan,
+        launchDirector);
     target.setFlightPlan(FlightPlanTest.makeGeneric());
   }
 
@@ -45,20 +46,6 @@ public class CollateralIndividualIndexerJobTest
   public void testInstantiation() throws Exception {
     assertThat(target, notNullValue());
   }
-
-  // @Test
-  // public void testfindAllNamedQueryExists() throws Exception {
-  // Query query = session.getNamedQuery(
-  // "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findPartitionedBuckets");
-  // assertThat(query, is(notNullValue()));
-  // }
-
-  // @Test
-  // public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
-  // Query query = session.getNamedQuery(
-  // "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfter");
-  // assertThat(query, is(notNullValue()));
-  // }
 
   @Test
   public void type() throws Exception {
@@ -106,7 +93,7 @@ public class CollateralIndividualIndexerJobTest
   public void getPrepLastChangeSQL_A$() throws Exception {
     String actual = target.getPrepLastChangeSQL();
     String expected =
-        "INSERT INTO GT_ID (IDENTIFIER)\n SELECT DISTINCT R.IDENTIFIER \n FROM COLTRL_T R \n WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000'";
+        "INSERT INTO GT_ID (IDENTIFIER)\n SELECT DISTINCT R.IDENTIFIER \n FROM COLTRL_T R \n WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000'";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -129,5 +116,19 @@ public class CollateralIndividualIndexerJobTest
     String[] args = new String[] {};
     CollateralIndividualIndexerJob.main(args);
   }
+
+  // @Test
+  // public void testfindAllNamedQueryExists() throws Exception {
+  // Query query = session.getNamedQuery(
+  // "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findPartitionedBuckets");
+  // assertThat(query, is(notNullValue()));
+  // }
+
+  // @Test
+  // public void testfindAllUpdatedAfterNamedQueryExists() throws Exception {
+  // Query query = session.getNamedQuery(
+  // "gov.ca.cwds.data.persistence.cms.rep.ReplicatedCollateralIndividual.findAllUpdatedAfter");
+  // assertThat(query, is(notNullValue()));
+  // }
 
 }
