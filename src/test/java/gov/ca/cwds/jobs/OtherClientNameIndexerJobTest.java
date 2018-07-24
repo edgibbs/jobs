@@ -79,11 +79,12 @@ public class OtherClientNameIndexerJobTest
     denorms.add(m);
     when(qn.list()).thenReturn(denorms);
 
-    target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, MAPPER, flightPlan, launchDirector);
+    target = new OtherClientNameIndexerJob(normDao, denormDao, esDao, MAPPER, flightPlan,
+        launchDirector);
   }
 
   private ReplicatedOtherClientName makeReplicatedBean() throws IOException {
-    return (ReplicatedOtherClientName) JsonUtils.from(
+    return JsonUtils.from(
         "{\"clientId\":\"abc123456789\",\"clientIndexNumber\":null,\"clientSensitivityIndicator\":null,"
             + "\"firstName\":\"abc123456789\",\"id\":\"abc123456789\",\"lastName\":\"abc123456789\","
             + "\"lastUpdatedId\":\"abc123456789\","
@@ -200,7 +201,16 @@ public class OtherClientNameIndexerJobTest
   public void getPrepLastChangeSQL_A$() throws Exception {
     final String actual = target.getPrepLastChangeSQL();
     final String expected =
-        "INSERT INTO GT_ID (IDENTIFIER)\nSELECT CLT.IDENTIFIER AS CLIENT_ID\nFROM OCL_NM_T ONM\nJOIN CLIENT_T CLT ON CLT.IDENTIFIER = ONM.FKCLIENT_T\nWHERE ONM.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' \nUNION ALL\nSELECT CLT.IDENTIFIER\nFROM CLIENT_T CLT \nWHERE CLT.IBMSNAP_LOGMARKER > '2018-12-31 03:21:12.000' ";
+    //@formatter:off
+        "INSERT INTO GT_ID (IDENTIFIER)\n"
+        + "SELECT CLT.IDENTIFIER AS CLIENT_ID\n"
+        + "FROM OCL_NM_T ONM\n"
+        + "JOIN CLIENT_T CLT ON CLT.IDENTIFIER = ONM.FKCLIENT_T\n"
+        + "WHERE ONM.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000' \n"
+        + "UNION ALL\nSELECT CLT.IDENTIFIER\n"
+        + "FROM CLIENT_T CLT \n"
+        + "WHERE CLT.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000' ";
+    //@formatter:on
     assertThat(actual, is(equalTo(expected)));
   }
 
