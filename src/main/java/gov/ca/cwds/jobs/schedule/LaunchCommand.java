@@ -230,7 +230,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       final Set<StandardFlightSchedule> excludeRockets = commonFlightPlan.getExcludedRockets();
 
       if (!excludeRockets.isEmpty()) {
-        LOGGER.warn("\n\n *********** EXCLUDE ROCKETS!! {} ***********\n\n", excludeRockets);
+        LOGGER.warn("\n\n *********** EXCLUDE ROCKETS!! {} ***********\n", excludeRockets);
       }
 
       // Turn off People rockets, if desired.
