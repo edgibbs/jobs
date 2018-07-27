@@ -20,12 +20,14 @@ import gov.ca.cwds.neutron.vox.rest.NeutronRestServer;
 
 /**
  * <p>
- * Expose the following to JMX:
+ * Exposes the following to JMX:
  * </p>
  * <ul>
  * <li>Command Center methods</li>
  * <li>Guice bean attributes</li>
  * </ul>
+ * 
+ * @author CWDS API Team
  */
 @Singleton
 public class XRaySpex implements AtomCommandCenterConsole {

@@ -67,7 +67,7 @@ public class ExitInitialLoadRocket
   public Date launch(Date lastRunDate) {
     nameThread("exit_initial_load");
     if (LaunchCommand.isInitialMode()) {
-      LOGGER.info("EXIT INITIAL LOAD!");
+      LOGGER.warn("EXIT INITIAL LOAD!");
       final AtomFlightRecorder flightRecorder = launchDirector1.getFlightRecorder();
 
       try {

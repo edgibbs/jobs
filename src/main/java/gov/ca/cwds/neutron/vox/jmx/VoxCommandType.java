@@ -13,7 +13,7 @@ import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandStop;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandWayBack;
 
 /**
- * Registered VOX command actions.
+ * Enum of VOX command actions.
  * 
  * @author CWDS API Team
  */

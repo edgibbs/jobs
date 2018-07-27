@@ -22,7 +22,7 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 
 /**
- * Base class of JMX command actions.
+ * Base class for JMX command actions.
  * 
  * @author CWDS API Team
  */
@@ -32,7 +32,7 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
 
   private static boolean testMode;
 
-  private BiFunction<String, String, JMXConnector> makeConnector = (theHost, thePort) -> {
+  private BiFunction<String, String, JMXConnector> biFuncMakeConnector = (theHost, thePort) -> {
     try {
       return JMXConnectorFactory.connect(new JMXServiceURL(
           "service:jmx:rmi:///jndi/rmi://" + theHost + ":" + thePort + "/jmxrmi"));
@@ -59,9 +59,14 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
     this.port = port;
   }
 
+  /**
+   * Connect to Launch Command via JMX RMI.
+   * 
+   * @throws NeutronCheckedException on Vox error
+   */
   public final void connect() throws NeutronCheckedException {
     try {
-      jmxConnector = makeConnector.apply(host, port);
+      jmxConnector = biFuncMakeConnector.apply(host, port);
       mbeanServerConnection = jmxConnector.getMBeanServerConnection();
       LOGGER.info("mbean count: {}", mbeanServerConnection.getMBeanCount());
       this.mbean = proxy(rocket);
@@ -104,11 +109,11 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
   }
 
   public BiFunction<String, String, JMXConnector> getMakeConnector() {
-    return makeConnector;
+    return biFuncMakeConnector;
   }
 
   public void setMakeConnector(BiFunction<String, String, JMXConnector> makeConnector) {
-    this.makeConnector = makeConnector;
+    this.biFuncMakeConnector = makeConnector;
   }
 
   public JMXConnector getJmxConnector() {

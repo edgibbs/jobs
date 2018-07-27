@@ -15,7 +15,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 /**
- * Parses Vox instructions from the command line.
+ * Parses Vox (RMI) instructions from the command line.
  * 
  * @author CWDS API Team
  */

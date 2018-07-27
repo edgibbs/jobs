@@ -189,6 +189,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Override
   public String summary() {
     try {
+      LOGGER.warn("SHOW FLIGHT SUMMARY! {}", rocketName);
       return flightRecorder.getFlightSummary(this.flightSchedule).toJson();
     } catch (Exception e) {
       LOGGER.error("UNABLE TO SHOW FLIGHT SUMMARY! {}", e.getMessage(), e);
@@ -330,7 +331,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   protected void threadShutdownLaunchCommand() {
     try {
       Thread.currentThread().setName("shutdown");
-      LOGGER.warn("SHUTDOWN THREAD STARTING!");
+      LOGGER.warn("******* SHUTDOWN THREAD STARTING! *******");
       Thread.sleep(2000);
       LaunchCommand.getInstance().shutdown();
     } catch (InterruptedException | NeutronCheckedException e) {
