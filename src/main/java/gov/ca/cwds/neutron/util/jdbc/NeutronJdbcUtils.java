@@ -216,13 +216,13 @@ public final class NeutronJdbcUtils {
   }
 
   /**
-   * Clear a Hibernate session and trap transaction errors.
+   * Clear a Hibernate session and trap transaction errors. For example, Hibernate session clear may
+   * fail without a transaction.
    * 
    * @param session active Hibernate session
    */
   public static void clearSession(final Session session) {
     try {
-      // Hibernate session clear may fail without a transaction.
       grabTransaction(session);
       session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {
