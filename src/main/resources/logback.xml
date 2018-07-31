@@ -33,8 +33,7 @@
 
 			<rollingPolicy
 				class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-				<FileNamePattern>${ROCKET_LOGS}/${rocketLog}.%i.log.zip
-				</FileNamePattern>
+				<FileNamePattern>${ROCKET_LOGS}/${rocketLog}.%i.log.zip</FileNamePattern>
 				<MinIndex>1</MinIndex>
 				<MaxIndex>10</MaxIndex>
 			</rollingPolicy>
