@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,22 +16,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedServiceProviderDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.neutron.flight.FlightPlanTest;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightPlan;
+import gov.ca.cwds.neutron.flight.FlightPlanTest;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
 
 /**
  * @author CWDS API Team
  */
-@SuppressWarnings("javadoc")
 public class ServiceProviderIndexerJobTest extends Goddard {
 
   private static final class TestServiceProviderIndexerJob extends ServiceProviderIndexerJob {
 
     public TestServiceProviderIndexerJob(ReplicatedServiceProviderDao dao, ElasticsearchDao esDao,
         String lastJobRunTimeFilename, ObjectMapper mapper, SessionFactory sessionFactory,
-        FlightRecorder jobHistory, FlightPlan opts,
-        AtomLaunchDirector launchDirector) {
+        FlightRecorder jobHistory, FlightPlan opts, AtomLaunchDirector launchDirector) {
       super(dao, esDao, lastJobRunTimeFilename, mapper, opts, launchDirector);
     }
 
@@ -46,7 +44,8 @@ public class ServiceProviderIndexerJobTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     dao = new ReplicatedServiceProviderDao(sessionFactory);
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
+    target =
+        new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
     target.setFlightPlan(FlightPlanTest.makeGeneric());
   }
 
@@ -62,7 +61,8 @@ public class ServiceProviderIndexerJobTest extends Goddard {
 
   @Test
   public void testInstantiation() throws Exception {
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
+    target =
+        new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
     assertThat(target, notNullValue());
   }
 
@@ -85,7 +85,8 @@ public class ServiceProviderIndexerJobTest extends Goddard {
 
   @Test
   public void getPartitionRanges_Args__() throws Exception {
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
+    target =
+        new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }
@@ -93,7 +94,8 @@ public class ServiceProviderIndexerJobTest extends Goddard {
   @Test
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
-    target = new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
+    target =
+        new ServiceProviderIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
     final List<Pair<String, String>> actual = target.getPartitionRanges();
     assertThat(actual, is(notNullValue()));
   }

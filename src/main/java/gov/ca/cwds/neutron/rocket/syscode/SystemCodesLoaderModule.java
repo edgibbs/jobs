@@ -61,7 +61,7 @@ public class SystemCodesLoaderModule extends AbstractModule {
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
     final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
-    SystemCodeCache systemCodeCache =
+    final SystemCodeCache systemCodeCache =
         new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
     systemCodeCache.register();
     return systemCodeCache;
