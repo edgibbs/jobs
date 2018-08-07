@@ -59,7 +59,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   }
 
   /**
-   * HACK for dependency injection issue. (Re-?) initialize the rocket.
+   * HACK for dependency injection issue. Initialize the rocket.
    * 
    * @param lastGoodRunTimeFilename last run file location
    * @param flightPlan flight plan

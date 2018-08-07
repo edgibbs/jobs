@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +63,6 @@ import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.data.cms.SystemCodeDao;
