@@ -126,6 +126,9 @@ public class PeopleSummaryThreadHandler
       prepAffectedClients(stmtInsClient, range);
       prepAffectedClients(stmtInsClientPlacementHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
+
+      LOGGER.info("commit");
+      con.commit();
     } catch (Exception e) {
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
