@@ -16,7 +16,7 @@ public interface AtomLaunchCommand {
   /**
    * shutdown Launch Command immediately.
    * 
-   * @throws NeutronCheckedException
+   * @throws NeutronCheckedException upon inadvertent "oopsie"
    */
   void shutdown() throws NeutronCheckedException;
 
