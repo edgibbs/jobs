@@ -325,20 +325,22 @@ public final class ElasticTransformer {
     List<ElasticSearchPersonLanguage> ret = null;
 
     if (p instanceof ApiMultipleLanguagesAware) {
-      ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
+      final ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
       ret = new ArrayList<>(mlx.getLanguages().length);
       for (ApiLanguageAware lx : mlx.getLanguages()) {
-        Integer languageId = lx.getLanguageSysId();
-        ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
+        final Integer languageId = lx.getLanguageSysId();
+        final ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(
+            languageId.toString(),
             SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
         ret.add(lang);
       }
     } else if (p instanceof ApiLanguageAware) {
       ret = new ArrayList<>();
-      ApiLanguageAware lx = (ApiLanguageAware) p;
-      Integer languageId = lx.getLanguageSysId();
-      ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
-          SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
+      final ApiLanguageAware lx = (ApiLanguageAware) p;
+      final Integer languageId = lx.getLanguageSysId();
+      final ElasticSearchPersonLanguage lang =
+          new ElasticSearchPersonLanguage(languageId.toString(),
+              SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
       ret.add(lang);
     }
 
