@@ -226,6 +226,7 @@ public class EsClientPerson extends BaseEsClient
     ret.openCaseId = rs.getString("CAS_IDENTIFIER");
 
     try {
+      // Column not yet added to MQT in all environments.
       ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
     } catch (Exception e) {
       LOGGER.trace("COLUMN 'CAS_RSP_AGY_CD' NOT IN SCHEMA!", e);
@@ -261,7 +262,6 @@ public class EsClientPerson extends BaseEsClient
 
     // Open case id
     ret.setOpenCaseId(this.openCaseId);
-
     ret.setOpenCaseResponsibleAgencyCode(this.openCaseResponsibleAgencyCode);
 
     map.put(ret.getId(), ret);
