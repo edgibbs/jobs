@@ -314,7 +314,7 @@ public class ClientSQLResource implements ApiMarker {
       + "      NVL(clc.LST_UPD_TS,        TIMESTAMP('2018-02-07 01:01:01')), \n"
       + "      NVL(sal.IBMSNAP_LOGMARKER, TIMESTAMP('2018-02-07 01:01:01')), \n"
       + "      NVL(onm.IBMSNAP_LOGMARKER, TIMESTAMP('2018-02-07 01:01:01')), \n"
-      + "      NVL(cas.IBMSNAP_LOGMARKER, TIMESTAMP('2018-02-07 01:01:01'))  \n"
+      + "      NVL(cas.IBMSNAP_LOGMARKER, TIMESTAMP('2018-02-07 01:01:01'))   \n"
       + "    ) LAST_CHG \n"
       + "FROM      {h-schema}GT_ID        gt \n"
       + "JOIN      {h-schema}CLIENT_T    clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
@@ -366,90 +366,60 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:off
   public static final String INSERT_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
-      + "SELECT '1234567abc' FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ? AND ?";
+    + "SELECT '1234567abc' FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ? AND ?";
   //@formatter:on
 
   //@formatter:off
   public static final String INSERT_PLACEMENT_HOME_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
-      + "SELECT DISTINCT pe.FKCLIENT_T \n"
-      + "FROM PLC_EPST pe \n" 
-      + "WHERE pe.FKCLIENT_T BETWEEN ? AND ? AND pe.IBMSNAP_OPERATION IN ('I','U')";
+    + "SELECT DISTINCT pe.FKCLIENT_T \n"
+    + "FROM PLC_EPST pe \n" 
+    + "WHERE pe.FKCLIENT_T BETWEEN ? AND ? AND pe.IBMSNAP_OPERATION IN ('I','U')";
   //@formatter:on
 
   //@formatter:off
   public static final String INSERT_CLIENT_LAST_CHG =
-      "INSERT INTO GT_REFR_CLT (FKREFERL_T, FKCLIENT_T, SENSTV_IND) \n"
-          + "WITH DRIVER AS (\n"
-          + "  SELECT CLT.IDENTIFIER AS CLIENT_ID \n"
-          + "  FROM CLIENT_T clt \n"
-          + "  WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + " UNION ALL SELECT cla.FKCLIENT_T AS CLIENT_ID \n"
-          + "  FROM CL_ADDRT cla \n"
-          + "  WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + " UNION ALL SELECT cla.FKCLIENT_T AS CLIENT_ID \n"
-          + "  FROM CL_ADDRT cla \n"
-          + "  JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
-          + "  WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + " UNION ALL SELECT eth.ESTBLSH_ID AS CLIENT_ID \n"
-          + "  FROM CLSCP_ET eth \n"
-          + "  WHERE ETH.ESTBLSH_CD = 'C' \n"
-          + "  AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + " UNION ALL SELECT pe.FKCLIENT_T AS CLIENT_ID \n"
-          + "  FROM PLC_EPST pe \n"
-          + "  WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + " UNION ALL SELECT ohp.FKPLC_EPST AS CLIENT_ID \n"
-          + "  FROM O_HM_PLT ohp \n"
-          + "  JOIN PLC_HM_T ph ON ph.IDENTIFIER = ohp.FKPLC_HM_T \n"
-          + "  WHERE ph.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + "  AND DATE('LAST_RUN_END') BETWEEN OHP.START_DT AND NVL(OHP.END_DT, DATE('LAST_RUN_END')) \n"
-          + " UNION ALL SELECT ohp.FKPLC_EPST AS CLIENT_ID \n"
-          + "  FROM O_HM_PLT ohp \n"
-          + "  WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + " UNION ALL SELECT alg.FKCLIENT_T AS CLIENT_ID \n"
-          + "  FROM ALLGTN_T alg \n"
-          + "  WHERE alg.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + " UNION ALL SELECT DISTINCT alg.FKCLIENT_T AS CLIENT_ID \n"
-          + "  FROM REFERL_T   r\n"
-          + "  JOIN ALLGTN_T alg ON alg.FKREFERL_T = r.IDENTIFIER\n"
-          + "  WHERE r.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-          + ")\n"
-          + "SELECT DISTINCT '' AS FKREFERL_T, x.CLIENT_ID, '' AS SENSTV_IND FROM DRIVER x ";  
-  //@formatter:on
-
-  //@formatter:off
-  public static final String INSERT_INITIAL_PROBATION_YOUTH_CLIENT =
-    "INSERT INTO GT_ID (IDENTIFIER) \n"
-        + "SELECT r.IDENTIFIER\n"
-        + "FROM REFERL_T r \n"
-        + "WHERE r.RSP_AGY_CD = 'P' \n"
-        + "  AND r.IBMSNAP_OPERATION IN ('I','U') \n"
-        + "FETCH FIRST 5000 ROWS ONLY \n";
-  //@formatter:on
-
-  //@formatter:off
-  public static final String SELECT_PROBATION_YOUTH_CLIENT =
-    "WITH DRIVER AS (\n"
-        + " SELECT r.IDENTIFIER AS REF_ID, CURRENT DATE AS FORCE_MATERIALIZE \n"
-        + " FROM GT_ID r \n"
-        + ")\n"
-        + "SELECT DISTINCT alg.FKCLIENT_T \n"
-        + "FROM DRIVER x \n"
-        + "JOIN ALLGTN_T alg ON alg.FKREFERL_T = x.REF_ID \n"
-        + "WHERE alg.IBMSNAP_OPERATION IN ('I','U') \n"
-        + "OPTIMIZE FOR 100 ROWS \n"
-        + "FETCH FIRST 5000 ROWS ONLY \n"
-        + "FOR READ ONLY WITH UR ";
+        "INSERT INTO GT_REFR_CLT (FKREFERL_T,FKCLIENT_T,SENSTV_IND) \n"
+          + "SELECT DISTINCT '' AS FKREFERL_T, s1.CLIENT_ID, '' AS SENSTV_IND FROM ( \n"
+          + "     SELECT DISTINCT CLT.IDENTIFIER AS CLIENT_ID \n"
+          + "     FROM CLIENT_T clt \n"
+          + "     WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT cla.FKCLIENT_T AS CLIENT_ID \n"
+          + "     FROM CL_ADDRT cla \n"
+          + "     WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT cla.FKCLIENT_T AS CLIENT_ID \n"
+          + "     FROM CL_ADDRT cla \n"
+          + "     JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER  \n"
+          + "     WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT eth.ESTBLSH_ID AS CLIENT_ID \n"
+          + "     FROM CLSCP_ET eth \n"
+          + "     WHERE ETH.ESTBLSH_CD = 'C' \n"
+          + "     AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + ") s1 \n"
+          + "UNION \n"
+          + "SELECT DISTINCT '' AS FKREFERL_T, s2.CLIENT_ID, '' AS SENSTV_IND FROM ( \n"
+          + "     SELECT DISTINCT pe.FKCLIENT_T AS CLIENT_ID \n"
+          + "     FROM PLC_EPST pe \n"
+          + "     WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + " UNION SELECT DISTINCT ohp.FKPLC_EPST AS CLIENT_ID \n"
+          + "     FROM O_HM_PLT ohp \n"
+          + "     JOIN PLC_HM_T ph ON ph.IDENTIFIER = ohp.FKPLC_HM_T \n"
+          + "     WHERE ph.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + "     AND DATE('LAST_RUN_END') BETWEEN OHP.START_DT AND NVL(OHP.END_DT, DATE('LAST_RUN_END')) \n"
+          + " UNION SELECT DISTINCT ohp.FKPLC_EPST AS CLIENT_ID \n"
+          + "     FROM O_HM_PLT ohp \n"
+          + "     WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
+          + ") s2 ";
   //@formatter:on
 
   //@formatter:off
   public static final String INSERT_NEXT_BUNDLE =
-     "INSERT INTO GT_ID (IDENTIFIER) \n"
-      + "SELECT x.IDENTIFIER FROM ( \n"
-      + "   SELECT rc.FKCLIENT_T AS IDENTIFIER, ROW_NUMBER() OVER(ORDER BY rc.FKCLIENT_T) AS rn \n"
-      + "   FROM GT_REFR_CLT rc \n"
-      + ") x \n"
-      + "WHERE x.rn BETWEEN ? AND ?";
+      "INSERT INTO GT_ID (IDENTIFIER) \n"
+        + "SELECT x.IDENTIFIER FROM ( \n"
+        + "   SELECT rc.FKCLIENT_T AS IDENTIFIER, ROW_NUMBER() OVER(ORDER BY rc.FKCLIENT_T) AS rn \n"
+        + "   FROM GT_REFR_CLT rc \n"
+        + ") x \n"
+        + "WHERE x.rn BETWEEN ? AND ?";
   //@formatter:on
 
 }
