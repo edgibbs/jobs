@@ -112,6 +112,21 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   }
 
   @Test
+  public void testAddresses_LastKnown__() throws Exception {
+    final ReplicatedClientAddress clientAddress = new ReplicatedClientAddress();
+    clientAddress.setId(DEFAULT_CLIENT_ID);
+    clientAddress.setAddressType((short) 27);
+    target.addClientAddress(clientAddress);
+    final ReplicatedAddress address = new ReplicatedAddress();
+    clientAddress.addAddress(address);
+    address.setState((short) 1873);
+    address.setGovernmentEntityCd((short) 1104);
+    final List<ElasticSearchPersonAddress> actual = target.getElasticSearchPersonAddresses();
+    String lastKnown = actual.get(0).getLastKnown();
+    assertThat(lastKnown, is(equalTo("true")));
+  }
+
+  @Test
   public void getPhones_Args__() throws Exception {
     final ApiPhoneAware[] actual = target.getPhones();
     final ApiPhoneAware[] expected = new ApiPhoneAware[0];
