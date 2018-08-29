@@ -260,6 +260,20 @@
 					"type": "text",
 					"store": true
 				},
+				"last_known": {
+                    "type": "text",
+                    "store": true
+                },
+                "searchable_address": {
+                    "type": "text",
+                    "store": true
+                },
+                "autocomplete_searchable_address": {
+                    "type": "text",
+                    "store": true,
+                     "analyzer": "autocomplete",
+                        "search_analyzer": "standard"
+                },
 				"phone_numbers": {
 					"properties": {
 						"number": {
