@@ -177,6 +177,7 @@
 			"store": true
 		},
 		"addresses": {
+		    "type": "nested",
 			"properties": {
 				"id": {
 					"type": "text",
@@ -269,6 +270,12 @@
                     "store": true
                 },
                 "autocomplete_searchable_address": {
+                    "type": "text",
+                    "store": true,
+                     "analyzer": "autocomplete",
+                        "search_analyzer": "standard"
+                },
+                "autocomplete_city": {
                     "type": "text",
                     "store": true,
                      "analyzer": "autocomplete",
