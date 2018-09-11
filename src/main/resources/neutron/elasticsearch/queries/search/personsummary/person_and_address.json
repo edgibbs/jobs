@@ -208,6 +208,7 @@
     "addresses.street_name",
     "addresses.street_number",
     "addresses.city",
+    "addresses.county",
     "addresses.state_code",
     "addresses.zip",
     "addresses.type",
