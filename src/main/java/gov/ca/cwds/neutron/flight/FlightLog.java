@@ -2,6 +2,7 @@ package gov.ca.cwds.neutron.flight;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
@@ -148,6 +149,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
    */
   @JsonIgnore
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
+
+  @JsonIgnore
+  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>());
 
   /**
    * Initial load only.
@@ -427,6 +431,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonProperty("bulk_after")
   public int getCurrentBulkAfter() {
     return this.recsBulkAfter.get();
+  }
+
+  @JsonProperty("warnings")
+  public List<String> getWarnings() {
+    return warnings;
   }
 
   public boolean isInitialLoad() {
