@@ -144,7 +144,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
-    LOGGER.debug("\nhandleJdbcDone: normalized.size(): {}\n", normalized.size());
+    LOGGER.trace("handleJdbcDone: normalized.size(): {}\n", normalized.size());
 
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
