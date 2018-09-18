@@ -55,10 +55,12 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
       final Query<SystemCode> query = session.getNamedQuery(namedQueryName)
           .setString("foreignKeyMetaTable", foreignKeyMetaTable).setReadOnly(true)
           .setCacheable(false).setHibernateFlushMode(FlushMode.MANUAL);
+
       ret = query.list().toArray(new SystemCode[0]);
       LOGGER.info("NeutronSystemCodeDao.findByForeignKeyMetaTable: meta: {}, count: {}",
           foreignKeyMetaTable, ret.length);
 
+      // Shares the thread's connection. Do NOT close!
       // txn.commit();
       // session.close();
     } catch (Exception h) {
@@ -84,6 +86,8 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
       query.setHibernateFlushMode(FlushMode.MANUAL);
 
       ret = query.getSingleResult();
+
+      // Shares the thread's connection. Do NOT close!
       // txn.commit();
       // session.close();
     } catch (Exception h) {

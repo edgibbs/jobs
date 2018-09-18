@@ -451,6 +451,8 @@ public class HyperCube extends NeutronGuiceModule {
       final SystemCodeCache ret =
           new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
       ret.register();
+
+      LOGGER.warn("System code cache: total: {}", ret.getAllSystemCodes().size());
       return ret;
     }
   }
