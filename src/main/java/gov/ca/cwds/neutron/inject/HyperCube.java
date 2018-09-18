@@ -449,7 +449,7 @@ public class HyperCube extends NeutronGuiceModule {
     } else {
       final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
       final SystemCodeCache ret =
-          new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, false);
+          new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
       ret.register();
       return ret;
     }
