@@ -17,6 +17,17 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeDescriptor;
 import gov.ca.cwds.rest.api.domain.cms.SystemMeta;
 
+/**
+ * Murphy's Law: "If anything <strong>can</strong> go wrong, it <strong>will</strong>."
+ * 
+ * <p>
+ * Simplistic code cache without refresh capability. Sufficient for Neutron "initial load" jobs,
+ * whose system codes must not change while the job is running. Usually appropriate for on-going
+ * Launch Command -- until system codes are modified by IBM quarterly release.
+ * </p>
+ * 
+ * @author CWDS API Team
+ */
 public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemCodeCache {
 
   private static final long serialVersionUID = 1L;
