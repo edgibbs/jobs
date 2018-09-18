@@ -452,7 +452,11 @@ public class HyperCube extends NeutronGuiceModule {
           new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
       ret.register();
 
-      LOGGER.warn("System code cache: total: {}", ret.getAllSystemCodes().size());
+      LOGGER.warn("System code cache: codes: {}, metas: {}, cache size: {}",
+          ret.getAllSystemCodes().size(), ret.getAllSystemMetas().size(), ret.getCacheSize());
+
+      final gov.ca.cwds.rest.api.domain.cms.SystemCode scd = ret.getSystemCode(3199);
+      LOGGER.warn("getSystemCode(3199): {}", scd);
       return ret;
     }
   }
