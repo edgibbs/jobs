@@ -77,7 +77,7 @@ public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemC
     }
 
     LOGGER.warn(
-        "Neutron System code cache: mapCodeByKey: {}, mapMetaByKey: {}, setCodes: {}, setMetas: {}, codesByMeta: {}",
+        "Neutron System code cache: mapCodeByKey: {}, mapMetaByKey: {}, setCodes: {}, setMetas: {}, mapCodeByMeta: {}",
         mapCodeByKey.size(), mapMetaByKey.size(), setCodes.size(), setMetas.size(),
         mapCodeByMeta.size());
   }
