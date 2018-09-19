@@ -144,14 +144,14 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
-    LOGGER.info("\nhandleJdbcDone: normalized.size(): {}\n", normalized.size());
+    LOGGER.trace("handleJdbcDone: normalized.size(): {}\n", normalized.size());
 
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
-    LOGGER.info("handleJdbcDone: FINISHED");
+    LOGGER.debug("handleJdbcDone: FINISHED");
   }
 
   @Override

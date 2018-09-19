@@ -23,7 +23,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 
 project.ext {
-    coreApiVersion = "1.7.5_857-RC"
+    coreApiVersion = "1.7.5_858-RC"
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
@@ -36,7 +36,7 @@ jacoco {
     reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
-version = 0.51
+version = 0.52
 
 repositories {
     mavenLocal()

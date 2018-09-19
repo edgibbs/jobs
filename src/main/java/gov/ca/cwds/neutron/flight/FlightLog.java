@@ -2,6 +2,7 @@ package gov.ca.cwds.neutron.flight;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
@@ -149,15 +150,20 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonIgnore
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
-  /**
-   * Initial load only.
-   */
-  private final List<Pair<String, String>> initialLoadRangesStarted = new ArrayList<>();
+  @JsonIgnore
+  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>());
 
   /**
    * Initial load only.
    */
-  private final List<Pair<String, String>> initialLoadRangesCompleted = new ArrayList<>();
+  private final List<Pair<String, String>> initialLoadRangesStarted =
+      Collections.synchronizedList(new ArrayList<>());
+
+  /**
+   * Initial load only.
+   */
+  private final List<Pair<String, String>> initialLoadRangesCompleted =
+      Collections.synchronizedList(new ArrayList<>());
 
   /**
    * Last change only. Log Elasticsearch documents created or modified by this rocket.
@@ -427,6 +433,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonProperty("bulk_after")
   public int getCurrentBulkAfter() {
     return this.recsBulkAfter.get();
+  }
+
+  @JsonProperty("warnings")
+  public List<String> getWarnings() {
+    return warnings;
   }
 
   public boolean isInitialLoad() {
