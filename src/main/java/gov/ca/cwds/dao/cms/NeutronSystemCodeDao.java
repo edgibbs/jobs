@@ -52,6 +52,9 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
     final Transaction txn = joinTransaction(session);
 
     try {
+      if (!txn.isActive()) {
+        txn.begin();
+      }
       final Query<SystemCode> query = session.getNamedQuery(namedQueryName)
           .setString("foreignKeyMetaTable", foreignKeyMetaTable).setReadOnly(true)
           .setCacheable(false).setHibernateFlushMode(FlushMode.MANUAL);

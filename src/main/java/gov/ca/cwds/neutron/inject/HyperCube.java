@@ -448,10 +448,11 @@ public class HyperCube extends NeutronGuiceModule {
       return scaffoldSystemCodeCache();
     } else {
       final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
-      final SystemCodeCache ret =
+      final SystemCodeCache orig =
           new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
+      final SystemCodeCache ret = new NeutronSystemCodeCache(orig);
       ret.register();
-      return new NeutronSystemCodeCache(ret);
+      return ret;
     }
   }
 
