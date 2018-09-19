@@ -447,7 +447,8 @@ public class HyperCube extends NeutronGuiceModule {
     if (isScaffoldSystemCodeCache()) {
       return scaffoldSystemCodeCache();
     } else {
-      final long secondsToRefreshCache = 15 * 24 * 60 * (long) 60; // 15 days
+      final long secondsToRefreshCache = 13 * 24 * 60 * (long) 60; // 13 days -- to glorify our luck
+                                                                   // with DB2
       final SystemCodeCache orig =
           new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
       final SystemCodeCache ret = new NeutronSystemCodeCache(orig);
