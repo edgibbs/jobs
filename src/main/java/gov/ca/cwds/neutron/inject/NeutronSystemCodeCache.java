@@ -34,10 +34,11 @@ public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemC
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronSystemCodeCache.class);
 
+  // Core indexes.
   private Map<Short, SystemCode> mapCodeByKey;
-  private Map<String, Set<SystemCode>> mapCodeByMeta;
   private Map<String, SystemMeta> mapMetaByKey;
 
+  private Map<String, Set<SystemCode>> mapCodeByMeta;
   private Set<SystemCode> setCodes;
   private Set<SystemMeta> setMetas;
 
@@ -97,12 +98,6 @@ public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemC
   }
 
   @Override
-  public Set<SystemCode> getSystemCodesForMeta(String key) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public String getSystemCodeShortDescription(Number key) {
     final SystemCode code = mapCodeByKey.get(key.shortValue());
     return code != null ? code.getShortDescription() : null;
@@ -115,25 +110,29 @@ public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemC
   }
 
   @Override
+  public Set<SystemCode> getSystemCodesForMeta(String key) {
+    return mapCodeByMeta.get(key);
+  }
+
+  @Override
   public Short getSystemCodeId(String shortDescription, String meta) {
-    // TODO Auto-generated method stub
-    return null;
+    return null; // not implemented
   }
 
   @Override
   public boolean verifyActiveSystemCodeIdForMeta(Number systemCodeId, String metaId,
       boolean checkCategoryIdValueIsZero) {
-    return false;
+    return false; // not implemented
   }
 
   @Override
   public boolean verifyActiveLogicalIdForMeta(String logicalId, String metaId) {
-    return false;
+    return false; // not implemented
   }
 
   @Override
   public boolean verifyActiveSystemCodeDescriptionForMeta(String shortDesc, String metaId) {
-    return false;
+    return false; // not implemented
   }
 
 }
