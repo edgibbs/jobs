@@ -87,10 +87,6 @@ public class SQLiteJDBC {
         System.out.println("SALARY = " + salary);
         System.out.println();
       }
-
-      // rs.close();
-      // stmt.close();
-      // c.close();
     } catch (Exception e) {
       System.err.println(e.getClass().getName() + ": " + e.getMessage());
     }
