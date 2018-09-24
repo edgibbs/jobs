@@ -12,6 +12,7 @@ public class SQLiteJDBC {
       Class.forName("org.sqlite.JDBC");
     } catch (Exception e) {
       System.err.println(e.getClass().getName() + ": " + e.getMessage());
+      e.printStackTrace();
     }
   }
 
@@ -29,6 +30,7 @@ public class SQLiteJDBC {
        //@formatter:on
 
       stmt.executeUpdate(sql);
+      c.commit();
     } catch (Exception e) {
       System.err.println(e.getClass().getName() + ": " + e.getMessage());
       e.printStackTrace();
@@ -69,8 +71,6 @@ public class SQLiteJDBC {
 
   public void select() {
     try (final Connection c = connect(); final Statement stmt = c.createStatement()) {
-      c.setAutoCommit(false);
-      System.out.println("Opened database successfully");
       final ResultSet rs = stmt.executeQuery("SELECT * FROM COMPANY;");
 
       while (rs.next()) {
@@ -98,12 +98,43 @@ public class SQLiteJDBC {
     Connection c = null;
     try {
       c = DriverManager.getConnection("jdbc:sqlite:test.db");
+      c.setAutoCommit(false);
     } catch (Exception e) {
       System.err.println(e.getClass().getName() + ": " + e.getMessage());
+      e.printStackTrace();
     }
 
     System.out.println("Opened database successfully");
     return c;
+  }
+
+  public void update() {
+    try (final Connection c = connect(); final Statement stmt = c.createStatement()) {
+      String sql = "UPDATE COMPANY set SALARY = 25000.00 where ID=1;";
+      stmt.executeUpdate(sql);
+      c.commit();
+
+      final ResultSet rs = stmt.executeQuery("SELECT * FROM COMPANY;");
+      while (rs.next()) {
+        int id = rs.getInt("id");
+        String name = rs.getString("name");
+        int age = rs.getInt("age");
+        String address = rs.getString("address");
+        float salary = rs.getFloat("salary");
+
+        System.out.println("ID = " + id);
+        System.out.println("NAME = " + name);
+        System.out.println("AGE = " + age);
+        System.out.println("ADDRESS = " + address);
+        System.out.println("SALARY = " + salary);
+        System.out.println();
+      }
+    } catch (Exception e) {
+      System.err.println(e.getClass().getName() + ": " + e.getMessage());
+      e.printStackTrace();
+    }
+
+    System.out.println("Operation done successfully");
   }
 
   public static void main(String args[]) {
@@ -111,6 +142,7 @@ public class SQLiteJDBC {
     inst.createTable();
     inst.insert();
     inst.select();
+    inst.update();
   }
 
 }
