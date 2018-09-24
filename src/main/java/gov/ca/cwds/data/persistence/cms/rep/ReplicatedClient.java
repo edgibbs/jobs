@@ -89,14 +89,21 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "z.MTERM_DT, z.FTERM_DT, z.ZIPPY_IND, TRIM(z.DEATH_PLC) DEATH_PLC, "
         + "z.TR_MBVRT_B, z.TRBA_CLT_B, z.SOC158_IND, z.DTH_DT_IND, "
         + "TRIM(z.EMAIL_ADDR) EMAIL_ADDR, z.ADJDEL_IND, z.ETH_UD_CD, "
-        + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, " + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-        + "from {h-schema}CLIENT_T z \n" + "WHERE z.IBMSNAP_LOGMARKER >= :after \n"
+        + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, " 
+        + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+        + "from {h-schema}CLIENT_T z \n" 
+        + "WHERE z.IBMSNAP_LOGMARKER >= :after \n"
         + "FOR READ ONLY WITH UR",
     resultClass = ReplicatedClient.class)
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findByTemp",
-    query = "SELECT \n" + "    c.IDENTIFIER \n" + "  , TRIM(c.COM_FST_NM) AS COM_FST_NM \n"
-        + "  , TRIM(c.COM_LST_NM) AS COM_LST_NM \n" + "  , c.SENSTV_IND \n" + "  , c.LST_UPD_TS \n"
-        + "  , c.IBMSNAP_LOGMARKER \n" + "  , c.IBMSNAP_OPERATION \n"
+    query = "SELECT \n" 
+        + "    c.IDENTIFIER \n" 
+        + "  , TRIM(c.COM_FST_NM) AS COM_FST_NM \n"
+        + "  , TRIM(c.COM_LST_NM) AS COM_LST_NM \n" 
+        + "  , c.SENSTV_IND \n" 
+        + "  , c.LST_UPD_TS \n"
+        + "  , c.IBMSNAP_LOGMARKER \n" 
+        + "  , c.IBMSNAP_OPERATION \n"
         + " FROM {h-schema}GT_ID GT \n"
         + " JOIN {h-schema}CLIENT_T C ON C.IDENTIFIER = GT.IDENTIFIER \n"
         + " FOR READ ONLY WITH UR ",
@@ -314,6 +321,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
 
+    System.out.println("sortedClientAddresses count: " + sortedClientAddresses.size());
+
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
@@ -384,12 +393,13 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       }
     }
 
-    List<ElasticSearchPersonAddress> sortedAddresses = new ArrayList<>(esClientAddresses.values());
+    final List<ElasticSearchPersonAddress> sortedAddresses =
+        new ArrayList<>(esClientAddresses.values());
     if (!sortedAddresses.isEmpty()) {
       sortedAddresses.get(0).setLastKnown("true");
     }
-    return sortedAddresses;
 
+    return sortedAddresses;
   }
 
   // ============================
