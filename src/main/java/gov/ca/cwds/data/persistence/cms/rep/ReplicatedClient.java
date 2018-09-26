@@ -91,7 +91,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "TRIM(z.EMAIL_ADDR) EMAIL_ADDR, z.ADJDEL_IND, z.ETH_UD_CD, "
         + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, " 
         + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-        + "from {h-schema}CLIENT_T z \n" 
+        + "FROM {h-schema}CLIENT_T z \n" 
         + "WHERE z.IBMSNAP_LOGMARKER >= :after \n"
         + "FOR READ ONLY WITH UR",
     resultClass = ReplicatedClient.class)
