@@ -23,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -117,6 +119,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     ApiMultipleLanguagesAware, ApiMultipleClientAddressAware, ApiMultiplePhonesAware,
     CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware,
     ApiClientSafetyAlertsAware, ApiOtherClientNamesAware, ApiClientCaseAware {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReplicatedClient.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -321,8 +325,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
 
-    System.out.println("HERE");
-    System.out.println("sortedClientAddresses count: " + sortedClientAddresses.size());
+    LOGGER.trace("sortedClientAddresses count: " + sortedClientAddresses.size());
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());

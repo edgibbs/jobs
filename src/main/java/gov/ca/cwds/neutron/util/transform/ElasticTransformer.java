@@ -88,11 +88,12 @@ public final class ElasticTransformer {
       ret = mapper.writeValueAsString(obj);
     } catch (Exception e) { // NOSONAR
       // HACK: shouldn't swallow the exception, but don't blow up a whole batch for one bad record.
-      // Functional lambda doesn't like checked exceptions, but runtime exceptions.
+      // Functional lambda doesn't allow checked exceptions, only runtime exceptions.
       // But then SonarQube complains about switching from checked to runtime.
       // Damned if you do, damned if you don't.
       LOGGER.warn("ERROR SERIALIZING OBJECT {} TO JSON", obj);
     }
+
     return ret;
   }
 
