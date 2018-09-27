@@ -321,6 +321,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
 
+    System.out.println("HERE");
     System.out.println("sortedClientAddresses count: " + sortedClientAddresses.size());
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
