@@ -1,6 +1,5 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -41,6 +40,7 @@ import gov.ca.cwds.dao.ApiOtherClientNamesAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
@@ -402,10 +402,11 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
             countyCode.setId(countySysCode.getSystemId().toString());
           }
 
-          if (repAddress.getApiAdrUnitType() != null
-              && repAddress.getApiAdrUnitType().intValue() != 0) {
+          final Short unitType = repAddress.getApiAdrUnitType();
+          if (unitType != null
+              && unitType.intValue() != 0) {
             esAddress.setUnitType(SystemCodeCache.global()
-                .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
+                .getSystemCodeShortDescription(unitType));
           }
 
           // SNAP-46: last known phone numbers.
