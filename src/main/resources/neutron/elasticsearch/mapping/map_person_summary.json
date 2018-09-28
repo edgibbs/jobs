@@ -119,6 +119,10 @@
 			"type": "text",
 			"store": true
 		},
+		"open_case_responsible_agency_code": {
+			"type": "text",
+			"store": true
+		},
 		"client_county": {
 			"properties": {
 				"id": {
@@ -393,6 +397,53 @@
 				},
 				"name_type": {
 					"type": "text",
+					"store": true
+				},
+				"legacy_descriptor": {
+					"properties": {
+						"legacy_id": {
+							"type": "text",
+							"store": true
+						},
+						"legacy_ui_id": {
+							"type": "text",
+							"store": true
+						},
+						"legacy_last_updated": {
+							"format": "strict_date_time",
+							"type": "date",
+							"store": true
+						},
+						"legacy_table_name": {
+							"type": "text",
+							"store": true
+						},
+						"legacy_table_description": {
+							"type": "text",
+							"store": true
+						}
+					}
+				}
+			}
+		},
+		"csec": {
+			"properties": {
+				"csec_code_id": {
+					"type": "text",
+					"store": true
+				},
+				"description": {
+					"type": "text",
+					"store": true
+				},
+				"start_date": {
+					"format": "strict_date_optional_time||epoch_millis",
+					"type": "date",
+					"store": true
+				},
+				"end_date": {
+					"format": "strict_date_optional_time||epoch_millis",
+					"type": "date",
 					"store": true
 				},
 				"legacy_descriptor": {

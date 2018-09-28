@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -266,6 +267,9 @@ public class EsClientPerson extends BaseEsClient
 
     // AKA
     ret.addAka(createAka());
+
+    //CSEC
+    ret.addCsec(createCsec());
 
     // Open case id
     ret.setOpenCaseId(this.openCaseId);
@@ -609,6 +613,17 @@ public class EsClientPerson extends BaseEsClient
         this.akaLastUpdatedTimestamp, LegacyTable.ALIAS_OR_OTHER_CLIENT_NAME));
 
     return aka;
+  }
+
+  private ElasticSearchPersonCsec createCsec() {
+
+    ElasticSearchPersonCsec csec = new ElasticSearchPersonCsec();
+      //TODO: Make it real remove the stab
+      csec.setCsecCodeId("6870");
+      csec.setCsecDesc("Victim in Open Case not in Foster Care  ");
+      csec.setStartDate("2017-08-04");
+//      csec.setEndDate("2017-12-12");
+    return csec;
   }
 
   // =====================

@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -140,6 +141,9 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   private Map<String, ElasticSearchPersonAka> akas = new HashMap<>();
 
   @Transient
+  private List<ElasticSearchPersonCsec> csecs = new ArrayList<>();
+
+  @Transient
   private Map<String, ElasticSearchSafetyAlert> safetyAlerts = new HashMap<>();
 
   @Transient
@@ -214,6 +218,20 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   public void addAka(ElasticSearchPersonAka aka) {
     if (aka != null) {
       akas.put(aka.getId(), aka);
+    }
+  }
+
+  public List<ElasticSearchPersonCsec> getCsecs() {
+    return csecs;
+  }
+
+  public void setCsecs(List<ElasticSearchPersonCsec> csecs) {
+    this.csecs = csecs;
+  }
+
+  public void addCsec(ElasticSearchPersonCsec csec) {
+    if (csec != null) {
+      csecs.add(csec);
     }
   }
 

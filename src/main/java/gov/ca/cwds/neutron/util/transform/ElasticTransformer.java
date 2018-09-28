@@ -2,6 +2,8 @@ package gov.ca.cwds.neutron.util.transform;
 
 import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
 
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -443,6 +445,18 @@ public final class ElasticTransformer {
     return ret;
   }
 
+  protected static List<ElasticSearchPersonCsec> buildCsecs(ApiPersonAware p) {
+    List<ElasticSearchPersonCsec> ret = null;
+    if (p instanceof ReplicatedClient) {
+      ReplicatedClient replicatedClient = (ReplicatedClient) p;
+      final List<ElasticSearchPersonCsec> clientCsecs = replicatedClient.getCsecs();
+      if (clientCsecs != null && !clientCsecs.isEmpty()) {
+        ret = clientCsecs;
+      }
+    }
+    return ret;
+  }
+
   protected static String buildOpenCaseId(ApiPersonAware p) {
     String ret = null;
     if (p instanceof ApiClientCaseAware) {
@@ -528,6 +542,9 @@ public final class ElasticTransformer {
 
     // AKAs
     ret.setAkas(buildAkas(p));
+
+    // CSECs
+    ret.setCsecs(buildCsecs(p));
 
     // Safety alerts
     ret.setSafetyAlerts(buildSafetyAlerts(p));
