@@ -27,7 +27,7 @@ public class NeutronDateUtils {
   /**
    * Appease SonarQube's concern about "OMG! This gives away your implementation!"
    * 
-   * @param incoming
+   * @param incoming date to clone
    * @return fresh new Date -- to shut SonarQube up
    */
   public static Date freshDate(Date incoming) {
