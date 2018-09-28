@@ -382,12 +382,11 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         try {
           w.execute(con);
         } catch (SQLException e) {
-          // eat it
+          // Swallow it, but don't throw "up".
         }
         return null;
       }
     }).when(session).doWork(any(Work.class));
-
 
     markTestDone(); // reset
   }
