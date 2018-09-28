@@ -5,6 +5,12 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * Specialized version of class ElasticSearchPerson. Intentionally omits addresses for ES document
+ * validation.
+ * 
+ * @author CWDS API Team
+ */
 @JsonIgnoreProperties({"addresses"})
 public class NeutronElasticSearchPerson extends ElasticSearchPerson {
 

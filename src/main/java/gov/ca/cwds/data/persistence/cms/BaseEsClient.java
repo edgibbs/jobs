@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.sql.ResultSet;
@@ -23,7 +24,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 @MappedSuperclass
 public abstract class BaseEsClient
@@ -760,7 +760,7 @@ public abstract class BaseEsClient
   }
 
   public Date getCltBirthDate() {
-    return NeutronDateUtils.freshDate(cltBirthDate);
+    return freshDate(cltBirthDate);
   }
 
   public String getCltBirthFacilityName() {
@@ -804,11 +804,11 @@ public abstract class BaseEsClient
   }
 
   public Date getCltConfidentialityActionDate() {
-    return NeutronDateUtils.freshDate(cltConfidentialityActionDate);
+    return freshDate(cltConfidentialityActionDate);
   }
 
   public void setCltConfidentialityActionDate(Date cltConfidentialityActionDate) {
-    this.cltConfidentialityActionDate = NeutronDateUtils.freshDate(cltConfidentialityActionDate);
+    this.cltConfidentialityActionDate = freshDate(cltConfidentialityActionDate);
   }
 
   public String getCltConfidentialityInEffectIndicator() {
@@ -820,11 +820,11 @@ public abstract class BaseEsClient
   }
 
   public Date getCltCreationDate() {
-    return NeutronDateUtils.freshDate(cltCreationDate);
+    return freshDate(cltCreationDate);
   }
 
   public void setCltCreationDate(Date cltCreationDate) {
-    this.cltCreationDate = NeutronDateUtils.freshDate(cltCreationDate);
+    this.cltCreationDate = freshDate(cltCreationDate);
   }
 
   public String getCltCurrCaChildrenServIndicator() {
@@ -844,7 +844,7 @@ public abstract class BaseEsClient
   }
 
   public Date getCltDeathDate() {
-    return NeutronDateUtils.freshDate(cltDeathDate);
+    return freshDate(cltDeathDate);
   }
 
   public String getCltDeathDateVerifiedIndicator() {
@@ -956,7 +956,7 @@ public abstract class BaseEsClient
   }
 
   public Date getCltMotherParentalRightTermDate() {
-    return NeutronDateUtils.freshDate(cltMotherParentalRightTermDate);
+    return freshDate(cltMotherParentalRightTermDate);
   }
 
   public String getCltNamePrefixDescription() {
@@ -1117,11 +1117,11 @@ public abstract class BaseEsClient
   }
 
   public Date getCltReplicationDate() {
-    return NeutronDateUtils.freshDate(cltReplicationDate);
+    return freshDate(cltReplicationDate);
   }
 
   public void setCltReplicationDate(Date cltReplicationDate) {
-    this.cltReplicationDate = NeutronDateUtils.freshDate(cltReplicationDate);
+    this.cltReplicationDate = freshDate(cltReplicationDate);
   }
 
   public String getCltLastUpdatedId() {
@@ -1133,11 +1133,11 @@ public abstract class BaseEsClient
   }
 
   public Date getCltLastUpdatedTime() {
-    return NeutronDateUtils.freshDate(cltLastUpdatedTime);
+    return freshDate(cltLastUpdatedTime);
   }
 
   public void setCltLastUpdatedTime(Date cltLastUpdatedTime) {
-    this.cltLastUpdatedTime = NeutronDateUtils.freshDate(cltLastUpdatedTime);
+    this.cltLastUpdatedTime = freshDate(cltLastUpdatedTime);
   }
 
   public CmsReplicationOperation getClaReplicationOperation() {
@@ -1149,11 +1149,11 @@ public abstract class BaseEsClient
   }
 
   public Date getClaReplicationDate() {
-    return NeutronDateUtils.freshDate(claReplicationDate);
+    return freshDate(claReplicationDate);
   }
 
   public void setClaReplicationDate(Date claReplicationDate) {
-    this.claReplicationDate = NeutronDateUtils.freshDate(claReplicationDate);
+    this.claReplicationDate = freshDate(claReplicationDate);
   }
 
   public String getClaLastUpdatedId() {
@@ -1165,11 +1165,11 @@ public abstract class BaseEsClient
   }
 
   public Date getClaLastUpdatedTime() {
-    return NeutronDateUtils.freshDate(claLastUpdatedTime);
+    return freshDate(claLastUpdatedTime);
   }
 
   public void setClaLastUpdatedTime(Date claLastUpdatedTime) {
-    this.claLastUpdatedTime = NeutronDateUtils.freshDate(claLastUpdatedTime);
+    this.claLastUpdatedTime = freshDate(claLastUpdatedTime);
   }
 
   public String getClaFkAddress() {
@@ -1221,19 +1221,19 @@ public abstract class BaseEsClient
   }
 
   public Date getClaEffectiveEndDate() {
-    return NeutronDateUtils.freshDate(claEffectiveEndDate);
+    return freshDate(claEffectiveEndDate);
   }
 
   public void setClaEffectiveEndDate(Date date) {
-    this.claEffectiveEndDate = NeutronDateUtils.freshDate(date);
+    this.claEffectiveEndDate = freshDate(date);
   }
 
   public Date getClaEffectiveStartDate() {
-    return NeutronDateUtils.freshDate(claEffectiveStartDate);
+    return freshDate(claEffectiveStartDate);
   }
 
   public void setClaEffectiveStartDate(Date date) {
-    this.claEffectiveStartDate = NeutronDateUtils.freshDate(date);
+    this.claEffectiveStartDate = freshDate(date);
   }
 
   public String getAdrId() {
@@ -1393,15 +1393,15 @@ public abstract class BaseEsClient
   }
 
   public Date getAdrReplicationDate() {
-    return NeutronDateUtils.freshDate(adrReplicationDate);
+    return freshDate(adrReplicationDate);
   }
 
   public Date getLastChange() {
-    return NeutronDateUtils.freshDate(lastChange);
+    return freshDate(lastChange);
   }
 
   public void setLastChange(Date lastChange) {
-    this.lastChange = NeutronDateUtils.freshDate(lastChange);
+    this.lastChange = freshDate(lastChange);
   }
 
   public void setCltAdjudicatedDelinquentIndicator(String cltAdjudicatedDelinquentIndicator) {
@@ -1425,7 +1425,7 @@ public abstract class BaseEsClient
   }
 
   public void setCltBirthDate(Date cltBirthDate) {
-    this.cltBirthDate = NeutronDateUtils.freshDate(cltBirthDate);
+    this.cltBirthDate = freshDate(cltBirthDate);
   }
 
   public void setCltBirthFacilityName(String cltBirthFacilityName) {
@@ -1469,7 +1469,7 @@ public abstract class BaseEsClient
   }
 
   public void setCltDeathDate(Date cltDeathDate) {
-    this.cltDeathDate = NeutronDateUtils.freshDate(cltDeathDate);
+    this.cltDeathDate = freshDate(cltDeathDate);
   }
 
   public void setCltDeathDateVerifiedIndicator(String cltDeathDateVerifiedIndicator) {
@@ -1505,8 +1505,7 @@ public abstract class BaseEsClient
   }
 
   public void setCltFatherParentalRightTermDate(Date cltFatherParentalRightTermDate) {
-    this.cltFatherParentalRightTermDate =
-        NeutronDateUtils.freshDate(cltFatherParentalRightTermDate);
+    this.cltFatherParentalRightTermDate = freshDate(cltFatherParentalRightTermDate);
   }
 
   public void setCltGenderCode(String cltGenderCode) {
@@ -1547,8 +1546,7 @@ public abstract class BaseEsClient
   }
 
   public void setCltMotherParentalRightTermDate(Date cltMotherParentalRightTermDate) {
-    this.cltMotherParentalRightTermDate =
-        NeutronDateUtils.freshDate(cltMotherParentalRightTermDate);
+    this.cltMotherParentalRightTermDate = freshDate(cltMotherParentalRightTermDate);
   }
 
   public void setCltNamePrefixDescription(String cltNamePrefixDescription) {
@@ -1572,7 +1570,7 @@ public abstract class BaseEsClient
   }
 
   public void setAdrReplicationDate(Date adrReplicationDate) {
-    this.adrReplicationDate = NeutronDateUtils.freshDate(adrReplicationDate);
+    this.adrReplicationDate = freshDate(adrReplicationDate);
   }
 
   public void setAdrPrimaryExtension(Integer adrPrimaryExtension) {

@@ -34,7 +34,7 @@ public class NeutronThreadUtils {
   public static int calcReaderThreads(final FlightPlan flightPlan) {
     final int ret = flightPlan.getThreadCount() != 0L ? (int) flightPlan.getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-    LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
+    LOGGER.debug(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
     return ret;
   }
 
@@ -63,7 +63,7 @@ public class NeutronThreadUtils {
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      LOGGER.trace("Interrupted", e); // appease SonarQube
+      LOGGER.warn("Interrupted", e); // appease SonarQube
     }
   }
 
@@ -81,9 +81,9 @@ public class NeutronThreadUtils {
    * Log available memory, request garbage collection, then log memory again.
    */
   public static void freeMemory() {
-    LOGGER.info("Free memory, before gc: {} MB", calcMemory());
+    LOGGER.debug("Free memory, before gc: {} MB", calcMemory());
     System.gc();
-    LOGGER.info("Free memory, after  gc: {} MB", calcMemory());
+    LOGGER.debug("Free memory, after  gc: {} MB", calcMemory());
   }
 
 }

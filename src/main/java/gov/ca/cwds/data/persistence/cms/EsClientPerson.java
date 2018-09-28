@@ -42,10 +42,16 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
  * Entity bean for the People Summary index, CWS/CMS view VW_LST_CLIENT_ADDRESS.
  * 
  * <p>
+ * <strong>NOTE</strong>: view VW_LST_CLIENT_ADDRESS is no longer in use. See
+ * {@link ClientSQLResource}.
+ * </p>
+ * 
+ * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
  * </p>
  * 
  * @author CWDS API Team
+ * @see ClientSQLResource
  */
 @Entity
 @Table(name = "VW_LST_CLIENT_ADDRESS")
@@ -226,6 +232,8 @@ public class EsClientPerson extends BaseEsClient
     //
     ret.openCaseId = rs.getString("CAS_IDENTIFIER");
 
+    // Was necessary during quarterly CWS/CMS DDL update.
+    // Probably no longer needed.
     try {
       ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
     } catch (Exception e) {

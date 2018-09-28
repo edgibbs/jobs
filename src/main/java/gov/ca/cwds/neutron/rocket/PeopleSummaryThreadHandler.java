@@ -77,9 +77,10 @@ public class PeopleSummaryThreadHandler
     Object lastId = new Object();
     final List<EsClientPerson> grpRecs = new ArrayList<>();
     final FlightLog flightLog = getRocket().getFlightLog();
+    final ClientPersonIndexerJob rocket = getRocket();
 
     // NOTE: Assumes that records are sorted by group key.
-    while (!getRocket().isFailed() && rs.next() && (m = getRocket().extract(rs)) != null) {
+    while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
       CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
@@ -91,7 +92,7 @@ public class PeopleSummaryThreadHandler
     }
 
     flightLog.addToDenormalized(cntr);
-    LOGGER.info("Normalized count: {}, de-normalized count: {}", normalized.size(), cntr);
+    LOGGER.info("Counts: normalized: {}, de-normalized: {}", normalized.size(), cntr);
   }
 
   /**
@@ -110,7 +111,7 @@ public class PeopleSummaryThreadHandler
           rocket.getFlightPlan().getOverrideLastEndTime());
       LOGGER.info("SQL for Placement Address: \n{}", sqlPlacementAddress);
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREP PLACEMENT ADDRESS SQL! {}", e.getMessage(),
+      throw CheeseRay.runtime(LOGGER, e, "INVALID SQL FOR PLACEMENT ADDRESS! {}", e.getMessage(),
           e);
     }
 
@@ -144,7 +145,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
-    LOGGER.trace("handleJdbcDone: normalized.size(): {}\n", normalized.size());
+    LOGGER.debug("handleJdbcDone: normalized.size(): {}", normalized.size());
 
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
@@ -183,7 +184,7 @@ public class PeopleSummaryThreadHandler
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
     this.deletionResults = deletionResults;
-    LOGGER.info("After view: count: {}", normalized.size());
+    LOGGER.info("After last run fetch: count: {}", normalized.size());
 
     // Handle additional JDBC statements, if any.
     try (final Session session = getRocket().getJobDao().grabSession();

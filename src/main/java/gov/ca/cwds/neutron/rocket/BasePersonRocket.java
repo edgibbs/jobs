@@ -820,7 +820,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
           NeutronDateUtils.makeTimestampStringLookBack(lastRunTime), StringType.INSTANCE);
 
       // Iterate, process, flush.
-      List<D> recs = new ArrayList<>(210000); // Outrageous but necessary.
+      List<D> recs = new ArrayList<>();
       try {
         recs = q.list();
         LOGGER.info("FOUND {} RECORDS", recs.size());

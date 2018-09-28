@@ -90,11 +90,12 @@ public final class ElasticTransformer {
       ret = mapper.writeValueAsString(obj);
     } catch (Exception e) { // NOSONAR
       // HACK: shouldn't swallow the exception, but don't blow up a whole batch for one bad record.
-      // Functional lambda doesn't like checked exceptions, but runtime exceptions.
+      // Functional lambda doesn't allow checked exceptions, only runtime exceptions.
       // But then SonarQube complains about switching from checked to runtime.
       // Damned if you do, damned if you don't.
       LOGGER.warn("ERROR SERIALIZING OBJECT {} TO JSON", obj);
     }
+
     return ret;
   }
 
@@ -106,7 +107,7 @@ public final class ElasticTransformer {
 
   protected static String determineId(final ApiLegacyAware l, final ElasticSearchPerson esp) {
     String id;
-    final String legacyId = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId().trim() : "";
+    final String legacyId = StringUtils.trimToEmpty(l.getLegacyId());
     final boolean hasLegacyId = legacyId.length() == CMS_ID_LEN;
 
     if (hasLegacyId) {
@@ -154,7 +155,7 @@ public final class ElasticTransformer {
 
     // Set id and legacy id.
     if (t instanceof ApiLegacyAware) {
-      ApiLegacyAware l = (ApiLegacyAware) t;
+      final ApiLegacyAware l = (ApiLegacyAware) t;
       final String tempId = StringUtils.isNotBlank(l.getLegacyId()) ? l.getLegacyId().trim() : null;
       final boolean hasLegacyId = tempId != null && tempId.length() == CMS_ID_LEN;
 
@@ -210,7 +211,7 @@ public final class ElasticTransformer {
 
     String updateJson;
     if (StringUtils.isNotBlank(elementName)) {
-      StringBuilder buf = new StringBuilder();
+      final StringBuilder buf = new StringBuilder();
       buf.append("{\"").append(elementName).append("\":[");
 
       if (list != null && !list.isEmpty()) {
@@ -261,6 +262,7 @@ public final class ElasticTransformer {
   public static ElasticSearchPerson[] buildElasticSearchPersons(final PersistentObject p)
       throws JsonProcessingException {
     ElasticSearchPerson[] ret;
+
     if (p instanceof ApiMultiplePersonAware) {
       final ApiPersonAware[] persons = ((ApiMultiplePersonAware) p).getPersons();
       ret = new ElasticSearchPerson[persons.length];
@@ -271,6 +273,7 @@ public final class ElasticTransformer {
     } else {
       ret = new ElasticSearchPerson[] {buildElasticSearchPerson((ApiPersonAware) p)};
     }
+
     return ret;
   }
 
@@ -304,7 +307,7 @@ public final class ElasticTransformer {
     final ElasticSearchLegacyDescriptor ret = new ElasticSearchLegacyDescriptor();
 
     if (!StringUtils.isBlank(legacyId)) {
-      final String cleanLegacyId = legacyId.trim(); // Yes, actually trim a fix CHAR(10) PK.
+      final String cleanLegacyId = legacyId.trim(); // data errors in CHAR(10) keys.
       ret.setLegacyId(cleanLegacyId);
       ret.setLegacyLastUpdated(DomainChef.cookStrictTimestamp(legacyLastUpdated));
 
@@ -327,21 +330,19 @@ public final class ElasticTransformer {
     List<ElasticSearchPersonLanguage> ret = null;
 
     if (p instanceof ApiMultipleLanguagesAware) {
-      ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
+      final ApiMultipleLanguagesAware mlx = (ApiMultipleLanguagesAware) p;
       ret = new ArrayList<>(mlx.getLanguages().length);
       for (ApiLanguageAware lx : mlx.getLanguages()) {
-        Integer languageId = lx.getLanguageSysId();
-        ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
-            SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
-        ret.add(lang);
+        final Integer languageId = lx.getLanguageSysId();
+        ret.add(new ElasticSearchPersonLanguage(languageId.toString(),
+            SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary()));
       }
     } else if (p instanceof ApiLanguageAware) {
       ret = new ArrayList<>();
-      ApiLanguageAware lx = (ApiLanguageAware) p;
-      Integer languageId = lx.getLanguageSysId();
-      ElasticSearchPersonLanguage lang = new ElasticSearchPersonLanguage(languageId.toString(),
-          SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary());
-      ret.add(lang);
+      final ApiLanguageAware lx = (ApiLanguageAware) p;
+      final Integer languageId = lx.getLanguageSysId();
+      ret.add(new ElasticSearchPersonLanguage(languageId.toString(),
+          SystemCodeCache.global().getSystemCodeShortDescription(languageId), lx.getPrimary()));
     }
 
     return ret;
@@ -350,16 +351,15 @@ public final class ElasticTransformer {
   protected static List<ElasticSearchPersonPhone> buildPhone(ApiPersonAware p) {
     List<ElasticSearchPersonPhone> ret = null;
     if (p instanceof ApiMultiplePhonesAware) {
-      Map<String, ElasticSearchPersonPhone> uniquePhones = new HashMap<>();
-      ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;
+      final Map<String, ElasticSearchPersonPhone> uniquePhones = new HashMap<>();
+      final ApiMultiplePhonesAware mphx = (ApiMultiplePhonesAware) p;
       for (ApiPhoneAware phx : mphx.getPhones()) {
         uniquePhones.putIfAbsent(phx.getPhoneNumber(), new ElasticSearchPersonPhone(phx));
       }
       ret = new ArrayList<>(uniquePhones.values());
     } else if (p instanceof ApiPhoneAware) {
       ret = new ArrayList<>();
-      ApiPhoneAware phx = (ApiPhoneAware) p;
-      ret.add(new ElasticSearchPersonPhone(phx));
+      ret.add(new ElasticSearchPersonPhone((ApiPhoneAware) p));
     }
 
     return ret;
@@ -372,7 +372,8 @@ public final class ElasticTransformer {
       ret = ((ApiMultipleClientAddressAware) p).getElasticSearchPersonAddresses();
     } else if (p instanceof ApiAddressAware) {
       ret = new ArrayList<>();
-      ElasticSearchPersonAddress esAddress = new ElasticSearchPersonAddress((ApiAddressAware) p);
+      final ElasticSearchPersonAddress esAddress =
+          new ElasticSearchPersonAddress((ApiAddressAware) p);
       if (p instanceof ApiLegacyAware) {
         esAddress.setLegacyDescriptor(((ApiLegacyAware) p).getLegacyDescriptor());
       }
@@ -405,7 +406,7 @@ public final class ElasticTransformer {
   protected static ElasticSearchRaceAndEthnicity buildRaceEthnicity(ApiPersonAware p) {
     ElasticSearchRaceAndEthnicity ret = null;
     if (p instanceof ApiClientRaceAndEthnicityAware) {
-      ApiClientRaceAndEthnicityAware raceAware = (ApiClientRaceAndEthnicityAware) p;
+      final ApiClientRaceAndEthnicityAware raceAware = (ApiClientRaceAndEthnicityAware) p;
       ret = raceAware.getRaceAndEthnicity();
     }
     return ret;
@@ -413,7 +414,6 @@ public final class ElasticTransformer {
 
   protected static List<ElasticSearchSystemCode> buildClientCounties(ApiPersonAware p) {
     List<ElasticSearchSystemCode> ret = new ArrayList<>();
-
     if (p instanceof ApiClientCountyAware) {
       final ApiClientCountyAware countyAware = (ApiClientCountyAware) p;
       ret = countyAware.getClientCounties();
@@ -424,7 +424,7 @@ public final class ElasticTransformer {
   protected static List<ElasticSearchSafetyAlert> buildSafetyAlerts(ApiPersonAware p) {
     List<ElasticSearchSafetyAlert> ret = null;
     if (p instanceof ApiClientSafetyAlertsAware) {
-      ApiClientSafetyAlertsAware alertsAware = (ApiClientSafetyAlertsAware) p;
+      final ApiClientSafetyAlertsAware alertsAware = (ApiClientSafetyAlertsAware) p;
       final List<ElasticSearchSafetyAlert> safetyAlerts = alertsAware.getClientSafetyAlerts();
       if (safetyAlerts != null && !safetyAlerts.isEmpty()) {
         ret = safetyAlerts;
@@ -436,7 +436,7 @@ public final class ElasticTransformer {
   protected static List<ElasticSearchPersonAka> buildAkas(ApiPersonAware p) {
     List<ElasticSearchPersonAka> ret = null;
     if (p instanceof ApiOtherClientNamesAware) {
-      ApiOtherClientNamesAware akasAware = (ApiOtherClientNamesAware) p;
+      final ApiOtherClientNamesAware akasAware = (ApiOtherClientNamesAware) p;
       final List<ElasticSearchPersonAka> clientAkas = akasAware.getOtherClientNames();
       if (clientAkas != null && !clientAkas.isEmpty()) {
         ret = clientAkas;
@@ -460,7 +460,7 @@ public final class ElasticTransformer {
   protected static String buildOpenCaseId(ApiPersonAware p) {
     String ret = null;
     if (p instanceof ApiClientCaseAware) {
-      ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
+      final ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
       ret = caseAware.getOpenCaseId();
     }
     return ret;
@@ -469,7 +469,7 @@ public final class ElasticTransformer {
   protected static String buildOpenCaseResponsibleAgencyCode(ApiPersonAware p) {
     String ret = null;
     if (p instanceof ApiClientCaseAware) {
-      ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
+      final ApiClientCaseAware caseAware = (ApiClientCaseAware) p;
       ret = caseAware.getOpenCaseResponsibleAgencyCode();
     }
     return ret;
@@ -526,7 +526,7 @@ public final class ElasticTransformer {
     ret.setSensitivityIndicator(p.getSensitivityIndicator());
 
     // Set client counties
-    List<ElasticSearchSystemCode> clientCounties = buildClientCounties(p);
+    final List<ElasticSearchSystemCode> clientCounties = buildClientCounties(p);
     ret.setClientCounties(clientCounties);
     // this is only added for backward compatibility
     if (!clientCounties.isEmpty()) {

@@ -14,7 +14,7 @@ import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
 /**
- * Date and timestamp utilities, mainly for DB2.
+ * Date and timestamp utilities, mainly for DB2 and last change mode.
  * 
  * @author CWDS API Team
  */
@@ -24,6 +24,12 @@ public class NeutronDateUtils {
     // no-op
   }
 
+  /**
+   * Appease SonarQube's concern about "OMG! This gives away your implementation!"
+   * 
+   * @param incoming date to clone
+   * @return fresh new Date -- to shut SonarQube up
+   */
   public static Date freshDate(Date incoming) {
     return incoming != null ? new Date(incoming.getTime()) : null;
   }
@@ -36,7 +42,7 @@ public class NeutronDateUtils {
   }
 
   public static Date uncookTimestampString(String timestamp) {
-    String trimTimestamp = StringUtils.trim(timestamp);
+    final String trimTimestamp = StringUtils.trim(timestamp);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
       try {
         return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).parse(trimTimestamp);

@@ -1,6 +1,5 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
-import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -24,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -39,6 +40,7 @@ import gov.ca.cwds.dao.ApiOtherClientNamesAware;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
@@ -90,14 +92,21 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
         + "z.MTERM_DT, z.FTERM_DT, z.ZIPPY_IND, TRIM(z.DEATH_PLC) DEATH_PLC, "
         + "z.TR_MBVRT_B, z.TRBA_CLT_B, z.SOC158_IND, z.DTH_DT_IND, "
         + "TRIM(z.EMAIL_ADDR) EMAIL_ADDR, z.ADJDEL_IND, z.ETH_UD_CD, "
-        + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, " + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
-        + "from {h-schema}CLIENT_T z \n" + "WHERE z.IBMSNAP_LOGMARKER >= :after \n"
+        + "z.HISP_UD_CD, z.SOCPLC_CD, z.CL_INDX_NO, " 
+        + "z.IBMSNAP_OPERATION, z.IBMSNAP_LOGMARKER "
+        + "FROM {h-schema}CLIENT_T z \n" 
+        + "WHERE z.IBMSNAP_LOGMARKER >= :after \n"
         + "FOR READ ONLY WITH UR",
     resultClass = ReplicatedClient.class)
 @NamedNativeQuery(name = "gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient.findByTemp",
-    query = "SELECT \n" + "    c.IDENTIFIER \n" + "  , TRIM(c.COM_FST_NM) AS COM_FST_NM \n"
-        + "  , TRIM(c.COM_LST_NM) AS COM_LST_NM \n" + "  , c.SENSTV_IND \n" + "  , c.LST_UPD_TS \n"
-        + "  , c.IBMSNAP_LOGMARKER \n" + "  , c.IBMSNAP_OPERATION \n"
+    query = "SELECT \n" 
+        + "    c.IDENTIFIER \n" 
+        + "  , TRIM(c.COM_FST_NM) AS COM_FST_NM \n"
+        + "  , TRIM(c.COM_LST_NM) AS COM_LST_NM \n" 
+        + "  , c.SENSTV_IND \n" 
+        + "  , c.LST_UPD_TS \n"
+        + "  , c.IBMSNAP_LOGMARKER \n" 
+        + "  , c.IBMSNAP_OPERATION \n"
         + " FROM {h-schema}GT_ID GT \n"
         + " JOIN {h-schema}CLIENT_T C ON C.IDENTIFIER = GT.IDENTIFIER \n"
         + " FOR READ ONLY WITH UR ",
@@ -111,6 +120,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     ApiMultipleLanguagesAware, ApiMultipleClientAddressAware, ApiMultiplePhonesAware,
     CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware,
     ApiClientSafetyAlertsAware, ApiOtherClientNamesAware, ApiClientCaseAware {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReplicatedClient.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -332,13 +343,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
 
+    LOGGER.trace("counts: client addresses: {}, sorted addresses: {}", clientAddresses.size(),
+        sortedClientAddresses.size());
+
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
 
       if (addressActive) {
-        final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
-
         // Choose appropriate system code type for index target index.
         final ElasticSearchSystemCode addressType = makeJsonAddressType();
         final SystemCode addressTypeSystemCode =
@@ -363,7 +375,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           esAddress.setStreetName(repAddress.getStreetName());
           esAddress.setStreetNumber(repAddress.getStreetNumber());
           esAddress.setUnitNumber(repAddress.getApiAdrUnitNumber());
-          esAddress.setEffectiveStartDate(effectiveStartDate);
+          esAddress.setEffectiveStartDate(DomainChef.cookDate(repClientAddress.getEffStartDt()));
           esAddress.setEffectiveEndDate(effectiveEndDate);
           esAddress.setType(addressType);
           esAddress.setActive("true"); // String, not a boolean?
@@ -390,10 +402,11 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
             countyCode.setId(countySysCode.getSystemId().toString());
           }
 
-          if (repAddress.getApiAdrUnitType() != null
-              && repAddress.getApiAdrUnitType().intValue() != 0) {
+          final Short unitType = repAddress.getApiAdrUnitType();
+          if (unitType != null
+              && unitType.intValue() != 0) {
             esAddress.setUnitType(SystemCodeCache.global()
-                .getSystemCodeShortDescription(repAddress.getApiAdrUnitType()));
+                .getSystemCodeShortDescription(unitType));
           }
 
           // SNAP-46: last known phone numbers.
@@ -402,12 +415,13 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
       }
     }
 
-    List<ElasticSearchPersonAddress> sortedAddresses = new ArrayList<>(esClientAddresses.values());
+    final List<ElasticSearchPersonAddress> sortedAddresses =
+        new ArrayList<>(esClientAddresses.values());
     if (!sortedAddresses.isEmpty()) {
       sortedAddresses.get(0).setLastKnown("true");
     }
-    return sortedAddresses;
 
+    return sortedAddresses;
   }
 
   // ============================

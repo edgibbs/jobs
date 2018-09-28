@@ -99,14 +99,24 @@ public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemC
 
   @Override
   public String getSystemCodeShortDescription(Number key) {
-    final SystemCode code = mapCodeByKey.get(key.shortValue());
-    return code != null ? code.getShortDescription() : null;
+    String ret = null;
+    if (key != null && key.intValue() != 0) {
+      final SystemCode code = mapCodeByKey.get(key.shortValue());
+      ret = code != null ? code.getShortDescription() : null;
+    }
+
+    return ret;
   }
 
   @Override
   public SystemCodeDescriptor getSystemCodeDescriptor(Number key) {
-    final SystemCode code = mapCodeByKey.get(key.shortValue());
-    return code != null ? code.getSystemCodeDescriptor() : null;
+    SystemCodeDescriptor ret = null;
+    if (key != null && key.intValue() != 0) {
+      final SystemCode code = mapCodeByKey.get(key.shortValue());
+      ret = code != null ? code.getSystemCodeDescriptor() : null;
+    }
+
+    return ret;
   }
 
   @Override
