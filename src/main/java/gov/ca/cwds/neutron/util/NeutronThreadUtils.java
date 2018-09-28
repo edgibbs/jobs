@@ -34,7 +34,7 @@ public class NeutronThreadUtils {
   public static int calcReaderThreads(final FlightPlan flightPlan) {
     final int ret = flightPlan.getThreadCount() != 0L ? (int) flightPlan.getThreadCount()
         : Math.max(Runtime.getRuntime().availableProcessors() - 4, 4);
-    LOGGER.info(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
+    LOGGER.debug(">>>>>>>> # OF READER THREADS: {} <<<<<<<<", ret);
     return ret;
   }
 
@@ -63,7 +63,7 @@ public class NeutronThreadUtils {
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      LOGGER.trace("Interrupted", e); // appease SonarQube
+      LOGGER.warn("Interrupted", e); // appease SonarQube
     }
   }
 

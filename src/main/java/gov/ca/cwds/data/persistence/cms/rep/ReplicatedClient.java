@@ -325,15 +325,14 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);
 
-    LOGGER.trace("sortedClientAddresses count: " + sortedClientAddresses.size());
+    LOGGER.trace("counts: client addresses: {}, sorted addresses: {}", clientAddresses.size(),
+        sortedClientAddresses.size());
 
     for (ReplicatedClientAddress repClientAddress : sortedClientAddresses) {
       final String effectiveEndDate = DomainChef.cookDate(repClientAddress.getEffEndDt());
       final boolean addressActive = StringUtils.isBlank(effectiveEndDate);
 
       if (addressActive) {
-        final String effectiveStartDate = DomainChef.cookDate(repClientAddress.getEffStartDt());
-
         // Choose appropriate system code type for index target index.
         final ElasticSearchSystemCode addressType = makeJsonAddressType();
         final SystemCode addressTypeSystemCode =
@@ -358,7 +357,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           esAddress.setStreetName(repAddress.getStreetName());
           esAddress.setStreetNumber(repAddress.getStreetNumber());
           esAddress.setUnitNumber(repAddress.getApiAdrUnitNumber());
-          esAddress.setEffectiveStartDate(effectiveStartDate);
+          esAddress.setEffectiveStartDate(DomainChef.cookDate(repClientAddress.getEffStartDt()));
           esAddress.setEffectiveEndDate(effectiveEndDate);
           esAddress.setType(addressType);
           esAddress.setActive("true"); // String, not a boolean?

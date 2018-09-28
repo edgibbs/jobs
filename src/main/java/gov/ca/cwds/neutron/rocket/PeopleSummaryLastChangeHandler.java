@@ -87,7 +87,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
    * @param session active Hibernate session
    */
   protected void clearSession(final Session session) {
-    LOGGER.info("Flush and clear session");
+    LOGGER.trace("Flush and clear session");
     session.clear();
     session.flush();
   }
@@ -110,7 +110,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         ? entityClass.getName() + ".findAllUpdatedAfter"
         : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
-    LOGGER.info("query name: {}", queryName);
+    LOGGER.debug("query name: {}", queryName);
     handleStartRange(range);
 
     Transaction txn = null;
@@ -234,16 +234,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       groupRecs.clear();
       recs = null; // release memory
       NeutronThreadUtils.freeMemory();
-      LOGGER.info("NORMALIZATION DONE, scan for limited access");
+      LOGGER.debug("NORMALIZATION DONE, scan for limited access");
 
       // ---------------------------
       // CHECK LIMITED ACCESS
       // ---------------------------
 
       try (final Session session = rocket.getJobDao().grabSession()) {
-        LOGGER.info("Grabbed session");
         txn = rocket.grabTransaction();
-        LOGGER.info("Grabbed transaction");
 
         if (rocket.mustDeleteLimitedAccessRecords()) {
           LOGGER.info("OMIT LIMITED ACCESS RECORDS: count: {}", deletionResults.size());
