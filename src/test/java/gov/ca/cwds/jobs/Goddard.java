@@ -404,7 +404,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
-        lock.unlock();
+        lock.unlock(); // unlock no matter what happens
       }
     });
 
@@ -413,7 +413,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target) {
-    return runKillThread(target, 1800L);
+    return runKillThread(target, 1900L);
   }
 
   public void markTestDone() {
