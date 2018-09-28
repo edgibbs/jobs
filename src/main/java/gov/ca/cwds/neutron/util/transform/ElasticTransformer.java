@@ -260,6 +260,7 @@ public final class ElasticTransformer {
   public static ElasticSearchPerson[] buildElasticSearchPersons(final PersistentObject p)
       throws JsonProcessingException {
     ElasticSearchPerson[] ret;
+
     if (p instanceof ApiMultiplePersonAware) {
       final ApiPersonAware[] persons = ((ApiMultiplePersonAware) p).getPersons();
       ret = new ElasticSearchPerson[persons.length];
@@ -270,6 +271,7 @@ public final class ElasticTransformer {
     } else {
       ret = new ElasticSearchPerson[] {buildElasticSearchPerson((ApiPersonAware) p)};
     }
+
     return ret;
   }
 
