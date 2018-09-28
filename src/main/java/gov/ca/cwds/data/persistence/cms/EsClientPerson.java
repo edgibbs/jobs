@@ -610,14 +610,6 @@ public class EsClientPerson extends BaseEsClient
   private ElasticSearchPersonCsec createCsec() {
 
     ElasticSearchPersonCsec csec = new ElasticSearchPersonCsec();
-//    csec.setId(this.akaId);
-//
-//    if (this.akaNameType != null && this.akaNameType.intValue() != 0) {
-//      csec.setNameType(SystemCodeCache.global().getSystemCodeShortDescription(this.akaNameType));
-//    }
-//
-//    csec.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.akaId,
-//        this.akaLastUpdatedTimestamp, LegacyTable.ALIAS_OR_OTHER_CLIENT_NAME));
       //TODO: Make it real remove the stab
       csec.setCsecCodeId("6870");
       csec.setCsecDesc("Victim in Open Case not in Foster Care  ");
