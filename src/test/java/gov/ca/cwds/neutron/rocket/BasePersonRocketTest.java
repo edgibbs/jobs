@@ -899,13 +899,14 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     final ElasticSearchPerson esp = new ElasticSearchPerson();
     esp.setId(DEFAULT_CLIENT_ID);
 
+
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
     final DocWriteRequest request = target.prepareUpsertRequestNoChecked(esp, t);
 
     final String actual =
         ((UpdateRequest) request).upsertRequest().toString().replaceAll("\\s+", "");
     final String expected =
-        "index{[null][person][abc1234567],source[{\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"id\":\"abc1234567\"}]}";
+        "index{[null][person][abc1234567],source[{\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"csec\":[],\"id\":\"abc1234567\"}]}";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -919,7 +920,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
     final String actual = request.upsertRequest().toString().replaceAll("\\s+", "");
     final String expected =
-        "index{[null][person][abc1234567],source[{\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"id\":\"abc1234567\"}]}";
+        "index{[null][person][abc1234567],source[{\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"csec\":[],\"id\":\"abc1234567\"}]}";
     assertThat(actual, is(equalTo(expected)));
   }
 
