@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.launch;
 
-import java.util.List;
 import java.util.TimerTask;
 
 import org.quartz.JobExecutionContext;
@@ -46,30 +45,33 @@ public class ZombieKillerTimerTask extends TimerTask {
 
   protected void abortRunningJob(JobExecutionContext ctx) {
     final NeutronRocket job = (NeutronRocket) ctx.getJobInstance();
-    final FlightLog flightLog = job.getRocket().getFlightLog();
     final BasePersonRocket<?, ?> rocket = job.getRocket();
     final FlightPlan flightPlan = rocket.getFlightPlan();
     final Class<?> klass = rocket.getClass();
 
-    if ((flightPlan.isLastRunMode() && (flightLog.isRunning() && ctx.getJobRunTime() > timeToAbort))
+    final FlightLog flightLog = job.getRocket().getFlightLog();
+    final long elapsed = System.currentTimeMillis() - flightLog.getStartTime();
+
+    LOGGER.info("Keep flying. rocket: {}, elapsed millis: {}, failed: {}", klass, elapsed,
+        flightLog.isFailed());
+    if ((flightPlan.isLastRunMode() && (flightLog.isRunning() && elapsed > timeToAbort))
         || flightLog.isFailed()) {
       try {
-        LOGGER.warn("ABORT ROCKET! rocket: {}", klass);
+        LOGGER.warn("ABORT FLIGHT! rocket: {}, elapsed millis: {}, failed: {}", klass, elapsed,
+            flightLog.isFailed());
         scheduler.interrupt(ctx.getJobDetail().getKey());
+        LOGGER.warn("FLIGHT ABORTED! rocket: {}", klass);
       } catch (SchedulerException e) {
         LOGGER.error("FAILED TO ABORT! {} : {}", klass, e.getMessage(), e);
       }
-    } else {
-      LOGGER.info("Keep flying. rocket: {}", klass);
     }
   }
 
   @Override
   public void run() {
     try {
-      LOGGER.info("Run zombie killer!");
-      final List<JobExecutionContext> currentlyExecuting = scheduler.getCurrentlyExecutingJobs();
-      currentlyExecuting.stream().sequential().forEach(this::abortRunningJob);
+      LOGGER.info("Start zombie killer!");
+      scheduler.getCurrentlyExecutingJobs().stream().sequential().forEach(this::abortRunningJob);
     } catch (SchedulerException e) {
       LOGGER.warn("SCHEDULER ERROR! {}", e.getMessage(), e);
     }

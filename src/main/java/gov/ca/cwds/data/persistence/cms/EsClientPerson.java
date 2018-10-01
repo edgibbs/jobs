@@ -39,10 +39,16 @@ import org.hibernate.annotations.Type;
  * Entity bean for the People Summary index, CWS/CMS view VW_LST_CLIENT_ADDRESS.
  * 
  * <p>
+ * <strong>NOTE</strong>: view VW_LST_CLIENT_ADDRESS is no longer in use. See
+ * {@link ClientSQLResource}.
+ * </p>
+ *
+ * <p>
  * Implements {@link ApiGroupNormalizer} and converts to {@link ReplicatedClient}.
  * </p>
  * 
  * @author CWDS API Team
+ * @see ClientSQLResource
  */
 @Entity
 @Table(name = "VW_LST_CLIENT_ADDRESS")

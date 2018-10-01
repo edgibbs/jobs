@@ -262,10 +262,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public boolean validateDocument(final ElasticSearchPerson person) throws NeutronCheckedException {
     boolean ret = true;
+
     if (flightPlan.isValidateAfterIndexing()) {
       try {
         final String clientId = person.getId();
-        LOGGER.info("Validate client: {}", clientId);
+        LOGGER.debug("Validate client: {}", clientId);
 
         // HACK: Initialize transaction. Fix DAO impl instead.
         grabTransaction();

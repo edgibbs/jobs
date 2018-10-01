@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -23,7 +24,9 @@ import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 public class FlightSummaryTest {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(FlightSummaryTest.class);
+
   FlightSummary target;
 
   @Before
@@ -361,7 +364,7 @@ public class FlightSummaryTest {
   public void getFirstStart_A$() throws Exception {
     Date actual = target.getFirstStart();
     Date expected = new Date();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(lessThanOrEqualTo(expected)));
   }
 
   @Test

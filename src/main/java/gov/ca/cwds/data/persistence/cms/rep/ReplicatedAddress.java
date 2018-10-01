@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.rep;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -11,12 +13,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.persistence.cms.BaseAddress;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 
 /**
- * {@link CmsPersistentObject} representing an Address in the replicated schema.
+ * {@link CmsPersistentObject} that represents an Address in the replicated schema.
  * 
  * @author CWDS API Team
  */
@@ -56,7 +57,7 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
 
   @Override
   public Date getReplicationDate() {
-    return NeutronDateUtils.freshDate(replicatedEntity.getReplicationDate());
+    return freshDate(replicatedEntity.getReplicationDate());
   }
 
   @Override
@@ -66,7 +67,7 @@ public class ReplicatedAddress extends BaseAddress implements CmsReplicatedEntit
 
   @Override
   public void setReplicationDate(Date replicationDate) {
-    this.replicatedEntity.setReplicationDate(NeutronDateUtils.freshDate(replicationDate));
+    this.replicatedEntity.setReplicationDate(freshDate(replicationDate));
   }
 
 }

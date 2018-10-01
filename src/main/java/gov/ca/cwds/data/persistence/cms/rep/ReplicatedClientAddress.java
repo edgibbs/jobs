@@ -37,7 +37,7 @@ public class ReplicatedClientAddress extends BaseClientAddress implements CmsRep
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "IDENTIFIER", referencedColumnName = "FKADDRS_T", insertable = false,
       updatable = false, unique = false)
-  private Set<ReplicatedAddress> addresses = new LinkedHashSet<>();
+  private Set<ReplicatedAddress> addresses = new LinkedHashSet<>(); // unique, sorted
 
   private EmbeddableCmsReplicatedEntity replicatedEntity = new EmbeddableCmsReplicatedEntity();
 

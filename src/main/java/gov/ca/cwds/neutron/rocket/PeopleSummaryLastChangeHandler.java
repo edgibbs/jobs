@@ -87,7 +87,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
    * @param session active Hibernate session
    */
   protected void clearSession(final Session session) {
-    LOGGER.info("Flush and clear session");
+    LOGGER.trace("Flush and clear session");
     session.clear();
     session.flush();
   }
@@ -110,7 +110,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         ? entityClass.getName() + ".findAllUpdatedAfter"
         : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
 
-    LOGGER.info("query name: {}", queryName);
+    LOGGER.debug("query name: {}", queryName);
     handleStartRange(range);
 
     Transaction txn = null;
@@ -177,8 +177,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
         } catch (Exception e) {
           rocket.fail();
-          throw CheeseRay.runtime(LOGGER, e,
-              "PeopleSummaryLastChangeHandler.handleSecondaryJdbc: INNER EXTRACT ERROR!: {}",
+          throw CheeseRay.runtime(LOGGER, e, "handleSecondaryJdbc: INNER EXTRACT ERROR!: {}",
               e.getMessage());
         } finally {
           // leave it
@@ -234,16 +233,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       groupRecs.clear();
       recs = null; // release memory
       NeutronThreadUtils.freeMemory();
-      LOGGER.info("NORMALIZATION DONE, scan for limited access");
+      LOGGER.debug("NORMALIZATION DONE, scan for limited access");
 
       // ---------------------------
       // CHECK LIMITED ACCESS
       // ---------------------------
 
       try (final Session session = rocket.getJobDao().grabSession()) {
-        LOGGER.info("Grabbed session");
         txn = rocket.grabTransaction();
-        LOGGER.info("Grabbed transaction");
 
         if (rocket.mustDeleteLimitedAccessRecords()) {
           LOGGER.info("OMIT LIMITED ACCESS RECORDS: count: {}", deletionResults.size());
@@ -272,7 +269,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // INDEX DOCUMENTS
       // ---------------------------
 
-      LOGGER.info("START INDEXER THREAD");
+      LOGGER.debug("START INDEXER THREAD");
       for (Thread t : threads) {
         t.start();
       }
@@ -282,17 +279,16 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       doneThreadRetrieve();
       rocket.doneRetrieve();
 
-      // free memory
+      // free memory:
       this.placementHomeAddresses.clear();
       this.normalized.clear();
       NeutronThreadUtils.freeMemory();
 
       LOGGER.info("Retrieval done, waiting on indexing");
       for (Thread t : threads) {
-        LOGGER.info("Wait for indexer thread");
-        t.join(120000); // safety, two minutes tops
+        LOGGER.debug("Wait for indexer thread");
+        t.join(600000); // safety: 10 minutes max
       }
-
     } catch (Exception e) {
       rocket.fail();
       Thread.currentThread().interrupt();
@@ -301,7 +297,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       rocket.doneRetrieve();
     }
 
-    LOGGER.info("PeopleSummaryLastChangeHandler.handleSecondaryJdbc: DONE");
+    LOGGER.info("handleSecondaryJdbc: DONE");
   }
 
 }

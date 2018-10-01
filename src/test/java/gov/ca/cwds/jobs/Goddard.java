@@ -382,12 +382,11 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         try {
           w.execute(con);
         } catch (SQLException e) {
-          // eat it
+          // Swallow it, but don't throw "up".
         }
         return null;
       }
     }).when(session).doWork(any(Work.class));
-
 
     markTestDone(); // reset
   }
@@ -404,7 +403,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
       } catch (Exception e) {
         e.printStackTrace();
       } finally {
-        lock.unlock();
+        lock.unlock(); // unlock no matter what happens
       }
     });
 
@@ -413,7 +412,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target) {
-    return runKillThread(target, 1400L);
+    return runKillThread(target, 1900L);
   }
 
   public void markTestDone() {
