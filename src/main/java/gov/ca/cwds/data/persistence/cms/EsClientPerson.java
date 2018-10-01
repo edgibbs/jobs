@@ -1,29 +1,8 @@
 package gov.ca.cwds.data.persistence.cms;
 
-import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
-import java.io.Serializable;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Map;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.FlushModeType;
-import org.hibernate.annotations.NamedNativeQuery;
-import org.hibernate.annotations.Type;
-
 import gov.ca.cwds.common.NameSuffixTranslator;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
@@ -37,6 +16,24 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Map;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.FlushModeType;
+import org.hibernate.annotations.NamedNativeQuery;
+import org.hibernate.annotations.Type;
 
 /**
  * Entity bean for the People Summary index, CWS/CMS view VW_LST_CLIENT_ADDRESS.
@@ -177,6 +174,40 @@ public class EsClientPerson extends BaseEsClient
   @Column(name = "CAS_RSP_AGY_CD")
   private String openCaseResponsibleAgencyCode;
 
+  // ====================================
+  // CSECHIST: (CSEC history)
+  // =====================================
+
+  @Column(name = "CSH_THIRD_ID")
+  private String csecId;
+
+  @Column(name = "CSH_CSEC_TPC")
+  @Type(type = "short")
+  private Short csecCodeId;
+
+  @Column(name = "CSH_START_DT")
+  @Type(type = "date")
+  private Date csecStartDate;
+
+  @Column(name = "CSH_END_DT")
+  @Type(type = "date")
+  private Date csecEndDate;
+
+  @Column(name = "CSH_LST_UPD_ID")
+  private String csecLastUpdatedId;
+
+  @Column(name = "CSH_LST_UPD_TS")
+  @Type(type = "timestamp")
+  private Date csecLastUpdatedTimestamp;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "CSH_IBMSNAP_OPERATION", updatable = false)
+  private CmsReplicationOperation csecLastUpdatedOperation;
+
+  @Column(name = "CSH_IBMSNAP_LOGMARKER")
+  @Type(type = "timestamp")
+  private Date csecReplicationTimestamp;
+
   /**
    * Build an EsClient from the incoming ResultSet.
    * 
@@ -225,12 +256,20 @@ public class EsClientPerson extends BaseEsClient
     // is there an open case? (get its id)
     //
     ret.openCaseId = rs.getString("CAS_IDENTIFIER");
+    ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
 
-    try {
-      ret.openCaseResponsibleAgencyCode = rs.getString("CAS_RSP_AGY_CD");
-    } catch (Exception e) {
-      LOGGER.trace("COLUMN 'CAS_RSP_AGY_CD' NOT IN SCHEMA!", e);
-    }
+    //
+    // CSEC history (CSEC)
+    //
+    ret.csecId = rs.getString("CSH_THIRD_ID");
+    ret.csecCodeId = rs.getShort("CSH_CSEC_TPC");
+    ret.csecStartDate = rs.getDate("CSH_START_DT");
+    ret.csecEndDate = rs.getDate("CSH_END_DT");
+    ret.csecLastUpdatedId = rs.getString("CSH_LST_UPD_ID");
+    ret.csecLastUpdatedTimestamp = rs.getTimestamp("CSH_LST_UPD_TS");
+    ret.csecLastUpdatedOperation = CmsReplicationOperation
+        .strToRepOp(rs.getString("CSH_IBMSNAP_OPERATION"));
+    ret.csecReplicationTimestamp = rs.getTimestamp("CSH_IBMSNAP_LOGMARKER");
 
     //
     // Last change (overall)
@@ -608,13 +647,26 @@ public class EsClientPerson extends BaseEsClient
   }
 
   private ElasticSearchPersonCsec createCsec() {
+    if (StringUtils.isBlank(this.csecId)
+        || CmsReplicationOperation.D == this.csecLastUpdatedOperation) {
+      return null;
+    }
 
     ElasticSearchPersonCsec csec = new ElasticSearchPersonCsec();
-      //TODO: Make it real remove the stab
-      csec.setCsecCodeId("6870");
-      csec.setCsecDesc("Victim in Open Case not in Foster Care  ");
-      csec.setStartDate("2017-08-04");
-//      csec.setEndDate("2017-12-12");
+    csec.setId(this.csecId);
+
+    csec.setStartDate(DomainChef.cookDate(this.csecStartDate));
+    csec.setEndDate(DomainChef.cookDate(this.csecEndDate));
+
+    if (this.csecCodeId != null && this.csecCodeId > 0) {
+      csec.setCsecCodeId(this.csecCodeId.toString());
+
+      csec.setCsecDesc(SystemCodeCache.global().getSystemCodeShortDescription(this.csecCodeId));
+    }
+
+    csec.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(this.csecId,
+        this.csecLastUpdatedTimestamp, LegacyTable.CSEC_HISTORY));
+
     return csec;
   }
 
