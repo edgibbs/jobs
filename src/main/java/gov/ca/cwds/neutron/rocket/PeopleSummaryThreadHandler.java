@@ -64,18 +64,19 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
-  protected Map<String, ReplicatedClient> normalized = new HashMap<>();
+  protected Map<String, ReplicatedClient> normalized = new HashMap<>(300119);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
   }
 
+  // SNAP-695: OPTION: read all data, THEN normalize.
   @Override
   public void handleMainResults(ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientPerson m;
     Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>();
+    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
     final FlightLog flightLog = getRocket().getFlightLog();
     final ClientPersonIndexerJob rocket = getRocket();
 
@@ -127,6 +128,7 @@ public class PeopleSummaryThreadHandler
       prepAffectedClients(stmtInsClient, range);
       prepAffectedClients(stmtInsClientPlacementHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
+      LOGGER.debug("handleJdbcDone: FINISHED");
     } catch (Exception e) {
       con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
@@ -193,18 +195,18 @@ public class PeopleSummaryThreadHandler
             con.prepareStatement(ClientSQLResource.SELECT_PLACEMENT_ADDRESS)) {
       try {
         readPlacementAddress(stmtSelPlacementAddress);
+        con.commit(); // Done reading data. Clear temp tables.
       } catch (Exception e) {
         con.rollback();
         throw e;
+      } finally {
+        // Close statements, session, and connection.
       }
-
-      // Done reading data. Clear temp tables.
-      con.commit();
 
       // Merge placement homes and index into Elasticsearch.
       handleJdbcDone(range);
       final List<ReplicatedClient> ret = getResults();
-      LOGGER.info("FETCHED {} LAST CHANGE RESULTS", ret.size());
+      LOGGER.info("FETCHED {} RESULTS", ret.size());
       return ret;
     } catch (Exception e) {
       getRocket().fail();

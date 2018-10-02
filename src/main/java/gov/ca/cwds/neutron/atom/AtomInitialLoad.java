@@ -157,7 +157,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         throw e;
       }
 
-      // Done reading data. Process data, like cleansing and normalizing.
+      // Done reading data. Now cleanse, normalize, etc.
       handleJdbcDone(range);
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
       return getResults();
@@ -166,7 +166,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       throw CheeseRay.runtime(log, e, "RANGE FAILED! {}-{} : {}", range.getLeft(), range.getRight(),
           e.getMessage());
     } finally {
-      handleFinishRange(range);
+      handleFinishRange(range); // Done with this range.
       flightLog.markRangeComplete(range);
       nameThread(origThreadName);
     }

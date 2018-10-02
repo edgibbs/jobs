@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
@@ -166,6 +168,12 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       Collections.synchronizedList(new ArrayList<>());
 
   /**
+   * Initial load only.
+   */
+  private final Map<Pair<String, String>, FlightStatus> initialLoadRangeStatus =
+      new ConcurrentHashMap<>();
+
+  /**
    * Last change only. Log Elasticsearch documents created or modified by this rocket.
    */
   private final Queue<String> affectedDocumentIds = new CircularFifoQueue<>();
@@ -237,6 +245,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     }
   }
 
+  /**
+   * Once a flight fails, the failed status cannot be rescinded.
+   */
   @Override
   public void fail() {
     this.status = FlightStatus.FAILED;
@@ -246,7 +257,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   @Override
   public void done() {
-    // Once failed, it cannot be rescinded.
+    // Once failed, the status cannot be rescinded.
     if (this.status != FlightStatus.FAILED) {
       this.status = FlightStatus.SUCCEEDED;
     }
@@ -282,7 +293,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   // PRETTY PRINT:
   // =======================
 
-  private String pad(Integer padme) {
+  public String pad(Integer padme) {
     return StringUtils.leftPad(new DecimalFormat("###,###,###").format(padme.intValue()), 8, ' ');
   }
 
@@ -345,7 +356,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   // =======================
-  // INCREMENT:
+  // RECORD TRACKING:
   // =======================
 
   public int markQueuedToIndex() {
@@ -372,6 +383,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return this.recsBulkError.incrementAndGet();
   }
 
+  protected void setRangeStatus(final Pair<String, String> pair, final FlightStatus flightStatus) {
+    initialLoadRangeStatus.put(pair, flightStatus);
+  }
+
+  // =======================
+  // INITIAL LOAD RANGES:
+  // =======================
+
   public void markRangeStart(final Pair<String, String> pair) {
     initialLoadRangesStarted.add(pair);
   }
@@ -380,6 +399,15 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     initialLoadRangesCompleted.add(pair);
   }
 
+  public void markRangeError(final Pair<String, String> pair) {
+    setRangeStatus(pair, FlightStatus.FAILED);
+  }
+
+  /**
+   * Applies to on-going mode. Overkill in Initial Load.
+   * 
+   * @param docId ES document identifier
+   */
   public void addAffectedDocumentId(String docId) {
     affectedDocumentIds.add(docId);
   }
