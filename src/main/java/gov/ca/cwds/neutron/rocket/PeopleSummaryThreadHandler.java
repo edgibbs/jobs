@@ -195,6 +195,8 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
+    denormalized = new ArrayList<>(); // free memory
+    normalized = new HashMap<>(); // free memory
     doneThreadRetrieve();
     clear();
   }
@@ -273,6 +275,7 @@ public class PeopleSummaryThreadHandler
    * Release unneeded heap memory early and often.
    */
   protected void clear() {
+    denormalized.clear();
     normalized.clear();
     placementHomeAddresses.clear();
   }
