@@ -181,6 +181,8 @@ public class PeopleSummaryThreadHandler
 
     // Send to Elasticsearch.
     normalized.values().stream().forEach(rocket::addToIndexQueue);
+    denormalized = new ArrayList<>(); // free memory
+    normalized = new HashMap<>(); // free memory
     LOGGER.debug("handleJdbcDone: FINISHED");
   }
 
@@ -224,6 +226,7 @@ public class PeopleSummaryThreadHandler
         readPlacementAddress(stmtSelPlacementAddress);
         con.commit(); // Done reading data. Clear temp tables.
       } catch (Exception e) {
+        getRocket().getFlightLog().markRangeError(range);
         con.rollback();
         throw e;
       } finally {
@@ -236,8 +239,9 @@ public class PeopleSummaryThreadHandler
       LOGGER.info("FETCHED {} RESULTS", ret.size());
       return ret;
     } catch (Exception e) {
-      getRocket().fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
+      // getRocket().fail(); // SNAP-695: don't fail the whole job yet.
+      getRocket().getFlightLog().markRangeError(range);
+      throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING SQL! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
       getRocket().getFlightLog().markRangeComplete(range);

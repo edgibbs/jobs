@@ -140,6 +140,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
             .replaceAll(":toId", range.getRight());
     log.info("query: {}", query);
 
+    boolean rangeError = false;
+
     try {
       final Connection con = NeutronJdbcUtils.prepConnection(getJobDao().grabSession());
       try (final Statement stmt = con.createStatement()) { // Auto-close statement.
@@ -153,6 +155,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         handleSecondaryJdbc(con, range);
         con.commit(); // Clear temp tables
       } catch (Exception e) {
+        flightLog.markRangeError(range);
+        rangeError = true;
         con.rollback();
         throw e;
       }
@@ -162,12 +166,16 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
       return getResults();
     } catch (Exception e) {
-      fail();
+      // fail(); // SNAP-695: don't fail the whole job yet.
+      rangeError = true;
+      flightLog.markRangeError(range);
       throw CheeseRay.runtime(log, e, "RANGE FAILED! {}-{} : {}", range.getLeft(), range.getRight(),
           e.getMessage());
     } finally {
       handleFinishRange(range); // Done with this range.
-      flightLog.markRangeComplete(range);
+      if (!rangeError) {
+        flightLog.markRangeComplete(range);
+      }
       nameThread(origThreadName);
     }
   }
