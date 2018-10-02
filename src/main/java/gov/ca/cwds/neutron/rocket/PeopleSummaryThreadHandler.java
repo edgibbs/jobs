@@ -66,23 +66,45 @@ public class PeopleSummaryThreadHandler
    */
   protected Map<String, ReplicatedClient> normalized = new HashMap<>(300119);
 
+  /**
+   * Raw, de-normalized records.
+   */
+  protected List<EsClientPerson> denormalized = new ArrayList<>(300119);
+
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
   }
 
-  // SNAP-695: OPTION: read all data, THEN normalize.
   @Override
   public void handleMainResults(ResultSet rs) throws SQLException {
     int cntr = 0;
     EsClientPerson m;
-    Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
     final FlightLog flightLog = getRocket().getFlightLog();
     final ClientPersonIndexerJob rocket = getRocket();
 
     // NOTE: Assumes that records are sorted by group key.
     while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
       CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
+      denormalized.add(m);
+    }
+
+    flightLog.addToDenormalized(cntr);
+    LOGGER.info("Counts: de-normalized: {}", cntr);
+  }
+
+  /**
+   * SNAP-695: performance improvement: read all data, THEN normalize.
+   */
+  protected void normalize() {
+    LOGGER.info("Start normalization");
+    int cntr = 0;
+    Object lastId = new Object();
+    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
+    final FlightLog flightLog = getRocket().getFlightLog();
+
+    // NOTE: Assumes that records are sorted by group key.
+    for (EsClientPerson m : denormalized) {
+      CheeseRay.logEvery(LOGGER, ++cntr, "Normalized", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
@@ -92,8 +114,10 @@ public class PeopleSummaryThreadHandler
       lastId = m.getNormalizationGroupKey();
     }
 
-    flightLog.addToDenormalized(cntr);
-    LOGGER.info("Counts: normalized: {}, de-normalized: {}", normalized.size(), cntr);
+    denormalized = new ArrayList<>(); // free memory
+    flightLog.addToNormalized(cntr);
+    LOGGER.info("Normalization DONE: normalized: {}, de-normalized: {}", normalized.size(),
+        denormalized.size());
   }
 
   /**
@@ -112,6 +136,7 @@ public class PeopleSummaryThreadHandler
           rocket.getFlightPlan().getOverrideLastEndTime());
       LOGGER.info("SQL for Placement Address: \n{}", sqlPlacementAddress);
     } catch (Exception e) {
+      con.rollback();
       throw CheeseRay.runtime(LOGGER, e, "INVALID SQL FOR PLACEMENT ADDRESS! {}", e.getMessage(),
           e);
     }
@@ -131,6 +156,8 @@ public class PeopleSummaryThreadHandler
       LOGGER.debug("handleJdbcDone: FINISHED");
     } catch (Exception e) {
       con.rollback();
+      denormalized = new ArrayList<>(); // free memory
+      normalized = new HashMap<>(); // free memory
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
   }
@@ -147,7 +174,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
-    LOGGER.debug("handleJdbcDone: normalized.size(): {}", normalized.size());
+    normalize(); // normalize raw data
 
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
