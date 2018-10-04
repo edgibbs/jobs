@@ -27,7 +27,7 @@
 
 			<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 				<Pattern>
-					%d{yyyy-MM-dd HH:mm:ss} %mdc [%thread] %level %logger{35} - %msg%n
+					%d{yyyy-MM-dd HH:mm:ss} [%mdc] [%thread] [%level] [%logger{35}] - %msg%n
 				</Pattern>
 			</encoder>
 
@@ -41,7 +41,7 @@
 
 			<triggeringPolicy
 				class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-				<MaxFileSize>10MB</MaxFileSize>
+				<MaxFileSize>30MB</MaxFileSize>
 			</triggeringPolicy>
 
 		  </appender>

@@ -56,6 +56,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
     this.deletionResults = deletionResults;
+    final ClientPersonIndexerJob rocket = getRocket();
 
     // Read from the view, old school.
     // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
@@ -72,17 +73,17 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("FETCHED {} LAST CHANGE RESULTS", ret.size());
       return ret;
     } catch (Exception e) {
-      getRocket().fail(); // DRS: rocket not aborting??
+      rocket.fail();
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
-      getRocket().getFlightLog().markRangeComplete(range);
-      getRocket().doneRetrieve();
+      rocket.getFlightLog().markRangeComplete(range);
+      rocket.doneRetrieve();
     }
   }
 
   /**
-   * Jiggle the handle, flush, and clear session.
+   * Jiggle the handle. Flush and clear session.
    * 
    * @param session active Hibernate session
    */
@@ -105,6 +106,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final ClientPersonIndexerJob rocket = getRocket();
     final Date lastRunTime = rocket.getFlightLog().getLastChangeSince();
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
+
     final Class<?> entityClass = rocket.getDenormalizedClass(); // view entity class
     final String queryName = rocket.getFlightPlan().isLoadSealedAndSensitive()
         ? entityClass.getName() + ".findAllUpdatedAfter"
@@ -198,7 +200,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     NeutronThreadUtils.freeMemory();
 
     try {
-      LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
+      LOGGER.info("DATA RETRIEVAL DONE: recs: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
       List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
 
