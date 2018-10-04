@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.NeutronRocket;
@@ -25,23 +26,25 @@ public class NeutronTriggerListener implements TriggerListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronTriggerListener.class);
 
+  private static final String THREAD_NAME = "neutron_trigger_listener";
+
   private final LaunchDirector neutronScheduler;
 
   @Inject
   public NeutronTriggerListener(final LaunchDirector neutronScheduler) {
     this.neutronScheduler = neutronScheduler;
-    NeutronThreadUtils.nameThread("neutron_trigger_listener", this);
+    NeutronThreadUtils.nameThread(THREAD_NAME, this);
   }
 
   @Override
   public String getName() {
-    return "neutron_trigger_listener";
+    return THREAD_NAME;
   }
 
   @Override
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
     final TriggerKey key = trigger.getKey();
-    LOGGER.debug("trigger fired: key: {}", key);
+    LOGGER.debug("Trigger fired: key: {}", key);
     neutronScheduler.getRocketsInFlight().put(key, (NeutronRocket) context.getJobInstance());
   }
 
@@ -51,23 +54,24 @@ public class NeutronTriggerListener implements TriggerListener {
   @Override
   public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
-    final String className = map.getString("job_class");
+    final String className = map.getString(NeutronSchedulerConstants.ROCKET_CLASS);
     boolean answer = true;
 
     try {
       answer = neutronScheduler.isLaunchVetoed(className);
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "NO LAUNCH PAD! rocket class: {}", className, e);
+      answer = false;
+      throw CheeseRay.runtime(LOGGER, e, "NO LAUNCH PAD! rocket: {}", className, e);
     }
 
-    LOGGER.debug("veto job execution: {}", answer);
+    LOGGER.debug("Veto job execution: {}", answer);
     return answer;
   }
 
   @Override
   public void triggerMisfired(Trigger trigger) {
     final TriggerKey key = trigger.getKey();
-    LOGGER.info("TRIGGER MISFIRED! key: {}", key);
+    LOGGER.debug("TRIGGER MISFIRED! key: {}", key);
     neutronScheduler.removeExecutingJob(key);
   }
 
@@ -75,7 +79,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerComplete(Trigger trigger, JobExecutionContext context,
       CompletedExecutionInstruction triggerInstructionCode) {
     final TriggerKey key = trigger.getKey();
-    LOGGER.debug("TRIGGER COMPLETE: key: {}", key);
+    LOGGER.debug("Trigger complete: key: {}", key);
     neutronScheduler.removeExecutingJob(key);
   }
 
