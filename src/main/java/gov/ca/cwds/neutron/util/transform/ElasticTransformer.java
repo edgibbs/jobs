@@ -449,9 +449,9 @@ public final class ElasticTransformer {
     List<ElasticSearchPersonCsec> ret = null;
     if (p instanceof ReplicatedClient) {
       ReplicatedClient replicatedClient = (ReplicatedClient) p;
-      final List<ElasticSearchPersonCsec> clientCsecs = replicatedClient.getCsecs();
+      final Map<String, ElasticSearchPersonCsec> clientCsecs = replicatedClient.getCsecs();
       if (clientCsecs != null && !clientCsecs.isEmpty()) {
-        ret = clientCsecs;
+        ret = new ArrayList<>(clientCsecs.values());
       }
     }
     return ret;

@@ -141,7 +141,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
   private Map<String, ElasticSearchPersonAka> akas = new HashMap<>();
 
   @Transient
-  private List<ElasticSearchPersonCsec> csecs = new ArrayList<>();
+  private Map<String, ElasticSearchPersonCsec> csecs = new HashMap<>();
 
   @Transient
   private Map<String, ElasticSearchSafetyAlert> safetyAlerts = new HashMap<>();
@@ -221,17 +221,17 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     }
   }
 
-  public List<ElasticSearchPersonCsec> getCsecs() {
+  public Map<String, ElasticSearchPersonCsec> getCsecs() {
     return csecs;
   }
 
-  public void setCsecs(List<ElasticSearchPersonCsec> csecs) {
+  public void setCsecs(Map<String, ElasticSearchPersonCsec> csecs) {
     this.csecs = csecs;
   }
 
   public void addCsec(ElasticSearchPersonCsec csec) {
     if (csec != null) {
-      csecs.add(csec);
+      csecs.put(csec.getId(), csec);
     }
   }
 
