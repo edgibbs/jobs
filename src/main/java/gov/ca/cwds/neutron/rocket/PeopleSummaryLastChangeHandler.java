@@ -60,7 +60,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
     // Read from the view, old school.
     // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
+
     LOGGER.info("After view: count: {}", normalized.size());
+
+    // ***************************************
+    // DRS: PROD HANGS HERE!!!
+    // ***************************************
+
+    // Prod periodically hangs when
 
     // Handle additional JDBC statements, if any.
     try (final Session session = getRocket().getJobDao().grabSession();

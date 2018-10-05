@@ -156,8 +156,9 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleStartRange(Pair<String, String> range) {
-    getRocket().getFlightLog().markRangeStart(range);
-    getRocket().doneTransform();
+    final ClientPersonIndexerJob rocket = getRocket();
+    rocket.getFlightLog().markRangeStart(range);
+    rocket.doneTransform();
     clear();
   }
 
@@ -239,6 +240,7 @@ public class PeopleSummaryThreadHandler
    * Release unneeded heap memory early and often.
    */
   protected void clear() {
+    LOGGER.debug("clear containers");
     normalized.clear();
     placementHomeAddresses.clear();
   }
