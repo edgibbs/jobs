@@ -289,12 +289,15 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     int cntr = 0;
     EsCaseRelatedPerson m;
-    final ResultSet rs = stmtSelCase.executeQuery(); // NOSONAR
-    while (!isFailed() && rs.next()) {
-      m = extractCase(rs);
-      CheeseRay.logEvery(++cntr, "read", "case bundle");
-      CheeseRay.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
-      mapCases.put(m.getCaseId(), m);
+    try (final ResultSet rs = stmtSelCase.executeQuery()) {
+      while (!isFailed() && rs.next()) {
+        m = extractCase(rs);
+        CheeseRay.logEvery(++cntr, "read", "case bundle");
+        CheeseRay.logEvery(LOGGER, 10000, rowsReadCases.incrementAndGet(), "Total read", "cases");
+        mapCases.put(m.getCaseId(), m);
+      }
+    } finally {
+      // Close result set.
     }
   }
 
@@ -382,18 +385,19 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final Map<String, ReplicatedClient> mapClients) throws NeutronCheckedException {
     try {
       stmtSelClient.setMaxRows(0);
-      stmtSelClient.setQueryTimeout(0);
+      stmtSelClient.setQueryTimeout(115);
       stmtSelClient.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
 
       LOGGER.info("read client/case keys");
-      final ResultSet rs = stmtSelClient.executeQuery(); // NOSONAR
-
-      ReplicatedClient rc;
-      while (!isFailed() && rs.next()) {
-        rc = extractClient(rs);
-        mapClients.put(rc.getId(), rc);
+      try (final ResultSet rs = stmtSelClient.executeQuery();) {
+        ReplicatedClient rc;
+        while (!isFailed() && rs.next()) {
+          rc = extractClient(rs);
+          mapClients.put(rc.getId(), rc);
+        }
+      } finally {
+        // Close result set.
       }
-
     } catch (Exception e) {
       fail();
       throw new NeutronCheckedException("ERROR READING CLIENTS", e);
