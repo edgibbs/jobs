@@ -197,7 +197,7 @@ public class PeopleSummaryThreadHandler
       try {
         readPlacementAddress(stmtSelPlacementAddress);
       } catch (Exception e) {
-        con.rollback();
+        LOGGER.error("ERROR READING PLACEMENT HOME ADDRESS!", e);
         throw e;
       }
 
@@ -280,7 +280,6 @@ public class PeopleSummaryThreadHandler
     stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     int cntr = 0;
     PlacementHomeAddress pha;
-    final ClientPersonIndexerJob rocket = getRocket();
 
     // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
     try (final ResultSet rs = stmt.executeQuery()) {
