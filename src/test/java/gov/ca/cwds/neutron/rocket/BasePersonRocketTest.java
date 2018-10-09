@@ -1004,6 +1004,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Ignore
   @Test
   public void bulkPrepare_A$BulkProcessor$int() throws Exception {
     final BulkProcessor bp = mock(BulkProcessor.class);

@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -169,6 +171,7 @@ public class PeopleSummaryThreadHandler
   public void handleFinishRange(Pair<String, String> range) {
     doneThreadRetrieve();
     clear();
+    freeMemory();
   }
 
   @Override

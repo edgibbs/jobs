@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,7 +20,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
@@ -125,7 +126,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     Transaction txn = null;
     List<EsClientPerson> recs = null;
     int totalClientAddressRetrieved = 0;
-    NeutronThreadUtils.freeMemory();
+    freeMemory();
 
     // ---------------------------
     // RETRIEVE DATA
@@ -209,7 +210,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
     final List<Thread> threads = new ArrayList<>();
     rocket.addThread(true, rocket::threadIndex, threads);
-    NeutronThreadUtils.freeMemory();
 
     try {
       LOGGER.info("DATA RETRIEVAL DONE: recs: {}", totalClientAddressRetrieved);
@@ -246,7 +246,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       groupRecs.clear();
       recs = null; // release memory
-      NeutronThreadUtils.freeMemory();
+      freeMemory();
       LOGGER.debug("NORMALIZATION DONE, scan for limited access");
 
       // ---------------------------
@@ -271,7 +271,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("check access limitations");
       addAll(results); // push to normalized map
       results = null; // free memory
-      NeutronThreadUtils.freeMemory();
+      freeMemory();
 
       // Remove sealed and sensitive, if not permitted to view them.
       if (!deletionResults.isEmpty()) {
@@ -294,9 +294,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       rocket.doneRetrieve();
 
       // free memory:
-      this.placementHomeAddresses.clear();
-      this.normalized.clear();
-      NeutronThreadUtils.freeMemory();
+      clear();
+      freeMemory();
 
       LOGGER.info("Retrieval done, waiting on indexing");
       for (Thread t : threads) {
