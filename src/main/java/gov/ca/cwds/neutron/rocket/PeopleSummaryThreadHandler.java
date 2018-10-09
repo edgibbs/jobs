@@ -75,7 +75,7 @@ public class PeopleSummaryThreadHandler
     int cntr = 0;
     EsClientPerson m;
     Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>();
+    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
     final FlightLog flightLog = getRocket().getFlightLog();
     final ClientPersonIndexerJob rocket = getRocket();
 
@@ -257,33 +257,37 @@ public class PeopleSummaryThreadHandler
         .forEach(n -> normalized.put(n.getId(), n));
   }
 
-  protected void prepAffectedClients(final PreparedStatement stmtInsClient,
-      final Pair<String, String> p) throws SQLException {
-    stmtInsClient.setMaxRows(0);
-    stmtInsClient.setQueryTimeout(0);
+  protected void prepAffectedClients(final PreparedStatement stmt, final Pair<String, String> p)
+      throws SQLException {
+    stmt.setMaxRows(0);
+    stmt.setQueryTimeout(115); // SNAP-709: just shy of 2 minute timeout
 
     if (!getRocket().getFlightPlan().isLastRunMode()) {
       LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
-      stmtInsClient.setString(1, p.getLeft());
-      stmtInsClient.setString(2, p.getRight());
+      stmt.setString(1, p.getLeft());
+      stmt.setString(2, p.getRight());
     }
 
-    final int countInsClient = stmtInsClient.executeUpdate();
+    final int countInsClient = stmt.executeUpdate();
     LOGGER.info("affected clients: {}", countInsClient);
   }
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
     stmt.setMaxRows(0);
-    stmt.setQueryTimeout(0); // NEXT: soft-code
+    stmt.setQueryTimeout(115); // SNAP-709: just shy of 2 minute timeout
     stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     int cntr = 0;
-
     PlacementHomeAddress pha;
-    final ResultSet rs = stmt.executeQuery(); // NOSONAR
-    while (getRocket().isRunning() && rs.next()) {
-      CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes retrieved", "recs");
-      pha = new PlacementHomeAddress(rs);
-      placementHomeAddresses.put(pha.getClientId(), pha);
+
+    // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
+    try (final ResultSet rs = stmt.executeQuery()) {
+      while (getRocket().isRunning() && rs.next()) {
+        CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes retrieved", "recs");
+        pha = new PlacementHomeAddress(rs);
+        placementHomeAddresses.put(pha.getClientId(), pha);
+      }
+    } finally {
+      // Close result set.
     }
 
     LOGGER.info("Placement home count: {}", placementHomeAddresses.size());

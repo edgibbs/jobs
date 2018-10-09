@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.atom;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,14 +141,23 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
             .replaceAll(":toId", range.getRight());
     log.info("query: {}", query);
 
+    // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
     try {
-      final Connection con = NeutronJdbcUtils.prepConnection(getJobDao().grabSession());
-      try (final Statement stmt = con.createStatement()) { // Auto-close statement.
+      Connection con = null;
+      try (final Session session = getJobDao().grabSession();
+          final Connection conn = NeutronJdbcUtils.prepConnection(session);
+          final Statement stmt = conn.createStatement()) { // Auto-close statement.
+        con = conn;
         con.commit();
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
-        stmt.setQueryTimeout(0);
-        handleMainResults(stmt.executeQuery(query));
+        stmt.setQueryTimeout(115); // Just shy of the 2 minute timeout
+
+        try (final ResultSet rs = stmt.executeQuery(query)) {
+          handleMainResults(rs);
+        } finally {
+          // Close result set.
+        }
 
         // Handle additional JDBC statements, if any.
         handleSecondaryJdbc(con, range);
@@ -155,6 +165,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       } catch (Exception e) {
         con.rollback();
         throw e;
+      } finally {
+        // Close statement, connection, and session.
       }
 
       // Done reading data. Process data, like cleansing and normalizing.
