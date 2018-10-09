@@ -28,7 +28,7 @@
 
 		<property name="hibernate.connection.connectionTimeout">1000000</property>
 		<property name="hibernate.connection.loginTimeout">1000000</property>
-		<property name="hibernate.connection.keepAliveTimeOut">6000</property>  <!-- seconds -->
+		<property name="hibernate.connection.keepAliveTimeOut">6000</property>      <!-- seconds -->
 		<property name="hibernate.connection.enableRowsetSupport">1</property>
 		<property name="hibernate.connection.autocommit">false</property>
 		<property name="hibernate.cache.use_query_cache">false</property>
