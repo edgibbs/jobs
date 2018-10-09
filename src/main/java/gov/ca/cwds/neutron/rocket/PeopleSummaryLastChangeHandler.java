@@ -200,7 +200,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       try {
         txn.rollback();
       } catch (Exception e2) {
-        LOGGER.trace("NESTED EXCEPTION", e2);
+        LOGGER.error("handleSecondaryJdbc: NESTED EXCEPTION", e2);
       }
       throw CheeseRay.runtime(LOGGER, e, "OUTER EXTRACT ERROR!: {}", e.getMessage());
     } finally {

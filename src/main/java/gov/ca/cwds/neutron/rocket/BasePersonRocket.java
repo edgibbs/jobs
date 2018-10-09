@@ -834,7 +834,11 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       } catch (Exception h) {
         fail();
         if (txn.getStatus().canRollback()) {
-          txn.rollback();
+          try {
+            txn.rollback();
+          } catch (Exception e2) {
+            LOGGER.error("NESTED EXCEPTION", e2);
+          }
         }
         throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
       }
@@ -975,7 +979,11 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       fail();
       LOGGER.error("ERROR PULLING BUCKET RANGE! {}-{}: {}", minId, maxId, e.getMessage(), e);
       if (txn.getStatus().canRollback()) {
-        txn.rollback();
+        try {
+          txn.rollback();
+        } catch (Exception e2) {
+          LOGGER.error("NESTED EXCEPTION", e2);
+        }
       }
       throw new DaoException(e);
     }

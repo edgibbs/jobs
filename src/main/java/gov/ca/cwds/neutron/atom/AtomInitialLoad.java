@@ -163,7 +163,11 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         handleSecondaryJdbc(con, range);
         con.commit(); // Clear temp tables
       } catch (Exception e) {
-        con.rollback();
+        try {
+          con.rollback();
+        } catch (Exception e2) {
+          log.trace("NESTED EXCEPTION", e2);
+        }
         throw e;
       } finally {
         // Close statement, connection, and session.
