@@ -59,20 +59,17 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     this.deletionResults = deletionResults;
     final ClientPersonIndexerJob rocket = getRocket();
 
+    // Today we normalize while reading records to minimize memory at the expense of some CPU.
     // Read from the view, old school.
     // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
 
     LOGGER.info("After view: count: {}", normalized.size());
 
-    // ***************************************
-    // DRS: PROD HANGS HERE!!!
-    // ***************************************
-
-    // Prod periodically hangs when
-
+    // Prod periodically hangs here when calling SessionFactory.getCurrentSession();
     // Handle additional JDBC statements, if any.
-    try (final Session session = getRocket().getJobDao().grabSession();
-        final Connection con = NeutronJdbcUtils.prepConnection(session)) {
+    Connection con = null;
+    try (final Session session = getRocket().getJobDao().grabSession()) {
+      con = NeutronJdbcUtils.prepConnection(session);
       handleSecondaryJdbc(con, range);
 
       // Merge placement homes and index into Elasticsearch.

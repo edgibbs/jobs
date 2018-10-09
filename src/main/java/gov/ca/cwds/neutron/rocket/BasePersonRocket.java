@@ -357,7 +357,10 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     LOGGER.info("BEGIN: jdbc thread");
 
     // Close the connection automatically.
-    try (final Connection con = NeutronJdbcUtils.prepConnection(jobDao.grabSession())) {
+    Connection con = null;
+    try (final Session session = jobDao.grabSession()) {
+      con = NeutronJdbcUtils.prepConnection(session);
+
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName());
