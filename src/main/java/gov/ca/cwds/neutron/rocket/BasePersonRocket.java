@@ -371,7 +371,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
       D m;
       try (final Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(15000); // faster
+        stmt.setFetchSize(5000); // faster
         stmt.setMaxRows(0);
         stmt.setQueryTimeout(115); // Just shy of the 2 minute cutoff.
 
