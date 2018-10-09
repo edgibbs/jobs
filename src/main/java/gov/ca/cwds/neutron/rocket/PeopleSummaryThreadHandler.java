@@ -64,7 +64,7 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
-  protected Map<String, ReplicatedClient> normalized = new HashMap<>();
+  protected Map<String, ReplicatedClient> normalized = new HashMap<>(300119);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
@@ -77,7 +77,6 @@ public class PeopleSummaryThreadHandler
     Object lastId = new Object();
     final List<EsClientPerson> grpRecs = new ArrayList<>(50);
     final FlightLog flightLog = getRocket().getFlightLog();
-    final ClientPersonIndexerJob rocket = getRocket();
 
     // NOTE: Assumes that records are sorted by group key.
     while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
@@ -127,7 +126,12 @@ public class PeopleSummaryThreadHandler
       prepAffectedClients(stmtInsClientPlacementHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
-      con.rollback();
+      rocket.fail();
+      try {
+        con.rollback();
+      } catch (Exception e2) {
+        LOGGER.trace("NESTED EXCEPTION", e2);
+      }
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
   }
@@ -156,7 +160,6 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleStartRange(Pair<String, String> range) {
-    final ClientPersonIndexerJob rocket = getRocket();
     rocket.getFlightLog().markRangeStart(range);
     rocket.doneTransform();
     clear();
@@ -198,8 +201,7 @@ public class PeopleSummaryThreadHandler
         throw e;
       }
 
-      // Done reading data. Clear temp tables.
-      con.commit();
+      con.commit(); // Done reading data. Clear temp tables.
 
       // Merge placement homes and index into Elasticsearch.
       handleJdbcDone(range);
@@ -207,11 +209,11 @@ public class PeopleSummaryThreadHandler
       LOGGER.info("FETCHED {} LAST CHANGE RESULTS", ret.size());
       return ret;
     } catch (Exception e) {
-      getRocket().fail();
+      rocket.fail();
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
-      getRocket().getFlightLog().markRangeComplete(range);
+      rocket.getFlightLog().markRangeComplete(range);
     }
   }
 
@@ -278,11 +280,12 @@ public class PeopleSummaryThreadHandler
     stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
     int cntr = 0;
     PlacementHomeAddress pha;
+    final ClientPersonIndexerJob rocket = getRocket();
 
     // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
     try (final ResultSet rs = stmt.executeQuery()) {
-      while (getRocket().isRunning() && rs.next()) {
-        CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes retrieved", "recs");
+      while (rocket.isRunning() && rs.next()) {
+        CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes fetched", "recs");
         pha = new PlacementHomeAddress(rs);
         placementHomeAddresses.put(pha.getClientId(), pha);
       }

@@ -197,6 +197,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
+      try {
+        txn.rollback();
+      } catch (Exception e2) {
+        LOGGER.trace("NESTED EXCEPTION", e2);
+      }
       throw CheeseRay.runtime(LOGGER, e, "OUTER EXTRACT ERROR!: {}", e.getMessage());
     } finally {
       // session goes out of scope

@@ -125,12 +125,12 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
    */
   default List<N> pullRange(final Pair<String, String> range, String sql) {
     final String origThreadName = Thread.currentThread().getName();
+    final Logger log = getLogger();
+    final FlightLog flightLog = getFlightLog();
+
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + range.getLeft() + "_" + range.getRight();
     nameThread(threadName);
-
-    final Logger log = getLogger();
-    final FlightLog flightLog = getFlightLog();
 
     log.info("BEGIN: extract thread {}", threadName);
     flightLog.markRangeStart(range);
@@ -148,10 +148,10 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
           final Connection conn = NeutronJdbcUtils.prepConnection(session);
           final Statement stmt = conn.createStatement()) { // Auto-close statement.
         con = conn;
-        con.commit();
+        con.commit(); // cleanup
         stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
-        stmt.setQueryTimeout(115); // Just shy of the 2 minute timeout
+        stmt.setQueryTimeout(115); // SNAP-709: Just shy of the 2 minute timeout
 
         try (final ResultSet rs = stmt.executeQuery(query)) {
           handleMainResults(rs);
