@@ -370,15 +370,19 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       try (final Statement stmt = con.createStatement()) {
         stmt.setFetchSize(15000); // faster
         stmt.setMaxRows(0);
-        stmt.setQueryTimeout(100000);
-        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
+        stmt.setQueryTimeout(115); // Just shy of the 2 minute cutoff.
 
+        // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
         int cntr = 0;
-        while (isRunning() && rs.next() && (m = extract(rs)) != null) {
-          CheeseRay.logEvery(++cntr, "Retrieved", "recs");
-          final boolean addedToQueue = queueNormalize.offer(m,
-              NeutronIntegerDefaults.POLL_MILLIS.getValue(), TimeUnit.MILLISECONDS);
-          LOGGER.trace("addedToQueue: {}", addedToQueue);
+        try (final ResultSet rs = stmt.executeQuery(query)) {
+          while (isRunning() && rs.next() && (m = extract(rs)) != null) {
+            CheeseRay.logEvery(++cntr, "Retrieved", "recs");
+            final boolean addedToQueue = queueNormalize.offer(m,
+                NeutronIntegerDefaults.POLL_MILLIS.getValue(), TimeUnit.MILLISECONDS);
+            LOGGER.trace("addedToQueue: {}", addedToQueue);
+          }
+        } finally {
+          // Automatically close the result set.
         }
 
         con.commit();
