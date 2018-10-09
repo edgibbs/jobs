@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
 import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
 
 import java.sql.Connection;
@@ -27,7 +29,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
-import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -265,7 +266,8 @@ public class PeopleSummaryThreadHandler
   protected void prepAffectedClients(final PreparedStatement stmt, final Pair<String, String> p)
       throws SQLException {
     stmt.setMaxRows(0);
-    stmt.setQueryTimeout(115); // SNAP-709: just shy of 2 minute timeout
+    stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
+    stmt.setFetchSize(FETCH_SIZE.getValue());
 
     if (!getRocket().getFlightPlan().isLastRunMode()) {
       LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
@@ -279,8 +281,9 @@ public class PeopleSummaryThreadHandler
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
     stmt.setMaxRows(0);
-    stmt.setQueryTimeout(115); // SNAP-709: just shy of 2 minute timeout
-    stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+    stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
+    stmt.setFetchSize(FETCH_SIZE.getValue());
+
     int cntr = 0;
     PlacementHomeAddress pha;
 

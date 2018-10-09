@@ -1,5 +1,8 @@
 package gov.ca.cwds.neutron.atom;
 
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -19,7 +22,6 @@ import org.slf4j.Logger;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -149,9 +151,9 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         con.commit(); // cleanup
 
         try (final Statement stmt = con.createStatement()) {
-          stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
           stmt.setMaxRows(0);
-          stmt.setQueryTimeout(115); // SNAP-709: Just shy of the 2 minute timeout
+          stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
+          stmt.setFetchSize(FETCH_SIZE.getValue());
 
           try (final ResultSet rs = stmt.executeQuery(query)) {
             handleMainResults(rs);

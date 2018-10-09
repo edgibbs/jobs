@@ -1,5 +1,10 @@
 package gov.ca.cwds.neutron.enums;
 
+/**
+ * Depressingly common Neutron settings.
+ * 
+ * @author CWDS API Team
+ */
 public enum NeutronIntegerDefaults {
 
   WAIT_BULK_PROCESSOR(25),
@@ -20,12 +25,15 @@ public enum NeutronIntegerDefaults {
   LOOKBACK_MINUTES(-11),
 
   /**
-   * Default fetch size for Hibernate and JDBC. Pull records in bulk in order to minimize network
-   * calls.
+   * Default fetch size for Hibernate and JDBC. Pull records in bulk to minimize network
+   * round-trips.
    */
-  FETCH_SIZE(5000)
+  FETCH_SIZE(5000),
 
-  ;
+  /**
+   * Let queries run -- until it's time to give up.
+   */
+  QUERY_TIMEOUT_IN_SECONDS(1800);
 
   private final int value;
 

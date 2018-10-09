@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.io.IOException;
@@ -385,8 +387,8 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       final Map<String, ReplicatedClient> mapClients) throws NeutronCheckedException {
     try {
       stmtSelClient.setMaxRows(0);
-      stmtSelClient.setQueryTimeout(115);
-      stmtSelClient.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue());
+      stmtSelClient.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
+      stmtSelClient.setFetchSize(FETCH_SIZE.getValue());
 
       LOGGER.info("read client/case keys");
       try (final ResultSet rs = stmtSelClient.executeQuery();) {

@@ -1,5 +1,8 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -371,9 +374,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
       D m;
       try (final Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(5000); // faster
+        stmt.setFetchSize(FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
-        stmt.setQueryTimeout(115); // Just shy of the 2 minute cutoff.
+        stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
 
         // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
         int cntr = 0;
