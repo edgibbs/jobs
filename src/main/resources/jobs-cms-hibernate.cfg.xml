@@ -35,7 +35,7 @@
 		<property name="hibernate.cache.use_second_level_cache">false</property>
 		<property name="hibernate.connection.isolation">1</property>
 		<property name="hibernate.connection.provider_disables_autocommit">false</property>
-		<property name="hibernate.connection.allowNextOnExhaustedResultSet">1</property>
+		<!-- <property name="hibernate.connection.allowNextOnExhaustedResultSet">1</property> -->
 
 		<property name="hibernate.connection.sqljAvoidTimeStampConversion">true</property>
 		<property name="hibernate.jdbc.time_zone">America/Los_Angeles</property>
@@ -46,15 +46,13 @@
 		<property name="hibernate.c3p0.initialPoolSize">2</property>
 		<property name="hibernate.c3p0.max_size">8</property>
 		<property name="hibernate.c3p0.acquire_increment">3</property>
+		<property name="hibernate.c3p0.autoCommitOnClose">false</property>
 
-		<property name="hibernate.c3p0.timeout">0</property>                      <!-- seconds -->
+		<property name="hibernate.c3p0.timeout">1800</property>                   <!-- seconds -->
 		<property name="hibernate.c3p0.idle_test_period">0</property>             <!-- seconds -->
 		<property name="hibernate.c3p0.maxIdleTime">0</property>                  <!-- seconds -->
 		<property name="hibernate.c3p0.checkoutTimeout">60000</property>          <!-- milliseconds -->
 		<property name="hibernate.c3p0.maxAdministrativeTaskTime">900</property>
-		
-		<property name="hibernate.c3p0.statementCacheNumDeferredCloseThreads">1</property>
-		<property name="hibernate.c3p0.autoCommitOnClose">false</property>
 
 		<property name="hibernate.c3p0.max_statements">0</property>
 		<property name="hibernate.c3p0.maxStatementsPerConnection">0</property>
