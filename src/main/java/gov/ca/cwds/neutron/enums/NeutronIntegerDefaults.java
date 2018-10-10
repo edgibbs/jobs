@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.enums;
 
+import gov.ca.cwds.neutron.jetpack.JobLogs;
+
 /**
  * Depressingly common Neutron settings.
  * 
@@ -9,6 +11,10 @@ public enum NeutronIntegerDefaults {
 
   WAIT_BULK_PROCESSOR(25),
 
+  /**
+   * Sadly necessary sometimes. Default thread sleep time, usually when waiting for work without a
+   * lock condition or pollable queue.
+   */
   SLEEP_MILLIS(1500),
 
   /**
@@ -33,7 +39,14 @@ public enum NeutronIntegerDefaults {
   /**
    * Let queries run -- until it's time to give up.
    */
-  QUERY_TIMEOUT_IN_SECONDS(1800);
+  QUERY_TIMEOUT_IN_SECONDS(1800),
+
+  /**
+   * Log every N records.
+   * 
+   * @see JobLogs
+   */
+  LOG_EVERY(5000);
 
   private final int value;
 
