@@ -412,7 +412,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target) {
-    return runKillThread(target, 1900L);
+    return runKillThread(target, 2300L);
   }
 
   public void markTestDone() {

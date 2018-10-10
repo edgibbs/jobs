@@ -1,5 +1,26 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Map;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.FlushModeType;
+import org.hibernate.annotations.NamedNativeQuery;
+import org.hibernate.annotations.Type;
+
 import gov.ca.cwds.common.NameSuffixTranslator;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
@@ -16,24 +37,6 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
-import java.io.Serializable;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Map;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.FlushModeType;
-import org.hibernate.annotations.NamedNativeQuery;
-import org.hibernate.annotations.Type;
 
 /**
  * Entity bean for the People Summary index, CWS/CMS view VW_LST_CLIENT_ADDRESS.
@@ -273,8 +276,8 @@ public class EsClientPerson extends BaseEsClient
     ret.csecEndDate = rs.getDate("CSH_END_DT");
     ret.csecLastUpdatedId = rs.getString("CSH_LST_UPD_ID");
     ret.csecLastUpdatedTimestamp = rs.getTimestamp("CSH_LST_UPD_TS");
-    ret.csecLastUpdatedOperation = CmsReplicationOperation
-        .strToRepOp(rs.getString("CSH_IBMSNAP_OPERATION"));
+    ret.csecLastUpdatedOperation =
+        CmsReplicationOperation.strToRepOp(rs.getString("CSH_IBMSNAP_OPERATION"));
     ret.csecReplicationTimestamp = rs.getTimestamp("CSH_IBMSNAP_LOGMARKER");
 
     //
@@ -305,12 +308,11 @@ public class EsClientPerson extends BaseEsClient
     // AKA
     ret.addAka(createAka());
 
-    //CSEC
+    // CSEC
     ret.addCsec(createCsec());
 
     // Open case id
     ret.setOpenCaseId(this.openCaseId);
-
     ret.setOpenCaseResponsibleAgencyCode(this.openCaseResponsibleAgencyCode);
 
     map.put(ret.getId(), ret);

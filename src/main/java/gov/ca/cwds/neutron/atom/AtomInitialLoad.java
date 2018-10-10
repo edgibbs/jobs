@@ -1,6 +1,10 @@
 package gov.ca.cwds.neutron.atom;
 
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
+
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +22,6 @@ import org.slf4j.Logger;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -124,12 +127,12 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
    */
   default List<N> pullRange(final Pair<String, String> range, String sql) {
     final String origThreadName = Thread.currentThread().getName();
+    final Logger log = getLogger();
+    final FlightLog flightLog = getFlightLog();
+
     final String threadName =
         "extract_" + nextThreadNumber() + "_" + range.getLeft() + "_" + range.getRight();
     nameThread(threadName);
-
-    final Logger log = getLogger();
-    final FlightLog flightLog = getFlightLog();
 
     log.info("BEGIN: extract thread {}", threadName);
     flightLog.markRangeStart(range);
@@ -140,21 +143,39 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
             .replaceAll(":toId", range.getRight());
     log.info("query: {}", query);
 
+    // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
     try {
-      final Connection con = NeutronJdbcUtils.prepConnection(getJobDao().grabSession());
-      try (final Statement stmt = con.createStatement()) { // Auto-close statement.
-        con.commit();
-        stmt.setFetchSize(NeutronIntegerDefaults.FETCH_SIZE.getValue()); // faster
-        stmt.setMaxRows(0);
-        stmt.setQueryTimeout(0);
-        handleMainResults(stmt.executeQuery(query));
+      Connection con = null;
+      try (final Session session = getJobDao().grabSession()) { // Auto-close statement.
+        con = NeutronJdbcUtils.prepConnection(session);
+        con.commit(); // cleanup
+
+        try (final Statement stmt = con.createStatement()) {
+          stmt.setMaxRows(0);
+          stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
+          stmt.setFetchSize(FETCH_SIZE.getValue());
+
+          try (final ResultSet rs = stmt.executeQuery(query)) {
+            handleMainResults(rs);
+          } finally {
+            // Close result set.
+          }
+        } finally {
+          // Close statement.
+        }
 
         // Handle additional JDBC statements, if any.
         handleSecondaryJdbc(con, range);
         con.commit(); // Clear temp tables
       } catch (Exception e) {
-        con.rollback();
+        try {
+          con.rollback();
+        } catch (Exception e2) {
+          log.trace("NESTED EXCEPTION", e2);
+        }
         throw e;
+      } finally {
+        // Close statement, connection, and session.
       }
 
       // Done reading data. Process data, like cleansing and normalizing.

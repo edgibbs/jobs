@@ -151,19 +151,19 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
   @JsonIgnore
-  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>());
+  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>(512));
 
   /**
    * Initial load only.
    */
   private final List<Pair<String, String>> initialLoadRangesStarted =
-      Collections.synchronizedList(new ArrayList<>());
+      Collections.synchronizedList(new ArrayList<>(512));
 
   /**
    * Initial load only.
    */
   private final List<Pair<String, String>> initialLoadRangesCompleted =
-      Collections.synchronizedList(new ArrayList<>());
+      Collections.synchronizedList(new ArrayList<>(512));
 
   /**
    * Last change only. Log Elasticsearch documents created or modified by this rocket.

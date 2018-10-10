@@ -1,5 +1,8 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -357,7 +360,10 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     LOGGER.info("BEGIN: jdbc thread");
 
     // Close the connection automatically.
-    try (final Connection con = NeutronJdbcUtils.prepConnection(jobDao.grabSession())) {
+    Connection con = null;
+    try (final Session session = jobDao.grabSession()) {
+      con = NeutronJdbcUtils.prepConnection(session);
+
       // Linux MQT lacks ORDER BY clause. Must sort manually.
       // Either detect platform or force ORDER BY clause.
       final String query = getInitialLoadQuery(getDBSchemaName());
@@ -368,17 +374,21 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
       D m;
       try (final Statement stmt = con.createStatement()) {
-        stmt.setFetchSize(15000); // faster
+        stmt.setFetchSize(FETCH_SIZE.getValue()); // faster
         stmt.setMaxRows(0);
-        stmt.setQueryTimeout(100000);
-        final ResultSet rs = stmt.executeQuery(query); // NOSONAR
+        stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
 
+        // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
         int cntr = 0;
-        while (isRunning() && rs.next() && (m = extract(rs)) != null) {
-          CheeseRay.logEvery(++cntr, "Retrieved", "recs");
-          final boolean addedToQueue = queueNormalize.offer(m,
-              NeutronIntegerDefaults.POLL_MILLIS.getValue(), TimeUnit.MILLISECONDS);
-          LOGGER.trace("addedToQueue: {}", addedToQueue);
+        try (final ResultSet rs = stmt.executeQuery(query)) {
+          while (isRunning() && rs.next() && (m = extract(rs)) != null) {
+            CheeseRay.logEvery(++cntr, "Retrieved", "recs");
+            final boolean addedToQueue = queueNormalize.offer(m,
+                NeutronIntegerDefaults.POLL_MILLIS.getValue(), TimeUnit.MILLISECONDS);
+            LOGGER.trace("addedToQueue: {}", addedToQueue);
+          }
+        } finally {
+          // Automatically close the result set.
         }
 
         con.commit();
@@ -830,7 +840,11 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       } catch (Exception h) {
         fail();
         if (txn.getStatus().canRollback()) {
-          txn.rollback();
+          try {
+            txn.rollback();
+          } catch (Exception e2) {
+            LOGGER.error("NESTED EXCEPTION", e2);
+          }
         }
         throw CheeseRay.runtime(LOGGER, h, "EXTRACT SQL ERROR!: {}", h.getMessage());
       }
@@ -971,7 +985,11 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       fail();
       LOGGER.error("ERROR PULLING BUCKET RANGE! {}-{}: {}", minId, maxId, e.getMessage(), e);
       if (txn.getStatus().canRollback()) {
-        txn.rollback();
+        try {
+          txn.rollback();
+        } catch (Exception e2) {
+          LOGGER.error("NESTED EXCEPTION", e2);
+        }
       }
       throw new DaoException(e);
     }

@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,7 +20,6 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
@@ -56,14 +57,19 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
     this.deletionResults = deletionResults;
+    final ClientPersonIndexerJob rocket = getRocket();
 
+    // Today we normalize while reading records to minimize memory at the expense of some CPU.
     // Read from the view, old school.
     // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
+
     LOGGER.info("After view: count: {}", normalized.size());
 
+    // Prod periodically hangs here when calling SessionFactory.getCurrentSession();
     // Handle additional JDBC statements, if any.
-    try (final Session session = getRocket().getJobDao().grabSession();
-        final Connection con = NeutronJdbcUtils.prepConnection(session)) {
+    Connection con = null;
+    try (final Session session = getRocket().getJobDao().grabSession()) {
+      con = NeutronJdbcUtils.prepConnection(session);
       handleSecondaryJdbc(con, range);
 
       // Merge placement homes and index into Elasticsearch.
@@ -72,17 +78,17 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("FETCHED {} LAST CHANGE RESULTS", ret.size());
       return ret;
     } catch (Exception e) {
-      getRocket().fail(); // DRS: rocket not aborting??
+      rocket.fail();
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE! {}", e.getMessage());
     } finally {
       handleFinishRange(range);
-      getRocket().getFlightLog().markRangeComplete(range);
-      getRocket().doneRetrieve();
+      rocket.getFlightLog().markRangeComplete(range);
+      rocket.doneRetrieve();
     }
   }
 
   /**
-   * Jiggle the handle, flush, and clear session.
+   * Jiggle the handle. Flush and clear session.
    * 
    * @param session active Hibernate session
    */
@@ -105,6 +111,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final ClientPersonIndexerJob rocket = getRocket();
     final Date lastRunTime = rocket.getFlightLog().getLastChangeSince();
     LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
+
     final Class<?> entityClass = rocket.getDenormalizedClass(); // view entity class
     final String queryName = rocket.getFlightPlan().isLoadSealedAndSensitive()
         ? entityClass.getName() + ".findAllUpdatedAfter"
@@ -116,7 +123,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     Transaction txn = null;
     List<EsClientPerson> recs = null;
     int totalClientAddressRetrieved = 0;
-    NeutronThreadUtils.freeMemory();
+    freeMemory();
 
     // ---------------------------
     // RETRIEVE DATA
@@ -188,6 +195,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
+      try {
+        txn.rollback();
+      } catch (Exception e2) {
+        LOGGER.error("handleSecondaryJdbc: NESTED EXCEPTION", e2);
+      }
       throw CheeseRay.runtime(LOGGER, e, "OUTER EXTRACT ERROR!: {}", e.getMessage());
     } finally {
       // session goes out of scope
@@ -195,10 +207,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
     final List<Thread> threads = new ArrayList<>();
     rocket.addThread(true, rocket::threadIndex, threads);
-    NeutronThreadUtils.freeMemory();
 
     try {
-      LOGGER.info("DATA RETRIEVAL DONE: client address: {}", totalClientAddressRetrieved);
+      LOGGER.info("DATA RETRIEVAL DONE: recs: {}", totalClientAddressRetrieved);
       Object lastId = new Object();
       List<ReplicatedClient> results = new ArrayList<>(recs.size()); // Size appropriately
 
@@ -232,7 +243,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       groupRecs.clear();
       recs = null; // release memory
-      NeutronThreadUtils.freeMemory();
+      freeMemory();
       LOGGER.debug("NORMALIZATION DONE, scan for limited access");
 
       // ---------------------------
@@ -257,7 +268,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("check access limitations");
       addAll(results); // push to normalized map
       results = null; // free memory
-      NeutronThreadUtils.freeMemory();
+      freeMemory();
 
       // Remove sealed and sensitive, if not permitted to view them.
       if (!deletionResults.isEmpty()) {
@@ -280,9 +291,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       rocket.doneRetrieve();
 
       // free memory:
-      this.placementHomeAddresses.clear();
-      this.normalized.clear();
-      NeutronThreadUtils.freeMemory();
+      clear();
+      freeMemory();
 
       LOGGER.info("Retrieval done, waiting on indexing");
       for (Thread t : threads) {

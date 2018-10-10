@@ -1,5 +1,10 @@
 package gov.ca.cwds.neutron.enums;
 
+/**
+ * Common Neutron constants for Quartz.
+ * 
+ * @author CWDS API Team
+ */
 public class NeutronSchedulerConstants {
 
   public static final String ROCKET_CLASS = "job_class";

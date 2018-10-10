@@ -36,7 +36,7 @@ jacoco {
     reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
-version = 0.52
+version = 0.53
 
 repositories {
     mavenLocal()

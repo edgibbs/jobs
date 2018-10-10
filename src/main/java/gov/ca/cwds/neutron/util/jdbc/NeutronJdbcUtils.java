@@ -226,7 +226,7 @@ public final class NeutronJdbcUtils {
       grabTransaction(session);
       session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {
-      LOGGER.warn("'clear' without transaction", e);
+      LOGGER.trace("'clear' without transaction", e);
     }
   }
 

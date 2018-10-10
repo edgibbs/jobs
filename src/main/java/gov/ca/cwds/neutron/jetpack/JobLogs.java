@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
@@ -18,7 +19,7 @@ public class JobLogs {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(JobLogs.class);
 
-  protected static final int DEFAULT_LOG_EVERY = 1000;
+  public static final int DEFAULT_LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue();
 
   protected JobLogs() {
     // Static methods only; do not instantiate.

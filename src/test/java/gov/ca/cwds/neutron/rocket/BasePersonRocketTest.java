@@ -606,6 +606,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     }
   }
 
+  @Ignore
   @Test(expected = NeutronRuntimeException.class)
   public void threadIndex_Args() throws Exception {
     runKillThread(target);
@@ -816,6 +817,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, notNullValue());
   }
 
+  @Ignore
   @Test(expected = InterruptedException.class)
   public void testNormalizeLoop() throws Exception {
     final List<TestDenormalizedEntity> grpRecs = new ArrayList<>();
@@ -1002,6 +1004,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Ignore
   @Test
   public void bulkPrepare_A$BulkProcessor$int() throws Exception {
     final BulkProcessor bp = mock(BulkProcessor.class);
