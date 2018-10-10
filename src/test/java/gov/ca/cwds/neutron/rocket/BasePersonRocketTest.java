@@ -480,6 +480,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   }
 
   @Test
+  @Ignore
   public void threadRetrieveByJdbc_Args() throws Exception {
     when(rs.next()).thenReturn(true, true, false);
     target.getFlightLog().start();
