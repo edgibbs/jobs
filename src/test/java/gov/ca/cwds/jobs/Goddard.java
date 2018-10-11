@@ -105,9 +105,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
   public static final String DEFAULT_CLIENT_ID = "abc1234567";
 
-  public static final AtomicBoolean isRunwayClear = new AtomicBoolean(false);
+  protected static final AtomicBoolean isRunwayClear = new AtomicBoolean(false);
 
-  public static final Lock lock = new ReentrantLock();
+  protected static final Lock lock = new ReentrantLock();
 
   @BeforeClass
   public static void setupClass() {
@@ -194,7 +194,10 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     mapper = MAPPER;
     pair = Pair.of("aaaaaaaaaa", "9999999999");
 
+    // -------------------------
     // JDBC:
+    // -------------------------
+
     sessionFactory = mock(SessionFactory.class);
     session = mock(Session.class);
     transaction = mock(Transaction.class);
@@ -206,6 +209,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     meta = mock(DatabaseMetaData.class);
     stmt = mock(Statement.class);
     em = mock(EntityManager.class);
+
     hibernationConfiguration = mock(Configuration.class);
     rocketFactory = mock(RocketFactory.class);
     scheduler = mock(Scheduler.class);
@@ -214,12 +218,28 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     proc = mock(ProcedureCall.class);
     client = mock(Client.class);
 
+    // -------------------------
+    // COMMON DAO's:
+    // -------------------------
+
     final TestNormalizedEntityDao testNormalizedEntityDao =
         new TestNormalizedEntityDao(sessionFactory);
+    systemCodeDao = mock(SystemCodeDao.class);
+    systemMetaDao = mock(SystemMetaDao.class);
+
+    // -------------------------
+    // TEST ROCKET:
+    // -------------------------
+
     mach1Rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
     flightSchedule = StandardFlightSchedule.CLIENT;
 
+    // -------------------------
+    // Hibernate:
+    // -------------------------
+
+    // SessionFactory:
     final Map<String, Object> sessionProperties = new HashMap<>();
     sessionProperties.put("hibernate.default_schema", "CWSRS1");
 
@@ -230,6 +250,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(sessionFactory.isOpen()).thenReturn(true);
     when(sessionFactory.getProperties()).thenReturn(sessionProperties);
 
+    // Session:
     when(session.getSessionFactory()).thenReturn(sessionFactory);
     when(session.getProperties()).thenReturn(sessionProperties);
     when(session.beginTransaction()).thenReturn(transaction);
@@ -237,18 +258,20 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(session.createStoredProcedureCall(any(String.class))).thenReturn(proc);
 
     when(transaction.getStatus()).thenReturn(TransactionStatus.MARKED_ROLLBACK);
-
     when(sfo.getServiceRegistry()).thenReturn(reg);
     when(reg.getService(ConnectionProvider.class)).thenReturn(cp);
     when(cp.getConnection()).thenReturn(con);
 
+    // Connection:
     when(con.getMetaData()).thenReturn(meta);
     when(con.createStatement()).thenReturn(stmt);
 
+    // Statement:
     when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(stmt.executeQuery(any())).thenReturn(rs);
     when(stmt.executeUpdate(any(String.class))).thenReturn(1);
 
+    // Prepared statement:
     preparedStatement = mock(PreparedStatement.class);
     when(con.prepareStatement(any(String.class))).thenReturn(preparedStatement);
     when(con.prepareStatement(any())).thenReturn(preparedStatement);
@@ -300,7 +323,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(flightPlan.getThreadCount()).thenReturn(1L);
     when(flightPlan.getLastRunLoc()).thenReturn(this.lastRunFile);
 
-    // Queries.
+    // Queries:
     nq = mock(NativeQuery.class);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
@@ -321,7 +344,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     flightRecorder = new FlightRecorder();
     launchDirector = mock(LaunchDirector.class);
 
-    // Elasticsearch _msearch.
+    // Elasticsearch _msearch:
     final MultiSearchRequestBuilder mBuilder = mock(MultiSearchRequestBuilder.class);
     final MultiSearchResponse multiResponse = mock(MultiSearchResponse.class);
     final SearchRequestBuilder sBuilder = mock(SearchRequestBuilder.class);
@@ -345,17 +368,16 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(item.getResponse()).thenReturn(sr);
     when(sr.getHits()).thenReturn(hits);
     when(hits.getHits()).thenReturn(hitArray);
-
     when(hit.docId()).thenReturn(12345);
 
     final String useDefaultCharSet = null;
     when(hit.getSourceAsString()).thenReturn(IOUtils
         .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
 
-    systemCodeDao = mock(SystemCodeDao.class);
-    systemMetaDao = mock(SystemMetaDao.class);
+    // -------------------------
+    // Command and control:
+    // -------------------------
 
-    // Command and control.
     when(launchDirector.fuelRocket(any(String.class), any(FlightPlan.class)))
         .thenReturn(mach1Rocket);
     when(launchDirector.fuelRocket(any(Class.class), any(FlightPlan.class)))
@@ -375,6 +397,8 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(scheduler.getListenerManager()).thenReturn(listenerManager);
     mbean = mock(VoxLaunchPadMBean.class);
 
+    // Mockito magic to call Hibernate's Work interface.
+    // Can be applied to any method that returns void.
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) {
@@ -391,6 +415,15 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     markTestDone(); // reset
   }
 
+  /**
+   * Simplifies testing error conditions and runaway unit tests in multi-threaded test suites. Kills
+   * a unit test and throws an {@link InterruptedException} after {@code sleepMillis} in
+   * milliseconds.
+   * 
+   * @param target rocket to test
+   * @param sleepMillis milliseconds until killing the target test
+   * @return timer kill thread
+   */
   public Thread runKillThread(final BasePersonRocket<T, M> target, long sleepMillis) {
     final Thread t = new Thread(() -> {
       try {
@@ -411,6 +444,13 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     return t;
   }
 
+  /**
+   * Convenient overload of {@link #runKillThread(BasePersonRocket, long)} with a default timeout of
+   * 1,900 milliseconds.
+   * 
+   * @param target rocket to test
+   * @return timer kill thread
+   */
   public Thread runKillThread(final BasePersonRocket<T, M> target) {
     return runKillThread(target, 1900L);
   }
