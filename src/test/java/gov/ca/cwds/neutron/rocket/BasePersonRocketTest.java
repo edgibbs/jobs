@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -919,16 +918,12 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     target.prepareDocument(bp, t);
   }
 
-  @Test
+  @Test(expected = IOException.class)
   public void prepareDocument_A$BulkProcessor$Object_T$IOException() throws Exception {
     final BulkProcessor bp = mock(BulkProcessor.class);
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    try {
-      target.plantBomb();
-      target.prepareDocument(bp, t);
-      fail("Expected exception was not thrown!");
-    } catch (IOException e) {
-    }
+    target.plantBomb();
+    target.prepareDocument(bp, t);
   }
 
   @Test
@@ -960,16 +955,12 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void prepareUpsertRequest_A$ElasticSearchPerson$Object_T$NeutronCheckedException()
       throws Exception {
     final ElasticSearchPerson esp = mock(ElasticSearchPerson.class);
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
-    try {
-      target.prepareUpsertRequest(esp, t);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target.prepareUpsertRequest(esp, t);
   }
 
   @Test
