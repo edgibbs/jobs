@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.quartz.ListenerManager;
@@ -447,12 +448,19 @@ public class HyperCube extends NeutronGuiceModule {
     if (isScaffoldSystemCodeCache()) {
       return scaffoldSystemCodeCache();
     } else {
-      final long secondsToRefreshCache = 13 * 24 * 60 * (long) 60; // 13 days -- to glorify our luck
-                                                                   // with DB2
-      final SystemCodeCache orig =
-          new CachingSystemCodeService(systemCodeDao, systemMetaDao, secondsToRefreshCache, true);
-      final SystemCodeCache ret = new NeutronSystemCodeCache(orig);
-      ret.register();
+      final long secsToRefreshCache = 13 * 24 * 60 * (long) 60; // 13 days -- to glorify our luck
+                                                                // with DB2
+      SystemCodeCache ret = null;
+      try (final Session session = systemCodeDao.grabSession()) {
+        // Preload cache
+        final SystemCodeCache orig =
+            new CachingSystemCodeService(systemCodeDao, systemMetaDao, secsToRefreshCache, true);
+        ret = new NeutronSystemCodeCache(orig);
+        ret.register();
+      } catch (Exception e) {
+        LOGGER.debug("SYSTEM CODES: FAILED TO CLOSE SESSION!", e);
+      }
+
       return ret;
     }
   }
