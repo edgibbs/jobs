@@ -207,7 +207,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, null);
   }
 
   @Test
@@ -268,12 +268,12 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, null);
   }
 
   @Test
   public void handleRangeResults_Args__ResultSet__2() throws Exception {
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, null);
   }
 
   @Test

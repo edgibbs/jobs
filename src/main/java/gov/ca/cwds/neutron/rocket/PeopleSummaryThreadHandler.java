@@ -53,6 +53,8 @@ public class PeopleSummaryThreadHandler
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(PeopleSummaryThreadHandler.class);
 
+  protected static final int FULL_DENORMALIZED_SIZE = 200117;
+
   private final ClientPersonIndexerJob rocket;
 
   protected boolean doneHandlerRetrieve = false;
@@ -67,34 +69,58 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
-  protected Map<String, ReplicatedClient> normalized = new HashMap<>(200117);
+  protected Map<String, ReplicatedClient> normalized = new HashMap<>(FULL_DENORMALIZED_SIZE);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
   }
 
+  /**
+   * SNAP-715: Staging Initial Load: ERRORCODE=-1224, SQLSTATE=55032.
+   * <p>
+   * Read data, commit as soon as possible, THEN normalize. Takes more memory but reduces database
+   * errors.
+   * </p>
+   * 
+   * {@inheritDoc}
+   */
   @Override
-  public void handleMainResults(ResultSet rs) throws SQLException {
-    int cntr = 0;
-    EsClientPerson m;
-    Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
+  public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
+    int cntrRetrieved = 0;
     final FlightLog flightLog = getRocket().getFlightLog();
 
-    // NOTE: Assumes that records are sorted by group key.
-    while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, 2000, ++cntr, "Retrieved", "recs");
-      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-        normalize(grpRecs);
-        grpRecs.clear(); // Single thread, re-use memory.
+    { // scope brace
+      int cntrNormalized = 0;
+      EsClientPerson m;
+      Object lastId = new Object();
+      final List<EsClientPerson> grpRecs = new ArrayList<>(50);
+      final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
+
+      LOGGER.debug("Cursor name: {}", rs.getCursorName());
+
+      // NOTE: Assumes that records are sorted by group key.
+      while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
+        CheeseRay.logEvery(LOGGER, 2000, ++cntrRetrieved, "Retrieved", "recs");
+        denormalized.add(m);
       }
 
-      grpRecs.add(m);
-      lastId = m.getNormalizationGroupKey();
+      con.commit(); // free database resources
+
+      // Normalize.
+      for (EsClientPerson d : denormalized) {
+        CheeseRay.logEvery(LOGGER, 5000, ++cntrNormalized, "Normalized", "recs");
+        if (!lastId.equals(d.getNormalizationGroupKey()) && cntrNormalized > 1) {
+          normalize(grpRecs);
+          grpRecs.clear(); // Single thread, re-use memory.
+        }
+
+        grpRecs.add(d);
+        lastId = d.getNormalizationGroupKey();
+      }
     }
 
-    flightLog.addToDenormalized(cntr);
-    LOGGER.info("Counts: normalized: {}, de-normalized: {}", normalized.size(), cntr);
+    flightLog.addToDenormalized(cntrRetrieved);
+    LOGGER.info("Counts: normalized: {}, de-normalized: {}", normalized.size(), cntrRetrieved);
   }
 
   /**

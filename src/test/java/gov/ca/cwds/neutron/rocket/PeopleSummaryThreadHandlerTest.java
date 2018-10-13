@@ -64,13 +64,13 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test
   public void handleMainResults_A$ResultSet() throws Exception {
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, null);
   }
 
   @Test(expected = SQLException.class)
   public void handleMainResults_A$ResultSet_T$SQLException() throws Exception {
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, null);
   }
 
   @Test

@@ -156,9 +156,10 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
           stmt.setFetchSize(FETCH_SIZE.getValue());
 
           try (final ResultSet rs = stmt.executeQuery(query)) {
-            handleMainResults(rs);
+            handleMainResults(rs, con);
           } catch (Exception ex) {
-            log.debug("ERROR CLOSING RESULT SET!", ex); // don't re-throw, for now
+            // Don't re-throw, for now
+            log.debug("AtomicInitialLoad.pullRange(): ERROR CLOSING RESULT SET!", ex);
           } finally {
             // Close result set.
           }
@@ -174,7 +175,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         try {
           con.rollback();
         } catch (Exception e2) {
-          log.trace("NESTED EXCEPTION", e2);
+          log.trace("AtomicInitialLoad.pullRange(): NESTED ROLLBACK EXCEPTION!", e2);
         }
         throw e;
       } finally {
