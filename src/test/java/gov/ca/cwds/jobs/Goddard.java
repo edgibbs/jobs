@@ -25,7 +25,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -354,8 +353,14 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final MultiSearchResponse.Item[] items = new MultiSearchResponse.Item[1];
     items[0] = item;
 
-    hits = mock(SearchHits.class);
-    hit = mock(SearchHit.class);
+    // CANS-560: Update Jobs to use ElasticSearch 6.4.1.
+    // hits = mock(SearchHits.class);
+    // hit = mock(SearchHit.class);
+    hit = new SearchHit(12354);
+    final SearchHit[] searchHits = new SearchHit[1];
+    searchHits[0] = hit;
+    hits = new SearchHits(searchHits, 1, 0.25f);
+
     hitArray = new SearchHit[1];
     hitArray[0] = hit;
     sr = mock(SearchResponse.class);
@@ -369,12 +374,12 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(multiResponse.getResponses()).thenReturn(items);
     when(item.getResponse()).thenReturn(sr);
     when(sr.getHits()).thenReturn(hits);
-    when(hits.getHits()).thenReturn(hitArray);
-    when(hit.docId()).thenReturn(12345);
+    // when(hits.getHits()).thenReturn(hitArray);
+    // when(hit.docId()).thenReturn(12345);
 
-    final String useDefaultCharSet = null;
-    when(hit.getSourceAsString()).thenReturn(IOUtils
-        .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
+    // final String useDefaultCharSet = null;
+    // when(hit.getSourceAsString()).thenReturn(IOUtils
+    // .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
 
     // -------------------------
     // Command and control:
