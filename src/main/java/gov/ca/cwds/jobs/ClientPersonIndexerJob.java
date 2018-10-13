@@ -255,7 +255,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    */
   @Override
   public void handleMainResults(final ResultSet rs, Connection con) throws SQLException {
-    handler.get().handleMainResults(rs, null);
+    handler.get().handleMainResults(rs, con);
   }
 
   @Override

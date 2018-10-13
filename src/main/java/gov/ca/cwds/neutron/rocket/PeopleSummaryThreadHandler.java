@@ -88,10 +88,10 @@ public class PeopleSummaryThreadHandler
   @Override
   public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
     int cntrRetrieved = 0;
+    int cntrNormalized = 0;
     final FlightLog flightLog = getRocket().getFlightLog();
 
     { // scope brace
-      int cntrNormalized = 0;
       EsClientPerson m;
       Object lastId = new Object();
       final List<EsClientPerson> grpRecs = new ArrayList<>(50);
@@ -101,7 +101,7 @@ public class PeopleSummaryThreadHandler
       // Retrieve.
       LOGGER.info("handleMainResults(): Retrieve client range");
       while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
-        CheeseRay.logEvery(LOGGER, 2000, ++cntrRetrieved, "Retrieved", "recs");
+        CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
         denormalized.add(m);
       }
 
@@ -175,7 +175,8 @@ public class PeopleSummaryThreadHandler
       rc.setActivePlacementHomeAddress(pha);
     } else {
       // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
-      LOGGER.warn("Placement home address not in normalized map! client id: {}", pha.getClientId());
+      LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
+          pha.getClientId());
     }
   }
 
