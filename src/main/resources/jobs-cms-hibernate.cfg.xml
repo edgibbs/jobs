@@ -46,7 +46,7 @@
 		<property name="hibernate.c3p0.min_size">4</property>
 		<property name="hibernate.c3p0.initialPoolSize">4</property>
 		<property name="hibernate.c3p0.max_size">12</property>
-		<property name="hibernate.c3p0.acquire_increment">3</property>
+		<property name="hibernate.c3p0.acquire_increment">2</property>
 		<property name="hibernate.c3p0.autoCommitOnClose">false</property>
 
 		<property name="hibernate.c3p0.timeout">3600</property>                   <!-- seconds -->
