@@ -82,7 +82,7 @@ public class PeopleSummaryThreadHandler
     final FlightLog flightLog = getRocket().getFlightLog();
 
     // NOTE: Assumes that records are sorted by group key.
-    while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
+    while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
       CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
