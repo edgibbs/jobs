@@ -76,7 +76,8 @@ public class PeopleSummaryThreadHandler
   }
 
   /**
-   * SNAP-715: Staging Initial Load: ERRORCODE=-1224, SQLSTATE=55032.
+   * SNAP-715: Initial Load: ERRORCODE=-1224, SQLSTATE=55032.
+   * 
    * <p>
    * Read data, commit as soon as possible, THEN normalize. Takes more memory but reduces database
    * errors.
@@ -95,18 +96,20 @@ public class PeopleSummaryThreadHandler
       Object lastId = new Object();
       final List<EsClientPerson> grpRecs = new ArrayList<>(50);
       final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
+      LOGGER.debug("handleMainResults(): Cursor name: {}", rs.getCursorName());
 
-      LOGGER.debug("Cursor name: {}", rs.getCursorName());
-
-      // NOTE: Assumes that records are sorted by group key.
+      // Retrieve.
+      LOGGER.info("handleMainResults(): Retrieve client range");
       while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
         CheeseRay.logEvery(LOGGER, 2000, ++cntrRetrieved, "Retrieved", "recs");
         denormalized.add(m);
       }
 
+      LOGGER.info("handleMainResults(): commit");
       con.commit(); // free database resources
 
-      // Normalize.
+      LOGGER.info("handleMainResults(): normalize");
+      // Records must be sorted by group key.
       for (EsClientPerson d : denormalized) {
         CheeseRay.logEvery(LOGGER, 5000, ++cntrNormalized, "Normalized", "recs");
         if (!lastId.equals(d.getNormalizationGroupKey()) && cntrNormalized > 1) {
@@ -120,7 +123,8 @@ public class PeopleSummaryThreadHandler
     }
 
     flightLog.addToDenormalized(cntrRetrieved);
-    LOGGER.info("Counts: normalized: {}, de-normalized: {}", normalized.size(), cntrRetrieved);
+    LOGGER.info("handleMainResults() DONE: counts: normalized: {}, de-normalized: {}",
+        normalized.size(), cntrRetrieved);
   }
 
   /**
