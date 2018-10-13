@@ -22,6 +22,7 @@ import org.hibernate.jdbc.Work;
 import org.hibernate.query.Query;
 
 import gov.ca.cwds.data.BaseDaoImpl;
+import gov.ca.cwds.neutron.atom.AtomHibernate;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
@@ -333,7 +334,7 @@ public final class NeutronJdbcUtils {
    * @return default CMS schema name
    */
   public static String getDBSchemaName() {
-    return System.getProperty("DB_CMS_SCHEMA");
+    return System.getProperty(AtomHibernate.CURRENT_SCHEMA);
   }
 
   /**
@@ -467,7 +468,7 @@ public final class NeutronJdbcUtils {
       String[] partitions) {
     final int len = partitions.length;
     final int skip = len / partitionCount;
-    LOGGER.info("len: {}, skip: {}", len, skip);
+    LOGGER.debug("len: {}, skip: {}", len, skip);
 
     final Integer[] positions =
         IntStream.rangeClosed(0, len - 1).boxed().flatMap(NeutronStreamUtils.everyNth(skip))
@@ -504,7 +505,6 @@ public final class NeutronJdbcUtils {
       // ORDER: a,z,A,Z,0,9
       // ----------------------------
       ret.add(Pair.of(Z_OS_START, Z_OS_END));
-      // ret = initialLoad.limitRange(buildPartitionsRanges(4, partitions));
     } else {
       // ----------------------------
       // Linux or small data set:

@@ -31,6 +31,8 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends AtomShared, AtomRowMapper<M> {
 
+  public static final String CURRENT_SCHEMA = "DB_CMS_SCHEMA";
+
   /**
    * @return the rocket's main DAO.
    */
@@ -40,14 +42,14 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @return default CMS schema name
    */
   default String getDBSchemaName() {
-    return System.getProperty("DB_CMS_SCHEMA");
+    return System.getProperty(CURRENT_SCHEMA);
   }
 
   /**
    * @return default CMS schema name
    */
   static String databaseSchemaName() {
-    return System.getProperty("DB_CMS_SCHEMA");
+    return System.getProperty(CURRENT_SCHEMA);
   }
 
   /**
@@ -158,7 +160,8 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   default boolean isLargeDataSet() throws NeutronCheckedException {
     final String schema = getDBSchemaName().toUpperCase().trim();
 
-    // Not the best idea to check by replication schema name, but we lack other options.
+    // TODO: Not the best idea to check by replication schema name.
+    // Get the client count instead.
     return isDB2OnZOS()
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("RSS"));
   }
