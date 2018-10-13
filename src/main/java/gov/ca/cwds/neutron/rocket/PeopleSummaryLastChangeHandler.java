@@ -123,7 +123,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     Transaction txn = null;
     List<EsClientPerson> recs = null;
     int totalClientAddressRetrieved = 0;
-    freeMemory();
 
     // ---------------------------
     // RETRIEVE DATA
@@ -268,7 +267,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("check access limitations");
       addAll(results); // push to normalized map
       results = null; // free memory
-      freeMemory();
 
       // Remove sealed and sensitive, if not permitted to view them.
       if (!deletionResults.isEmpty()) {
