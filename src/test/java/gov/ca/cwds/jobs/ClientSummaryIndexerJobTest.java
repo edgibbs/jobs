@@ -170,7 +170,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
     final List<Pair<String, String>> actual = target.getPartitionRanges();
-    assertThat(actual.size(), is(equalTo(511)));
+    assertThat(actual.size(), is(equalTo(1025)));
   }
 
   @Test
