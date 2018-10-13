@@ -96,7 +96,6 @@ public class PeopleSummaryThreadHandler
       Object lastId = new Object();
       final List<EsClientPerson> grpRecs = new ArrayList<>(50);
       final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
-      LOGGER.debug("handleMainResults(): Cursor name: {}", rs.getCursorName());
 
       // Retrieve.
       LOGGER.info("handleMainResults(): Retrieve client range");

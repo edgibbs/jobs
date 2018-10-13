@@ -37,12 +37,14 @@ public class JetPackLogger implements ConditionalLogger {
    * @param args
    * @return
    */
+  @SuppressWarnings("unchecked")
   private Object[] collect(Supplier<Object>... args) {
     return Arrays.stream(args).map(Supplier::get).collect(Collectors.toList())
         .toArray(new Object[0]);
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void trace(String format, Supplier<Object>... args) {
     if (isTraceEnabled()) {
       logger.trace(format, collect(args));
@@ -50,6 +52,7 @@ public class JetPackLogger implements ConditionalLogger {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void debug(String format, Supplier<Object>... args) {
     if (isDebugEnabled()) {
       logger.debug(format, collect(args));
@@ -57,6 +60,7 @@ public class JetPackLogger implements ConditionalLogger {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void info(String format, Supplier<Object>... args) {
     if (isInfoEnabled()) {
       logger.info(format, collect(args));
@@ -64,6 +68,7 @@ public class JetPackLogger implements ConditionalLogger {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void warn(String format, Supplier<Object>... args) {
     if (isWarnEnabled()) {
       logger.warn(format, collect(args));
@@ -71,6 +76,7 @@ public class JetPackLogger implements ConditionalLogger {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public void error(String format, Supplier<Object>... args) {
     if (isErrorEnabled()) {
       logger.error(format, collect(args));
