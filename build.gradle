@@ -25,7 +25,7 @@ apply plugin: 'jacoco'
 project.ext {
     coreApiVersion = "1.7.5_860-RC"
     log4jVersion = "2.8"
-    elasticsearchVersion = "5.5.0"
+    elasticsearchVersion = "6.4.2"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
     dropwizardVersion = "1.1.0"
     powerMockVersion = "1.7.3"

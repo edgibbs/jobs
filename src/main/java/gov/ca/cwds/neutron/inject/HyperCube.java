@@ -430,7 +430,7 @@ public class HyperCube extends NeutronGuiceModule {
   // =========================
 
   protected SessionFactory makeNsSessionFactory() {
-    LOGGER.debug("HyperCube.makeNsSessionFactory");
+    LOGGER.debug("HyperCube.makeNsSessionFactory()");
     return makeHibernateConfiguration().configure(getHibernateConfigNs())
         .addAnnotatedClass(EsIntakeScreening.class).addAnnotatedClass(IntakeScreening.class)
         .buildSessionFactory();
@@ -444,7 +444,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Singleton
   public SystemCodeCache provideSystemCodeCache(SystemCodeDao systemCodeDao,
       SystemMetaDao systemMetaDao) {
-    LOGGER.debug("HyperCube.provideSystemCodeCache");
+    LOGGER.debug("HyperCube.provideSystemCodeCache()");
     if (isScaffoldSystemCodeCache()) {
       return scaffoldSystemCodeCache();
     } else {
@@ -468,7 +468,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Singleton
   public CmsSystemCodeSerializer provideCmsSystemCodeSerializer(SystemCodeCache systemCodeCache) {
-    LOGGER.debug("HyperCube.provideCmsSystemCodeSerializer");
+    LOGGER.debug("HyperCube.provideCmsSystemCodeSerializer()");
     return new CmsSystemCodeSerializer(systemCodeCache);
   }
 
@@ -479,7 +479,7 @@ public class HyperCube extends NeutronGuiceModule {
   protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
       throws NeutronCheckedException {
     TransportClient client = null;
-    LOGGER.debug("HyperCube.buildElasticsearchClient");
+    LOGGER.debug("HyperCube.buildElasticsearchClient()");
     try {
       client = ElasticUtils.buildElasticsearchClient(config);
       return client;
@@ -500,7 +500,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Singleton
   @Named("elasticsearch.client.people")
   public Client elasticsearchClientPeople() throws NeutronCheckedException {
-    LOGGER.debug("HyperCube.elasticsearchClientPeople");
+    LOGGER.debug("HyperCube.elasticsearchClientPeople()");
     TransportClient client = null;
     if (esConfigPeople != null) {
       client = buildElasticsearchClient(elasticSearchConfigPeople());
@@ -518,7 +518,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Singleton
   @Named("elasticsearch.client.people-summary")
   public Client elasticsearchClientPeopleSummary() throws NeutronCheckedException {
-    LOGGER.debug("HyperCube.elasticsearchClientPeopleSummary");
+    LOGGER.debug("HyperCube.elasticsearchClientPeopleSummary()");
     return buildElasticsearchClient(elasticSearchConfigPeopleSummary());
   }
 
@@ -526,7 +526,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Singleton
   @Named("elasticsearch.dao.people")
   public ElasticsearchDao makeElasticsearchDaoPeople() throws NeutronCheckedException {
-    LOGGER.debug("HyperCube.makeElasticsearchDaoPeople");
+    LOGGER.debug("HyperCube.makeElasticsearchDaoPeople()");
     return new ElasticsearchDao(elasticsearchClientPeople(), elasticSearchConfigPeople());
   }
 
@@ -536,14 +536,14 @@ public class HyperCube extends NeutronGuiceModule {
   public ElasticsearchDao makeElasticsearchDaoPeopleSummary(
       @Named("elasticsearch.client.people-summary") Client client,
       @Named("elasticsearch.config.people-summary") ElasticsearchConfiguration config) {
-    LOGGER.debug("HyperCube.makeElasticsearchDaoPeopleSummary");
+    LOGGER.debug("HyperCube.makeElasticsearchDaoPeopleSummary()");
     return new ElasticsearchDao(client, config);
   }
 
   protected ElasticsearchConfiguration loadElasticSearchConfig(File esConfig)
       throws NeutronCheckedException {
     try {
-      LOGGER.debug("HyperCube.loadElasticSearchConfig");
+      LOGGER.debug("HyperCube.loadElasticSearchConfig()");
       return new ObjectMapper(new YAMLFactory()).readValue(esConfig,
           ElasticsearchConfiguration.class);
     } catch (Exception e) {
@@ -560,7 +560,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Named("elasticsearch.config.people")
   public ElasticsearchConfiguration elasticSearchConfigPeople() throws NeutronCheckedException {
-    LOGGER.debug("HyperCube.elasticSearchConfigPeople");
+    LOGGER.debug("HyperCube.elasticSearchConfigPeople()");
     ElasticsearchConfiguration ret = null;
     if (esConfigPeople != null) {
       LOGGER.debug("Create NEW ES configuration: people");
@@ -579,7 +579,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Named("elasticsearch.config.people-summary")
   public ElasticsearchConfiguration elasticSearchConfigPeopleSummary()
       throws NeutronCheckedException {
-    LOGGER.debug("HyperCube.elasticSearchConfigPeopleSummary");
+    LOGGER.debug("HyperCube.elasticSearchConfigPeopleSummary()");
     ElasticsearchConfiguration ret = null;
     if (esConfigPeopleSummary != null) {
       LOGGER.debug("Create NEW ES configuration: people summary");
@@ -631,7 +631,7 @@ public class HyperCube extends NeutronGuiceModule {
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
       ZombieKillerTimerTask zombieKillerTimerTask,
       @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
-    LOGGER.debug("HyperCube.configureQuartz");
+    LOGGER.debug("HyperCube.configureQuartz()");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
         zombieKillerTimerTask, strTimeToAbort);

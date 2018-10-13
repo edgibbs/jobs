@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -10,7 +9,6 @@ import java.util.function.Function;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -101,9 +99,10 @@ public class FacilityIndexerJob extends AbstractModule {
       try {
         client = produceTransportClient(
             Settings.builder().put("cluster.name", config.getElasticsearchCluster()).build());
-        client.addTransportAddress(
-            new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
-                Integer.parseInt(config.getElasticsearchPort())));
+        // CANS-560: Update Jobs to use ElasticSearch 6.4.1.
+        // client.addTransportAddress(
+        // new InetSocketTransportAddress(InetAddress.getByName(config.getElasticsearchHost()),
+        // Integer.parseInt(config.getElasticsearchPort())));
       } catch (Exception e) {
         throw JobLogs.checked(LOGGER, e, "Error initializing Elasticsearch client: {}",
             e.getMessage());
@@ -194,8 +193,9 @@ public class FacilityIndexerJob extends AbstractModule {
     }
     try {
       final File configFile = new ApiFileAssistant().validateFileLocation(args[0]);
-      Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile)); // NOSONAR
-      Rocket rocket = injector.getInstance(Key.get(Rocket.class, Names.named("facility-job")));
+      final Injector injector = Guice.createInjector(new FacilityIndexerJob(configFile)); // NOSONAR
+      final Rocket rocket =
+          injector.getInstance(Key.get(Rocket.class, Names.named("facility-job")));
       rocket.run();
     } catch (Exception e) {
       LOGGER.error("ERROR: {}", e.getMessage(), e);
