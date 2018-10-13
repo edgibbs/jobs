@@ -59,7 +59,7 @@ public class HoverCar implements ApiMarker, NeutronBulkProcessorBuilder {
         .builder(esDao.getClient(), new NeutronBulkProcessorListener(this.flightLog))
         .setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
         .setConcurrentRequests(1)
-        // .setName("jobs_bp") // WARNING: disappears in ES 5.6.3
+        // .setName("jobs_bp") // CANS-560
         .build();
   }
 
