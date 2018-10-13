@@ -67,7 +67,7 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
-  protected Map<String, ReplicatedClient> normalized = new HashMap<>(300119);
+  protected Map<String, ReplicatedClient> normalized = new HashMap<>(200117);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
