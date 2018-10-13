@@ -171,7 +171,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   @Test
   public void prepAffectedClients_A$PreparedStatement$Pair() throws Exception {
     Pair<String, String> p = pair;
-    target.prepAffectedClients(preparedStatement, p);
+    target.prepPlacementClients(preparedStatement, p);
   }
 
   @Test(expected = SQLException.class)
@@ -180,7 +180,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
 
     Pair<String, String> p = pair;
-    target.prepAffectedClients(preparedStatement, p);
+    target.prepPlacementClients(preparedStatement, p);
   }
 
   @Test

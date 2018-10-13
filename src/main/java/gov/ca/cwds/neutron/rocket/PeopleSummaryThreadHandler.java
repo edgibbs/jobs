@@ -83,7 +83,7 @@ public class PeopleSummaryThreadHandler
 
     // NOTE: Assumes that records are sorted by group key.
     while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
+      CheeseRay.logEvery(LOGGER, 2000, ++cntr, "Retrieved", "recs");
       if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
         normalize(grpRecs);
         grpRecs.clear(); // Single thread, re-use memory.
@@ -125,15 +125,15 @@ public class PeopleSummaryThreadHandler
                 ClientSQLResource.INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(sqlPlacementAddress)) {
-      prepAffectedClients(stmtInsClient, range);
-      prepAffectedClients(stmtInsClientPlacementHome, range);
+      prepPlacementClients(stmtInsClient, range);
+      prepPlacementClients(stmtInsClientPlacementHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
       rocket.fail();
       try {
         con.rollback();
       } catch (Exception e2) {
-        LOGGER.trace("NESTED EXCEPTION", e2);
+        LOGGER.trace("NESTED ROLLBACK EXCEPTION!", e2);
       }
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
@@ -263,7 +263,7 @@ public class PeopleSummaryThreadHandler
         .forEach(n -> normalized.put(n.getId(), n));
   }
 
-  protected void prepAffectedClients(final PreparedStatement stmt, final Pair<String, String> p)
+  protected void prepPlacementClients(final PreparedStatement stmt, final Pair<String, String> p)
       throws SQLException {
     stmt.setMaxRows(0);
     stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
@@ -276,7 +276,7 @@ public class PeopleSummaryThreadHandler
     }
 
     final int countInsClient = stmt.executeUpdate();
-    LOGGER.info("affected clients: {}", countInsClient);
+    LOGGER.info("Placement home clients: {}", countInsClient);
   }
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {

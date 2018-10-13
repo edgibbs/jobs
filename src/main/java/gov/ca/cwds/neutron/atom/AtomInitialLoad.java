@@ -157,6 +157,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
           try (final ResultSet rs = stmt.executeQuery(query)) {
             handleMainResults(rs);
+          } catch (Exception ex) {
+            log.debug("ERROR CLOSING RESULT SET!", ex); // don't re-throw, for now
           } finally {
             // Close result set.
           }
@@ -165,6 +167,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         }
 
         // Handle additional JDBC statements, if any.
+        con.commit(); // Clear temp tables
         handleSecondaryJdbc(con, range);
         con.commit(); // Clear temp tables
       } catch (Exception e) {
