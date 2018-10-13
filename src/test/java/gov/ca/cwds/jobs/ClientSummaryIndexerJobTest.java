@@ -170,7 +170,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   public void getPartitionRanges_RSQ() throws Exception {
     System.setProperty("DB_CMS_SCHEMA", "CWSRSQ");
     final List<Pair<String, String>> actual = target.getPartitionRanges();
-    assertThat(actual.size(), is(equalTo(511)));
+    assertThat(actual.size(), is(equalTo(1025)));
   }
 
   @Test
@@ -209,7 +209,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void iterateRangeResults_Args__ResultSet() throws Exception {
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, con);
   }
 
   @Test
@@ -270,12 +270,12 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void handleRangeResults_Args__ResultSet() throws Exception {
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, con);
   }
 
   @Test
   public void handleRangeResults_Args__ResultSet__2() throws Exception {
-    target.handleMainResults(rs);
+    target.handleMainResults(rs, con);
   }
 
   @Test

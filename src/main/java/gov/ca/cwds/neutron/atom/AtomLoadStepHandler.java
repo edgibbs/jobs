@@ -26,9 +26,10 @@ public interface AtomLoadStepHandler<N extends PersistentObject> {
    * no-op.
    * 
    * @param rs result set for this key range
+   * @param con raw JDBC connection
    * @throws SQLException on database error
    */
-  default void handleMainResults(final ResultSet rs) throws SQLException {
+  default void handleMainResults(final ResultSet rs, Connection con) throws SQLException {
     // Provide your own solution, for now.
   }
 

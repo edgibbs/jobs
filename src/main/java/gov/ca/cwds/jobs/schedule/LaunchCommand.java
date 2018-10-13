@@ -28,6 +28,7 @@ import com.google.inject.Injector;
 
 import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
+import gov.ca.cwds.neutron.atom.AtomHibernate;
 import gov.ca.cwds.neutron.atom.AtomLaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
@@ -51,9 +52,9 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(LaunchCommand.class);
 
-  protected static final List<String> DB_PROPERTY_LIST =
-      Collections.unmodifiableList(asList("DB_NS_USER", "DB_NS_PASSWORD", "DB_NS_JDBC_URL",
-          "DB_CMS_USER", "DB_CMS_PASSWORD", "DB_CMS_JDBC_URL", "DB_CMS_SCHEMA", "LAUNCH_DIR"));
+  protected static final List<String> DB_PROPERTY_LIST = Collections
+      .unmodifiableList(asList("DB_NS_USER", "DB_NS_PASSWORD", "DB_NS_JDBC_URL", "DB_CMS_USER",
+          "DB_CMS_PASSWORD", "DB_CMS_JDBC_URL", AtomHibernate.CURRENT_SCHEMA, "LAUNCH_DIR"));
 
   /**
    * Singleton instance. One launch director to rule them all!

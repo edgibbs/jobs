@@ -1,7 +1,7 @@
 package gov.ca.cwds.neutron.enums;
 
 /**
- * Common Neutron constants for Quartz.
+ * Neutron constants for the Quartz scheduler.
  * 
  * @author CWDS API Team
  */

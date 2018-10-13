@@ -53,6 +53,8 @@ public class PeopleSummaryThreadHandler
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(PeopleSummaryThreadHandler.class);
 
+  protected static final int FULL_DENORMALIZED_SIZE = 200117;
+
   private final ClientPersonIndexerJob rocket;
 
   protected boolean doneHandlerRetrieve = false;
@@ -67,34 +69,61 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
-  protected Map<String, ReplicatedClient> normalized = new HashMap<>(300119);
+  protected Map<String, ReplicatedClient> normalized = new HashMap<>(FULL_DENORMALIZED_SIZE);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
   }
 
+  /**
+   * SNAP-715: Initial Load: ERRORCODE=-1224, SQLSTATE=55032.
+   * 
+   * <p>
+   * Read data, commit as soon as possible, THEN normalize. Takes more memory but reduces database
+   * errors.
+   * </p>
+   * 
+   * {@inheritDoc}
+   */
   @Override
-  public void handleMainResults(ResultSet rs) throws SQLException {
-    int cntr = 0;
-    EsClientPerson m;
-    Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
+  public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
+    int cntrRetrieved = 0;
+    int cntrNormalized = 0;
     final FlightLog flightLog = getRocket().getFlightLog();
 
-    // NOTE: Assumes that records are sorted by group key.
-    while (!rocket.isFailed() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, ++cntr, "Retrieved", "recs");
-      if (!lastId.equals(m.getNormalizationGroupKey()) && cntr > 1) {
-        normalize(grpRecs);
-        grpRecs.clear(); // Single thread, re-use memory.
+    { // scope brace
+      EsClientPerson m;
+      Object lastId = new Object();
+      final List<EsClientPerson> grpRecs = new ArrayList<>(50);
+      final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
+
+      // Retrieve.
+      LOGGER.info("handleMainResults(): Retrieve client range");
+      while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
+        CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
+        denormalized.add(m);
       }
 
-      grpRecs.add(m);
-      lastId = m.getNormalizationGroupKey();
+      LOGGER.info("handleMainResults(): commit");
+      con.commit(); // free database resources
+
+      LOGGER.info("handleMainResults(): normalize");
+      // Records must be sorted by group key.
+      for (EsClientPerson d : denormalized) {
+        CheeseRay.logEvery(LOGGER, 5000, ++cntrNormalized, "Normalized", "recs");
+        if (!lastId.equals(d.getNormalizationGroupKey()) && cntrNormalized > 1) {
+          normalize(grpRecs);
+          grpRecs.clear(); // Single thread, re-use memory.
+        }
+
+        grpRecs.add(d);
+        lastId = d.getNormalizationGroupKey();
+      }
     }
 
-    flightLog.addToDenormalized(cntr);
-    LOGGER.info("Counts: normalized: {}, de-normalized: {}", normalized.size(), cntr);
+    flightLog.addToDenormalized(cntrRetrieved);
+    LOGGER.info("handleMainResults() DONE: counts: normalized: {}, de-normalized: {}",
+        normalized.size(), cntrRetrieved);
   }
 
   /**
@@ -125,15 +154,15 @@ public class PeopleSummaryThreadHandler
                 ClientSQLResource.INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(sqlPlacementAddress)) {
-      prepAffectedClients(stmtInsClient, range);
-      prepAffectedClients(stmtInsClientPlacementHome, range);
+      prepPlacementClients(stmtInsClient, range);
+      prepPlacementClients(stmtInsClientPlacementHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
       rocket.fail();
       try {
         con.rollback();
       } catch (Exception e2) {
-        LOGGER.trace("NESTED EXCEPTION", e2);
+        LOGGER.trace("NESTED ROLLBACK EXCEPTION!", e2);
       }
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
@@ -145,7 +174,8 @@ public class PeopleSummaryThreadHandler
       rc.setActivePlacementHomeAddress(pha);
     } else {
       // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
-      LOGGER.warn("Placement home address not in normalized map! client id: {}", pha.getClientId());
+      LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
+          pha.getClientId());
     }
   }
 
@@ -263,7 +293,7 @@ public class PeopleSummaryThreadHandler
         .forEach(n -> normalized.put(n.getId(), n));
   }
 
-  protected void prepAffectedClients(final PreparedStatement stmt, final Pair<String, String> p)
+  protected void prepPlacementClients(final PreparedStatement stmt, final Pair<String, String> p)
       throws SQLException {
     stmt.setMaxRows(0);
     stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
@@ -276,7 +306,7 @@ public class PeopleSummaryThreadHandler
     }
 
     final int countInsClient = stmt.executeUpdate();
-    LOGGER.info("affected clients: {}", countInsClient);
+    LOGGER.info("Placement home clients: {}", countInsClient);
   }
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {

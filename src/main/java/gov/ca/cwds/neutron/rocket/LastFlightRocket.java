@@ -245,7 +245,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   @Override
   public void doneRetrieve() {
-    LOGGER.info("\n\t\t *********** RETRIEVAL DONE ***********\n");
+    LOGGER.info("****** RETRIEVAL DONE ******");
     getFlightLog().doneRetrieve();
   }
 
@@ -262,7 +262,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   @Override
   public void doneIndex() {
-    LOGGER.info("\n\t\t *********** INDEXING DONE ***********\n");
+    LOGGER.info("****** INDEXING DONE ******");
     getFlightLog().doneIndex();
   }
 

@@ -10,8 +10,8 @@
 		<property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
 		<property name="hibernate.connection.driver_class">com.ibm.db2.jcc.DB2Driver</property>
 
-		<property name="connection_pool_size">2</property>
-		<property name="hibernate.connection.pool_size">2</property>
+		<property name="connection_pool_size">4</property>
+		<property name="hibernate.connection.pool_size">4</property>
 
 		<property name="show_sql">true</property>
 		<property name="format_sql">true</property>
@@ -28,42 +28,53 @@
 
 		<property name="hibernate.connection.connectionTimeout">1000000</property>
 		<property name="hibernate.connection.loginTimeout">1000000</property>
-		<property name="hibernate.connection.keepAliveTimeOut">60000</property>     <!-- seconds -->
-		
-		<property name="hibernate.connection.enableRowsetSupport">1</property>
+		<property name="hibernate.connection.keepAliveTimeOut">3600</property>        <!-- seconds -->
+
+		<!-- Turn off Hibernate caching: -->
 		<property name="hibernate.connection.autocommit">false</property>
 		<property name="hibernate.cache.use_query_cache">false</property>
 		<property name="hibernate.cache.use_second_level_cache">false</property>
 		<property name="hibernate.connection.isolation">1</property>
 		<property name="hibernate.connection.provider_disables_autocommit">false</property>
-		<!-- <property name="hibernate.connection.allowNextOnExhaustedResultSet">1</property> -->
 
 		<property name="hibernate.connection.sqljAvoidTimeStampConversion">true</property>
 		<property name="hibernate.jdbc.time_zone">America/Los_Angeles</property>
 
+		<!-- C3P0 connection pool: -->
 		<!-- https://www.mchange.com/projects/c3p0/#configuration_properties -->
 		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
-		<property name="hibernate.c3p0.min_size">2</property>
-		<property name="hibernate.c3p0.initialPoolSize">2</property>
-		<property name="hibernate.c3p0.max_size">8</property>
-		<property name="hibernate.c3p0.acquire_increment">3</property>
+		<property name="hibernate.c3p0.min_size">4</property>
+		<property name="hibernate.c3p0.initialPoolSize">4</property>
+		<property name="hibernate.c3p0.max_size">12</property>
+		<property name="hibernate.c3p0.acquire_increment">2</property>
 		<property name="hibernate.c3p0.autoCommitOnClose">false</property>
 
-		<property name="hibernate.c3p0.timeout">1800</property>                   <!-- seconds -->
-		<property name="hibernate.c3p0.idle_test_period">0</property>             <!-- seconds -->
-		<property name="hibernate.c3p0.maxIdleTime">0</property>                  <!-- seconds -->
-		<property name="hibernate.c3p0.checkoutTimeout">60000</property>          <!-- milliseconds -->
-		<property name="hibernate.c3p0.maxAdministrativeTaskTime">900</property>  <!-- seconds -->
+		<property name="hibernate.c3p0.timeout">3600</property>                      <!-- seconds -->
+		<property name="hibernate.c3p0.idle_test_period">3600</property>             <!-- seconds -->
+		<property name="hibernate.c3p0.checkoutTimeout">600000</property>            <!-- milliseconds -->
+		<property name="hibernate.c3p0.maxAdministrativeTaskTime">900</property>     <!-- seconds -->
+		<property name="hibernate.c3p0.maxIdleTime">0</property>                     <!-- seconds -->
+		<property name="hibernate.c3p0.unreturnedConnectionTimeout">0</property>     <!-- seconds -->
+		<property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">false</property>
 
+		<!-- Turn off C3P0 statement caching: -->
 		<property name="hibernate.c3p0.max_statements">0</property>
 		<property name="hibernate.c3p0.maxStatementsPerConnection">0</property>
 
-		<property name="hibernate.c3p0.unreturnedConnectionTimeout">0</property>  <!-- seconds -->
-		<property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
-
-		<property name="hibernate.c3p0.testConnectionOnCheckout">true</property>
+		<property name="hibernate.c3p0.testConnectionOnCheckout">false</property>
 		<property name="hibernate.c3p0.connectionTesterClassName">gov.ca.cwds.neutron.quark.NeutronNoOpConnectionTester</property>
 		<property name="hibernate.c3p0.preferredTestQuery">SELECT 1 FROM SYSIBM.SYSDUMMY1 FOR READ ONLY WITH UR</property>
+
+		<!-- C3P0 DEBUGGING: -->
+		<property name="hibernate.c3p0.unreturnedConnectionTimeout">3600</property>  <!-- seconds -->
+		<property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
+
+		<!-- DB2 OPTIONS: -->
+		<!-- Multi-row fetch: -->
+		<!-- <property name="hibernate.connection.enableRowsetSupport">1</property> -->
+
+		<!-- Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032 -->
+		<property name="hibernate.connection.allowNextOnExhaustedResultSet">1</property>
 
 	</session-factory>
 
