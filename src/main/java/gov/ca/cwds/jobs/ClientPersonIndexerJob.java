@@ -152,7 +152,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     ret = buf.toString();
-    LOGGER.info("initial load: SQL: {}", ret);
+    LOGGER.info("initial load: SQL:\n{}\n", ret);
 
     return ret;
   }
@@ -171,7 +171,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
     }
 
-    LOGGER.info("last change: SQL: {}", ret);
+    LOGGER.info("last change: SQL:\n{}\n", ret);
     return ret;
   }
 
@@ -192,7 +192,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronCheckedException {
-    return NeutronJdbcUtils.getCommonPartitionRanges512(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges1024(this);
   }
 
   /**

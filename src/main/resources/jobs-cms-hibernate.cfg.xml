@@ -28,7 +28,7 @@
 
 		<property name="hibernate.connection.connectionTimeout">1000000</property>
 		<property name="hibernate.connection.loginTimeout">1000000</property>
-		<property name="hibernate.connection.keepAliveTimeOut">3600</property>     <!-- seconds -->
+		<property name="hibernate.connection.keepAliveTimeOut">3600</property>        <!-- seconds -->
 
 		<!-- Turn off Hibernate caching: -->
 		<property name="hibernate.connection.autocommit">false</property>
@@ -49,12 +49,12 @@
 		<property name="hibernate.c3p0.acquire_increment">2</property>
 		<property name="hibernate.c3p0.autoCommitOnClose">false</property>
 
-		<property name="hibernate.c3p0.timeout">3600</property>                   <!-- seconds -->
-		<property name="hibernate.c3p0.idle_test_period">3600</property>          <!-- seconds -->
-		<property name="hibernate.c3p0.checkoutTimeout">600000</property>         <!-- milliseconds -->
-		<property name="hibernate.c3p0.maxAdministrativeTaskTime">900</property>  <!-- seconds -->
-		<property name="hibernate.c3p0.maxIdleTime">0</property>                  <!-- seconds -->
-		<property name="hibernate.c3p0.unreturnedConnectionTimeout">0</property>  <!-- seconds -->
+		<property name="hibernate.c3p0.timeout">3600</property>                      <!-- seconds -->
+		<property name="hibernate.c3p0.idle_test_period">3600</property>             <!-- seconds -->
+		<property name="hibernate.c3p0.checkoutTimeout">600000</property>            <!-- milliseconds -->
+		<property name="hibernate.c3p0.maxAdministrativeTaskTime">900</property>     <!-- seconds -->
+		<property name="hibernate.c3p0.maxIdleTime">0</property>                     <!-- seconds -->
+		<property name="hibernate.c3p0.unreturnedConnectionTimeout">0</property>     <!-- seconds -->
 		<property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">false</property>
 
 		<!-- Turn off C3P0 statement caching: -->
@@ -64,6 +64,10 @@
 		<property name="hibernate.c3p0.testConnectionOnCheckout">false</property>
 		<property name="hibernate.c3p0.connectionTesterClassName">gov.ca.cwds.neutron.quark.NeutronNoOpConnectionTester</property>
 		<property name="hibernate.c3p0.preferredTestQuery">SELECT 1 FROM SYSIBM.SYSDUMMY1 FOR READ ONLY WITH UR</property>
+
+		<!-- C3P0 DEBUGGING: -->
+		<property name="hibernate.c3p0.unreturnedConnectionTimeout">3600</property>  <!-- seconds -->
+		<property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
 
 		<!-- DB2 OPTIONS: -->
 		<!-- Multi-row fetch: -->

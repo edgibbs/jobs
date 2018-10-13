@@ -9,6 +9,9 @@ import gov.ca.cwds.neutron.jetpack.JobLogs;
  */
 public enum NeutronIntegerDefaults {
 
+  /**
+   * Give Elasticsearch bulk indexing a chance to catch its breath.
+   */
   WAIT_BULK_PROCESSOR(25),
 
   /**
