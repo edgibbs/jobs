@@ -10,7 +10,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +34,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -515,7 +515,7 @@ public class ReferralHistoryIndexerJobTest
 
   @Test(expected = SQLException.class)
   public void getConnection_Args___T__SQLException() throws Exception {
-    when(cp.getConnection()).thenThrow(SQLException.class);
+    when(dao.grabSession()).thenThrow(SQLException.class);
     target.getConnection();
   }
 
