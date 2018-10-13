@@ -73,7 +73,7 @@
 		<!-- Multi-row fetch: -->
 		<!-- <property name="hibernate.connection.enableRowsetSupport">1</property> -->
 
-		<!-- Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032-->
+		<!-- Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032 -->
 		<property name="hibernate.connection.allowNextOnExhaustedResultSet">1</property>
 
 	</session-factory>
