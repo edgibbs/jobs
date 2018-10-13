@@ -5,10 +5,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,13 +64,13 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test
   public void handleMainResults_A$ResultSet() throws Exception {
-    target.handleMainResults(rs, null);
+    target.handleMainResults(rs, con);
   }
 
   @Test(expected = SQLException.class)
   public void handleMainResults_A$ResultSet_T$SQLException() throws Exception {
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-    target.handleMainResults(rs, null);
+    target.handleMainResults(rs, con);
   }
 
   @Test
@@ -81,9 +81,9 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test(expected = NeutronRuntimeException.class)
   public void handleSecondaryJdbc_A$Connection$Pair_T$SQLException() throws Exception {
-    Connection con = mock(Connection.class);
-    Pair<String, String> range = pair;
-    target.handleSecondaryJdbc(con, range);
+    doThrow(new SQLException()).when(con).commit();
+    doThrow(new SQLException()).when(rs).getString(any());
+    target.handleSecondaryJdbc(con, pair);
   }
 
   @Test

@@ -477,14 +477,10 @@ public class EsPersonReferralTest extends Goddard<ReplicatedPersonReferrals, EsP
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void extractAllegation_Args__ResultSet_T__SQLException() throws Exception {
-    try {
-      doThrow(new SQLException()).when(rs).getString(any());
-      EsPersonReferral.extractAllegation(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    doThrow(new SQLException()).when(rs).getString(any());
+    EsPersonReferral.extractAllegation(rs);
   }
 
   @Test
@@ -493,14 +489,10 @@ public class EsPersonReferralTest extends Goddard<ReplicatedPersonReferrals, EsP
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void extractReferral_Args__ResultSet_T__SQLException() throws Exception {
-    try {
-      doThrow(new SQLException()).when(rs).getString(any());
-      EsPersonReferral.extractReferral(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    doThrow(new SQLException()).when(rs).getString(any());
+    EsPersonReferral.extractReferral(rs);
   }
 
   @Test
