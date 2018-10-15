@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
@@ -157,13 +159,19 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
    * Initial load only.
    */
   private final List<Pair<String, String>> initialLoadRangesStarted =
-      Collections.synchronizedList(new ArrayList<>(512));
+      Collections.synchronizedList(new ArrayList<>(1024));
 
   /**
    * Initial load only.
    */
   private final List<Pair<String, String>> initialLoadRangesCompleted =
-      Collections.synchronizedList(new ArrayList<>(512));
+      Collections.synchronizedList(new ArrayList<>(1024));
+
+  /**
+   * Initial load only.
+   */
+  private final Map<Pair<String, String>, FlightStatus> initialLoadRangeStatus =
+      new ConcurrentHashMap<>();
 
   /**
    * Last change only. Log Elasticsearch documents created or modified by this rocket.
@@ -372,21 +380,38 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return this.recsBulkError.incrementAndGet();
   }
 
+  // =======================
+  // INITIAL LOAD RANGES:
+  // =======================
+
+  protected void setRangeStatus(final Pair<String, String> pair, final FlightStatus flightStatus) {
+    initialLoadRangeStatus.put(pair, flightStatus);
+  }
+
   public void markRangeStart(final Pair<String, String> pair) {
     initialLoadRangesStarted.add(pair);
+    setRangeStatus(pair, FlightStatus.RUNNING);
   }
 
   public void markRangeComplete(final Pair<String, String> pair) {
     initialLoadRangesCompleted.add(pair);
   }
 
-  public void addAffectedDocumentId(String docId) {
-    affectedDocumentIds.add(docId);
+  public void markRangeSuccess(final Pair<String, String> pair) {
+    setRangeStatus(pair, FlightStatus.SUCCEEDED);
+  }
+
+  public void markRangeError(final Pair<String, String> pair) {
+    setRangeStatus(pair, FlightStatus.FAILED);
   }
 
   // =======================
   // ACCESSORS:
   // =======================
+
+  public void addAffectedDocumentId(String docId) {
+    affectedDocumentIds.add(docId);
+  }
 
   public List<Pair<String, String>> getInitialLoadRangesStarted() {
     final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
