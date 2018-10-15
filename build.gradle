@@ -79,6 +79,8 @@ dependencies {
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
         exclude group: 'com.ibm'
+        exclude group: 'org.elasticsearch'
+        exclude group: 'org.elasticsearch.client'
 	}
 
     compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
@@ -99,7 +101,7 @@ dependencies {
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
 	testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powerMockVersion
-    testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: powerMockVersion
+    testCompile group: 'org.powermock', name: 'powermock-api-mockito2',  version: powerMockVersion
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.195'
