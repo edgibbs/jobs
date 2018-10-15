@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs;
 
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -181,7 +182,7 @@ public class RelationshipIndexerJob
    * @throws SQLException on database error
    */
   @Override
-  public void handleMainResults(final ResultSet rs) throws SQLException {
+  public void handleMainResults(final ResultSet rs, Connection con) throws SQLException {
     int cntr = 0;
     EsRelationship m;
     Object lastId = new Object();

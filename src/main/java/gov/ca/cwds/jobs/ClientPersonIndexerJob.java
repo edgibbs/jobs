@@ -141,6 +141,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
+    String ret = null;
     final StringBuilder buf = new StringBuilder();
     buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' ");
@@ -150,7 +151,10 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
-    return buf.toString();
+    ret = buf.toString();
+    LOGGER.info("initial load: SQL:\n\n{}\n", ret);
+
+    return ret;
   }
 
   /**
@@ -159,12 +163,16 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    */
   @Override
   public String getPrepLastChangeSQL() {
+    String ret = null;
     try {
-      return NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
+      ret = NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
           determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
     }
+
+    LOGGER.info("last change: SQL:\n\n{}\n", ret);
+    return ret;
   }
 
   @Override
@@ -184,7 +192,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public List<Pair<String, String>> getPartitionRanges() throws NeutronCheckedException {
-    return NeutronJdbcUtils.getCommonPartitionRanges512(this);
+    return NeutronJdbcUtils.getCommonPartitionRanges1024(this);
   }
 
   /**
@@ -246,8 +254,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * {@inheritDoc}
    */
   @Override
-  public void handleMainResults(final ResultSet rs) throws SQLException {
-    handler.get().handleMainResults(rs);
+  public void handleMainResults(final ResultSet rs, Connection con) throws SQLException {
+    handler.get().handleMainResults(rs, con);
   }
 
   @Override

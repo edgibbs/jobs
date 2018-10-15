@@ -31,6 +31,8 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNormalizer<?>>
     extends AtomShared, AtomRowMapper<M> {
 
+  public static final String CURRENT_SCHEMA = "DB_CMS_SCHEMA";
+
   /**
    * @return the rocket's main DAO.
    */
@@ -40,14 +42,14 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * @return default CMS schema name
    */
   default String getDBSchemaName() {
-    return System.getProperty("DB_CMS_SCHEMA");
+    return System.getProperty(CURRENT_SCHEMA);
   }
 
   /**
    * @return default CMS schema name
    */
   static String databaseSchemaName() {
-    return System.getProperty("DB_CMS_SCHEMA");
+    return System.getProperty(CURRENT_SCHEMA);
   }
 
   /**
@@ -149,7 +151,8 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    * Detect large data sets on the mainframe.
    * 
    * <p>
-   * <strong>HACK:</strong> also checks schema name. Add a "database version" table or something.
+   * <strong>HACK:</strong> also checks schema name. Add a "database version" table or get client
+   * count.
    * </p>
    * 
    * @return true if is large data set on z/OS
@@ -158,7 +161,8 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   default boolean isLargeDataSet() throws NeutronCheckedException {
     final String schema = getDBSchemaName().toUpperCase().trim();
 
-    // Not the best idea to check by replication schema name, but we lack other options.
+    // TODO: Bad idea to check data size by replication schema name.
+    // Get the client count instead. Need a client DAO.
     return isDB2OnZOS()
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("RSS"));
   }

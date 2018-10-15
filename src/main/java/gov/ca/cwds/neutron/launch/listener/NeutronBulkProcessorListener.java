@@ -46,7 +46,7 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
     if (response.hasFailures()) {
       // NEXT: use CindyBulkResponse for per record error details instead of toString().
       final String failure = response.buildFailureMessage();
-      LOGGER.error("\n\t\t >>>>>> BULK FAILURES??? status: {}, errors: {}\n", response.status(),
+      LOGGER.error("\n\t\t >>>>>> BULK FAILURES! status: {}, errors: {}\n", response.status(),
           failure);
       flightLog.trackBulkError();
     }

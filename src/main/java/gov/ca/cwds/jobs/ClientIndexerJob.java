@@ -1,6 +1,8 @@
 package gov.ca.cwds.jobs;
 
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -177,7 +179,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * {@inheritDoc}
    */
   @Override
-  public void handleMainResults(final ResultSet rs) throws SQLException {
+  public void handleMainResults(final ResultSet rs, Connection con) throws SQLException {
     int cntr = 0;
     EsClientAddress m;
     Object lastId = new Object();

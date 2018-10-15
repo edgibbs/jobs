@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,6 +33,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
@@ -221,8 +221,7 @@ public class ReferralHistoryIndexerJob
   @Inject
   public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao dao,
       @Named("elasticsearch.dao.people") ElasticsearchDao esDao, @LastRunFile String lastRunFile,
-      ObjectMapper mapper, FlightPlan flightPlan,
-      AtomLaunchDirector launchDirector) {
+      ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
 
@@ -267,7 +266,7 @@ public class ReferralHistoryIndexerJob
    * @throws SQLException on database error
    */
   protected synchronized Connection getConnection() throws SQLException {
-    return NeutronJdbcUtils.prepConnection(jobDao.getSessionFactory());
+    return NeutronJdbcUtils.prepConnection(jobDao.grabSession());
   }
 
   /**
@@ -426,9 +425,11 @@ public class ReferralHistoryIndexerJob
   /**
    * Release heap objects early and often. Good time to <strong>request</strong> garbage collection,
    * not demand it. Java GC runs in a dedicated thread anyway.
+   * 
    * <p>
    * SonarQube disagrees.
    * </p>
+   * 
    * The catch: when many threads run, parallel GC may not get sufficient CPU cycles, until heap
    * memory is exhausted. Yes, this is a good place to drop a hint to GC that it
    * <strong>might</strong> want to clean up memory.
