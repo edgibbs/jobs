@@ -9,6 +9,6 @@ elasticsearch.doctype: person-summary
 # elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_summary.json
 
 # X-Pack:
-elasticsearch.xpack.user: elastic
-elasticsearch.xpack.password: changeme
+# elasticsearch.xpack.user: elastic
+# elasticsearch.xpack.password: changeme
 

@@ -106,7 +106,6 @@ import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.vox.XRaySpex;
-import gov.ca.cwds.rest.ElasticUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;

@@ -17,6 +17,7 @@ import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.ApiException;
 
@@ -101,7 +102,7 @@ public class ElasticUtils {
           addressList.add(new TransportAddress(InetAddress.getByName(hostPort[0]),
               Integer.parseInt(hostPort[1])));
         } catch (UnknownHostException e) {
-          LOGGER.error("Error adding Node: {}", e.getMessage(), e);
+          throw CheeseRay.runtime(LOGGER, e, "ERROR ADDING ES NODE! {}", e.getMessage());
         } // end catch
       } // end if
     } // end for
