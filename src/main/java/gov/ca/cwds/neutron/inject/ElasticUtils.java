@@ -83,7 +83,7 @@ public class ElasticUtils {
 
     // Comma-separated List of host:port pairs provided in configuration file.
     // Example: host1:port1,host2:port2,...etc.
-    if (StringUtils.isBlank(config.getElasticsearchNodes())) {
+    if (StringUtils.isNotBlank(config.getElasticsearchNodes())) {
       nodesList.addAll(Arrays.asList(config.getElasticsearchNodes().trim().split(",")));
     }
 
