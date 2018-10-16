@@ -105,7 +105,6 @@ import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.neutron.vox.XRaySpex;
-import gov.ca.cwds.rest.ElasticUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
@@ -473,7 +472,7 @@ public class HyperCube extends NeutronGuiceModule {
     TransportClient client = null;
     LOGGER.debug("HyperCube.buildElasticsearchClient");
     try {
-      client = ElasticUtils.buildElasticsearchClient(config);
+      client = gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
       return client;
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e,
