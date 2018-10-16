@@ -284,7 +284,6 @@ public class EsClientPerson extends BaseEsClient
     // Last change (overall)
     //
     ret.lastChange = rs.getTimestamp("LAST_CHG");
-
     return ret;
   }
 

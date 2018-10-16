@@ -476,7 +476,7 @@ public class HyperCube extends NeutronGuiceModule {
       return client;
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e,
-          "ERROR initializing Elasticsearch client for people index: {}", e.getMessage(), e);
+          "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
     }
   }
 
