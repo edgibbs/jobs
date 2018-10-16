@@ -80,13 +80,13 @@ public class ElasticUtils {
           .add(config.getElasticsearchHost().concat(":").concat(config.getElasticsearchPort()));
     }
 
-    // Comma "," separated List of host:port pairs provided in configuration file.
+    // Comma-separated List of host:port pairs provided in configuration file.
     // Example: host1:port1,host2:port2,...etc.
-    if (config.getElasticsearchNodes() != null) {
-      nodesList.addAll(Arrays.asList(config.getElasticsearchNodes().split(",")));
+    if (StringUtils.isBlank(config.getElasticsearchNodes())) {
+      nodesList.addAll(Arrays.asList(config.getElasticsearchNodes().trim().split(",")));
     }
 
-    // remove duplicates if any.
+    // Remove duplicates if any.
     final Map<String, String[]> nodesMap = new HashMap<>(nodesList.size());
     for (String node : nodesList) {
       nodesMap.put(node, node.split(":"));
@@ -102,10 +102,9 @@ public class ElasticUtils {
               Integer.parseInt(hostPort[1])));
         } catch (UnknownHostException e) {
           LOGGER.error("Error adding Node: {}", e.getMessage(), e);
-        }
-
-      }
-    }
+        } // end catch
+      } // end if
+    } // end for
 
     return addressList;
   }
