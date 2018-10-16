@@ -480,7 +480,7 @@ public class HyperCube extends NeutronGuiceModule {
     TransportClient client = null;
     LOGGER.debug("HyperCube.buildElasticsearchClient()");
     try {
-      client = ElasticUtils.buildElasticsearchClient(config);
+      client = new Elasticsearch6JavaClientBuilder().buildElasticsearchClient(config);
       return client;
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e,

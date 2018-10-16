@@ -19,36 +19,37 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
-import gov.ca.cwds.rest.api.ApiException;
 
 /**
  * @author CWDS API Team
  */
-public class ElasticUtils {
+public class Elasticsearch6JavaClientBuilder {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticUtils.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(Elasticsearch6JavaClientBuilder.class);
 
-  private ElasticUtils() {}
+  public Elasticsearch6JavaClientBuilder() {
+    // No-op.
+  }
 
-  public static TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config) {
+  public TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config) {
     TransportClient client = null;
     try {
       client = makeESTransportClient(config);
-
       for (TransportAddress address : getValidatedESNodes(config)) {
         client.addTransportAddress(address);
       }
       return client;
     } catch (Exception e) {
-      LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+      LOGGER.error("ERROR INITIALIZING ELASTICSEARCH CLIENT!: {}", e.getMessage(), e);
       if (client != null) {
         client.close();
       }
-      throw new ApiException(e);
+      throw CheeseRay.runtime(LOGGER, e, "ERROR ADDING ES CLIENT TRANSPORT! {}", e.getMessage());
     }
   }
 
-  private static TransportClient makeESTransportClient(final ElasticsearchConfiguration config) {
+  protected TransportClient makeESTransportClient(final ElasticsearchConfiguration config) {
     TransportClient client;
     final String cluster = config.getElasticsearchCluster();
     final String user = config.getUser();
@@ -71,7 +72,7 @@ public class ElasticUtils {
   }
 
   @SuppressWarnings("fb-contrib:CLI_CONSTANT_LIST_INDEX")
-  private static List<TransportAddress> getValidatedESNodes(ElasticsearchConfiguration config) {
+  protected List<TransportAddress> getValidatedESNodes(ElasticsearchConfiguration config) {
     final List<TransportAddress> addressList = new ArrayList<>();
     final List<String> nodesList = new ArrayList<>();
 
