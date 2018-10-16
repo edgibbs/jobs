@@ -143,7 +143,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   public String getInitialLoadQuery(String dbSchemaName) {
     String ret = null;
     final StringBuilder buf = new StringBuilder();
-    buf.append("SELECT x.* FROM ").append(dbSchemaName).append('.').append(getInitialLoadViewName())
+    buf.append("SELECT ").append(ClientSQLResource.LAST_CHG_COLUMNS).append(" FROM ")
+        .append(dbSchemaName).append('.').append(getInitialLoadViewName())
         .append(" x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' ");
 
     if (!getFlightPlan().isLoadSealedAndSensitive()) {
