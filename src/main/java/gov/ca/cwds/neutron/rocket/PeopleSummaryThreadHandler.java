@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
@@ -69,24 +69,26 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id
    */
+  protected Map<String, RawClient> rawClients = new HashMap<>(FULL_DENORMALIZED_SIZE);
+
+  /**
+   * key = client id
+   */
   protected Map<String, ReplicatedClient> normalized = new HashMap<>(FULL_DENORMALIZED_SIZE);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
   }
 
-  protected List<EsClientPerson> readClient(final ResultSet rs) throws SQLException {
+  protected void readClient(final ResultSet rs) throws SQLException {
     int cntrRetrieved = 0;
-    EsClientPerson m;
-    final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
+    RawClient m;
 
     LOGGER.info("readClient()");
-    while (rocket.isRunning() && rs.next() && (m = EsClientPerson.extractClient(rs)) != null) {
+    while (rocket.isRunning() && rs.next() && (m = RawClient.extractClient(rs)) != null) {
       CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
-      denormalized.add(m);
+      rawClients.put(m.getCltId(), m);
     }
-
-    return denormalized;
   }
 
   protected void readClientAddress(final ResultSet rs) throws SQLException {
@@ -119,32 +121,14 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
-    int cntrNormalized = 0;
-    final FlightLog flightLog = getRocket().getFlightLog();
-
-    final List<EsClientPerson> denormalized = readClient(rs);
-    final int cntrRetrieved = denormalized.size();
+    readClient(rs);
+    final int cntrRetrieved = rawClients.size();
 
     LOGGER.info("handleMainResults(): commit");
     con.commit(); // free database resources
 
-    Object lastId = new Object();
-    final List<EsClientPerson> grpRecs = new ArrayList<>(1);
-    LOGGER.info("handleMainResults(): normalize");
 
-    // TODO: normalization no longer necessary. Move to ResultSet read to ReplicatedClient.
-    // Records must be sorted by group key.
-    for (EsClientPerson d : denormalized) {
-      CheeseRay.logEvery(LOGGER, 5000, ++cntrNormalized, "Normalized", "recs");
-      if (!lastId.equals(d.getNormalizationGroupKey()) && cntrNormalized > 1) {
-        normalize(grpRecs);
-        grpRecs.clear(); // Single thread, re-use memory.
-      }
-
-      grpRecs.add(d);
-      lastId = d.getNormalizationGroupKey();
-    }
-
+    final FlightLog flightLog = getRocket().getFlightLog();
     flightLog.addToDenormalized(cntrRetrieved);
     LOGGER.info("handleMainResults() DONE: counts: normalized: {}, de-normalized: {}",
         normalized.size(), cntrRetrieved);

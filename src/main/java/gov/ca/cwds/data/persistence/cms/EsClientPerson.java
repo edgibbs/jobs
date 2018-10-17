@@ -1,7 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
 import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
-import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -219,67 +218,6 @@ public class EsClientPerson extends BaseEsClient
   @Type(type = "timestamp")
   private Date csecReplicationTimestamp;
 
-  public static EsClientPerson extractClient(final ResultSet rs) throws SQLException {
-    final EsClientPerson ret = new EsClientPerson();
-    ret.cltId = ifNull(rs.getString("CLT_IDENTIFIER"));
-    ret.cltSensitivityIndicator = ifNull(rs.getString("CLT_SENSTV_IND"));
-    ret.cltSoc158SealedClientIndicator = ifNull(rs.getString("CLT_SOC158_IND"));
-    ret.cltAdjudicatedDelinquentIndicator = ifNull(rs.getString("CLT_ADJDEL_IND"));
-    ret.cltAdoptionStatusCode = rs.getString("CLT_ADPTN_STCD");
-    ret.cltAlienRegistrationNumber = ifNull(rs.getString("CLT_ALN_REG_NO"));
-    ret.cltBirthCity = ifNull(rs.getString("CLT_BIRTH_CITY"));
-    ret.cltBirthCountryCodeType = rs.getShort("CLT_B_CNTRY_C");
-    ret.cltBirthDate = rs.getDate("CLT_BIRTH_DT");
-    ret.cltBirthFacilityName = ifNull(rs.getString("CLT_BR_FAC_NM"));
-    ret.cltBirthStateCodeType = rs.getShort("CLT_B_STATE_C");
-    ret.cltBirthplaceVerifiedIndicator = ifNull(rs.getString("CLT_BP_VER_IND"));
-    ret.cltChildClientIndicatorVar = ifNull(rs.getString("CLT_CHLD_CLT_B"));
-    ret.cltClientIndexNumber = ifNull(rs.getString("CLT_CL_INDX_NO"));
-    ret.cltCommentDescription = ifNull(rs.getString("CLT_COMMNT_DSC"));
-    ret.cltCommonFirstName = (rs.getString("CLT_COM_FST_NM"));
-    ret.cltCommonLastName = ifNull(rs.getString("CLT_COM_LST_NM"));
-    ret.cltCommonMiddleName = ifNull(rs.getString("CLT_COM_MID_NM"));
-    ret.cltConfidentialityActionDate = rs.getDate("CLT_CONF_ACTDT");
-    ret.cltConfidentialityInEffectIndicator = ifNull(rs.getString("CLT_CONF_EFIND"));
-    ret.cltCreationDate = rs.getDate("CLT_CREATN_DT");
-    ret.cltCurrCaChildrenServIndicator = ifNull(rs.getString("CLT_CURRCA_IND"));
-    ret.cltCurrentlyOtherDescription = rs.getString("CLT_COTH_DESC");
-    ret.cltCurrentlyRegionalCenterIndicator = ifNull(rs.getString("CLT_CURREG_IND"));
-    ret.cltDeathDate = rs.getDate("CLT_DEATH_DT");
-    ret.cltDeathDateVerifiedIndicator = ifNull(rs.getString("CLT_DTH_DT_IND"));
-    ret.cltDeathPlace = ifNull(rs.getString("CLT_DEATH_PLC"));
-    ret.cltDeathReasonText = ifNull(rs.getString("CLT_DTH_RN_TXT"));
-    ret.cltDriverLicenseNumber = ifNull(rs.getString("CLT_DRV_LIC_NO"));
-    ret.cltDriverLicenseStateCodeType = rs.getShort("CLT_D_STATE_C");
-    ret.cltEmailAddress = ifNull(rs.getString("CLT_EMAIL_ADDR"));
-    ret.cltEstimatedDobCode = ifNull(rs.getString("CLT_EST_DOB_CD"));
-    ret.cltEthUnableToDetReasonCode = ifNull(rs.getString("CLT_ETH_UD_CD"));
-    ret.cltFatherParentalRightTermDate = rs.getDate("CLT_FTERM_DT");
-    ret.cltGenderCode = ifNull(rs.getString("CLT_GENDER_CD"));
-    ret.cltHealthSummaryText = ifNull(rs.getString("CLT_HEALTH_TXT"));
-    ret.cltHispUnableToDetReasonCode = ifNull(rs.getString("CLT_HISP_UD_CD"));
-    ret.cltHispanicOriginCode = ifNull(rs.getString("CLT_HISP_CD"));
-    ret.cltImmigrationCountryCodeType = rs.getShort("CLT_I_CNTRY_C");
-    ret.cltImmigrationStatusType = rs.getShort("CLT_IMGT_STC");
-    ret.cltIncapacitatedParentCode = ifNull(rs.getString("CLT_INCAPC_CD"));
-    ret.cltIndividualHealthCarePlanIndicator = ifNull(rs.getString("CLT_HCARE_IND"));
-    ret.cltLimitationOnScpHealthIndicator = ifNull(rs.getString("CLT_LIMIT_IND"));
-    ret.cltLiterateCode = ifNull(rs.getString("CLT_LITRATE_CD"));
-    ret.cltMaritalCohabitatnHstryIndicatorVar = ifNull(rs.getString("CLT_MAR_HIST_B"));
-    ret.cltMaritalStatusType = rs.getShort("CLT_MRTL_STC");
-    ret.cltMilitaryStatusCode = ifNull(rs.getString("CLT_MILT_STACD"));
-    ret.cltMotherParentalRightTermDate = rs.getDate("CLT_MTERM_DT");
-    ret.cltNamePrefixDescription = ifNull(rs.getString("CLT_NMPRFX_DSC"));
-    ret.cltNameType = rs.getShort("CLT_NAME_TPC");
-    ret.cltOutstandingWarrantIndicator = ifNull(rs.getString("CLT_OUTWRT_IND"));
-    ret.cltPrevCaChildrenServIndicator = ifNull(rs.getString("CLT_PREVCA_IND"));
-    ret.cltPrevOtherDescription = ifNull(rs.getString("CLT_POTH_DESC"));
-    ret.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
-    ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
-
-    return ret;
-  }
-
   /**
    * Build an EsClient from the incoming ResultSet.
    * 
@@ -362,7 +300,7 @@ public class EsClientPerson extends BaseEsClient
 
   @Override
   public ReplicatedClient normalize(Map<Object, ReplicatedClient> map) {
-    ReplicatedClient ret = super.normalize(map);
+    final ReplicatedClient ret = super.normalize(map);
 
     // Safety alerts
     ret.addSafetyAlert(createSafetyAlert());
