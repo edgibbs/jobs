@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,7 +34,6 @@ import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -332,7 +333,7 @@ public class EsClientPerson extends BaseEsClient
   }
 
   public Date getCltFatherParentalRightTermDate() {
-    return NeutronDateUtils.freshDate(cltFatherParentalRightTermDate);
+    return freshDate(cltFatherParentalRightTermDate);
   }
 
   public void setClaId(String claId) {
@@ -392,11 +393,11 @@ public class EsClientPerson extends BaseEsClient
   }
 
   public Date getSafetyAlertActivationDate() {
-    return NeutronDateUtils.freshDate(safetyAlertActivationDate);
+    return freshDate(safetyAlertActivationDate);
   }
 
   public void setSafetyAlertActivationDate(Date safetyAlertActivationDate) {
-    this.safetyAlertActivationDate = NeutronDateUtils.freshDate(safetyAlertActivationDate);
+    this.safetyAlertActivationDate = freshDate(safetyAlertActivationDate);
   }
 
   public Short getSafetyAlertActivationCountyCode() {
@@ -416,11 +417,11 @@ public class EsClientPerson extends BaseEsClient
   }
 
   public Date getSafetyAlertDeactivationDate() {
-    return NeutronDateUtils.freshDate(safetyAlertDeactivationDate);
+    return freshDate(safetyAlertDeactivationDate);
   }
 
   public void setSafetyAlertDeactivationDate(Date safetyAlertDeactivationDate) {
-    this.safetyAlertDeactivationDate = NeutronDateUtils.freshDate(safetyAlertDeactivationDate);
+    this.safetyAlertDeactivationDate = freshDate(safetyAlertDeactivationDate);
   }
 
   public Short getSafetyAlertDeactivationCountyCode() {
@@ -448,12 +449,11 @@ public class EsClientPerson extends BaseEsClient
   }
 
   public Date getSafetyAlertLastUpdatedTimestamp() {
-    return NeutronDateUtils.freshDate(safetyAlertLastUpdatedTimestamp);
+    return freshDate(safetyAlertLastUpdatedTimestamp);
   }
 
   public void setSafetyAlertLastUpdatedTimestamp(Date safetyAlertLastUpdatedTimestamp) {
-    this.safetyAlertLastUpdatedTimestamp =
-        NeutronDateUtils.freshDate(safetyAlertLastUpdatedTimestamp);
+    this.safetyAlertLastUpdatedTimestamp = freshDate(safetyAlertLastUpdatedTimestamp);
   }
 
   public CmsReplicationOperation getSafetyAlertLastUpdatedOperation() {
@@ -466,12 +466,11 @@ public class EsClientPerson extends BaseEsClient
   }
 
   public Date getSafetyAlertReplicationTimestamp() {
-    return NeutronDateUtils.freshDate(safetyAlertReplicationTimestamp);
+    return freshDate(safetyAlertReplicationTimestamp);
   }
 
   public void setSafetyAlertReplicationTimestamp(Date safetyAlertReplicationTimestamp) {
-    this.safetyAlertReplicationTimestamp =
-        NeutronDateUtils.freshDate(safetyAlertReplicationTimestamp);
+    this.safetyAlertReplicationTimestamp = freshDate(safetyAlertReplicationTimestamp);
   }
 
   public String getAkaId() {
@@ -539,11 +538,11 @@ public class EsClientPerson extends BaseEsClient
   }
 
   public Date getAkaLastUpdatedTimestamp() {
-    return NeutronDateUtils.freshDate(akaLastUpdatedTimestamp);
+    return freshDate(akaLastUpdatedTimestamp);
   }
 
   public void setAkaLastUpdatedTimestamp(Date akaLastUpdatedTimestamp) {
-    this.akaLastUpdatedTimestamp = NeutronDateUtils.freshDate(akaLastUpdatedTimestamp);
+    this.akaLastUpdatedTimestamp = freshDate(akaLastUpdatedTimestamp);
   }
 
   public CmsReplicationOperation getAkaLastUpdatedOperation() {
@@ -555,11 +554,11 @@ public class EsClientPerson extends BaseEsClient
   }
 
   public Date getAkaReplicationTimestamp() {
-    return NeutronDateUtils.freshDate(akaReplicationTimestamp);
+    return freshDate(akaReplicationTimestamp);
   }
 
   public void setAkaReplicationTimestamp(Date akaReplicationTimestamp) {
-    this.akaReplicationTimestamp = NeutronDateUtils.freshDate(akaReplicationTimestamp);
+    this.akaReplicationTimestamp = freshDate(akaReplicationTimestamp);
   }
 
   private ElasticSearchSafetyAlert createSafetyAlert() {
@@ -620,7 +619,7 @@ public class EsClientPerson extends BaseEsClient
       return null;
     }
 
-    ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
+    final ElasticSearchPersonAka aka = new ElasticSearchPersonAka();
     aka.setId(this.akaId);
 
     if (StringUtils.isNotBlank(this.akaFirstName)) {
@@ -659,7 +658,7 @@ public class EsClientPerson extends BaseEsClient
       return null;
     }
 
-    ElasticSearchPersonCsec csec = new ElasticSearchPersonCsec();
+    final ElasticSearchPersonCsec csec = new ElasticSearchPersonCsec();
     csec.setId(this.csecId);
 
     csec.setStartDate(DomainChef.cookDate(this.csecStartDate));
@@ -667,7 +666,6 @@ public class EsClientPerson extends BaseEsClient
 
     if (this.csecCodeId != null && this.csecCodeId > 0) {
       csec.setCsecCodeId(this.csecCodeId.toString());
-
       csec.setCsecDesc(SystemCodeCache.global().getSystemCodeShortDescription(this.csecCodeId));
     }
 
