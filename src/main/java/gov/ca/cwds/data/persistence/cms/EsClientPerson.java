@@ -218,6 +218,51 @@ public class EsClientPerson extends BaseEsClient
   @Type(type = "timestamp")
   private Date csecReplicationTimestamp;
 
+  public static EsClientPerson readClient(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readClientAddress(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readAddress(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readClientCounty(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readCase(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readCsec(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readEthnicity(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readAka(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
+  public static EsClientPerson readSafetyAlert(final ResultSet rs) throws SQLException {
+    final EsClientPerson ret = new EsClientPerson();
+    return ret;
+  }
+
   /**
    * Build an EsClient from the incoming ResultSet.
    * 

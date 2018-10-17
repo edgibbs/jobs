@@ -159,8 +159,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   /**
-   * Despite IBM's research prowess in machine learning and artificial intelligence, DB2's optimizer
-   * can be as dumb as a stone.
+   * Despite IBM's research prowess in machine learning and artificial intelligence, the IQ of DB2's
+   * optimizer rivals that of a simple paramecium.
    */
   @Override
   public String getPrepLastChangeSQL() {

@@ -91,34 +91,33 @@ public class PeopleSummaryThreadHandler
     int cntrNormalized = 0;
     final FlightLog flightLog = getRocket().getFlightLog();
 
-    { // scope brace
-      EsClientPerson m;
-      Object lastId = new Object();
-      final List<EsClientPerson> grpRecs = new ArrayList<>(50);
-      final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
+    EsClientPerson m;
+    Object lastId = new Object();
+    final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
 
-      // Retrieve.
-      LOGGER.info("handleMainResults(): Retrieve client range");
-      while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
-        CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
-        denormalized.add(m);
+    // Retrieve.
+    LOGGER.info("handleMainResults(): Retrieve client range");
+    while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
+      CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
+      denormalized.add(m);
+    }
+
+    LOGGER.info("handleMainResults(): commit");
+    con.commit(); // free database resources
+
+    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
+    LOGGER.info("handleMainResults(): normalize");
+
+    // Records must be sorted by group key.
+    for (EsClientPerson d : denormalized) {
+      CheeseRay.logEvery(LOGGER, 5000, ++cntrNormalized, "Normalized", "recs");
+      if (!lastId.equals(d.getNormalizationGroupKey()) && cntrNormalized > 1) {
+        normalize(grpRecs);
+        grpRecs.clear(); // Single thread, re-use memory.
       }
 
-      LOGGER.info("handleMainResults(): commit");
-      con.commit(); // free database resources
-
-      LOGGER.info("handleMainResults(): normalize");
-      // Records must be sorted by group key.
-      for (EsClientPerson d : denormalized) {
-        CheeseRay.logEvery(LOGGER, 5000, ++cntrNormalized, "Normalized", "recs");
-        if (!lastId.equals(d.getNormalizationGroupKey()) && cntrNormalized > 1) {
-          normalize(grpRecs);
-          grpRecs.clear(); // Single thread, re-use memory.
-        }
-
-        grpRecs.add(d);
-        lastId = d.getNormalizationGroupKey();
-      }
+      grpRecs.add(d);
+      lastId = d.getNormalizationGroupKey();
     }
 
     flightLog.addToDenormalized(cntrRetrieved);
