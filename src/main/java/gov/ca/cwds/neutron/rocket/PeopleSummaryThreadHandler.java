@@ -36,7 +36,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
- * {@link AtomLoadStepHandler} for the People Summary getRocket().
+ * {@link AtomLoadStepHandler} for People Summary index, initial load.
  * 
  * <p>
  * Loads {@link EsClientPerson} and {@link PlacementHomeAddress}, normalizes to
@@ -75,6 +75,38 @@ public class PeopleSummaryThreadHandler
     this.rocket = rocket;
   }
 
+  protected List<EsClientPerson> readClient(final ResultSet rs) throws SQLException {
+    int cntrRetrieved = 0;
+    EsClientPerson m;
+    final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
+
+    LOGGER.info("readClient()");
+    while (rocket.isRunning() && rs.next() && (m = EsClientPerson.extractClient(rs)) != null) {
+      CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
+      denormalized.add(m);
+    }
+
+    return denormalized;
+  }
+
+  protected void readClientAddress(final ResultSet rs) throws SQLException {
+
+  }
+
+  protected void readAddress(final ResultSet rs) throws SQLException {}
+
+  protected void readClientCounty(final ResultSet rs) throws SQLException {}
+
+  protected void readEthnicity(final ResultSet rs) throws SQLException {}
+
+  protected void readAka(final ResultSet rs) throws SQLException {}
+
+  protected void readCase(final ResultSet rs) throws SQLException {}
+
+  protected void readSafetyAlert(final ResultSet rs) throws SQLException {}
+
+  protected void readCsec(final ResultSet rs) throws SQLException {}
+
   /**
    * SNAP-715: Initial Load: ERRORCODE=-1224, SQLSTATE=55032.
    * 
@@ -87,27 +119,20 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
-    int cntrRetrieved = 0;
     int cntrNormalized = 0;
     final FlightLog flightLog = getRocket().getFlightLog();
 
-    EsClientPerson m;
-    Object lastId = new Object();
-    final List<EsClientPerson> denormalized = new ArrayList<>(FULL_DENORMALIZED_SIZE);
-
-    // Retrieve.
-    LOGGER.info("handleMainResults(): Retrieve client range");
-    while (rocket.isRunning() && rs.next() && (m = rocket.extract(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
-      denormalized.add(m);
-    }
+    final List<EsClientPerson> denormalized = readClient(rs);
+    final int cntrRetrieved = denormalized.size();
 
     LOGGER.info("handleMainResults(): commit");
     con.commit(); // free database resources
 
-    final List<EsClientPerson> grpRecs = new ArrayList<>(50);
+    Object lastId = new Object();
+    final List<EsClientPerson> grpRecs = new ArrayList<>(1);
     LOGGER.info("handleMainResults(): normalize");
 
+    // TODO: normalization no longer necessary. Move to ResultSet read to ReplicatedClient.
     // Records must be sorted by group key.
     for (EsClientPerson d : denormalized) {
       CheeseRay.logEvery(LOGGER, 5000, ++cntrNormalized, "Normalized", "recs");
