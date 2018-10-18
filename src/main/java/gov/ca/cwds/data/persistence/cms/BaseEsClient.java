@@ -500,8 +500,8 @@ public abstract class BaseEsClient
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
     ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
-    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
 
+    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
     ret.clientCountyId = ifNull(rs.getString("CLC_CLIENT_ID"));
     ret.clientEthnicityId = ifNull(rs.getString("ETHNICITY_CODE"));
 
