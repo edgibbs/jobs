@@ -1,6 +1,8 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -12,6 +14,11 @@ public class ClientAddressReference extends ClientReference {
   @Id
   @Column(name = "CLA_IDENTIFIER")
   protected String claId;
+
+  @Override
+  public ClientReference read(ResultSet rs) throws SQLException {
+    return super.read(rs);
+  }
 
   @Override
   public Serializable getPrimaryKey() {
