@@ -19,7 +19,7 @@ import org.hibernate.annotations.Type;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
-public class RawClient implements PersistentObject {
+public class RawClient implements PersistentObject, NeutronJdbcReader<RawClient> {
 
   private static final long serialVersionUID = 1L;
 
@@ -267,6 +267,7 @@ public class RawClient implements PersistentObject {
     return this.cltId;
   }
 
+  @Override
   public RawClient read(final ResultSet rs) throws SQLException {
     this.cltId = ifNull(rs.getString("CLT_IDENTIFIER"));
     this.cltSensitivityIndicator = ifNull(rs.getString("CLT_SENSTV_IND"));
