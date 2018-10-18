@@ -11,13 +11,12 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Id;
 
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
-public class RawClientAddress extends ClientReference
+public class RawClientAddress extends ClientAddressReference
     implements NeutronJdbcReader<RawClientAddress> {
 
   private static final long serialVersionUID = 1L;
@@ -36,10 +35,6 @@ public class RawClientAddress extends ClientReference
   @Type(type = "timestamp")
   @Column(name = "CLA_LST_UPD_TS")
   protected Date claLastUpdatedTime;
-
-  @Id
-  @Column(name = "CLA_IDENTIFIER")
-  protected String claId;
 
   @Column(name = "CLA_FKADDRS_T")
   protected String claFkAddress;

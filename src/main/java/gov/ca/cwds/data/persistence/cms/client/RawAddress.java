@@ -15,9 +15,10 @@ import javax.persistence.Id;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
-public class RawAddress extends ClientReference implements NeutronJdbcReader<RawAddress> {
+public class RawAddress extends ClientAddressReference implements NeutronJdbcReader<RawAddress> {
 
   private static final long serialVersionUID = 1L;
 
@@ -143,7 +144,7 @@ public class RawAddress extends ClientReference implements NeutronJdbcReader<Raw
 
   @Override
   public Serializable getPrimaryKey() {
-    return this.getAdrId();
+    return new VarargPrimaryKey(getCltId(), getAdrId());
   }
 
   public String getAdrId() {

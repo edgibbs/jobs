@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.util.transform;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Common transformation methods.
  * 
@@ -12,13 +14,13 @@ public final class JobTransformUtils {
   }
 
   /**
-   * Trim a String.
+   * Trim a String to null.
    * 
    * @param value String to trim
    * @return trimmed String or null
    */
   public static final String ifNull(final String value) {
-    return value != null ? value.trim() : null;
+    return StringUtils.trimToNull(value);
   }
 
 }
