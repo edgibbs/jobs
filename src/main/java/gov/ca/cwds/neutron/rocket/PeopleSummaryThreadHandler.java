@@ -91,6 +91,10 @@ public class PeopleSummaryThreadHandler
     }
   }
 
+  // =================================
+  // Neutron, the next generation.
+  // =================================
+
   protected void readClientAddress(final ResultSet rs) throws SQLException {
 
   }
@@ -115,6 +119,10 @@ public class PeopleSummaryThreadHandler
    * <p>
    * Read data, commit as soon as possible, THEN normalize. Takes more memory but reduces database
    * errors.
+   * </p>
+   * 
+   * <p>
+   * OLD SCHOOL: normalize in place to reduce memory but holds cursors open longer.
    * </p>
    * 
    * {@inheritDoc}

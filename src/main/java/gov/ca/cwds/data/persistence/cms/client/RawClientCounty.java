@@ -11,9 +11,7 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
-
-public class RawClientCounty implements PersistentObject, NeutronJdbcReader<RawClientCounty> {
+public class RawClientCounty extends ClientReference implements NeutronJdbcReader<RawClientCounty> {
 
   private static final long serialVersionUID = 1L;
 
@@ -30,6 +28,7 @@ public class RawClientCounty implements PersistentObject, NeutronJdbcReader<RawC
 
   @Override
   public RawClientCounty read(ResultSet rs) throws SQLException {
+    super.read(rs);
     this.clientCounty = rs.getShort("CLC_GVR_ENTC");
     this.clientCountyId = ifNull(rs.getString("CLC_CLIENT_ID"));
     return this;

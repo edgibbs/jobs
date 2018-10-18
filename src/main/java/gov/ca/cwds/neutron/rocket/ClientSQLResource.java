@@ -16,7 +16,8 @@ public class ClientSQLResource implements ApiMarker {
       "INSERT INTO {h-schema}GT_ID (IDENTIFIER) \n"
     + "SELECT x.IDENTIFIER \n"
     + "FROM {h-schema}CLIENT_T x \n"
-    + "WHERE X.IDENTIFIER BETWEEN ? AND ? AND x.IBMSNAP_OPERATION IN ('I','U')";
+    + "WHERE X.IDENTIFIER BETWEEN ? AND ? \n"
+    + "AND x.IBMSNAP_OPERATION IN ('I','U')";
   //@formatter:on
 
   //@formatter:off
@@ -172,7 +173,7 @@ public class ClientSQLResource implements ApiMarker {
         "SELECT \n"
       + "    clc.CLIENT_ID         AS CLT_IDENTIFIER, \n"
       + "    clc.GVR_ENTC          AS CLC_GVR_ENTC, \n"
-      + "    clc.LST_UPD_TS        AS LST_UPD_TS, \n"
+      + "    clc.LST_UPD_TS        AS CLC_LST_UPD_TS, \n"
       + "    clc.LST_UPD_OP        AS CLC_LST_UPD_OP, \n"
       + "    clc.CNTY_RULE         AS CLC_CNTY_RULE \n"
       + "FROM {h-schema}GT_ID        gt \n"

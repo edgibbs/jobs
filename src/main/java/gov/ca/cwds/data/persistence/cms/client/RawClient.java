@@ -11,15 +11,13 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Id;
 
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
-public class RawClient implements PersistentObject, NeutronJdbcReader<RawClient> {
+public class RawClient extends ClientReference implements NeutronJdbcReader<RawClient> {
 
   private static final long serialVersionUID = 1L;
 
@@ -140,10 +138,6 @@ public class RawClient implements PersistentObject, NeutronJdbcReader<RawClient>
 
   @Column(name = "CLT_HISP_CD")
   protected String cltHispanicOriginCode;
-
-  @Id
-  @Column(name = "CLT_IDENTIFIER")
-  protected String cltId;
 
   @Type(type = "short")
   @Column(name = "CLT_I_CNTRY_C")
@@ -269,7 +263,7 @@ public class RawClient implements PersistentObject, NeutronJdbcReader<RawClient>
 
   @Override
   public RawClient read(final ResultSet rs) throws SQLException {
-    this.cltId = ifNull(rs.getString("CLT_IDENTIFIER"));
+    super.read(rs);
     this.cltSensitivityIndicator = ifNull(rs.getString("CLT_SENSTV_IND"));
     this.cltSoc158SealedClientIndicator = ifNull(rs.getString("CLT_SOC158_IND"));
     this.cltAdjudicatedDelinquentIndicator = ifNull(rs.getString("CLT_ADJDEL_IND"));
@@ -494,14 +488,6 @@ public class RawClient implements PersistentObject, NeutronJdbcReader<RawClient>
 
   public void setCltHispanicOriginCode(String cltHispanicOriginCode) {
     this.cltHispanicOriginCode = cltHispanicOriginCode;
-  }
-
-  public String getCltId() {
-    return cltId;
-  }
-
-  public void setCltId(String cltId) {
-    this.cltId = cltId;
   }
 
   public Short getCltImmigrationCountryCodeType() {

@@ -15,10 +15,10 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.Type;
 
-import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
-public class RawClientAddress implements PersistentObject, NeutronJdbcReader<RawClientAddress> {
+public class RawClientAddress extends ClientReference
+    implements NeutronJdbcReader<RawClientAddress> {
 
   private static final long serialVersionUID = 1L;
 
@@ -70,6 +70,7 @@ public class RawClientAddress implements PersistentObject, NeutronJdbcReader<Raw
 
   @Override
   public RawClientAddress read(ResultSet rs) throws SQLException {
+    super.read(rs);
     this.claLastUpdatedId = ifNull(rs.getString("CLA_LST_UPD_ID"));
     this.claLastUpdatedTime = rs.getTimestamp("CLA_LST_UPD_TS");
     this.claId = ifNull(rs.getString("CLA_IDENTIFIER"));
