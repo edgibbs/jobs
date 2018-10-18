@@ -100,7 +100,6 @@ public class ClientSQLResource implements ApiMarker {
       + "FOR READ ONLY WITH UR " ;
   //@formatter:on
 
-
   public static final String SELECT_CLIENT_ADDRESS =
   //@formatter:off
         "SELECT \n"
@@ -255,24 +254,24 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String SELECT_SAFETY_ALERT =
-      "SELECT \n"
-          + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
-          + "    sal.THIRD_ID          AS SAL_THIRD_ID, \n"
-          + "    sal.ACTV_RNC          AS SAL_ACTV_RNC, \n"
-          + "    sal.ACTV_DT           AS SAL_ACTV_DT, \n"
-          + "    sal.ACTV_GEC          AS SAL_ACTV_GEC, \n"
-          + "    sal.ACTV_TXT          AS SAL_ACTV_TXT, \n"
-          + "    sal.DACT_DT           AS SAL_DACT_DT, \n"
-          + "    sal.DACT_GEC          AS SAL_DACT_GEC, \n"
-          + "    sal.DACT_TXT          AS SAL_DACT_TXT, \n"
-          + "    sal.LST_UPD_ID        AS SAL_LST_UPD_ID, \n"
-          + "    sal.LST_UPD_TS        AS SAL_LST_UPD_TS, \n"
-          + "    sal.IBMSNAP_LOGMARKER AS SAL_IBMSNAP_LOGMARKER, \n"
-          + "    sal.IBMSNAP_OPERATION AS SAL_IBMSNAP_OPERATION \n"
-          + "FROM {h-schema}GT_ID     gt \n"
-          + "JOIN {h-schema}SAF_ALRT sal ON sal.FKCLIENT_T = gt.IDENTIFIER \n"
-          + "OPTIMIZE FOR 1000 ROWS \n"
-          + "FOR READ ONLY WITH UR ";
+    "SELECT \n"
+        + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
+        + "    sal.THIRD_ID          AS SAL_THIRD_ID, \n"
+        + "    sal.ACTV_RNC          AS SAL_ACTV_RNC, \n"
+        + "    sal.ACTV_DT           AS SAL_ACTV_DT, \n"
+        + "    sal.ACTV_GEC          AS SAL_ACTV_GEC, \n"
+        + "    sal.ACTV_TXT          AS SAL_ACTV_TXT, \n"
+        + "    sal.DACT_DT           AS SAL_DACT_DT, \n"
+        + "    sal.DACT_GEC          AS SAL_DACT_GEC, \n"
+        + "    sal.DACT_TXT          AS SAL_DACT_TXT, \n"
+        + "    sal.LST_UPD_ID        AS SAL_LST_UPD_ID, \n"
+        + "    sal.LST_UPD_TS        AS SAL_LST_UPD_TS, \n"
+        + "    sal.IBMSNAP_LOGMARKER AS SAL_IBMSNAP_LOGMARKER, \n"
+        + "    sal.IBMSNAP_OPERATION AS SAL_IBMSNAP_OPERATION \n"
+        + "FROM {h-schema}GT_ID     gt \n"
+        + "JOIN {h-schema}SAF_ALRT sal ON sal.FKCLIENT_T = gt.IDENTIFIER \n"
+        + "OPTIMIZE FOR 1000 ROWS \n"
+        + "FOR READ ONLY WITH UR ";
   //@formatter:on
 
 

@@ -85,7 +85,7 @@ public class PeopleSummaryThreadHandler
     RawClient m;
 
     LOGGER.info("readClient()");
-    while (rocket.isRunning() && rs.next() && (m = RawClient.extractClient(rs)) != null) {
+    while (rocket.isRunning() && rs.next() && (m = new RawClient().read(rs)) != null) {
       CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
       rawClients.put(m.getCltId(), m);
     }
