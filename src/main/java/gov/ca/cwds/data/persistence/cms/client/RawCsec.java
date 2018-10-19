@@ -18,6 +18,10 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
 
   private static final long serialVersionUID = 1L;
 
+  // ====================================
+  // CSECHIST: (CSEC history)
+  // =====================================
+
   @Column(name = "CSH_THIRD_ID")
   private String csecId;
 
@@ -66,6 +70,70 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
   @Override
   public Serializable getPrimaryKey() {
     return new VarargPrimaryKey(getCltId(), csecId);
+  }
+
+  public String getCsecId() {
+    return csecId;
+  }
+
+  public void setCsecId(String csecId) {
+    this.csecId = csecId;
+  }
+
+  public Short getCsecCodeId() {
+    return csecCodeId;
+  }
+
+  public void setCsecCodeId(Short csecCodeId) {
+    this.csecCodeId = csecCodeId;
+  }
+
+  public Date getCsecStartDate() {
+    return csecStartDate;
+  }
+
+  public void setCsecStartDate(Date csecStartDate) {
+    this.csecStartDate = csecStartDate;
+  }
+
+  public Date getCsecEndDate() {
+    return csecEndDate;
+  }
+
+  public void setCsecEndDate(Date csecEndDate) {
+    this.csecEndDate = csecEndDate;
+  }
+
+  public String getCsecLastUpdatedId() {
+    return csecLastUpdatedId;
+  }
+
+  public void setCsecLastUpdatedId(String csecLastUpdatedId) {
+    this.csecLastUpdatedId = csecLastUpdatedId;
+  }
+
+  public Date getCsecLastUpdatedTimestamp() {
+    return csecLastUpdatedTimestamp;
+  }
+
+  public void setCsecLastUpdatedTimestamp(Date csecLastUpdatedTimestamp) {
+    this.csecLastUpdatedTimestamp = csecLastUpdatedTimestamp;
+  }
+
+  public CmsReplicationOperation getCsecLastUpdatedOperation() {
+    return csecLastUpdatedOperation;
+  }
+
+  public void setCsecLastUpdatedOperation(CmsReplicationOperation csecLastUpdatedOperation) {
+    this.csecLastUpdatedOperation = csecLastUpdatedOperation;
+  }
+
+  public Date getCsecReplicationTimestamp() {
+    return csecReplicationTimestamp;
+  }
+
+  public void setCsecReplicationTimestamp(Date csecReplicationTimestamp) {
+    this.csecReplicationTimestamp = csecReplicationTimestamp;
   }
 
 }

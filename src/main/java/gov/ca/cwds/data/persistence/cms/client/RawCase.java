@@ -14,6 +14,10 @@ public class RawCase extends ClientReference implements NeutronJdbcReader<RawCas
 
   private static final long serialVersionUID = 1L;
 
+  // ====================================
+  // CASE_T: (is there an open case)
+  // =====================================
+
   @Column(name = "CAS_IDENTIFIER")
   private String openCaseId;
 
@@ -40,6 +44,5 @@ public class RawCase extends ClientReference implements NeutronJdbcReader<RawCas
   public void setOpenCaseId(String openCaseId) {
     this.openCaseId = openCaseId;
   }
-
 
 }

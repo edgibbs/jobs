@@ -6,7 +6,9 @@ import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.EnumType;
@@ -20,6 +22,12 @@ public class RawClientAddress extends ClientAddressReference
     implements NeutronJdbcReader<RawClientAddress> {
 
   private static final long serialVersionUID = 1L;
+
+  private List<RawAddress> addresses = new ArrayList<>();
+
+  // =======================
+  // CL_ADDRT: (address)
+  // =======================
 
   @Enumerated(EnumType.STRING)
   @Column(name = "CLA_IBMSNAP_OPERATION", updatable = false)
@@ -183,6 +191,14 @@ public class RawClientAddress extends ClientAddressReference
 
   public void setClaEffectiveStartDate(Date date) {
     this.claEffectiveStartDate = freshDate(date);
+  }
+
+  public void addAddress(RawAddress addr) {
+    addresses.add(addr);
+  }
+
+  public List<RawAddress> getAddresses() {
+    return addresses;
   }
 
 }

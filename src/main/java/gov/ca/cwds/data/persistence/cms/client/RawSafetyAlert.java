@@ -19,6 +19,10 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
 
   private static final long serialVersionUID = 1L;
 
+  // ================================
+  // SAF_ALRT: (safety alerts)
+  // ================================
+
   @Id
   @Column(name = "SAL_THIRD_ID")
   private String safetyAlertId;

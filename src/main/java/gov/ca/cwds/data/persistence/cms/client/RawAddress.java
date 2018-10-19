@@ -22,6 +22,10 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
 
   private static final long serialVersionUID = 1L;
 
+  // =======================
+  // ADDRS_T: (address)
+  // =======================
+
   @Id
   @Column(name = "ADR_IDENTIFIER")
   protected String adrId;
@@ -285,6 +289,66 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
 
   public String getAdrUnitNumber() {
     return adrUnitNumber;
+  }
+
+  public CmsReplicationOperation getAdrReplicationOperation() {
+    return adrReplicationOperation;
+  }
+
+  public void setAdrReplicationOperation(CmsReplicationOperation adrReplicationOperation) {
+    this.adrReplicationOperation = adrReplicationOperation;
+  }
+
+  public Date getAdrReplicationDate() {
+    return adrReplicationDate;
+  }
+
+  public void setAdrReplicationDate(Date adrReplicationDate) {
+    this.adrReplicationDate = adrReplicationDate;
+  }
+
+  public void setAdrPrimaryExtension(Integer adrPrimaryExtension) {
+    this.adrPrimaryExtension = adrPrimaryExtension;
+  }
+
+  public void setAdrState(Short adrState) {
+    this.adrState = adrState;
+  }
+
+  public void setAdrStreetName(String adrStreetName) {
+    this.adrStreetName = adrStreetName;
+  }
+
+  public void setAdrStreetNumber(String adrStreetNumber) {
+    this.adrStreetNumber = adrStreetNumber;
+  }
+
+  public void setAdrZip(String adrZip) {
+    this.adrZip = adrZip;
+  }
+
+  public void setAdrZip4(Short adrZip4) {
+    this.adrZip4 = adrZip4;
+  }
+
+  public void setAdrPostDirCd(String adrPostDirCd) {
+    this.adrPostDirCd = adrPostDirCd;
+  }
+
+  public void setAdrPreDirCd(String adrPreDirCd) {
+    this.adrPreDirCd = adrPreDirCd;
+  }
+
+  public void setAdrStreetSuffixCd(Short adrStreetSuffixCd) {
+    this.adrStreetSuffixCd = adrStreetSuffixCd;
+  }
+
+  public void setAdrUnitDesignationCd(Short adrUnitDesignationCd) {
+    this.adrUnitDesignationCd = adrUnitDesignationCd;
+  }
+
+  public void setAdrUnitNumber(String adrUnitNumber) {
+    this.adrUnitNumber = adrUnitNumber;
   }
 
 }

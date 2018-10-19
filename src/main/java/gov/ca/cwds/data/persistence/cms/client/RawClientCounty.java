@@ -16,6 +16,10 @@ public class RawClientCounty extends ClientReference implements NeutronJdbcReade
 
   private static final long serialVersionUID = 1L;
 
+  // ================================
+  // CLIENT_CNTY: (client county)
+  // ================================
+
   @Type(type = "short")
   @Column(name = "CLC_GVR_ENTC")
   protected Short clientCounty;

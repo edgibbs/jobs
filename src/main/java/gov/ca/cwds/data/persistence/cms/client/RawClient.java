@@ -6,7 +6,9 @@ import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.EnumType;
@@ -20,6 +22,20 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 public class RawClient extends ClientReference implements NeutronJdbcReader<RawClient> {
 
   private static final long serialVersionUID = 1L;
+
+  private List<RawClientAddress> clientAddress = new ArrayList<>();
+
+  private List<RawClientCounty> clientCounty = new ArrayList<>();
+
+  private List<RawCsec> csec = new ArrayList<>();
+
+  private List<RawAka> aka = new ArrayList<>();
+
+  private List<RawEthnicity> ethnicity = new ArrayList<>();
+
+  private List<RawSafetyAlert> safetyAlert = new ArrayList<>();
+
+  private List<RawCase> cases = new ArrayList<>();
 
   // ==============================
   // CLIENT_T: (client)
@@ -882,6 +898,62 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
 
   public void setCltPrevOtherDescription(String cltPrevOtherDescription) {
     this.cltPrevOtherDescription = cltPrevOtherDescription;
+  }
+
+  public void addClientAddress(RawClientAddress cla) {
+    clientAddress.add(cla);
+  }
+
+  public void addClientCounty(RawClientCounty c) {
+    clientCounty.add(c);
+  }
+
+  public void addCsec(RawCsec c) {
+    csec.add(c);
+  }
+
+  public void addCase(RawCase c) {
+    cases.add(c);
+  }
+
+  public void addAka(RawAka c) {
+    aka.add(c);
+  }
+
+  public void addEthnicity(RawEthnicity c) {
+    ethnicity.add(c);
+  }
+
+  public void addSafetyAlert(RawSafetyAlert c) {
+    safetyAlert.add(c);
+  }
+
+  public List<RawClientAddress> getClientAddress() {
+    return clientAddress;
+  }
+
+  public List<RawClientCounty> getClientCounty() {
+    return clientCounty;
+  }
+
+  public List<RawCsec> getCsec() {
+    return csec;
+  }
+
+  public List<RawAka> getAka() {
+    return aka;
+  }
+
+  public List<RawEthnicity> getEthnicity() {
+    return ethnicity;
+  }
+
+  public List<RawSafetyAlert> getSafetyAlert() {
+    return safetyAlert;
+  }
+
+  public List<RawCase> getCases() {
+    return cases;
   }
 
 }

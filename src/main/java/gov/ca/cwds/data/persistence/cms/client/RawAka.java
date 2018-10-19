@@ -19,6 +19,10 @@ public class RawAka extends ClientReference implements NeutronJdbcReader<RawAka>
 
   private static final long serialVersionUID = 1L;
 
+  // =====================================
+  // OCL_NM_T: (other client name / AKA)
+  // =====================================
+
   @Id
   @Column(name = "ONM_THIRD_ID")
   private String akaId;

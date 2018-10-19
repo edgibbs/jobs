@@ -17,6 +17,10 @@ public class RawEthnicity extends ClientReference implements NeutronJdbcReader<R
 
   private static final long serialVersionUID = 1L;
 
+  // ================================
+  // CLSCP_ET: (race & ethnicity)
+  // ================================
+
   @Id
   @Column(name = "ETH_IDENTIFIER")
   protected String clientEthnicityId;
