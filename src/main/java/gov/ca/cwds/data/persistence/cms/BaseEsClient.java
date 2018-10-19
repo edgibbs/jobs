@@ -584,7 +584,7 @@ public abstract class BaseEsClient
     final ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : makeReplicatedClient();
 
     if (!isClientAdded) {
-      // Populate core client attributes.
+      // Core client attributes.
       ret.adjudicatedDelinquentIndicator = getCltAdjudicatedDelinquentIndicator();
       ret.adoptionStatusCode = getCltAdoptionStatusCode();
       ret.alienRegistrationNumber = getCltAlienRegistrationNumber();

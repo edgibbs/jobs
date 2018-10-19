@@ -5,7 +5,7 @@ import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_FULL;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_LAST_CHG;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_NEXT_BUNDLE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_PLACEMENT_CLIENT_FULL;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ADDRESS;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_AKA;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT;
@@ -268,7 +268,7 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtInsClient =
             con.prepareStatement(pickPrepDml(INSERT_CLIENT_FULL, INSERT_CLIENT_LAST_CHG));
         final PreparedStatement stmtInsClientPlaceHome = con
-            .prepareStatement(pickPrepDml(INSERT_PLACEMENT_HOME_CLIENT_FULL, INSERT_NEXT_BUNDLE));
+            .prepareStatement(pickPrepDml(INSERT_PLACEMENT_CLIENT_FULL, INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
         final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
         final PreparedStatement stmtSelClientAddress = con.prepareStatement(SELECT_CLIENT_ADDRESS);

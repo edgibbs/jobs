@@ -21,8 +21,11 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
+import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
-public class RawClient extends ClientReference implements NeutronJdbcReader<RawClient> {
+public class RawClient extends ClientReference
+    implements NeutronJdbcReader<RawClient>, ApiGroupNormalizer<ReplicatedClient> {
 
   private static final long serialVersionUID = 1L;
 
@@ -342,6 +345,109 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
 
     return this;
   }
+
+  @Override
+  public Class<ReplicatedClient> getNormalizationClass() {
+    return ReplicatedClient.class;
+  }
+
+  @Override
+  public Serializable getNormalizationGroupKey() {
+    return this.getCltId();
+  }
+
+  protected ReplicatedClient convertClient() {
+    final ReplicatedClient ret = new ReplicatedClient();
+
+    return ret;
+  }
+
+  @Override
+  public ReplicatedClient normalize(Map<Object, ReplicatedClient> ignoreMe) {
+    final ReplicatedClient ret = new ReplicatedClient();
+    ret.setAdjudicatedDelinquentIndicator(getCltAdjudicatedDelinquentIndicator());
+    ret.setAdoptionStatusCode(getCltAdoptionStatusCode());
+    ret.setAlienRegistrationNumber(getCltAlienRegistrationNumber());
+    ret.setBirthCity(getCltBirthCity());
+    ret.setBirthCountryCodeType(getCltBirthCountryCodeType());
+    ret.setBirthDate(getCltBirthDate());
+    ret.setBirthFacilityName(getCltBirthFacilityName());
+    ret.setBirthplaceVerifiedIndicator(getCltBirthplaceVerifiedIndicator());
+    ret.setBirthStateCodeType(getCltBirthStateCodeType());
+    ret.setChildClientIndicatorVar(getCltChildClientIndicatorVar());
+    ret.setClientIndexNumber(getCltClientIndexNumber());
+    ret.setCommentDescription(getCltCommentDescription());
+    ret.setCommonFirstName(getCltCommonFirstName());
+    ret.setCommonLastName(getCltCommonLastName());
+    ret.setCommonMiddleName(getCltCommonMiddleName());
+    ret.setConfidentialityActionDate(getCltConfidentialityActionDate());
+    ret.setConfidentialityInEffectIndicator(getCltConfidentialityInEffectIndicator());
+    ret.setCreationDate(getCltCreationDate());
+    ret.setCurrCaChildrenServIndicator(getCltCurrCaChildrenServIndicator());
+    ret.setCurrentlyOtherDescription(getCltCurrentlyOtherDescription());
+    ret.setCurrentlyRegionalCenterIndicator(getCltCurrentlyRegionalCenterIndicator());
+    ret.setDeathDate(getCltDeathDate());
+    ret.setDeathDateVerifiedIndicator(getCltDeathDateVerifiedIndicator());
+    ret.setDeathPlace(getCltDeathPlace());
+    ret.setDeathReasonText(getCltDeathReasonText());
+    ret.setDriverLicenseNumber(getCltDriverLicenseNumber());
+    ret.setDriverLicenseStateCodeType(getCltDriverLicenseStateCodeType());
+    ret.setEmailAddress(getCltEmailAddress());
+    ret.setEstimatedDobCode(getCltEstimatedDobCode());
+    ret.setEthUnableToDetReasonCode(getCltEthUnableToDetReasonCode());
+    ret.setFatherParentalRightTermDate(getCltFatherParentalRightTermDate());
+    ret.setCommonFirstName(getCltCommonFirstName());
+    ret.setGenderCode(getCltGenderCode());
+    ret.setHealthSummaryText(getCltHealthSummaryText());
+    ret.setHispanicOriginCode(getCltHispanicOriginCode());
+    ret.setHispUnableToDetReasonCode(getCltHispUnableToDetReasonCode());
+    ret.setId(getCltId());
+    ret.setImmigrationCountryCodeType(getCltImmigrationCountryCodeType());
+    ret.setImmigrationStatusType(getCltImmigrationStatusType());
+    ret.setIncapacitatedParentCode(getCltIncapacitatedParentCode());
+    ret.setIndividualHealthCarePlanIndicator(getCltIndividualHealthCarePlanIndicator());
+    ret.setCommonLastName(getCltCommonLastName());
+    ret.setLimitationOnScpHealthIndicator(getCltLimitationOnScpHealthIndicator());
+    ret.setLiterateCode(getCltLiterateCode());
+    ret.setMaritalCohabitatnHstryIndicatorVar(getCltMaritalCohabitatnHstryIndicatorVar());
+    ret.setMaritalStatusType(getCltMaritalStatusType());
+    ret.setCommonMiddleName(getCltCommonMiddleName());
+    ret.setMilitaryStatusCode(getCltMilitaryStatusCode());
+    ret.setMotherParentalRightTermDate(getCltMotherParentalRightTermDate());
+    ret.setNamePrefixDescription(getCltNamePrefixDescription());
+    ret.setNameType(getCltNameType());
+    ret.setOutstandingWarrantIndicator(getCltOutstandingWarrantIndicator());
+    ret.setPrevCaChildrenServIndicator(getCltPrevCaChildrenServIndicator());
+    ret.setPrevOtherDescription(getCltPrevOtherDescription());
+    ret.setPrevRegionalCenterIndicator(getCltPrevRegionalCenterIndicator());
+    ret.setPrimaryEthnicityType(getCltPrimaryEthnicityType());
+
+    // Languages
+    ret.setPrimaryLanguageType(getCltPrimaryLanguageType());
+    ret.setSecondaryLanguageType(getCltSecondaryLanguageType());
+
+    ret.setReligionType(getCltReligionType());
+    ret.setSensitiveHlthInfoOnFileIndicator(getCltSensitiveHlthInfoOnFileIndicator());
+    ret.setSensitivityIndicator(getCltSensitivityIndicator());
+    ret.setSoc158PlacementCode(getCltSoc158PlacementCode());
+    ret.setSoc158SealedClientIndicator(getCltSoc158SealedClientIndicator());
+    ret.setSocialSecurityNumber(getCltSocialSecurityNumber());
+    ret.setSocialSecurityNumChangedCode(getCltSocialSecurityNumChangedCode());
+    ret.setSuffixTitleDescription(getCltSuffixTitleDescription());
+    ret.setTribalAncestryClientIndicatorVar(getCltTribalAncestryClientIndicatorVar());
+    ret.setTribalMembrshpVerifctnIndicatorVar(getCltTribalMembrshpVerifctnIndicatorVar());
+    ret.setUnemployedParentCode(getCltUnemployedParentCode());
+    ret.setZippyCreatedIndicator(getCltZippyCreatedIndicator());
+
+    ret.setReplicationDate(getCltReplicationDate());
+    ret.setReplicationOperation(getCltReplicationOperation());
+    ret.setLastUpdatedTime(getCltLastUpdatedTime());
+    return ret;
+  }
+
+  // ==============================
+  // ACCESSORS:
+  // ==============================
 
   public String getCltAdjudicatedDelinquentIndicator() {
     return cltAdjudicatedDelinquentIndicator;

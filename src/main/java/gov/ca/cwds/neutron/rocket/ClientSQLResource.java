@@ -661,7 +661,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_PLACEMENT_HOME_CLIENT_FULL =
+  public static final String INSERT_PLACEMENT_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
     + "SELECT DISTINCT pe.FKCLIENT_T \n"
     + "FROM PLC_EPST pe \n" 
