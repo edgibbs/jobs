@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -89,19 +91,19 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
   }
 
   public Date getCsecStartDate() {
-    return csecStartDate;
+    return freshDate(csecStartDate);
   }
 
   public void setCsecStartDate(Date csecStartDate) {
-    this.csecStartDate = csecStartDate;
+    this.csecStartDate = freshDate(csecStartDate);
   }
 
   public Date getCsecEndDate() {
-    return csecEndDate;
+    return freshDate(csecEndDate);
   }
 
   public void setCsecEndDate(Date csecEndDate) {
-    this.csecEndDate = csecEndDate;
+    this.csecEndDate = freshDate(csecEndDate);
   }
 
   public String getCsecLastUpdatedId() {
@@ -113,11 +115,11 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
   }
 
   public Date getCsecLastUpdatedTimestamp() {
-    return csecLastUpdatedTimestamp;
+    return freshDate(csecLastUpdatedTimestamp);
   }
 
   public void setCsecLastUpdatedTimestamp(Date csecLastUpdatedTimestamp) {
-    this.csecLastUpdatedTimestamp = csecLastUpdatedTimestamp;
+    this.csecLastUpdatedTimestamp = freshDate(csecLastUpdatedTimestamp);
   }
 
   public CmsReplicationOperation getCsecLastUpdatedOperation() {
@@ -129,11 +131,11 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
   }
 
   public Date getCsecReplicationTimestamp() {
-    return csecReplicationTimestamp;
+    return freshDate(csecReplicationTimestamp);
   }
 
   public void setCsecReplicationTimestamp(Date csecReplicationTimestamp) {
-    this.csecReplicationTimestamp = csecReplicationTimestamp;
+    this.csecReplicationTimestamp = freshDate(csecReplicationTimestamp);
   }
 
 }

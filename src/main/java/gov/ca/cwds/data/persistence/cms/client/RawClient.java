@@ -8,7 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.EnumType;
@@ -23,7 +25,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
 
   private static final long serialVersionUID = 1L;
 
-  private List<RawClientAddress> clientAddress = new ArrayList<>();
+  private Set<RawClientAddress> clientAddress = new HashSet<>();
 
   private List<RawClientCounty> clientCounty = new ArrayList<>();
 
@@ -928,7 +930,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     safetyAlert.add(c);
   }
 
-  public List<RawClientAddress> getClientAddress() {
+  public Set<RawClientAddress> getClientAddress() {
     return clientAddress;
   }
 

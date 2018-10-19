@@ -25,10 +25,12 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
+import gov.ca.cwds.data.persistence.cms.client.RawClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -53,7 +55,8 @@ public class PeopleSummaryThreadHandler
 
   protected static final Logger LOGGER = LoggerFactory.getLogger(PeopleSummaryThreadHandler.class);
 
-  protected static final int FULL_DENORMALIZED_SIZE = 200117;
+  public static final int FULL_DENORMALIZED_SIZE =
+      NeutronIntegerDefaults.FULL_DENORMALIZED_SIZE.value();
 
   private final ClientPersonIndexerJob rocket;
 
@@ -80,23 +83,30 @@ public class PeopleSummaryThreadHandler
     this.rocket = rocket;
   }
 
-  protected void readClient(final ResultSet rs) throws SQLException {
-    int cntrRetrieved = 0;
-    RawClient m;
-
-    LOGGER.info("readClient()");
-    while (rocket.isRunning() && rs.next() && (m = new RawClient().read(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, 5000, ++cntrRetrieved, "Retrieved", "recs");
-      rawClients.put(m.getCltId(), m);
-    }
-  }
-
   // =================================
   // Neutron, the next generation.
   // =================================
 
-  protected void readClientAddress(final ResultSet rs) throws SQLException {
+  protected void readClient(final ResultSet rs) throws SQLException {
+    int counter = 0;
+    RawClient m;
 
+    LOGGER.info("readClient()");
+    while (rocket.isRunning() && rs.next() && (m = new RawClient().read(rs)) != null) {
+      CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", "recs");
+      rawClients.put(m.getCltId(), m);
+    }
+  }
+
+  protected void readClientAddress(final ResultSet rs) throws SQLException {
+    LOGGER.info("readClientAddress()");
+    int counter = 0;
+    RawClientAddress m;
+
+    while (rocket.isRunning() && rs.next() && (m = new RawClientAddress().read(rs)) != null) {
+      CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", "recs");
+      rawClients.get(m.getCltId()).addClientAddress(m);
+    }
   }
 
   protected void readAddress(final ResultSet rs) throws SQLException {}

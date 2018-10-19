@@ -14,6 +14,8 @@ public enum NeutronIntegerDefaults {
    */
   WAIT_BULK_PROCESSOR(25),
 
+  FULL_DENORMALIZED_SIZE(16001),
+
   /**
    * Sadly necessary sometimes. Default thread sleep time, usually when waiting for work without a
    * lock condition or pollable queue.
@@ -58,6 +60,10 @@ public enum NeutronIntegerDefaults {
   }
 
   public int getValue() {
+    return value;
+  }
+
+  public int value() {
     return value;
   }
 

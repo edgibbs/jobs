@@ -11,7 +11,8 @@ import javax.persistence.Id;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 
 /**
- * Designates a direct child class of Client, one step removed with a foreign key to its parent.
+ * Designates a direct child class of Client, one step removed, that has a foreign key to its
+ * parent.
  * 
  * @author CWDS API Team
  */
@@ -25,8 +26,6 @@ public abstract class ClientReference extends CmsPersistentObject {
 
   public ClientReference read(ResultSet rs) throws SQLException {
     this.cltId = ifNull(rs.getString("CLT_IDENTIFIER"));
-    // setLastUpdatedId(ifNull(rs.getString("LST_UPD_ID")));
-    // setLastUpdatedTime(rs.getDate("LST_UPD_TS"));
     return this;
   }
 
