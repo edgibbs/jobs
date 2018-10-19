@@ -14,9 +14,11 @@ import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 
 public class RawClientAddress extends ClientAddressReference
     implements NeutronJdbcReader<RawClientAddress> {
@@ -199,6 +201,19 @@ public class RawClientAddress extends ClientAddressReference
 
   public List<RawAddress> getAddresses() {
     return addresses;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((claFkClient == null) ? 0 : claFkClient.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj, false, ApiObjectIdentity.class);
   }
 
 }

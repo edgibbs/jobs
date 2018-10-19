@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,8 +25,16 @@ import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
+import gov.ca.cwds.data.persistence.cms.client.ClientReference;
+import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
+import gov.ca.cwds.data.persistence.cms.client.RawAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawAka;
+import gov.ca.cwds.data.persistence.cms.client.RawCase;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.client.RawClientAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClientCounty;
+import gov.ca.cwds.data.persistence.cms.client.RawCsec;
+import gov.ca.cwds.data.persistence.cms.client.RawEthnicity;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
@@ -87,41 +96,54 @@ public class PeopleSummaryThreadHandler
   // Neutron, the next generation.
   // =================================
 
-  protected void readClient(final ResultSet rs) throws SQLException {
+  protected <T extends ClientReference> void readAny(final ResultSet rs,
+      NeutronJdbcReader<T> reader, BiConsumer<RawClient, T> organizer) throws SQLException {
     int counter = 0;
-    RawClient m;
+    T t;
 
-    LOGGER.info("readClient()");
-    while (rocket.isRunning() && rs.next() && (m = new RawClient().read(rs)) != null) {
+    LOGGER.info("readAny(): type: {}", reader.getClass().getName());
+    while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
       CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", "recs");
-      rawClients.put(m.getCltId(), m);
+      organizer.accept(rawClients.get(t.getCltId()), t);
     }
+  }
+
+  protected void readClient(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawClient().read(rs), (cx, c) -> rawClients.put(c.getCltId(), c));
   }
 
   protected void readClientAddress(final ResultSet rs) throws SQLException {
-    LOGGER.info("readClientAddress()");
-    int counter = 0;
-    RawClientAddress m;
-
-    while (rocket.isRunning() && rs.next() && (m = new RawClientAddress().read(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", "recs");
-      rawClients.get(m.getCltId()).addClientAddress(m);
-    }
+    readAny(rs, new RawClientAddress().read(rs), (c, adr) -> c.addClientAddress(adr));
   }
 
-  protected void readAddress(final ResultSet rs) throws SQLException {}
+  protected void readAddress(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawAddress().read(rs),
+        (c, ca) -> c.getClientAddress().get(ca.getClaId()).addAddress(ca));
+  }
 
-  protected void readClientCounty(final ResultSet rs) throws SQLException {}
+  protected void readClientCounty(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc));
+  }
 
-  protected void readEthnicity(final ResultSet rs) throws SQLException {}
+  protected void readAka(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawAka().read(rs), (c, aka) -> c.addAka(aka));
+  }
 
-  protected void readAka(final ResultSet rs) throws SQLException {}
+  protected void readCase(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawCase().read(rs), (c, cas) -> c.addCase(cas));
+  }
 
-  protected void readCase(final ResultSet rs) throws SQLException {}
+  protected void readCsec(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec));
+  }
 
-  protected void readSafetyAlert(final ResultSet rs) throws SQLException {}
+  protected void readEthnicity(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawEthnicity().read(rs), (c, eth) -> c.addEthnicity(eth));
+  }
 
-  protected void readCsec(final ResultSet rs) throws SQLException {}
+  protected void readSafetyAlert(final ResultSet rs) throws SQLException {
+    readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec));
+  }
 
   /**
    * SNAP-715: Initial Load: ERRORCODE=-1224, SQLSTATE=55032.
