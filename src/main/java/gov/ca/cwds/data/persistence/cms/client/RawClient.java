@@ -715,4 +715,173 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltLastUpdatedTime = freshDate(cltLastUpdatedTime);
   }
 
+  public Date getCltFatherParentalRightTermDate() {
+    return cltFatherParentalRightTermDate;
+  }
+
+  public void setCltFatherParentalRightTermDate(Date cltFatherParentalRightTermDate) {
+    this.cltFatherParentalRightTermDate = cltFatherParentalRightTermDate;
+  }
+
+  public void setCltAdjudicatedDelinquentIndicator(String cltAdjudicatedDelinquentIndicator) {
+    this.cltAdjudicatedDelinquentIndicator = cltAdjudicatedDelinquentIndicator;
+  }
+
+  public void setCltAdoptionStatusCode(String cltAdoptionStatusCode) {
+    this.cltAdoptionStatusCode = cltAdoptionStatusCode;
+  }
+
+  public void setCltAlienRegistrationNumber(String cltAlienRegistrationNumber) {
+    this.cltAlienRegistrationNumber = cltAlienRegistrationNumber;
+  }
+
+  public void setCltBirthCity(String cltBirthCity) {
+    this.cltBirthCity = cltBirthCity;
+  }
+
+  public void setCltBirthCountryCodeType(Short cltBirthCountryCodeType) {
+    this.cltBirthCountryCodeType = cltBirthCountryCodeType;
+  }
+
+  public void setCltBirthDate(Date cltBirthDate) {
+    this.cltBirthDate = cltBirthDate;
+  }
+
+  public void setCltBirthFacilityName(String cltBirthFacilityName) {
+    this.cltBirthFacilityName = cltBirthFacilityName;
+  }
+
+  public void setCltBirthStateCodeType(Short cltBirthStateCodeType) {
+    this.cltBirthStateCodeType = cltBirthStateCodeType;
+  }
+
+  public void setCltChildClientIndicatorVar(String cltChildClientIndicatorVar) {
+    this.cltChildClientIndicatorVar = cltChildClientIndicatorVar;
+  }
+
+  public void setCltClientIndexNumber(String cltClientIndexNumber) {
+    this.cltClientIndexNumber = cltClientIndexNumber;
+  }
+
+  public void setCltCommentDescription(String cltCommentDescription) {
+    this.cltCommentDescription = cltCommentDescription;
+  }
+
+  public void setCltCommonFirstName(String cltCommonFirstName) {
+    this.cltCommonFirstName = cltCommonFirstName;
+  }
+
+  public void setCltCommonLastName(String cltCommonLastName) {
+    this.cltCommonLastName = cltCommonLastName;
+  }
+
+  public void setCltCommonMiddleName(String cltCommonMiddleName) {
+    this.cltCommonMiddleName = cltCommonMiddleName;
+  }
+
+  public void setCltCurrentlyOtherDescription(String cltCurrentlyOtherDescription) {
+    this.cltCurrentlyOtherDescription = cltCurrentlyOtherDescription;
+  }
+
+  public void setCltCurrentlyRegionalCenterIndicator(String cltCurrentlyRegionalCenterIndicator) {
+    this.cltCurrentlyRegionalCenterIndicator = cltCurrentlyRegionalCenterIndicator;
+  }
+
+  public void setCltDeathDate(Date cltDeathDate) {
+    this.cltDeathDate = cltDeathDate;
+  }
+
+  public void setCltDeathDateVerifiedIndicator(String cltDeathDateVerifiedIndicator) {
+    this.cltDeathDateVerifiedIndicator = cltDeathDateVerifiedIndicator;
+  }
+
+  public void setCltDeathPlace(String cltDeathPlace) {
+    this.cltDeathPlace = cltDeathPlace;
+  }
+
+  public void setCltDeathReasonText(String cltDeathReasonText) {
+    this.cltDeathReasonText = cltDeathReasonText;
+  }
+
+  public void setCltDriverLicenseNumber(String cltDriverLicenseNumber) {
+    this.cltDriverLicenseNumber = cltDriverLicenseNumber;
+  }
+
+  public void setCltDriverLicenseStateCodeType(Short cltDriverLicenseStateCodeType) {
+    this.cltDriverLicenseStateCodeType = cltDriverLicenseStateCodeType;
+  }
+
+  public void setCltEmailAddress(String cltEmailAddress) {
+    this.cltEmailAddress = cltEmailAddress;
+  }
+
+  public void setCltEstimatedDobCode(String cltEstimatedDobCode) {
+    this.cltEstimatedDobCode = cltEstimatedDobCode;
+  }
+
+  public void setCltEthUnableToDetReasonCode(String cltEthUnableToDetReasonCode) {
+    this.cltEthUnableToDetReasonCode = cltEthUnableToDetReasonCode;
+  }
+
+  public void setCltGenderCode(String cltGenderCode) {
+    this.cltGenderCode = cltGenderCode;
+  }
+
+  public void setCltImmigrationStatusType(Short cltImmigrationStatusType) {
+    this.cltImmigrationStatusType = cltImmigrationStatusType;
+  }
+
+  public void setCltIncapacitatedParentCode(String cltIncapacitatedParentCode) {
+    this.cltIncapacitatedParentCode = cltIncapacitatedParentCode;
+  }
+
+  public void setCltIndividualHealthCarePlanIndicator(String cltIndividualHealthCarePlanIndicator) {
+    this.cltIndividualHealthCarePlanIndicator = cltIndividualHealthCarePlanIndicator;
+  }
+
+  public void setCltLimitationOnScpHealthIndicator(String cltLimitationOnScpHealthIndicator) {
+    this.cltLimitationOnScpHealthIndicator = cltLimitationOnScpHealthIndicator;
+  }
+
+  public void setCltLiterateCode(String cltLiterateCode) {
+    this.cltLiterateCode = cltLiterateCode;
+  }
+
+  public void setCltMaritalCohabitatnHstryIndicatorVar(
+      String cltMaritalCohabitatnHstryIndicatorVar) {
+    this.cltMaritalCohabitatnHstryIndicatorVar = cltMaritalCohabitatnHstryIndicatorVar;
+  }
+
+  public void setCltMaritalStatusType(Short cltMaritalStatusType) {
+    this.cltMaritalStatusType = cltMaritalStatusType;
+  }
+
+  public void setCltMilitaryStatusCode(String cltMilitaryStatusCode) {
+    this.cltMilitaryStatusCode = cltMilitaryStatusCode;
+  }
+
+  public void setCltMotherParentalRightTermDate(Date cltMotherParentalRightTermDate) {
+    this.cltMotherParentalRightTermDate = cltMotherParentalRightTermDate;
+  }
+
+  public void setCltNamePrefixDescription(String cltNamePrefixDescription) {
+    this.cltNamePrefixDescription = cltNamePrefixDescription;
+  }
+
+  public void setCltNameType(Short cltNameType) {
+    this.cltNameType = cltNameType;
+  }
+
+  public void setCltOutstandingWarrantIndicator(String cltOutstandingWarrantIndicator) {
+    this.cltOutstandingWarrantIndicator = cltOutstandingWarrantIndicator;
+  }
+
+  public void setCltPrevCaChildrenServIndicator(String cltPrevCaChildrenServIndicator) {
+    this.cltPrevCaChildrenServIndicator = cltPrevCaChildrenServIndicator;
+  }
+
+  public void setCltPrevOtherDescription(String cltPrevOtherDescription) {
+    this.cltPrevOtherDescription = cltPrevOtherDescription;
+  }
+
 }
