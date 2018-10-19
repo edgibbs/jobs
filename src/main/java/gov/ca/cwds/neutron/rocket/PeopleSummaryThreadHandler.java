@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -48,6 +49,7 @@ import gov.ca.cwds.data.persistence.cms.client.RawClientAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawClientCounty;
 import gov.ca.cwds.data.persistence.cms.client.RawCsec;
 import gov.ca.cwds.data.persistence.cms.client.RawEthnicity;
+import gov.ca.cwds.data.persistence.cms.client.RawSafetyAlert;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
@@ -109,53 +111,111 @@ public class PeopleSummaryThreadHandler
   // Neutron, the next generation.
   // =================================
 
-  protected <T extends ClientReference> void readAny(final ResultSet rs,
-      NeutronJdbcReader<T> reader, BiConsumer<RawClient, T> organizer) throws SQLException {
-    int counter = 0;
-    T t;
+  protected void readRaw(final PreparedStatement stmt, Consumer<ResultSet> consumer) {
+    try {
+      stmt.setMaxRows(0);
+      stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
+      stmt.setFetchSize(FETCH_SIZE.getValue());
 
-    LOGGER.info("readAny(): type: {}", reader.getClass().getName());
-    while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
-      CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", "recs");
-      organizer.accept(rawClients.get(t.getCltId()), t);
+      // Close ResultSet for driver stability. Can't just close parent statement and session.
+      try (final ResultSet rs = stmt.executeQuery()) {
+        while (rocket.isRunning() && rs.next()) { // Stop if the rocket aborts.
+          consumer.accept(rs);
+        }
+      } finally {
+        // Auto-close result set.
+      }
+    } catch (Exception e) {
+      // TODO: handle exception
     }
   }
 
-  protected void readClient(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawClient().read(rs), (cx, c) -> rawClients.put(c.getCltId(), c));
+  protected <T extends ClientReference> void readAny(final ResultSet rs,
+      NeutronJdbcReader<T> reader, BiConsumer<RawClient, T> organizer) {
+    int counter = 0;
+    T t;
+
+    try {
+      while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
+        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", "recs");
+        organizer.accept(rawClients.get(t.getCltId()), t);
+      }
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "SELECT FAILED! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readClientAddress(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawClientAddress().read(rs), (c, adr) -> c.addClientAddress(adr));
+  protected void readClient(final ResultSet rs) {
+    try {
+      readAny(rs, new RawClient().read(rs), (cx, c) -> rawClients.put(c.getCltId(), c));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readAddress(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawAddress().read(rs),
-        (c, ca) -> c.getClientAddress().get(ca.getClaId()).addAddress(ca));
+  protected void readClientAddress(final ResultSet rs) {
+    try {
+      readAny(rs, new RawClientAddress().read(rs), (c, adr) -> c.addClientAddress(adr));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readClientCounty(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc));
+  protected void readAddress(final ResultSet rs) {
+    try {
+      readAny(rs, new RawAddress().read(rs),
+          (c, ca) -> c.getClientAddress().get(ca.getClaId()).addAddress(ca));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readAka(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawAka().read(rs), (c, aka) -> c.addAka(aka));
+  protected void readClientCounty(final ResultSet rs) {
+    try {
+      readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT COUNTY! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readCase(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawCase().read(rs), (c, cas) -> c.addCase(cas));
+  protected void readAka(final ResultSet rs) {
+    try {
+      readAny(rs, new RawAka().read(rs), (c, aka) -> c.addAka(aka));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ AKA! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readCsec(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec));
+  protected void readCase(final ResultSet rs) {
+    try {
+      readAny(rs, new RawCase().read(rs), (c, cas) -> c.addCase(cas));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readEthnicity(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawEthnicity().read(rs), (c, eth) -> c.addEthnicity(eth));
+  protected void readCsec(final ResultSet rs) {
+    try {
+      readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CSEC! {}", e.getMessage(), e);
+    }
   }
 
-  protected void readSafetyAlert(final ResultSet rs) throws SQLException {
-    readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec));
+  protected void readEthnicity(final ResultSet rs) {
+    try {
+      readAny(rs, new RawEthnicity().read(rs), (c, eth) -> c.addEthnicity(eth));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ETHNICITY! {}", e.getMessage(), e);
+    }
+  }
+
+  protected void readSafetyAlert(final ResultSet rs) {
+    try {
+      readAny(rs, new RawSafetyAlert().read(rs), (c, saf) -> c.addSafetyAlert(saf));
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ SAFETY ALERT! {}", e.getMessage(), e);
+    }
   }
 
   /**
@@ -215,9 +275,21 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelClientCounty = con.prepareStatement(SELECT_CLIENT_COUNTY);
         final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS);
         final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA);
+        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CLIENT_ADDRESS);
         final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC);
         final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY);
         final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT)) {
+      LOGGER.debug("Read rows");
+      readRaw(stmtSelClient, rs -> this.readClient(rs));
+      readRaw(stmtSelClientAddress, rs -> this.readClientAddress(rs));
+      readRaw(stmtSelAddress, rs -> this.readAddress(rs));
+      readRaw(stmtSelAka, rs -> this.readAka(rs));
+      readRaw(stmtSelCase, rs -> this.readCase(rs));
+      readRaw(stmtSelCsec, rs -> this.readCsec(rs));
+      readRaw(stmtSelClientCounty, rs -> this.readClientCounty(rs));
+      readRaw(stmtSelEthnicity, rs -> this.readEthnicity(rs));
+      readRaw(stmtSelSafetyAlert, rs -> this.readSafetyAlert(rs));
+
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
@@ -315,6 +387,14 @@ public class PeopleSummaryThreadHandler
     }
   }
 
+  /**
+   * Some SQL statements differ between last change and initial load.
+   * 
+   * @param sqlInitialLoad SQL for initial load
+   * @param sqlLastChange SQL for last change
+   * @return chosen SQL
+   * @throws NeutronCheckedException on SQL preparation error
+   */
   protected String pickPrepDml(String sqlInitialLoad, String sqlLastChange)
       throws NeutronCheckedException {
     final String preparedSql =
@@ -342,6 +422,7 @@ public class PeopleSummaryThreadHandler
   protected void clear() {
     LOGGER.debug("clear containers");
     normalized.clear();
+    rawClients.clear();
     placementHomeAddresses.clear();
   }
 

@@ -14,6 +14,9 @@ public enum NeutronIntegerDefaults {
    */
   WAIT_BULK_PROCESSOR(25),
 
+  /**
+   * Default bucket size for Initial Load clients using 1024 buckets.
+   */
   FULL_DENORMALIZED_SIZE(16001),
 
   /**

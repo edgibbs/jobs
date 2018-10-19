@@ -19,6 +19,7 @@ import javax.persistence.Enumerated;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
 public class RawClient extends ClientReference implements NeutronJdbcReader<RawClient> {
@@ -38,6 +39,8 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
   private List<RawSafetyAlert> safetyAlert = new ArrayList<>();
 
   private List<RawCase> cases = new ArrayList<>();
+
+  private PlacementHomeAddress placementHomeAddress;
 
   // ==============================
   // CLIENT_T: (client)
@@ -956,6 +959,14 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
 
   public List<RawCase> getCases() {
     return cases;
+  }
+
+  public PlacementHomeAddress getPlacementHomeAddress() {
+    return placementHomeAddress;
+  }
+
+  public void setPlacementHomeAddress(PlacementHomeAddress placementHomeAddress) {
+    this.placementHomeAddress = placementHomeAddress;
   }
 
 }
