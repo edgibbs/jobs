@@ -499,11 +499,11 @@ public abstract class BaseEsClient
     ret.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
+    ret.clientEthnicityId = ifNull(rs.getString("ETHNICITY_CODE"));
     ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
 
     ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
     ret.clientCountyId = ifNull(rs.getString("CLC_CLIENT_ID"));
-    ret.clientEthnicityId = ifNull(rs.getString("ETHNICITY_CODE"));
 
     // Languages:
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
