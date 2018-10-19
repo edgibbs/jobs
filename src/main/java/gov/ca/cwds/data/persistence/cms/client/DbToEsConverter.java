@@ -4,11 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import gov.ca.cwds.common.NameSuffixTranslator;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
+import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
@@ -103,13 +106,81 @@ public class DbToEsConverter {
     }
 
     for (RawAka aka : rawCli.getAka()) {
-      createEsAka(rc, rawCli, aka);
+      convertAka(rc, rawCli, aka);
+    }
+
+    for (RawEthnicity eth : rawCli.getEthnicity()) {
+      convertEthnicity(rc, rawCli, eth);
+    }
+
+    for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
+      convertSafetyAlert(rc, rawCli, saf);
     }
 
     return rc;
   }
 
-  protected void createEsAka(ReplicatedClient rc, RawClient rawCli, RawAka rawAka) {
+  protected void convertSafetyAlert(ReplicatedClient rc, RawClient rawCli,
+      RawSafetyAlert rawSafetyAlert) {
+    // Last-change mode only. Initial Load omits all deleted records.
+    if (StringUtils.isBlank(rawSafetyAlert.getSafetyAlertId())
+        || CmsReplicationOperation.D == rawSafetyAlert.getSafetyAlertLastUpdatedOperation()) {
+      return;
+    }
+
+    final ElasticSearchSafetyAlert alert = new ElasticSearchSafetyAlert();
+    alert.setId(rawSafetyAlert.getSafetyAlertId());
+
+    final ElasticSearchSafetyAlert.Activation activation =
+        new ElasticSearchSafetyAlert.Activation();
+    alert.setActivation(activation);
+
+    activation.setActivationReasonDescription(SystemCodeCache.global()
+        .getSystemCodeShortDescription(rawSafetyAlert.getSafetyAlertActivationReasonCode()));
+    activation.setActivationReasonId(rawSafetyAlert.getSafetyAlertActivationReasonCode() != null
+        ? rawSafetyAlert.getSafetyAlertActivationReasonCode().toString()
+        : null);
+
+    final ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
+    activation.setActivationCounty(activationCounty);
+    activationCounty.setDescription(SystemCodeCache.global()
+        .getSystemCodeShortDescription(rawSafetyAlert.getSafetyAlertActivationCountyCode()));
+    activationCounty.setId(rawSafetyAlert.getSafetyAlertActivationCountyCode() != null
+        ? rawSafetyAlert.getSafetyAlertActivationCountyCode().toString()
+        : null);
+
+    activation
+        .setActivationDate(DomainChef.cookDate(rawSafetyAlert.getSafetyAlertActivationDate()));
+    activation.setActivationExplanation(rawSafetyAlert.getSafetyAlertActivationExplanation());
+
+    final ElasticSearchSafetyAlert.Deactivation deactivation =
+        new ElasticSearchSafetyAlert.Deactivation();
+    alert.setDeactivation(deactivation);
+
+    final ElasticSearchSystemCode deactivationCounty = new ElasticSearchSystemCode();
+    deactivation.setDeactivationCounty(deactivationCounty);
+
+    deactivationCounty.setDescription(SystemCodeCache.global()
+        .getSystemCodeShortDescription(rawSafetyAlert.getSafetyAlertDeactivationCountyCode()));
+    deactivationCounty.setId(rawSafetyAlert.getSafetyAlertDeactivationCountyCode() != null
+        ? rawSafetyAlert.getSafetyAlertDeactivationCountyCode().toString()
+        : null);
+
+    deactivation
+        .setDeactivationDate(DomainChef.cookDate(rawSafetyAlert.getSafetyAlertDeactivationDate()));
+    deactivation.setDeactivationExplanation(rawSafetyAlert.getSafetyAlertDeactivationExplanation());
+
+    alert.setLegacyDescriptor(
+        ElasticTransformer.createLegacyDescriptor(rawSafetyAlert.getSafetyAlertId(),
+            rawSafetyAlert.getSafetyAlertLastUpdatedTimestamp(), LegacyTable.SAFETY_ALERT));
+  }
+
+  protected void convertEthnicity(ReplicatedClient rc, RawClient rawCli,
+      RawEthnicity rawEthnicity) {
+    rc.addClientRace(rawEthnicity.getClientEthnicityCode());
+  }
+
+  protected void convertAka(ReplicatedClient rc, RawClient rawCli, RawAka rawAka) {
     if (StringUtils.isBlank(rawAka.getAkaId())
         || CmsReplicationOperation.D == rawAka.getAkaLastUpdatedOperation()) {
       return;
