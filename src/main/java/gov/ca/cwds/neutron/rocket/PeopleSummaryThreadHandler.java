@@ -2,6 +2,19 @@ package gov.ca.cwds.neutron.rocket;
 
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_FULL;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_LAST_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_NEXT_BUNDLE;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ADDRESS;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_AKA;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT_ADDRESS;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT_COUNTY;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CSEC;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ETHNICITY;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_PLACEMENT_ADDRESS;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_SAFETY_ALERT;
 import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
 
 import java.sql.Connection;
@@ -167,7 +180,6 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("handleMainResults(): commit");
     con.commit(); // free database resources
 
-
     final FlightLog flightLog = getRocket().getFlightLog();
     flightLog.addToDenormalized(cntrRetrieved);
     LOGGER.info("handleMainResults() DONE: counts: normalized: {}, de-normalized: {}",
@@ -185,9 +197,8 @@ public class PeopleSummaryThreadHandler
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     String sqlPlacementAddress;
     try {
-      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(
-          ClientSQLResource.SELECT_PLACEMENT_ADDRESS, rocket.determineLastSuccessfulRunTime(),
-          rocket.getFlightPlan().getOverrideLastEndTime());
+      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SELECT_PLACEMENT_ADDRESS,
+          rocket.determineLastSuccessfulRunTime(), rocket.getFlightPlan().getOverrideLastEndTime());
       LOGGER.info("SQL for Placement Address:\n{}", sqlPlacementAddress);
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "INVALID PLACEMENT ADDRESS SQL! {}", e.getMessage(), e);
@@ -195,18 +206,23 @@ public class PeopleSummaryThreadHandler
 
     try (
         final PreparedStatement stmtInsClient =
-            con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_CLIENT_FULL,
-                ClientSQLResource.INSERT_CLIENT_LAST_CHG));
-        final PreparedStatement stmtInsClientPlacementHome =
-            con.prepareStatement(pickPrepDml(ClientSQLResource.INSERT_PLACEMENT_HOME_CLIENT_FULL,
-                ClientSQLResource.INSERT_NEXT_BUNDLE));
-        final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(sqlPlacementAddress)) {
+            con.prepareStatement(pickPrepDml(INSERT_CLIENT_FULL, INSERT_CLIENT_LAST_CHG));
+        final PreparedStatement stmtInsClientPlaceHome = con
+            .prepareStatement(pickPrepDml(INSERT_PLACEMENT_HOME_CLIENT_FULL, INSERT_NEXT_BUNDLE));
+        final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
+        final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
+        final PreparedStatement stmtSelClientAddress = con.prepareStatement(SELECT_CLIENT_ADDRESS);
+        final PreparedStatement stmtSelClientCounty = con.prepareStatement(SELECT_CLIENT_COUNTY);
+        final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS);
+        final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA);
+        final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC);
+        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY);
+        final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT)) {
       prepPlacementClients(stmtInsClient, range);
-      prepPlacementClients(stmtInsClientPlacementHome, range);
+      prepPlacementClients(stmtInsClientPlaceHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
-      rocket.fail();
+      rocket.fail(); // TODO: fail the *whole flight* or just the bucket?
       try {
         con.rollback();
       } catch (Exception e2) {
