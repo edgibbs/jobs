@@ -20,8 +20,8 @@ public abstract class ClientReference extends CmsPersistentObject {
 
   public ClientReference read(ResultSet rs) throws SQLException {
     this.cltId = ifNull(rs.getString("CLT_IDENTIFIER"));
-    setLastUpdatedId(ifNull(rs.getString("LST_UPD_ID")));
-    setLastUpdatedTime(rs.getDate("LST_UPD_TS"));
+    // setLastUpdatedId(ifNull(rs.getString("LST_UPD_ID")));
+    // setLastUpdatedTime(rs.getDate("LST_UPD_TS"));
     return this;
   }
 

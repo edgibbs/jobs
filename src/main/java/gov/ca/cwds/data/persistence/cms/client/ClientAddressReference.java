@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
+import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +19,7 @@ public class ClientAddressReference extends ClientReference {
 
   @Override
   public ClientReference read(ResultSet rs) throws SQLException {
+    this.claId = ifNull(rs.getString("CLA_IDENTIFIER"));
     return super.read(rs);
   }
 
