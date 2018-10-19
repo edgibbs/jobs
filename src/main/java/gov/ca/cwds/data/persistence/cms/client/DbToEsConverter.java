@@ -117,7 +117,17 @@ public class DbToEsConverter {
       convertSafetyAlert(rc, rawCli, saf);
     }
 
+    for (RawCase cas : rawCli.getCases()) {
+      convertCase(rc, rawCli, cas);
+    }
+
     return rc;
+  }
+
+  protected void convertCase(ReplicatedClient rc, RawClient rawCli, RawCase rawCase) {
+    // Open case id
+    rc.setOpenCaseId(rawCase.getOpenCaseId());
+    rc.setOpenCaseResponsibleAgencyCode(rawCase.getOpenCaseResponsibleAgencyCode());
   }
 
   protected void convertSafetyAlert(ReplicatedClient rc, RawClient rawCli,
@@ -173,6 +183,8 @@ public class DbToEsConverter {
     alert.setLegacyDescriptor(
         ElasticTransformer.createLegacyDescriptor(rawSafetyAlert.getSafetyAlertId(),
             rawSafetyAlert.getSafetyAlertLastUpdatedTimestamp(), LegacyTable.SAFETY_ALERT));
+
+    rc.addSafetyAlert(alert);
   }
 
   protected void convertEthnicity(ReplicatedClient rc, RawClient rawCli,

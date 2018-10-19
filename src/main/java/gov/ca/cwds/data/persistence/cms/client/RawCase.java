@@ -45,4 +45,12 @@ public class RawCase extends ClientReference implements NeutronJdbcReader<RawCas
     this.openCaseId = openCaseId;
   }
 
+  public String getOpenCaseResponsibleAgencyCode() {
+    return openCaseResponsibleAgencyCode;
+  }
+
+  public void setOpenCaseResponsibleAgencyCode(String openCaseResponsibleAgencyCode) {
+    this.openCaseResponsibleAgencyCode = openCaseResponsibleAgencyCode;
+  }
+
 }
