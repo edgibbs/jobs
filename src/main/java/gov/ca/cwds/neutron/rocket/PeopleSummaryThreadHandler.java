@@ -2,7 +2,7 @@ package gov.ca.cwds.neutron.rocket;
 
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_FULL;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.FULL_INSERT_CLIENT_RANGE;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_LAST_CHG;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_NEXT_BUNDLE;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_PLACEMENT_CLIENT_FULL;
@@ -111,7 +111,7 @@ public class PeopleSummaryThreadHandler
   // Neutron, the next generation.
   // =================================
 
-  protected void readRaw(final PreparedStatement stmt, Consumer<ResultSet> consumer) {
+  protected void read(final PreparedStatement stmt, Consumer<ResultSet> consumer) {
     try {
       stmt.setMaxRows(0);
       stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
@@ -126,7 +126,7 @@ public class PeopleSummaryThreadHandler
         // Auto-close result set.
       }
     } catch (Exception e) {
-      // TODO: handle exception
+      throw CheeseRay.runtime(LOGGER, e, "SELECT FAILED! {}", e.getMessage(), e);
     }
   }
 
@@ -222,8 +222,8 @@ public class PeopleSummaryThreadHandler
    * SNAP-715: Initial Load: ERRORCODE=-1224, SQLSTATE=55032.
    * 
    * <p>
-   * Read data, commit as soon as possible, THEN normalize. Takes more memory but reduces database
-   * errors.
+   * NEW SCHOOL: Read data, commit frequently, THEN normalize. Takes more memory but reduces
+   * database errors.
    * </p>
    * 
    * <p>
@@ -266,7 +266,7 @@ public class PeopleSummaryThreadHandler
 
     try (
         final PreparedStatement stmtInsClient =
-            con.prepareStatement(pickPrepDml(INSERT_CLIENT_FULL, INSERT_CLIENT_LAST_CHG));
+            con.prepareStatement(pickPrepDml(FULL_INSERT_CLIENT_RANGE, INSERT_CLIENT_LAST_CHG));
         final PreparedStatement stmtInsClientPlaceHome =
             con.prepareStatement(pickPrepDml(INSERT_PLACEMENT_CLIENT_FULL, INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
@@ -280,21 +280,27 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY);
         final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT)) {
       LOGGER.debug("Read rows");
-      readRaw(stmtSelClient, rs -> this.readClient(rs));
-      readRaw(stmtSelClientAddress, rs -> this.readClientAddress(rs));
-      readRaw(stmtSelAddress, rs -> this.readAddress(rs));
-      readRaw(stmtSelAka, rs -> this.readAka(rs));
-      readRaw(stmtSelCase, rs -> this.readCase(rs));
-      readRaw(stmtSelCsec, rs -> this.readCsec(rs));
-      readRaw(stmtSelClientCounty, rs -> this.readClientCounty(rs));
-      readRaw(stmtSelEthnicity, rs -> this.readEthnicity(rs));
-      readRaw(stmtSelSafetyAlert, rs -> this.readSafetyAlert(rs));
+
+      stmtInsClient.setString(1, range.getLeft());
+      stmtInsClient.setString(1, range.getLeft());
+      final int clientCount = stmtInsClient.executeUpdate();
+      LOGGER.debug("clientCount: {}", clientCount);
+
+      read(stmtSelClient, rs -> this.readClient(rs));
+      read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
+      read(stmtSelAddress, rs -> this.readAddress(rs));
+      read(stmtSelAka, rs -> this.readAka(rs));
+      read(stmtSelCase, rs -> this.readCase(rs));
+      read(stmtSelCsec, rs -> this.readCsec(rs));
+      read(stmtSelClientCounty, rs -> this.readClientCounty(rs));
+      read(stmtSelEthnicity, rs -> this.readEthnicity(rs));
+      read(stmtSelSafetyAlert, rs -> this.readSafetyAlert(rs));
 
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
     } catch (Exception e) {
-      rocket.fail(); // TODO: fail the *whole flight* or just the bucket?
+      rocket.fail(); // TODO: fail the BUCKET, NOT the WHOLE FLIGHT!
       try {
         con.rollback();
       } catch (Exception e2) {
@@ -305,7 +311,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void mapReplicatedClient(PlacementHomeAddress pha) {
-    if (normalized.containsKey(pha.getClientId())) {
+    if (rawClients.containsKey(pha.getClientId())) {
       final ReplicatedClient rc = normalized.get(pha.getClientId());
       rc.setActivePlacementHomeAddress(pha);
     } else {
