@@ -247,6 +247,15 @@ public class PeopleSummaryThreadHandler
         normalized.size(), cntrRetrieved);
   }
 
+  protected void loadClientRange(final PreparedStatement stmtInsClient, Pair<String, String> range)
+      throws SQLException {
+    // Initial Load client ranges:
+    stmtInsClient.setString(1, range.getLeft());
+    stmtInsClient.setString(2, range.getRight());
+    final int clientCount = stmtInsClient.executeUpdate();
+    LOGGER.debug("clientCount: {}", clientCount);
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -283,10 +292,7 @@ public class PeopleSummaryThreadHandler
       LOGGER.debug("Read rows");
 
       // Initial Load client ranges:
-      stmtInsClient.setString(1, range.getLeft());
-      stmtInsClient.setString(2, range.getRight());
-      final int clientCount = stmtInsClient.executeUpdate();
-      LOGGER.debug("clientCount: {}", clientCount);
+      loadClientRange(stmtInsClient, range);
 
       read(stmtSelClient, rs -> this.readClient(rs));
       read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
@@ -297,6 +303,8 @@ public class PeopleSummaryThreadHandler
       read(stmtSelClientCounty, rs -> this.readClientCounty(rs));
       read(stmtSelEthnicity, rs -> this.readEthnicity(rs));
       read(stmtSelSafetyAlert, rs -> this.readSafetyAlert(rs));
+
+      con.commit(); // commit often, clear temp tables.
 
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
@@ -313,14 +321,15 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void mapReplicatedClient(PlacementHomeAddress pha) {
-    if (rawClients.containsKey(pha.getClientId())) {
-      final ReplicatedClient rc = normalized.get(pha.getClientId());
-      rc.setActivePlacementHomeAddress(pha);
-    } else {
-      // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
-      LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
-          pha.getClientId());
-    }
+    // TODO: link placement home address to
+    // if (rawClients.containsKey(pha.getClientId())) {
+    // final ReplicatedClient rc = rawClients.get(pha.getClientId());
+    // rc.setActivePlacementHomeAddress(pha);
+    // } else {
+    // // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
+    // LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
+    // pha.getClientId());
+    // }
   }
 
   @Override
