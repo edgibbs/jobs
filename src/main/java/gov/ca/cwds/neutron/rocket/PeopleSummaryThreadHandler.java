@@ -8,6 +8,7 @@ import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_NEXT_BUNDLE;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_PLACEMENT_CLIENT_FULL;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ADDRESS;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_AKA;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CASE;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT_ADDRESS;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT_COUNTY;
@@ -275,14 +276,15 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelClientCounty = con.prepareStatement(SELECT_CLIENT_COUNTY);
         final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS);
         final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA);
-        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CLIENT_ADDRESS);
+        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CASE);
         final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC);
         final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY);
         final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT)) {
       LOGGER.debug("Read rows");
 
+      // Initial Load client ranges:
       stmtInsClient.setString(1, range.getLeft());
-      stmtInsClient.setString(1, range.getLeft());
+      stmtInsClient.setString(2, range.getRight());
       final int clientCount = stmtInsClient.executeUpdate();
       LOGGER.debug("clientCount: {}", clientCount);
 
