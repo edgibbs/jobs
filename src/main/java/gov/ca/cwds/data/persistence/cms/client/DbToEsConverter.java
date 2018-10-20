@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import gov.ca.cwds.common.NameSuffixTranslator;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
@@ -122,6 +123,30 @@ public class DbToEsConverter {
     }
 
     return rc;
+  }
+
+  protected void convertCsec(ReplicatedClient rc, RawClient rawCli, RawCsec rawCsec) {
+    if (StringUtils.isBlank(rawCsec.getCsecId())
+        || CmsReplicationOperation.D == rawCsec.getCsecLastUpdatedOperation()) {
+      return;
+    }
+
+    final ElasticSearchPersonCsec csec = new ElasticSearchPersonCsec();
+    csec.setId(rawCsec.getCsecId());
+
+    csec.setStartDate(DomainChef.cookDate(rawCsec.getCsecStartDate()));
+    csec.setEndDate(DomainChef.cookDate(rawCsec.getCsecEndDate()));
+
+    if (rawCsec.getCsecCodeId() != null && rawCsec.getCsecCodeId() > 0) {
+      csec.setCsecCodeId(rawCsec.getCsecCodeId().toString());
+      csec.setCsecDesc(
+          SystemCodeCache.global().getSystemCodeShortDescription(rawCsec.getCsecCodeId()));
+    }
+
+    csec.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(rawCsec.getCsecId(),
+        rawCsec.getCsecLastUpdatedTimestamp(), LegacyTable.CSEC_HISTORY));
+
+    rc.addCsec(csec);
   }
 
   protected void convertCase(ReplicatedClient rc, RawClient rawCli, RawCase rawCase) {

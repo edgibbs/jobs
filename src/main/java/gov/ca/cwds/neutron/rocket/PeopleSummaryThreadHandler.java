@@ -234,7 +234,7 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
-    readClient(rs);
+    // readClient(rs);
     final int cntrRetrieved = rawClients.size();
 
     LOGGER.info("handleMainResults(): commit");
@@ -267,8 +267,8 @@ public class PeopleSummaryThreadHandler
     try (
         final PreparedStatement stmtInsClient =
             con.prepareStatement(pickPrepDml(INSERT_CLIENT_FULL, INSERT_CLIENT_LAST_CHG));
-        final PreparedStatement stmtInsClientPlaceHome = con
-            .prepareStatement(pickPrepDml(INSERT_PLACEMENT_CLIENT_FULL, INSERT_NEXT_BUNDLE));
+        final PreparedStatement stmtInsClientPlaceHome =
+            con.prepareStatement(pickPrepDml(INSERT_PLACEMENT_CLIENT_FULL, INSERT_NEXT_BUNDLE));
         final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
         final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
         final PreparedStatement stmtSelClientAddress = con.prepareStatement(SELECT_CLIENT_ADDRESS);
