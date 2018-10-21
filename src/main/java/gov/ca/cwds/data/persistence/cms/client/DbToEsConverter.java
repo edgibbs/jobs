@@ -1,6 +1,8 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.common.NameSuffixTranslator;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
@@ -17,6 +19,8 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
 public class DbToEsConverter {
+
+  protected static final Logger LOGGER = LoggerFactory.getLogger(DbToEsConverter.class);
 
   public ReplicatedClient convert(RawClient rawCli) {
     final ReplicatedClient rc = new ReplicatedClient();
@@ -98,26 +102,32 @@ public class DbToEsConverter {
     rc.setReplicationOperation(rawCli.getCltReplicationOperation());
     rc.setLastUpdatedTime(rawCli.getCltLastUpdatedTime());
 
+    LOGGER.debug("convert client address");
     for (RawClientAddress rca : rawCli.getClientAddress().values()) {
       convertClientAddress(rc, rawCli, rca);
     }
 
+    LOGGER.debug("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
       convertClientCounty(rc, rawCli, cc);
     }
 
+    LOGGER.debug("convert aka");
     for (RawAka aka : rawCli.getAka()) {
       convertAka(rc, rawCli, aka);
     }
 
+    LOGGER.debug("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
       convertEthnicity(rc, rawCli, eth);
     }
 
+    LOGGER.debug("convert safety alert");
     for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
       convertSafetyAlert(rc, rawCli, saf);
     }
 
+    LOGGER.debug("convert case");
     for (RawCase cas : rawCli.getCases()) {
       convertCase(rc, rawCli, cas);
     }

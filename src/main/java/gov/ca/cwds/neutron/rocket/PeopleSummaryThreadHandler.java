@@ -253,7 +253,7 @@ public class PeopleSummaryThreadHandler
     stmtInsClient.setString(1, range.getLeft());
     stmtInsClient.setString(2, range.getRight());
     final int clientCount = stmtInsClient.executeUpdate();
-    LOGGER.debug("clientCount: {}", clientCount);
+    LOGGER.debug("client count: {}", clientCount);
   }
 
   /**
@@ -265,6 +265,7 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
+    LOGGER.debug("handleSecondaryJdbc(): begin");
     String sqlPlacementAddress;
     try {
       sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SELECT_PLACEMENT_ADDRESS,
@@ -294,6 +295,7 @@ public class PeopleSummaryThreadHandler
       // Initial Load client ranges:
       loadClientRange(stmtInsClient, range);
 
+      // OPTION: commit more often by re-inserting client id's into GT_ID.
       read(stmtSelClient, rs -> this.readClient(rs));
       read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
       read(stmtSelAddress, rs -> this.readAddress(rs));
@@ -309,6 +311,8 @@ public class PeopleSummaryThreadHandler
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
+
+      con.commit(); // commit often, clear temp tables.
     } catch (Exception e) {
       rocket.fail(); // TODO: fail the BUCKET, NOT the WHOLE FLIGHT!
       try {
@@ -318,22 +322,26 @@ public class PeopleSummaryThreadHandler
       }
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
+
+    LOGGER.debug("handleSecondaryJdbc(): DONE");
   }
 
   protected void mapReplicatedClient(PlacementHomeAddress pha) {
-    // TODO: link placement home address to
-    // if (rawClients.containsKey(pha.getClientId())) {
-    // final ReplicatedClient rc = rawClients.get(pha.getClientId());
-    // rc.setActivePlacementHomeAddress(pha);
-    // } else {
-    // // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
-    // LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
-    // pha.getClientId());
-    // }
+    if (normalized.containsKey(pha.getClientId())) {
+      final ReplicatedClient rc = normalized.get(pha.getClientId());
+      rc.setActivePlacementHomeAddress(pha);
+    } else {
+      // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
+      LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
+          pha.getClientId());
+    }
   }
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
+    this.rawClients.values().stream().map(RawClient::normalize)
+        .forEach(c -> normalized.put(c.getId(), c));
+    rawClients.clear();
     LOGGER.debug("handleJdbcDone: normalized.size(): {}", normalized.size());
 
     // Merge placement home addresses.
