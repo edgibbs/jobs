@@ -358,11 +358,11 @@ public class RawClient extends ClientReference
 
   @Override
   public ReplicatedClient normalize(Map<Object, ReplicatedClient> ignoreMe) {
-    return normalize();
+    return normalize(new DbToEsConverter());
   }
 
-  public ReplicatedClient normalize() {
-    return new DbToEsConverter().convert(this);
+  public ReplicatedClient normalize(DbToEsConverter conv) {
+    return conv.convert(this);
   }
 
   // ==============================

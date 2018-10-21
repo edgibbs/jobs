@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.client.ClientReference;
+import gov.ca.cwds.data.persistence.cms.client.DbToEsConverter;
 import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
 import gov.ca.cwds.data.persistence.cms.client.RawAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawAka;
@@ -138,7 +139,7 @@ public class PeopleSummaryThreadHandler
 
     try {
       while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
-        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", "recs");
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "recs");
         organizer.accept(rawClients.get(t.getCltId()), t);
       }
     } catch (Exception e) {
@@ -339,7 +340,8 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
-    this.rawClients.values().stream().map(RawClient::normalize)
+    DbToEsConverter conv = new DbToEsConverter();
+    this.rawClients.values().stream().map(r -> r.normalize(conv))
         .forEach(c -> normalized.put(c.getId(), c));
     rawClients.clear();
     LOGGER.debug("handleJdbcDone: normalized.size(): {}", normalized.size());

@@ -13,6 +13,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -102,33 +103,40 @@ public class DbToEsConverter {
     rc.setReplicationOperation(rawCli.getCltReplicationOperation());
     rc.setLastUpdatedTime(rawCli.getCltLastUpdatedTime());
 
+    int counter = 0;
     LOGGER.debug("convert client address");
+    CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client address", "ca");
     for (RawClientAddress rca : rawCli.getClientAddress().values()) {
       convertClientAddress(rc, rawCli, rca);
     }
 
     LOGGER.debug("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client county", "cc");
       convertClientCounty(rc, rawCli, cc);
     }
 
     LOGGER.debug("convert aka");
     for (RawAka aka : rawCli.getAka()) {
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert aka", "aka");
       convertAka(rc, rawCli, aka);
     }
 
     LOGGER.debug("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert ethnicity", "eth");
       convertEthnicity(rc, rawCli, eth);
     }
 
     LOGGER.debug("convert safety alert");
     for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert safety alert", "saf");
       convertSafetyAlert(rc, rawCli, saf);
     }
 
     LOGGER.debug("convert case");
     for (RawCase cas : rawCli.getCases()) {
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert case", "cas");
       convertCase(rc, rawCli, cas);
     }
 
@@ -291,12 +299,14 @@ public class DbToEsConverter {
     rca.setLastUpdatedTime(rawCliAdr.getClaLastUpdatedTime());
     rc.addClientAddress(rca);
 
+    int counter = 0;
     for (RawAddress rawAdr : rawCliAdr.getAddresses()) {
-      convertAddress(rc, rca, rawCli, rawCliAdr, rawAdr);
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert address", "addr");
+      rca.addAddress(convertAddress(rc, rca, rawCli, rawCliAdr, rawAdr));
     }
   }
 
-  protected void convertAddress(ReplicatedClient rc, ReplicatedClientAddress repCa,
+  protected ReplicatedAddress convertAddress(ReplicatedClient rc, ReplicatedClientAddress repCa,
       RawClient rawCli, RawClientAddress rawCa, RawAddress rawAdr) {
     final ReplicatedAddress adr = new ReplicatedAddress();
     adr.setId(rawAdr.getAdrId());
@@ -335,7 +345,8 @@ public class DbToEsConverter {
     adr.setReplicationOperation(rawAdr.getAdrReplicationOperation());
     adr.setLastUpdatedId(rawCa.getClaLastUpdatedId());
     adr.setLastUpdatedTime(rawAdr.getAdrLastUpdatedTime());
-    repCa.addAddress(adr);
+
+    return adr;
   }
 
 }
