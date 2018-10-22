@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.client.ClientReference;
-import gov.ca.cwds.data.persistence.cms.client.RawToEsConverter;
 import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
 import gov.ca.cwds.data.persistence.cms.client.RawAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawAka;
@@ -52,6 +51,7 @@ import gov.ca.cwds.data.persistence.cms.client.RawClientCounty;
 import gov.ca.cwds.data.persistence.cms.client.RawCsec;
 import gov.ca.cwds.data.persistence.cms.client.RawEthnicity;
 import gov.ca.cwds.data.persistence.cms.client.RawSafetyAlert;
+import gov.ca.cwds.data.persistence.cms.client.RawToEsConverter;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
@@ -179,7 +179,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} client recs.", counter);
+    LOGGER.info("Retrieved {} client records.", counter);
   }
 
   protected void readClientAddress(final ResultSet rs) {
@@ -199,7 +199,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} client address recs.", counter);
+    LOGGER.info("Retrieved {} client address records.", counter);
   }
 
   protected void readAddress(final ResultSet rs) {
@@ -219,7 +219,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} address recs.", counter);
+    LOGGER.info("Retrieved {} address records.", counter);
   }
 
   protected void readClientCounty(final ResultSet rs) {
@@ -243,7 +243,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT COUNTY! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} client county recs.", counter);
+    LOGGER.info("Retrieved {} client county records.", counter);
   }
 
   protected void readAka(final ResultSet rs) {
@@ -264,7 +264,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ AKA! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} aka recs.", counter);
+    LOGGER.info("Retrieved {} aka records.", counter);
   }
 
   protected void readCase(final ResultSet rs) {
@@ -287,7 +287,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE RECORD! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} case recs.", counter);
+    LOGGER.info("Retrieved {} case records.", counter);
   }
 
   protected void readCsec(final ResultSet rs) {
@@ -310,7 +310,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CSEC! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} CSEC recs.", counter);
+    LOGGER.info("Retrieved {} CSEC records.", counter);
   }
 
   protected void readEthnicity(final ResultSet rs) {
@@ -336,7 +336,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ETHNICITY! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} case recs.", counter);
+    LOGGER.info("Retrieved {} case records.", counter);
   }
 
   protected void readSafetyAlert(final ResultSet rs) {
@@ -358,7 +358,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ SAFETY ALERT! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} safety alert recs.", counter);
+    LOGGER.info("Retrieved {} safety alert records.", counter);
   }
 
   /**
