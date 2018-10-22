@@ -7,8 +7,6 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import gov.ca.cwds.neutron.util.transform.JobTransformUtils;
-
 public class JobTransformUtilsTest {
 
   @Test
@@ -36,7 +34,7 @@ public class JobTransformUtilsTest {
   public void test_ifNull__whitespace() throws Exception {
     final String value = " \t\t\n ";
     final String actual = JobTransformUtils.ifNull(value);
-    final String expected = "";
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -44,7 +42,7 @@ public class JobTransformUtilsTest {
   public void test_ifNull__blank() throws Exception {
     final String value = "";
     final String actual = JobTransformUtils.ifNull(value);
-    final String expected = "";
+    final String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

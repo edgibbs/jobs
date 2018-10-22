@@ -70,6 +70,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   @Test(expected = SQLException.class)
   public void handleMainResults_A$ResultSet_T$SQLException() throws Exception {
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    doThrow(new SQLException()).when(con).commit();
     target.handleMainResults(rs, con);
   }
 
