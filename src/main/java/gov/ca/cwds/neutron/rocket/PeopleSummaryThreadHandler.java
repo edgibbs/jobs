@@ -173,7 +173,7 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (c = new RawClient().read(rs)) != null) {
         rawClients.put(c.getCltId(), c);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "client");
+        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client");
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
@@ -192,7 +192,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cla.getCltId());
         if (c != null) {
           c.addClientAddress(cla);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "client address");
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client address");
         }
       }
     } catch (Exception e) {
@@ -212,7 +212,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(adr.getCltId());
         if (c != null) {
           c.getClientAddress().get(adr.getClaId()).setAddress(adr);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "address");
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "address");
         }
       }
     } catch (Exception e) {
@@ -236,7 +236,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cc.getCltId());
         if (c != null) {
           c.addClientCounty(cc);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "client county");
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client county");
         }
       }
     } catch (Exception e) {
@@ -257,8 +257,10 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (aka = new RawAka().read(rs)) != null) {
         c = rawClients.get(aka.getCltId());
-        c.addAka(aka);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "aka");
+        if (c != null) {
+          c.addAka(aka);
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "aka");
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ AKA! {}", e.getMessage(), e);
@@ -280,7 +282,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cas.getCltId());
         if (c != null) {
           c.addCase(cas);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "case");
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "case");
         }
       }
     } catch (Exception e) {
@@ -303,7 +305,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(csec.getCltId());
         if (c != null) {
           c.addCsec(csec);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "csec");
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "csec");
         }
       }
     } catch (Exception e) {
@@ -326,7 +328,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(eth.getCltId());
         if (c != null) {
           c.addEthnicity(eth);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "ethnicity");
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "ethnicity");
         } else {
           LOGGER.warn("ORPHAN ETHNICITY! id: {}, client: {}", eth.getClientEthnicityId(),
               eth.getCltId());
@@ -351,8 +353,10 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (saf = new RawSafetyAlert().read(rs)) != null) {
         c = rawClients.get(saf.getCltId());
-        c.addSafetyAlert(saf);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "safety");
+        if (c != null) {
+          c.addSafetyAlert(saf);
+          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "safety");
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ SAFETY ALERT! {}", e.getMessage(), e);
@@ -441,20 +445,24 @@ public class PeopleSummaryThreadHandler
       read(stmtSelClient, rs -> this.readClient(rs));
       read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
       read(stmtSelAddress, rs -> this.readAddress(rs));
+
+      con.commit(); // clear temp tables.
+      loadClientRange(stmtInsClient, range);
+
+      read(stmtSelClientCounty, rs -> this.readClientCounty(rs));
       read(stmtSelAka, rs -> this.readAka(rs));
       read(stmtSelCase, rs -> this.readCase(rs));
       read(stmtSelCsec, rs -> this.readCsec(rs));
-      read(stmtSelClientCounty, rs -> this.readClientCounty(rs));
       read(stmtSelEthnicity, rs -> this.readEthnicity(rs));
       read(stmtSelSafetyAlert, rs -> this.readSafetyAlert(rs));
 
-      con.commit(); // commit often, clear temp tables.
+      con.commit(); // clear temp tables.
 
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
 
-      con.commit(); // commit often, clear temp tables.
+      con.commit(); // clear temp tables.
     } catch (Exception e) {
       rocket.fail(); // NEXT: fail the BUCKET, NOT the WHOLE FLIGHT!
       try {
