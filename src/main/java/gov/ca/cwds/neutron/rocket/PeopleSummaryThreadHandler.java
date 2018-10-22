@@ -143,7 +143,7 @@ public class PeopleSummaryThreadHandler
         // Find associated raw client, if any, and link.
         c = rawClients.get(t.getCltId());
         organizer.accept(c, t); // NOT WORKING??
-        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", msg);
+        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", msg);
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
@@ -173,7 +173,7 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (c = new RawClient().read(rs)) != null) {
         rawClients.put(c.getCltId(), c);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client");
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "client");
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
@@ -192,7 +192,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cla.getCltId());
         if (c != null) {
           c.addClientAddress(cla);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client address");
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "client address");
         }
       }
     } catch (Exception e) {
@@ -212,7 +212,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(adr.getCltId());
         if (c != null) {
           c.getClientAddress().get(adr.getClaId()).setAddress(adr);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "address");
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "address");
         }
       }
     } catch (Exception e) {
@@ -236,7 +236,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cc.getCltId());
         if (c != null) {
           c.addClientCounty(cc);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client county");
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "client county");
         }
       }
     } catch (Exception e) {
@@ -258,7 +258,7 @@ public class PeopleSummaryThreadHandler
       while (rocket.isRunning() && rs.next() && (aka = new RawAka().read(rs)) != null) {
         c = rawClients.get(aka.getCltId());
         c.addAka(aka);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "aka");
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "aka");
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ AKA! {}", e.getMessage(), e);
@@ -280,7 +280,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cas.getCltId());
         if (c != null) {
           c.addCase(cas);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "case");
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "case");
         }
       }
     } catch (Exception e) {
@@ -303,7 +303,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(csec.getCltId());
         if (c != null) {
           c.addCsec(csec);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "csec");
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "csec");
         }
       }
     } catch (Exception e) {
@@ -326,7 +326,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(eth.getCltId());
         if (c != null) {
           c.addEthnicity(eth);
-          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "ethnicity");
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "ethnicity");
         } else {
           LOGGER.warn("ORPHAN ETHNICITY! id: {}, client: {}", eth.getClientEthnicityId(),
               eth.getCltId());
@@ -352,7 +352,7 @@ public class PeopleSummaryThreadHandler
       while (rocket.isRunning() && rs.next() && (saf = new RawSafetyAlert().read(rs)) != null) {
         c = rawClients.get(saf.getCltId());
         c.addSafetyAlert(saf);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "safety");
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Read", "safety");
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ SAFETY ALERT! {}", e.getMessage(), e);
