@@ -153,9 +153,16 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClient(final ResultSet rs) {
+    // DOESN'T WORK. :-(
+    // Isn't this **logically identical** to the boilerplate code below??
+    // Java should evaluate the lambda expression for each record, just like an interface
+    // implementation, but it doesn't.
+
     // try {
     // final NeutronJdbcReader<RawClient> reader = new RawClient().read(rs);
-    // readAny(rs, reader, (cx, c) -> rawClients.put(c.getCltId(), c), "client");
+    // final BiConsumer<RawClient, RawClient> organizer =
+    // (ignore, c) -> rawClients.put(c.getCltId(), c);
+    // readAny(rs, reader, organizer, "client");
     // } catch (Exception e) {
     // throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
     // }
@@ -172,7 +179,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("client {} recs retrieved. last client: {}", counter, c);
+    LOGGER.info("Retrieved {} client recs. last client: {}", counter, c);
   }
 
   protected void readClientAddress(final ResultSet rs) {
@@ -187,10 +194,10 @@ public class PeopleSummaryThreadHandler
         CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client address");
       }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("client address {} recs retrieved. last client: {}", counter, c);
+    LOGGER.info("Retrieved {} client address recs. last client: {}", counter, c);
   }
 
   protected void readAddress(final ResultSet rs) {
@@ -208,57 +215,134 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("last client: {}", c);
-    LOGGER.info("address {} recs retrieved", counter);
+    LOGGER.info("Retrieved {} address recs. last client: {}", counter, c);
   }
 
   protected void readClientCounty(final ResultSet rs) {
+    // Should work but doesn't.
+    // readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc),
+    // "client county");
+    int counter = 0;
+    RawClient c = null;
+    RawClientCounty cc = null;
+
     try {
-      readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc),
-          "client county");
+      while (rocket.isRunning() && rs.next() && (cc = new RawClientCounty().read(rs)) != null) {
+        c = rawClients.get(cc.getCltId());
+        c.addClientCounty(cc);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client county");
+      }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT COUNTY! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("Retrieved {} client county recs. last client: {}", counter, c);
   }
 
   protected void readAka(final ResultSet rs) {
+    // Should work but doesn't.
+    // readAny(rs, new RawAka().read(rs), (c, aka) -> c.addAka(aka), "aka");
+
+    int counter = 0;
+    RawClient c = null;
+    RawAka aka = null;
+
     try {
-      readAny(rs, new RawAka().read(rs), (c, aka) -> c.addAka(aka), "aka");
+      while (rocket.isRunning() && rs.next() && (aka = new RawAka().read(rs)) != null) {
+        c = rawClients.get(aka.getCltId());
+        c.addAka(aka);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "aka");
+      }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ AKA! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("Retrieved {} aka recs. last client: {}", counter, c);
   }
 
   protected void readCase(final ResultSet rs) {
+    // Ditto.
+    // readAny(rs, new RawCase().read(rs), (c, cas) -> c.addCase(cas), "case");
+
+    int counter = 0;
+    RawClient c = null;
+    RawCase cas = null;
+
     try {
-      readAny(rs, new RawCase().read(rs), (c, cas) -> c.addCase(cas), "case");
+      while (rocket.isRunning() && rs.next() && (cas = new RawCase().read(rs)) != null) {
+        c = rawClients.get(cas.getCltId());
+        c.addCase(cas);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "case");
+      }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE RECORD! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("Retrieved {} case recs.", counter);
   }
 
   protected void readCsec(final ResultSet rs) {
+    // Ditto.
+    // readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec), "csec");
+
+    int counter = 0;
+    RawClient c = null;
+    RawCsec csec = null;
+
     try {
-      readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec), "csec");
+      while (rocket.isRunning() && rs.next() && (csec = new RawCsec().read(rs)) != null) {
+        c = rawClients.get(csec.getCltId());
+        c.addCsec(csec);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "csec");
+      }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CSEC! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("Retrieved {} CSEC recs.", counter);
   }
 
   protected void readEthnicity(final ResultSet rs) {
+    // Ditto.
+    // readAny(rs, new RawEthnicity().read(rs), (c, eth) -> c.addEthnicity(eth), "ethnicity");
+
+    int counter = 0;
+    RawClient c = null;
+    RawEthnicity eth = null;
+
     try {
-      readAny(rs, new RawEthnicity().read(rs), (c, eth) -> c.addEthnicity(eth), "ethnicity");
+      while (rocket.isRunning() && rs.next() && (eth = new RawEthnicity().read(rs)) != null) {
+        c = rawClients.get(eth.getCltId());
+        c.addEthnicity(eth);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "ethnicity");
+      }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ETHNICITY! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("Retrieved {} case recs.", counter);
   }
 
   protected void readSafetyAlert(final ResultSet rs) {
+    // Ditto.
+    // readAny(rs, new RawSafetyAlert().read(rs), (c, saf) -> c.addSafetyAlert(saf), "safety
+    // alert");
+
+    int counter = 0;
+    RawClient c = null;
+    RawSafetyAlert saf = null;
+
     try {
-      readAny(rs, new RawSafetyAlert().read(rs), (c, saf) -> c.addSafetyAlert(saf), "safety alert");
+      while (rocket.isRunning() && rs.next() && (saf = new RawSafetyAlert().read(rs)) != null) {
+        c = rawClients.get(saf.getCltId());
+        c.addSafetyAlert(saf);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "safety");
+      }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ SAFETY ALERT! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("Retrieved {} safety alert recs.", counter);
   }
 
   /**
