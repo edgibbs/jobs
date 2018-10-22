@@ -12,6 +12,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.flight.FlightSummary;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -78,16 +79,23 @@ public class ExitInitialLoadRocket
           logError(sched, summary);
         }
 
-        // Swap Alias to new index
-        final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
-        final String alias = esDao.getConfig().getElasticsearchAlias();
-        if (esDao.createOrSwapAlias(alias, index)) {
-          LOGGER.info("Applied Alias {} to Index {} ", alias, index);
+        if (FlightLog.isGLOBAL_ERROR_FLAG()) {
+          // Swap Alias to new index
+          final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
+          final String alias = esDao.getConfig().getElasticsearchAlias();
+          if (esDao.createOrSwapAlias(alias, index)) {
+            LOGGER.info("Applied Alias {} to Index {} ", alias, index);
+          }
         }
 
-        LaunchCommand.getInstance().shutdown();
       } catch (Exception e) {
         CheeseRay.checked(LOGGER, e, "ELASTICSEARCH INDEX MANAGEMENT ERROR! {}", e.getMessage());
+      } finally {
+        try {
+          LaunchCommand.getInstance().shutdown();
+        } catch (Exception e2) {
+          LOGGER.trace("Oops!", e2);
+        }
       }
     }
 
