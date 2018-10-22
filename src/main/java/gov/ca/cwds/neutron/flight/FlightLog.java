@@ -534,6 +534,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     this.validationErrors = true;
   }
 
+  public static boolean isGlobalError() {
+    return GLOBAL_ERROR_FLAG;
+  }
+
   /**
    * Format for JMX console and logs.
    */
@@ -578,9 +582,5 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return buf.toString();
   }
   //@formatter:on
-
-  public static boolean isGLOBAL_ERROR_FLAG() {
-    return GLOBAL_ERROR_FLAG;
-  }
 
 }

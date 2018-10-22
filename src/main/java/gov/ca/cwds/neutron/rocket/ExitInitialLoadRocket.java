@@ -79,7 +79,7 @@ public class ExitInitialLoadRocket
           logError(sched, summary);
         }
 
-        if (!FlightLog.isGLOBAL_ERROR_FLAG()) {
+        if (!FlightLog.isGlobalError()) {
           // Swap Alias to new index
           final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
           final String alias = esDao.getConfig().getElasticsearchAlias();
