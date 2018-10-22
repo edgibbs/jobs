@@ -453,31 +453,28 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT)) {
       LOGGER.debug("Read rows");
 
+      // Commit more often by re-inserting client id's into GT_ID.
       // Initial Load client ranges:
       loadClientRange(stmtInsClient, range);
-
-      // OPTION: commit more often by re-inserting client id's into GT_ID.
       read(stmtSelClient, rs -> this.readClient(rs));
       read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
       read(stmtSelAddress, rs -> this.readAddress(rs));
-
       con.commit(); // clear temp tables.
-      loadClientRange(stmtInsClient, range);
 
+      loadClientRange(stmtInsClient, range); // Insert client id's again.
       read(stmtSelClientCounty, rs -> this.readClientCounty(rs));
       read(stmtSelAka, rs -> this.readAka(rs));
       read(stmtSelCase, rs -> this.readCase(rs));
       read(stmtSelCsec, rs -> this.readCsec(rs));
       read(stmtSelEthnicity, rs -> this.readEthnicity(rs));
       read(stmtSelSafetyAlert, rs -> this.readSafetyAlert(rs));
-
-      con.commit(); // clear temp tables.
+      con.commit();
 
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
 
-      con.commit(); // clear temp tables.
+      con.commit();
     } catch (Exception e) {
       rocket.fail(); // NEXT: fail the BUCKET, NOT the WHOLE FLIGHT!
       try {
@@ -508,7 +505,7 @@ public class PeopleSummaryThreadHandler
     final RawToEsConverter conv = new RawToEsConverter();
     this.rawClients.values().stream().map(r -> r.normalize(conv))
         .forEach(c -> normalized.put(c.getId(), c));
-    rawClients.clear();
+    rawClients.clear(); // free memory
     LOGGER.debug("handleJdbcDone: normalized.size(): {}", normalized.size());
 
     // Merge placement home addresses.
