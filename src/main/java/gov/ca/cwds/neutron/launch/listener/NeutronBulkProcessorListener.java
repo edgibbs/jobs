@@ -36,7 +36,7 @@ public class NeutronBulkProcessorListener implements BulkProcessor.Listener {
   public void beforeBulk(long executionId, BulkRequest request) {
     final int numActions = request.numberOfActions();
     flightLog.addToBulkBefore(numActions);
-    LOGGER.debug("Ready to execute bulk of {} actions", numActions);
+    LOGGER.trace("Ready to execute bulk of {} actions", numActions);
   }
 
   @Override
