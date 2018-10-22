@@ -143,17 +143,23 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   public String getInitialLoadQuery(String dbSchemaName) {
     String ret = null;
     final StringBuilder buf = new StringBuilder();
-    buf.append("SELECT ").append(ClientSQLResource.LAST_CHG_COLUMNS).append(" FROM ")
-        .append(dbSchemaName).append('.').append(getInitialLoadViewName())
-        .append(" x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' ");
 
-    if (!getFlightPlan().isLoadSealedAndSensitive()) {
-      buf.append(" AND x.CLT_SENSTV_IND = 'N' ");
-    }
+    // Return no records from the obsolete MQT.
+    // Real work in PeopleSummaryThreadHandler.
+    buf.append(
+        "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN :fromId' AND ':toId\n");
+
+    // buf.append("SELECT ").append(ClientSQLResource.LAST_CHG_COLUMNS).append(" FROM ")
+    // .append(dbSchemaName).append('.').append(getInitialLoadViewName())
+    // .append(" x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId'\n").append("AND 1=2\n");
+    //
+    // if (!getFlightPlan().isLoadSealedAndSensitive()) {
+    // buf.append(" AND x.CLT_SENSTV_IND = 'N'\n");
+    // }
 
     buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     ret = buf.toString();
-    LOGGER.info("initial load: SQL:\n\n{}\n", ret);
+    LOGGER.trace("initial load: SQL:\n\n{}\n", ret);
 
     return ret;
   }
