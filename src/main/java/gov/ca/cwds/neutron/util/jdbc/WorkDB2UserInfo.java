@@ -3,6 +3,8 @@ package gov.ca.cwds.neutron.util.jdbc;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import javax.sql.PooledConnection;
+
 import org.hibernate.jdbc.Work;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +38,19 @@ public class WorkDB2UserInfo implements Work {
     con.setClientInfo("ApplicationName", "CARES Neutron");
     con.setClientInfo("ClientUser", "Neutron");
 
-    if (con instanceof DB2Connection) {
-      LOGGER.info("DB2 connection! Set user info ...");
+    if (con instanceof DB2Connection || (con instanceof PooledConnection
+        && ((PooledConnection) con).getConnection() instanceof DB2Connection)) {
+      LOGGER.info("DB2 connection! Set user info.");
       final String userId = NAME;
 
-      final DB2Connection db2con = (DB2Connection) con;
+      // Unwrap pooled connections.
+      DB2Connection db2con;
+      if (con instanceof PooledConnection) {
+        db2con = (DB2Connection) ((PooledConnection) con).getConnection();
+      } else {
+        db2con = (DB2Connection) con;
+      }
+
       db2con.nativeSQL("SET CURRENT DEGREE = 'ANY'");
       db2con.setReadOnly(false);
       db2con.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);

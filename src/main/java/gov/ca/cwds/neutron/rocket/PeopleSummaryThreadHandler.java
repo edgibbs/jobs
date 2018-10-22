@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.client.ClientReference;
-import gov.ca.cwds.data.persistence.cms.client.DbToEsConverter;
+import gov.ca.cwds.data.persistence.cms.client.RawToEsConverter;
 import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
 import gov.ca.cwds.data.persistence.cms.client.RawAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawAka;
@@ -482,7 +482,7 @@ public class PeopleSummaryThreadHandler
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
     // LOGGER.info("client address count: {}", );
-    final DbToEsConverter conv = new DbToEsConverter();
+    final RawToEsConverter conv = new RawToEsConverter();
     this.rawClients.values().stream().map(r -> r.normalize(conv))
         .forEach(c -> normalized.put(c.getId(), c));
     rawClients.clear();

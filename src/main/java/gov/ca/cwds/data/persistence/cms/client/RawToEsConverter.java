@@ -21,9 +21,16 @@ import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 
-public class DbToEsConverter {
+/**
+ * Convert "raw" (JDBC) object hierarchy to Elasticsearch ready beans.
+ * 
+ * @author CWDS API Team
+ * @see RawClient
+ * @see ReplicatedClient
+ */
+public class RawToEsConverter {
 
-  protected static final Logger LOGGER = LoggerFactory.getLogger(DbToEsConverter.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(RawToEsConverter.class);
 
   public ReplicatedClient convert(RawClient rawCli) {
     final ReplicatedClient rc = new ReplicatedClient();
@@ -107,41 +114,41 @@ public class DbToEsConverter {
 
     int counter = 0;
     final Collection<RawClientAddress> coll = rawCli.getClientAddress().values();
-    LOGGER.debug("convert client address: count: {}", coll.size());
+    LOGGER.trace("convert client address: count: {}", coll.size());
     for (RawClientAddress rca : coll) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client address", "ca");
       convertClientAddress(rc, rawCli, rca);
     }
 
     counter = 0;
-    LOGGER.debug("convert client county");
+    LOGGER.trace("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client county", "cc");
       convertClientCounty(rc, rawCli, cc);
     }
 
     counter = 0;
-    LOGGER.debug("convert aka");
+    LOGGER.trace("convert aka");
     for (RawAka aka : rawCli.getAka()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert aka", "aka");
       convertAka(rc, rawCli, aka);
     }
 
     counter = 0;
-    LOGGER.debug("convert ethnicity");
+    LOGGER.trace("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert ethnicity", "eth");
       convertEthnicity(rc, rawCli, eth);
     }
 
     counter = 0;
-    LOGGER.debug("convert safety alert");
+    LOGGER.trace("convert safety alert");
     for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert safety alert", "saf");
       convertSafetyAlert(rc, rawCli, saf);
     }
 
-    LOGGER.debug("convert case");
+    LOGGER.trace("convert case");
     for (RawCase cas : rawCli.getCases()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert case", "cas");
       convertCase(rc, rawCli, cas);
