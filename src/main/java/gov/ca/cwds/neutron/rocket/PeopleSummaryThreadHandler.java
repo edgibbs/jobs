@@ -156,7 +156,7 @@ public class PeopleSummaryThreadHandler
     // DOESN'T WORK. :-(
     // Isn't this **logically identical** to the boilerplate code below??
     // Java should evaluate the lambda expression for each record, just like an interface
-    // implementation, but it doesn't.
+    // implementation, but it doesn't. It evaluates the expression only once. Why??
 
     // try {
     // final NeutronJdbcReader<RawClient> reader = new RawClient().read(rs);
@@ -222,6 +222,7 @@ public class PeopleSummaryThreadHandler
     // Should work but doesn't.
     // readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc),
     // "client county");
+
     int counter = 0;
     RawClient c = null;
     RawClientCounty cc = null;
