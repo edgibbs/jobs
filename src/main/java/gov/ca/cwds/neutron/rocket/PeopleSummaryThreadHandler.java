@@ -142,7 +142,7 @@ public class PeopleSummaryThreadHandler
       while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
         // Find associated raw client, if any, and link.
         c = rawClients.get(t.getCltId());
-        organizer.accept(c, t);
+        organizer.accept(c, t); // NOT WORKING??
         CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", msg);
       }
     } catch (Exception e) {
@@ -153,12 +153,26 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClient(final ResultSet rs) {
+    // try {
+    // final NeutronJdbcReader<RawClient> reader = new RawClient().read(rs);
+    // readAny(rs, reader, (cx, c) -> rawClients.put(c.getCltId(), c), "client");
+    // } catch (Exception e) {
+    // throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
+    // }
+
+    int counter = 0;
+    RawClient c = null;
+
     try {
-      final NeutronJdbcReader<RawClient> reader = new RawClient().read(rs);
-      readAny(rs, reader, (cx, c) -> rawClients.put(c.getCltId(), c), "client");
+      while (rocket.isRunning() && rs.next() && (c = new RawClient().read(rs)) != null) {
+        rawClients.put(c.getCltId(), c);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client");
+      }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("client {} recs retrieved. last client: {}", counter, c);
   }
 
   protected void readClientAddress(final ResultSet rs) {
