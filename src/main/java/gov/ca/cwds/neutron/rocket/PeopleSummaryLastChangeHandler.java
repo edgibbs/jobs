@@ -146,6 +146,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       recs = new ArrayList<>(totalKeys * 3);
       LOGGER.info("total keys found: {}", totalKeys);
 
+      // OPTION: Commit often and early. This block is one big transaction.
+      // Better to reinsert client id's as needed.
+
       // 1-1000, 1001-2000, 2001-3000, etc.
       for (int start = 1; start < totalKeys; start += BUNDLE_KEY_COUNT) {
         final int end = start + BUNDLE_KEY_COUNT - 1;

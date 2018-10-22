@@ -179,7 +179,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} client recs. last client: {}", counter, c);
+    LOGGER.info("Retrieved {} client recs.", counter);
   }
 
   protected void readClientAddress(final ResultSet rs) {
@@ -197,7 +197,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} client address recs. last client: {}", counter, c);
+    LOGGER.info("Retrieved {} client address recs.", counter);
   }
 
   protected void readAddress(final ResultSet rs) {
@@ -215,7 +215,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} address recs. last client: {}", counter, c);
+    LOGGER.info("Retrieved {} address recs.", counter);
   }
 
   protected void readClientCounty(final ResultSet rs) {
@@ -237,7 +237,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT COUNTY! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} client county recs. last client: {}", counter, c);
+    LOGGER.info("Retrieved {} client county recs.", counter);
   }
 
   protected void readAka(final ResultSet rs) {
@@ -258,7 +258,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ AKA! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} aka recs. last client: {}", counter, c);
+    LOGGER.info("Retrieved {} aka recs.", counter);
   }
 
   protected void readCase(final ResultSet rs) {

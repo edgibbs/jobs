@@ -36,7 +36,7 @@
 				<FileNamePattern>${ROCKET_LOGS}/${rocketLog}.%i.log.zip
 				</FileNamePattern>
 				<MinIndex>1</MinIndex>
-				<MaxIndex>10</MaxIndex>
+				<MaxIndex>20</MaxIndex>
 			</rollingPolicy>
 
 			<triggeringPolicy
