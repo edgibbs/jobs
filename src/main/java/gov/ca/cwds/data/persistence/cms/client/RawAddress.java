@@ -351,4 +351,12 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     this.adrUnitNumber = adrUnitNumber;
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((adrId == null) ? 0 : adrId.hashCode());
+    return result;
+  }
+
 }

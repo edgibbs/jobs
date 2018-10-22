@@ -104,7 +104,7 @@ public class ClientSQLResource implements ApiMarker {
   public static final String SELECT_CLIENT_ADDRESS =
   //@formatter:off
         "SELECT \n"
-      + "    cla.FKCLIENT_T        AS CLT_IDENTIFIER, \n"
+      + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
       + "    cla.IDENTIFIER        AS CLA_IDENTIFIER, \n"
       + "    cla.LST_UPD_ID        AS CLA_LST_UPD_ID, \n"
       + "    cla.LST_UPD_TS        AS CLA_LST_UPD_TS, \n"
@@ -123,7 +123,6 @@ public class ClientSQLResource implements ApiMarker {
       + "JOIN ADDRS_T   adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
       + "WHERE cla.IBMSNAP_OPERATION IN ('I','U') \n"
       + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
-      + "ORDER BY CLT_IDENTIFIER \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR " ;
   //@formatter:on
@@ -131,7 +130,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:off
   public static final String SELECT_ADDRESS =
         "SELECT \n"
-      + "    cla.FKCLIENT_T        AS CLT_IDENTIFIER, \n"
+      + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
       + "    cla.IDENTIFIER        AS CLA_IDENTIFIER, \n"
       + "    adr.IDENTIFIER        AS ADR_IDENTIFIER, \n"
       + "    adr.LST_UPD_ID        AS ADR_LST_UPD_ID, \n"
@@ -160,9 +159,10 @@ public class ClientSQLResource implements ApiMarker {
       + "    adr.IBMSNAP_LOGMARKER AS ADR_IBMSNAP_LOGMARKER, \n"
       + "    adr.IBMSNAP_OPERATION AS ADR_IBMSNAP_OPERATION \n"
       + "FROM GT_ID      gt \n"
-      + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T AND cla.EFF_END_DT IS NULL \n"
+      + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T \n"
       + "JOIN ADDRS_T   adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
-      + "WHERE cla.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "WHERE cla.EFF_END_DT IS NULL \n"
+      + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
       + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR ";

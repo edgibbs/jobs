@@ -16,6 +16,7 @@ import javax.persistence.Enumerated;
 
 import org.hibernate.annotations.Type;
 
+import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
 public class RawClientAddress extends ClientAddressReference
@@ -94,7 +95,7 @@ public class RawClientAddress extends ClientAddressReference
 
   @Override
   public Serializable getPrimaryKey() {
-    return claId;
+    return new VarargPrimaryKey(claFkClient, claId);
   }
 
   public CmsReplicationOperation getClaReplicationOperation() {

@@ -36,4 +36,13 @@ public class ClientAddressReference extends ClientReference {
     this.claId = claId;
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((getCltId() == null) ? 0 : getCltId().hashCode());
+    result = prime * result + ((getClaId() == null) ? 0 : getClaId().hashCode());
+    return result;
+  }
+
 }

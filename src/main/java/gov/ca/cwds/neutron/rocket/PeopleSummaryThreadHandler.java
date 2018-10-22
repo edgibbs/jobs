@@ -135,12 +135,15 @@ public class PeopleSummaryThreadHandler
   protected <T extends ClientReference> void readAny(final ResultSet rs,
       NeutronJdbcReader<T> reader, BiConsumer<RawClient, T> organizer, String msg) {
     int counter = 0;
+    RawClient c = null;
     T t;
 
     try {
       while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
+        // Find associated raw client, if any, and link.
+        c = rawClients.get(t.getCltId());
+        organizer.accept(c, t);
         CheeseRay.logEvery(LOGGER, 5000, ++counter, "Retrieved", msg);
-        organizer.accept(rawClients.get(t.getCltId()), t);
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
@@ -159,21 +162,48 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientAddress(final ResultSet rs) {
-    try {
-      readAny(rs, new RawClientAddress().read(rs), (c, adr) -> c.addClientAddress(adr),
-          "client address");
-    } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
-    }
-  }
+    // try {
+    // final NeutronJdbcReader<RawClientAddress> reader = new RawClientAddress().read(rs);
+    // readAny(rs, reader, (c, ca) -> c.addClientAddress(ca), "client address");
+    // } catch (Exception e) {
+    // throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
+    // }
+    int counter = 0;
+    RawClient c = null;
+    RawClientAddress cla = null;
 
-  protected void readAddress(final ResultSet rs) {
     try {
-      readAny(rs, new RawAddress().read(rs),
-          (c, ca) -> c.getClientAddress().get(ca.getClaId()).addAddress(ca), "address");
+      while (rocket.isRunning() && rs.next() && (cla = new RawClientAddress().read(rs)) != null) {
+        c = rawClients.get(cla.getCltId());
+        c.addClientAddress(cla);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client address");
+      }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
     }
+
+    LOGGER.info("client address {} recs retrieved. last client: {}", counter, c);
+  }
+
+  protected void readAddress(final ResultSet rs) {
+    int counter = 0;
+    RawAddress adr = null;
+    RawClient c = null;
+    String clientId = null;
+
+    try {
+      while (rocket.isRunning() && rs.next() && (adr = new RawAddress().read(rs)) != null) {
+        clientId = adr.getCltId();
+        c = rawClients.get(clientId);
+        c.getClientAddress().get(adr.getClaId()).addAddress(adr);
+        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "address");
+      }
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
+    }
+
+    LOGGER.info("last client: {}", c);
+    LOGGER.info("address {} recs retrieved", counter);
   }
 
   protected void readClientCounty(final ResultSet rs) {
@@ -305,7 +335,6 @@ public class PeopleSummaryThreadHandler
       read(stmtSelClient, rs -> this.readClient(rs));
       read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
       read(stmtSelAddress, rs -> this.readAddress(rs));
-
       read(stmtSelAka, rs -> this.readAka(rs));
       read(stmtSelCase, rs -> this.readCase(rs));
       read(stmtSelCsec, rs -> this.readCsec(rs));
