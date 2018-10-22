@@ -147,7 +147,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     // Return no records from the obsolete MQT.
     // Real work in PeopleSummaryThreadHandler.
     buf.append(
-        "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN :fromId' AND ':toId\n");
+        "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId'\n");
 
     // buf.append("SELECT ").append(ClientSQLResource.LAST_CHG_COLUMNS).append(" FROM ")
     // .append(dbSchemaName).append('.').append(getInitialLoadViewName())
