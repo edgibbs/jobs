@@ -79,13 +79,15 @@ public class ExitInitialLoadRocket
           logError(sched, summary);
         }
 
-        if (FlightLog.isGLOBAL_ERROR_FLAG()) {
+        if (!FlightLog.isGLOBAL_ERROR_FLAG()) {
           // Swap Alias to new index
           final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
           final String alias = esDao.getConfig().getElasticsearchAlias();
           if (esDao.createOrSwapAlias(alias, index)) {
             LOGGER.info("Applied Alias {} to Index {} ", alias, index);
           }
+        } else {
+          LOGGER.warn("PREVIOUS ERROR! DON'T SWAP ALIASES!");
         }
 
       } catch (Exception e) {
