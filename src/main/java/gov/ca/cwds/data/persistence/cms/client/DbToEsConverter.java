@@ -306,10 +306,8 @@ public class DbToEsConverter {
     rca.setLastUpdatedTime(rawCliAdr.getClaLastUpdatedTime());
     rc.addClientAddress(rca);
 
-    int counter = 0;
-    for (RawAddress rawAdr : rawCliAdr.getAddresses()) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert address", "addr");
-      rca.addAddress(convertAddress(rc, rca, rawCli, rawCliAdr, rawAdr));
+    if (rawCliAdr.getAddress() != null) {
+      rca.addAddress(convertAddress(rc, rca, rawCli, rawCliAdr, rawCliAdr.getAddress()));
     }
   }
 

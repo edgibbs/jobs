@@ -6,9 +6,7 @@ import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.EnumType;
@@ -24,7 +22,7 @@ public class RawClientAddress extends ClientAddressReference
 
   private static final long serialVersionUID = 1L;
 
-  private List<RawAddress> addresses = new ArrayList<>();
+  private RawAddress address;
 
   // =======================
   // CL_ADDRT: (address)
@@ -194,12 +192,12 @@ public class RawClientAddress extends ClientAddressReference
     this.claEffectiveStartDate = freshDate(date);
   }
 
-  public void addAddress(RawAddress addr) {
-    addresses.add(addr);
+  public RawAddress getAddress() {
+    return address;
   }
 
-  public List<RawAddress> getAddresses() {
-    return addresses;
+  public void setAddress(RawAddress address) {
+    this.address = address;
   }
 
 }
