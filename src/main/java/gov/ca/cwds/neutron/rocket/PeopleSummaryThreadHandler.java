@@ -592,7 +592,7 @@ public class PeopleSummaryThreadHandler
                 getRocket().determineLastSuccessfulRunTime(),
                 getRocket().getFlightPlan().getOverrideLastEndTime())
             : sqlInitialLoad; // initial mode
-    LOGGER.info("Prep SQL: \n{}", preparedSql);
+    LOGGER.trace("Prep SQL: \n{}", preparedSql);
     return preparedSql;
   }
 
