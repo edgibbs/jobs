@@ -117,7 +117,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void getJdbcOrderBy_Args__() throws Exception {
     final String actual = target.getJdbcOrderBy().trim().toUpperCase();
-    final String expected = "ORDER BY X.CLT_IDENTIFIER";
+    final String expected = "ORDER BY CLT_IDENTIFIER";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -126,7 +126,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     final String actual =
         target.getInitialLoadQuery("CWSINT").trim().replace("\\s{2,}", " ").replaceAll("  ", " ");
     final String expected =
-        "SELECT x.* FROM CWSINT.MQT_CLIENT_ADDRESS x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' AND x.CLT_SENSTV_IND = 'N' ORDER BY X.CLT_IDENTIFIER FOR READ ONLY WITH UR";
+        "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR";
     assertThat(actual, is(equalTo(expected)));
   }
 
