@@ -12,7 +12,7 @@ public class ClientSQLResource implements ApiMarker {
   // =================================
 
   //@formatter:off
-  public static final String FULL_INSERT_CLIENT_RANGE =
+  public static final String INSERT_CLIENT_RANGE =
       "INSERT INTO GT_ID (IDENTIFIER) \n"
     + "SELECT x.IDENTIFIER \n"
     + "FROM CLIENT_T x \n"
@@ -228,6 +228,7 @@ public class ClientSQLResource implements ApiMarker {
       + "FROM GT_ID     gt \n"
       + "JOIN CLSCP_ET eth ON gt.IDENTIFIER = eth.ESTBLSH_ID  \n"
       + "WHERE eth.ESTBLSH_CD = 'C' \n"
+      + "  AND eth.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR ";
   //@formatter:on
@@ -249,30 +250,32 @@ public class ClientSQLResource implements ApiMarker {
       + "    onm.IBMSNAP_LOGMARKER AS ONM_IBMSNAP_LOGMARKER \n"
       + "FROM GT_ID     gt \n"
       + "JOIN OCL_NM_T onm ON onm.FKCLIENT_T = gt.IDENTIFIER \n"
+      + "WHERE onm.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR ";
   //@formatter:on
 
   //@formatter:off
   public static final String SELECT_SAFETY_ALERT =
-    "SELECT \n"
-        + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
-        + "    sal.THIRD_ID          AS SAL_THIRD_ID, \n"
-        + "    sal.ACTV_RNC          AS SAL_ACTV_RNC, \n"
-        + "    sal.ACTV_DT           AS SAL_ACTV_DT, \n"
-        + "    sal.ACTV_GEC          AS SAL_ACTV_GEC, \n"
-        + "    sal.ACTV_TXT          AS SAL_ACTV_TXT, \n"
-        + "    sal.DACT_DT           AS SAL_DACT_DT, \n"
-        + "    sal.DACT_GEC          AS SAL_DACT_GEC, \n"
-        + "    sal.DACT_TXT          AS SAL_DACT_TXT, \n"
-        + "    sal.LST_UPD_ID        AS SAL_LST_UPD_ID, \n"
-        + "    sal.LST_UPD_TS        AS SAL_LST_UPD_TS, \n"
-        + "    sal.IBMSNAP_LOGMARKER AS SAL_IBMSNAP_LOGMARKER, \n"
-        + "    sal.IBMSNAP_OPERATION AS SAL_IBMSNAP_OPERATION \n"
-        + "FROM GT_ID     gt \n"
-        + "JOIN SAF_ALRT sal ON sal.FKCLIENT_T = gt.IDENTIFIER \n"
-        + "OPTIMIZE FOR 1000 ROWS \n"
-        + "FOR READ ONLY WITH UR ";
+        "SELECT \n"
+      + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
+      + "    sal.THIRD_ID          AS SAL_THIRD_ID, \n"
+      + "    sal.ACTV_RNC          AS SAL_ACTV_RNC, \n"
+      + "    sal.ACTV_DT           AS SAL_ACTV_DT, \n"
+      + "    sal.ACTV_GEC          AS SAL_ACTV_GEC, \n"
+      + "    sal.ACTV_TXT          AS SAL_ACTV_TXT, \n"
+      + "    sal.DACT_DT           AS SAL_DACT_DT, \n"
+      + "    sal.DACT_GEC          AS SAL_DACT_GEC, \n"
+      + "    sal.DACT_TXT          AS SAL_DACT_TXT, \n"
+      + "    sal.LST_UPD_ID        AS SAL_LST_UPD_ID, \n"
+      + "    sal.LST_UPD_TS        AS SAL_LST_UPD_TS, \n"
+      + "    sal.IBMSNAP_LOGMARKER AS SAL_IBMSNAP_LOGMARKER, \n"
+      + "    sal.IBMSNAP_OPERATION AS SAL_IBMSNAP_OPERATION \n"
+      + "FROM GT_ID     gt \n"
+      + "JOIN SAF_ALRT sal ON sal.FKCLIENT_T = gt.IDENTIFIER \n"
+      + "WHERE sal.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "OPTIMIZE FOR 1000 ROWS \n"
+      + "FOR READ ONLY WITH UR ";
   //@formatter:on
 
 
@@ -655,7 +658,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_CLIENT_FULL =
+  public static final String INSERT_CLIENT_DUMMY =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
     + "SELECT '1234567abc' FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ? AND ?";
   //@formatter:on
