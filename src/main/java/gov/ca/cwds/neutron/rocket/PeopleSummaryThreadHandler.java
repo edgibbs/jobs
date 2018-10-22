@@ -193,6 +193,8 @@ public class PeopleSummaryThreadHandler
         if (c != null) {
           c.addClientAddress(cla);
           CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client address");
+        } else {
+          LOGGER.warn("ORPHAN CLIENT ADDRESS! id: {}, client: {}", cla.getClaId(), cla.getCltId());
         }
       }
     } catch (Exception e) {
@@ -213,6 +215,8 @@ public class PeopleSummaryThreadHandler
         if (c != null) {
           c.getClientAddress().get(adr.getClaId()).setAddress(adr);
           CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "address");
+        } else {
+          LOGGER.warn("ORPHAN ADDRESS! id: {}, client: {}", adr.getAdrId(), adr.getCltId());
         }
       }
     } catch (Exception e) {
@@ -237,6 +241,8 @@ public class PeopleSummaryThreadHandler
         if (c != null) {
           c.addClientCounty(cc);
           CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client county");
+        } else {
+          LOGGER.warn("ORPHAN CLIENT COUNTY! id: {}, client: {}", cc.getCltId(), cc.getCltId());
         }
       }
     } catch (Exception e) {
@@ -260,6 +266,8 @@ public class PeopleSummaryThreadHandler
         if (c != null) {
           c.addAka(aka);
           CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "aka");
+        } else {
+          LOGGER.warn("ORPHAN AKA! id: {}, client: {}", aka.getAkaId(), aka.getCltId());
         }
       }
     } catch (Exception e) {
@@ -283,6 +291,8 @@ public class PeopleSummaryThreadHandler
         if (c != null) {
           c.addCase(cas);
           CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "case");
+        } else {
+          LOGGER.warn("ORPHAN CASE! id: {}, client: {}", cas.getOpenCaseId(), cas.getCltId());
         }
       }
     } catch (Exception e) {
@@ -306,6 +316,8 @@ public class PeopleSummaryThreadHandler
         if (c != null) {
           c.addCsec(csec);
           CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "csec");
+        } else {
+          LOGGER.warn("ORPHAN CSEC! id: {}, client: {}", csec.getCsecId(), csec.getCltId());
         }
       }
     } catch (Exception e) {
@@ -356,6 +368,9 @@ public class PeopleSummaryThreadHandler
         if (c != null) {
           c.addSafetyAlert(saf);
           CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "safety");
+        } else {
+          LOGGER.warn("ORPHAN SAFETY ALERT! id: {}, client: {}", saf.getSafetyAlertId(),
+              saf.getCltId());
         }
       }
     } catch (Exception e) {
