@@ -143,7 +143,7 @@ public class PeopleSummaryThreadHandler
         organizer.accept(rawClients.get(t.getCltId()), t);
       }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "SELECT FAILED! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
     }
   }
 
@@ -159,7 +159,7 @@ public class PeopleSummaryThreadHandler
     try {
       readAny(rs, new RawClientAddress().read(rs), (c, adr) -> c.addClientAddress(adr));
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
     }
   }
 
@@ -300,6 +300,7 @@ public class PeopleSummaryThreadHandler
       read(stmtSelClient, rs -> this.readClient(rs));
       read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
       read(stmtSelAddress, rs -> this.readAddress(rs));
+
       read(stmtSelAka, rs -> this.readAka(rs));
       read(stmtSelCase, rs -> this.readCase(rs));
       read(stmtSelCsec, rs -> this.readCsec(rs));
@@ -340,6 +341,7 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
+    // LOGGER.info("client address count: {}", );
     DbToEsConverter conv = new DbToEsConverter();
     this.rawClients.values().stream().map(r -> r.normalize(conv))
         .forEach(c -> normalized.put(c.getId(), c));

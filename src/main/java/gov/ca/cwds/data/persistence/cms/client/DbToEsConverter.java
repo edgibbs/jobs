@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
+import java.util.Collection;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,30 +106,35 @@ public class DbToEsConverter {
     rc.setLastUpdatedTime(rawCli.getCltLastUpdatedTime());
 
     int counter = 0;
-    LOGGER.debug("convert client address");
-    CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client address", "ca");
-    for (RawClientAddress rca : rawCli.getClientAddress().values()) {
+    final Collection<RawClientAddress> coll = rawCli.getClientAddress().values();
+    LOGGER.debug("convert client address: count: {}", coll.size());
+    for (RawClientAddress rca : coll) {
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client address", "ca");
       convertClientAddress(rc, rawCli, rca);
     }
 
+    counter = 0;
     LOGGER.debug("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client county", "cc");
       convertClientCounty(rc, rawCli, cc);
     }
 
+    counter = 0;
     LOGGER.debug("convert aka");
     for (RawAka aka : rawCli.getAka()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert aka", "aka");
       convertAka(rc, rawCli, aka);
     }
 
+    counter = 0;
     LOGGER.debug("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert ethnicity", "eth");
       convertEthnicity(rc, rawCli, eth);
     }
 
+    counter = 0;
     LOGGER.debug("convert safety alert");
     for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert safety alert", "saf");
