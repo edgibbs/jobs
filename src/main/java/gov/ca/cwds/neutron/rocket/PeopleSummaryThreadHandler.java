@@ -190,8 +190,10 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (cla = new RawClientAddress().read(rs)) != null) {
         c = rawClients.get(cla.getCltId());
-        c.addClientAddress(cla);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client address");
+        if (c != null) {
+          c.addClientAddress(cla);
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client address");
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
@@ -208,8 +210,10 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (adr = new RawAddress().read(rs)) != null) {
         c = rawClients.get(adr.getCltId());
-        c.getClientAddress().get(adr.getClaId()).setAddress(adr);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "address");
+        if (c != null) {
+          c.getClientAddress().get(adr.getClaId()).setAddress(adr);
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "address");
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
@@ -230,8 +234,10 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (cc = new RawClientCounty().read(rs)) != null) {
         c = rawClients.get(cc.getCltId());
-        c.addClientCounty(cc);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client county");
+        if (c != null) {
+          c.addClientCounty(cc);
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "client county");
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT COUNTY! {}", e.getMessage(), e);
@@ -272,8 +278,10 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (cas = new RawCase().read(rs)) != null) {
         c = rawClients.get(cas.getCltId());
-        c.addCase(cas);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "case");
+        if (c != null) {
+          c.addCase(cas);
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "case");
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE RECORD! {}", e.getMessage(), e);
@@ -293,8 +301,10 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (csec = new RawCsec().read(rs)) != null) {
         c = rawClients.get(csec.getCltId());
-        c.addCsec(csec);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "csec");
+        if (c != null) {
+          c.addCsec(csec);
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "csec");
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CSEC! {}", e.getMessage(), e);
@@ -314,8 +324,13 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (eth = new RawEthnicity().read(rs)) != null) {
         c = rawClients.get(eth.getCltId());
-        c.addEthnicity(eth);
-        CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "ethnicity");
+        if (c != null) {
+          c.addEthnicity(eth);
+          CheeseRay.logEvery(LOGGER, 1000, ++counter, "Retrieved", "ethnicity");
+        } else {
+          LOGGER.warn("ORPHAN ETHNICITY! id: {}, client: {}", eth.getClientEthnicityId(),
+              eth.getCltId());
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ETHNICITY! {}", e.getMessage(), e);
