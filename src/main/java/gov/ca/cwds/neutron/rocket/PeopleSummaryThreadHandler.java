@@ -124,8 +124,6 @@ public class PeopleSummaryThreadHandler
         while (rocket.isRunning() && rs.next()) { // Stop if the rocket aborts.
           consumer.accept(rs);
         }
-      } catch (com.ibm.db2.jcc.am.SqlException e) {
-
       } finally {
         // Auto-close result set.
       }
