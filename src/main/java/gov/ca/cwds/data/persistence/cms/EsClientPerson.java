@@ -22,6 +22,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.FlushModeType;
 import org.hibernate.annotations.NamedNativeQuery;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.common.NameSuffixTranslator;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
@@ -31,13 +33,12 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
-import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
+import gov.ca.cwds.utils.JsonUtils;
 
 /**
  * Entity bean for the People Summary index, CWS/CMS view VW_LST_CLIENT_ADDRESS.
@@ -81,7 +82,7 @@ public class EsClientPerson extends BaseEsClient
 
   private static final long serialVersionUID = 1L;
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(EsClientPerson.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EsClientPerson.class);
 
   // ================================
   // SAF_ALRT: (safety alerts)
@@ -697,6 +698,18 @@ public class EsClientPerson extends BaseEsClient
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  @Override
+  public String toString() {
+    String ret = "";
+    try {
+      ret = JsonUtils.to(this);
+    } catch (Exception e) {
+      LOGGER.warn("FAILED TO STREAM TO JSON!", e);
+    }
+
+    return ret;
   }
 
 }
