@@ -80,7 +80,7 @@
 
 		<!-- DB2 OPTIONS: -->
 		<!-- Multi-row fetch: -->
-		<property name="hibernate.connection.enableRowsetSupport">0</property>
+		<property name="hibernate.connection.enableRowsetSupport">1</property>
 
 		<!-- Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032 -->
 		<property name="hibernate.connection.allowNextOnExhaustedResultSet">1</property>

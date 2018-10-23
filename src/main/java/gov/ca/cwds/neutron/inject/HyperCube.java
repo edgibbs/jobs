@@ -419,6 +419,12 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(SystemMeta.class).addAnnotatedClass(StaffPerson.class)
         .addAnnotatedClass(DatabaseResetEntry.class);
 
+    // DRS: IBM's DB2 type 4 JDBC driver is NOT compliant without these arcane settings!!
+    // SNAP-710: Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032
+    config.setProperty("allowNextOnExhaustedResultSet", "1"); // ARE YOU SERIOUS?!
+    config.setProperty("resultSetHoldability", "1"); // ResultSet.next() BLOWS UP WITHOUT THIS!
+    config.setProperty("enableRowsetSupport", "1");
+
     LOGGER.debug("HyperCube.makeCmsSessionFactory: connect");
     return additionalDaos(config).buildSessionFactory();
   }
