@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.util.Calendar;
@@ -45,8 +46,8 @@ public class NeutronWarningTrackerTest extends Goddard<ReplicatedClient, EsClien
   @Test
   public void getThreadId_A$() throws Exception {
     long actual = target.getThreadId();
-    long expected = 1L;
-    assertThat(actual, is(equalTo(expected)));
+    long expected = 0L;
+    assertThat(actual, is(not(expected)));
   }
 
   @Test
