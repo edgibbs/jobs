@@ -293,6 +293,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   public void handleMainResults_A$ResultSet$Connection_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    doThrow(SQLException.class).when(con).commit();
     target.handleMainResults(rs, con);
   }
 
@@ -307,9 +308,11 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   public void loadClientRange_A$PreparedStatement$Pair_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    doThrow(SQLException.class).when(con).commit();
+    when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+
     Pair<String, String> range = mock(Pair.class);
-    target.loadClientRange(stmtInsClient, range);
+    target.loadClientRange(preparedStatement, range);
   }
 
   @Test
@@ -323,9 +326,11 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   public void prepPlacementClients_A$PreparedStatement$Pair_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-    PreparedStatement stmt = mock(PreparedStatement.class);
+    when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+    doThrow(SQLException.class).when(con).commit();
+
     Pair<String, String> p = mock(Pair.class);
-    target.prepPlacementClients(stmt, p);
+    target.prepPlacementClients(preparedStatement, p);
   }
 
   @Test
