@@ -36,7 +36,7 @@ jacoco {
     reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
-version = 0.53
+version = 0.54
 
 repositories {
     mavenLocal()
@@ -50,7 +50,7 @@ repositories {
 }
 
 dependencies {
-    // ES 5.x:
+    // Elasticsearch:
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
     compile ("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)

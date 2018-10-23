@@ -443,6 +443,7 @@ public abstract class BaseEsClient
   protected Short clientEthnicityCode;
 
   public static void extract(final BaseEsClient ret, final ResultSet rs) throws SQLException {
+    ret.cltId = ifNull(rs.getString("CLT_IDENTIFIER"));
     ret.cltSensitivityIndicator = ifNull(rs.getString("CLT_SENSTV_IND"));
     ret.cltSoc158SealedClientIndicator = ifNull(rs.getString("CLT_SOC158_IND"));
     ret.cltAdjudicatedDelinquentIndicator = ifNull(rs.getString("CLT_ADJDEL_IND"));
@@ -480,7 +481,6 @@ public abstract class BaseEsClient
     ret.cltHealthSummaryText = ifNull(rs.getString("CLT_HEALTH_TXT"));
     ret.cltHispUnableToDetReasonCode = ifNull(rs.getString("CLT_HISP_UD_CD"));
     ret.cltHispanicOriginCode = ifNull(rs.getString("CLT_HISP_CD"));
-    ret.cltId = ifNull(rs.getString("CLT_IDENTIFIER"));
     ret.cltImmigrationCountryCodeType = rs.getShort("CLT_I_CNTRY_C");
     ret.cltImmigrationStatusType = rs.getShort("CLT_IMGT_STC");
     ret.cltIncapacitatedParentCode = ifNull(rs.getString("CLT_INCAPC_CD"));
@@ -499,11 +499,11 @@ public abstract class BaseEsClient
     ret.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
     ret.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
-    ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
-    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
-
-    ret.clientCountyId = ifNull(rs.getString("CLC_CLIENT_ID"));
     ret.clientEthnicityId = ifNull(rs.getString("ETHNICITY_CODE"));
+    ret.clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
+
+    ret.clientCounty = rs.getShort("CLC_GVR_ENTC");
+    ret.clientCountyId = ifNull(rs.getString("CLC_CLIENT_ID"));
 
     // Languages:
     ret.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
@@ -584,7 +584,7 @@ public abstract class BaseEsClient
     final ReplicatedClient ret = isClientAdded ? map.get(this.cltId) : makeReplicatedClient();
 
     if (!isClientAdded) {
-      // Populate core client attributes.
+      // Core client attributes.
       ret.adjudicatedDelinquentIndicator = getCltAdjudicatedDelinquentIndicator();
       ret.adoptionStatusCode = getCltAdoptionStatusCode();
       ret.alienRegistrationNumber = getCltAlienRegistrationNumber();

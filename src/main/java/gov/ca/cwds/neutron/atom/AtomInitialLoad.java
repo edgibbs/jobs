@@ -271,25 +271,30 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     final String mqt = getMQTName();
     if (getFlightPlan().isRefreshMqt() && StringUtils.isNotBlank(mqt)) {
       log.warn("REFRESH MQT!");
-      final Session session = getJobDao().grabSession();
-      grabTransaction();
-      final String schema =
-          (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
+      try {
+        final Session session = getJobDao().grabSession();
+        grabTransaction();
+        final String schema =
+            (String) session.getSessionFactory().getProperties().get("hibernate.default_schema");
 
-      final ProcedureCall proc = session.createStoredProcedureCall(schema + ".SPREFRSMQT");
-      proc.registerStoredProcedureParameter("MQTNAME", String.class, ParameterMode.IN);
-      proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
-      proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
+        final ProcedureCall proc = session.createStoredProcedureCall(schema + ".SPREFRSMQT");
+        proc.registerStoredProcedureParameter("MQTNAME", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
+        proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
 
-      proc.setParameter("MQTNAME", mqt);
-      proc.execute();
+        proc.setParameter("MQTNAME", mqt);
+        proc.execute();
 
-      final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
-      final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
-      log.info("refresh MQT proc: status: {}, msg: {}", returnStatus, returnMsg);
+        final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
+        final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
+        log.info("refresh MQT proc: status: {}, msg: {}", returnStatus, returnMsg);
 
-      if (returnStatus.charAt(0) != '0') {
-        throw CheeseRay.runtime(log, "MQT REFRESH ERROR! {}", returnMsg);
+        if (returnStatus.charAt(0) != '0') {
+          throw CheeseRay.runtime(log, "MQT REFRESH ERROR! {}", returnMsg);
+        }
+      } catch (Exception e) {
+        log.error("ERROR ON MQT REFRESH!", e);
+        throw e;
       }
     }
   }

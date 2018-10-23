@@ -403,7 +403,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
       launchDirector.stopScheduler(false);
       close();
     } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e, "FAILED TO SHUTDOWN!: {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO SHUT DOWN!: {}", e.getMessage());
     }
   }
 
@@ -516,6 +516,14 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
 
   public static void setStandardFlightPlan(FlightPlan standardFlightPlan) {
     LaunchCommand.standardFlightPlan = standardFlightPlan;
+  }
+
+  public boolean isFatalError() {
+    return fatalError;
+  }
+
+  public void setFatalError(boolean fatalError) {
+    this.fatalError = fatalError;
   }
 
   /**

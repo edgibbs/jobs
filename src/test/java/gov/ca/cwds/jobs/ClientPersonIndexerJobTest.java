@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -118,7 +119,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   @Test
   public void getJdbcOrderBy_A$() throws Exception {
     final String actual = target.getJdbcOrderBy();
-    final String expected = " ORDER BY X.CLT_IDENTIFIER ";
+    final String expected = " ORDER BY CLT_IDENTIFIER ";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -127,7 +128,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
     final String dbSchemaName = "CWSRS4";
     final String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ");
     final String expected =
-        "SELECT x.* FROM CWSRS4.MQT_CLIENT_ADDRESS x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId' AND x.CLT_SENSTV_IND = 'N' ORDER BY X.CLT_IDENTIFIER FOR READ ONLY WITH UR ";
+        "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId' ORDER BY CLT_IDENTIFIER FOR READ ONLY WITH UR ";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -139,7 +140,8 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   @Test(expected = SQLException.class)
   public void initialLoadProcessRangeResults_A$ResultSet_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
-    target.handleMainResults(rs, null);
+    doThrow(SQLException.class).when(con).commit();
+    target.handleMainResults(rs, con);
   }
 
   @Test
