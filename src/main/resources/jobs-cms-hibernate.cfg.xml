@@ -40,9 +40,18 @@
 		<property name="hibernate.connection.sqljAvoidTimeStampConversion">true</property>
 		<property name="hibernate.jdbc.time_zone">America/Los_Angeles</property>
 
+		<!-- HikariCP connection pool: -->
+		<!-- https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby -->
+		<property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider</property>
+		<property name="hibernate.hikari.connectionTimeout">20000</property>
+		<property name="hibernate.hikari.minimumIdle">4</property>
+		<property name="hibernate.hikari.maximumPoolSize">16</property>
+		<property name="hibernate.hikari.idleTimeout">60000</property>
+
+
 		<!-- C3P0 connection pool: -->
 		<!-- https://www.mchange.com/projects/c3p0/#configuration_properties -->
-		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<!-- <property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property> -->
 		<property name="hibernate.c3p0.min_size">4</property>
 		<property name="hibernate.c3p0.initialPoolSize">4</property>
 		<property name="hibernate.c3p0.max_size">12</property>
