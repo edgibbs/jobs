@@ -583,4 +583,68 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
   //@formatter:on
 
+  public static boolean isGlobalErrorFlag() {
+    return globalErrorFlag;
+  }
+
+  public boolean isFatalError() {
+    return fatalError;
+  }
+
+  public boolean isDoneRetrieve() {
+    return doneRetrieve;
+  }
+
+  public boolean isDoneTransform() {
+    return doneTransform;
+  }
+
+  public boolean isDoneIndex() {
+    return doneIndex;
+  }
+
+  public boolean isDoneFlight() {
+    return doneFlight;
+  }
+
+  public AtomicInteger getRecsSentToIndexQueue() {
+    return recsSentToIndexQueue;
+  }
+
+  public AtomicInteger getRecsSentToBulkProcessor() {
+    return recsSentToBulkProcessor;
+  }
+
+  public AtomicInteger getRowsNormalized() {
+    return rowsNormalized;
+  }
+
+  public AtomicInteger getRowsDenormalized() {
+    return rowsDenormalized;
+  }
+
+  public AtomicInteger getRecsBulkPrepared() {
+    return recsBulkPrepared;
+  }
+
+  public AtomicInteger getRecsBulkDeleted() {
+    return recsBulkDeleted;
+  }
+
+  public AtomicInteger getRecsBulkBefore() {
+    return recsBulkBefore;
+  }
+
+  public AtomicInteger getRecsBulkAfter() {
+    return recsBulkAfter;
+  }
+
+  public AtomicInteger getRecsBulkError() {
+    return recsBulkError;
+  }
+
+  public Map<Pair<String, String>, FlightStatus> getInitialLoadRangeStatus() {
+    return initialLoadRangeStatus;
+  }
+
 }
