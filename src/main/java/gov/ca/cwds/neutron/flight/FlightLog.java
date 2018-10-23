@@ -647,4 +647,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return initialLoadRangeStatus;
   }
 
+  public void setStartTime(long startTime) {
+    this.startTime = startTime;
+  }
+
 }

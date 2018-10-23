@@ -16,12 +16,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
+import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
-public class FlightLogTest extends Goddard {
+public class FlightLogTest extends Goddard<ReplicatedClient, EsClientPerson> {
 
   FlightLog target;
 
@@ -303,11 +305,12 @@ public class FlightLogTest extends Goddard {
 
   @Test
   public void toJson_A$() throws Exception {
-    final String actual = target.toJson();
+    target.setStartTime(1522185484650L);
+    final String actual = target.toJson().trim();
     final String expected =
-        "{\"rocket_name\":\"client\",\"validation_errors\":false,\"start_time\":1522185484650,\"end_time\":0,\"initial_load\":false,\"last_change_since\":null,\"status\":\"NOT_STARTED\",\"initial_load_ranges_started\":[],\"initial_load_ranges_completed\":[],\"affected_document_ids\":[],\"running\":true,\"failed\":false,\"retrieve_done\":false,\"transform_done\":false,\"index_done\":false,\"current_queued_to_index\":0,\"current_normalized\":0,\"current_bulk_deleted\":0,\"current_bulk_prepared\":0,\"current_bulk_error\":0,\"current_bulk_after\":0}";
-    assertTrue(actual.startsWith(expected.substring(0, 30)));
+        "{\"rocket_name\":\"client\",\"fatal_error\":false,\"done_retrieve\":false,\"done_transform\":false,\"done_index\":false,\"done_flight\":false,\"validation_errors\":false,\"initial_load\":false,\"last_change_since\":null,\"status\":\"NOT_STARTED\",\"initial_load_ranges_started\":[],\"initial_load_ranges_completed\":[],\"initial_load_range_status\":{},\"affected_document_ids\":[],\"running\":true,\"failed\":false,\"retrieve_done\":false,\"transform_done\":false,\"index_done\":false,\"warnings\":[],\"to_index_queue\":0,\"normalized\":0,\"bulk_deleted\":0,\"bulk_prepared\":0,\"bulk_error\":0,\"bulk_after\":0,\"denormalized\":0,\"start_time\":\"2018-03-27T21:18:04.650Z\",\"end_time\":null}";
     System.out.println(actual);
+    assertTrue(actual.startsWith(expected.substring(0, 30)));
   }
 
   @Test
