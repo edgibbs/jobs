@@ -712,4 +712,84 @@ public class EsClientPerson extends BaseEsClient
     return ret;
   }
 
+  public String getOpenCaseId() {
+    return openCaseId;
+  }
+
+  public String getOpenCaseResponsibleAgencyCode() {
+    return openCaseResponsibleAgencyCode;
+  }
+
+  public String getCsecId() {
+    return csecId;
+  }
+
+  public Short getCsecCodeId() {
+    return csecCodeId;
+  }
+
+  public Date getCsecStartDate() {
+    return csecStartDate;
+  }
+
+  public Date getCsecEndDate() {
+    return csecEndDate;
+  }
+
+  public String getCsecLastUpdatedId() {
+    return csecLastUpdatedId;
+  }
+
+  public Date getCsecLastUpdatedTimestamp() {
+    return csecLastUpdatedTimestamp;
+  }
+
+  public CmsReplicationOperation getCsecLastUpdatedOperation() {
+    return csecLastUpdatedOperation;
+  }
+
+  public Date getCsecReplicationTimestamp() {
+    return csecReplicationTimestamp;
+  }
+
+  public void setOpenCaseId(String openCaseId) {
+    this.openCaseId = openCaseId;
+  }
+
+  public void setOpenCaseResponsibleAgencyCode(String openCaseResponsibleAgencyCode) {
+    this.openCaseResponsibleAgencyCode = openCaseResponsibleAgencyCode;
+  }
+
+  public void setCsecId(String csecId) {
+    this.csecId = csecId;
+  }
+
+  public void setCsecCodeId(Short csecCodeId) {
+    this.csecCodeId = csecCodeId;
+  }
+
+  public void setCsecStartDate(Date csecStartDate) {
+    this.csecStartDate = csecStartDate;
+  }
+
+  public void setCsecEndDate(Date csecEndDate) {
+    this.csecEndDate = csecEndDate;
+  }
+
+  public void setCsecLastUpdatedId(String csecLastUpdatedId) {
+    this.csecLastUpdatedId = csecLastUpdatedId;
+  }
+
+  public void setCsecLastUpdatedTimestamp(Date csecLastUpdatedTimestamp) {
+    this.csecLastUpdatedTimestamp = csecLastUpdatedTimestamp;
+  }
+
+  public void setCsecLastUpdatedOperation(CmsReplicationOperation csecLastUpdatedOperation) {
+    this.csecLastUpdatedOperation = csecLastUpdatedOperation;
+  }
+
+  public void setCsecReplicationTimestamp(Date csecReplicationTimestamp) {
+    this.csecReplicationTimestamp = csecReplicationTimestamp;
+  }
+
 }
