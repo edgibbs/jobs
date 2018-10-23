@@ -51,7 +51,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FlightLog.class);
 
-  private static volatile boolean GLOBAL_ERROR_FLAG = false;
+  private static volatile boolean globalErrorFlag = false;
 
   /**
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.
@@ -253,7 +253,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     this.fatalError = true;
 
     if (initialLoad) {
-      GLOBAL_ERROR_FLAG = true;
+      globalErrorFlag = true;
     }
 
     done();
@@ -535,7 +535,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public static boolean isGlobalError() {
-    return GLOBAL_ERROR_FLAG;
+    return globalErrorFlag;
   }
 
   /**

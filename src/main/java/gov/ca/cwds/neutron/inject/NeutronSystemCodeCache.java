@@ -43,43 +43,36 @@ public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemC
   private Set<SystemMeta> setMetas;
 
   public NeutronSystemCodeCache(SystemCodeCache sourceCache) {
-    {
-      final Set<SystemCode> codes = sourceCache.getAllSystemCodes();
-      final Map<Short, SystemCode> theCodes = new HashMap<>(codes.size());
-      codes.stream().forEach(x -> theCodes.put(x.getSystemId(), x));
-      mapCodeByKey = Collections.unmodifiableMap(theCodes);
-    }
-
-    {
-      final Set<SystemMeta> metas = sourceCache.getAllSystemMetas();
-      final Map<String, SystemMeta> theMetas = new HashMap<>(metas.size());
-      metas.stream().forEach(x -> theMetas.put(x.getLogicalTableDsdName(), x));
-      mapMetaByKey = Collections.unmodifiableMap(theMetas);
-    }
-
-    {
-      final Set<SystemCode> rawCodes = new HashSet<>(mapCodeByKey.size());
-      this.mapCodeByKey.values().forEach(rawCodes::add);
-      setCodes = Collections.unmodifiableSet(rawCodes);
-    }
-
-    {
-      final Set<SystemMeta> rawMetas = new HashSet<>(mapMetaByKey.size());
-      this.mapMetaByKey.values().forEach(rawMetas::add);
-      setMetas = Collections.unmodifiableSet(rawMetas);
-    }
-
-    {
-      final Map<String, Set<SystemCode>> codesByMeta = mapCodeByKey.values().stream()
-          .collect(Collectors.groupingBy(SystemCode::getForeignKeyMetaTable,
-              Collectors.mapping(Function.identity(), Collectors.<SystemCode>toSet())));
-      mapCodeByMeta = Collections.unmodifiableMap(codesByMeta);
-    }
-
-    LOGGER.warn(
+    init(sourceCache);
+    LOGGER.info(
         "Neutron System code cache: mapCodeByKey: {}, mapMetaByKey: {}, setCodes: {}, setMetas: {}, mapCodeByMeta: {}",
         mapCodeByKey.size(), mapMetaByKey.size(), setCodes.size(), setMetas.size(),
         mapCodeByMeta.size());
+  }
+
+  protected final void init(SystemCodeCache sourceCache) {
+    final Set<SystemCode> codes = sourceCache.getAllSystemCodes();
+    final Map<Short, SystemCode> theCodes = new HashMap<>(codes.size());
+    codes.stream().forEach(x -> theCodes.put(x.getSystemId(), x));
+    mapCodeByKey = Collections.unmodifiableMap(theCodes);
+
+    final Set<SystemMeta> metas = sourceCache.getAllSystemMetas();
+    final Map<String, SystemMeta> theMetas = new HashMap<>(metas.size());
+    metas.stream().forEach(x -> theMetas.put(x.getLogicalTableDsdName(), x));
+    mapMetaByKey = Collections.unmodifiableMap(theMetas);
+
+    final Set<SystemCode> rawCodes = new HashSet<>(mapCodeByKey.size());
+    this.mapCodeByKey.values().forEach(rawCodes::add);
+    setCodes = Collections.unmodifiableSet(rawCodes);
+
+    final Set<SystemMeta> rawMetas = new HashSet<>(mapMetaByKey.size());
+    this.mapMetaByKey.values().forEach(rawMetas::add);
+    setMetas = Collections.unmodifiableSet(rawMetas);
+
+    final Map<String, Set<SystemCode>> codesByMeta = mapCodeByKey.values().stream()
+        .collect(Collectors.groupingBy(SystemCode::getForeignKeyMetaTable,
+            Collectors.mapping(Function.identity(), Collectors.<SystemCode>toSet())));
+    mapCodeByMeta = Collections.unmodifiableMap(codesByMeta);
   }
 
   @Override
@@ -143,6 +136,26 @@ public class NeutronSystemCodeCache extends ApiObjectIdentity implements SystemC
   @Override
   public boolean verifyActiveSystemCodeDescriptionForMeta(String shortDesc, String metaId) {
     return false; // not implemented
+  }
+
+  public Map<Short, SystemCode> getMapCodeByKey() {
+    return mapCodeByKey;
+  }
+
+  public Map<String, Set<SystemCode>> getMapCodeByMeta() {
+    return mapCodeByMeta;
+  }
+
+  public Set<SystemCode> getSetCodes() {
+    return setCodes;
+  }
+
+  public Set<SystemMeta> getSetMetas() {
+    return setMetas;
+  }
+
+  public void setMapMetaByKey(Map<String, SystemMeta> mapMetaByKey) {
+    this.mapMetaByKey = mapMetaByKey;
   }
 
 }

@@ -492,6 +492,12 @@ public class FlightPlan implements ApiMarker {
     return ret;
   }
 
+  /**
+   * Did the caller request to run ranges? If so, then don't create a new index or swap index
+   * aliases.
+   * 
+   * @return true if {@code -r} was passed
+   */
   public boolean isRangeGiven() {
     return rangeGiven;
   }
