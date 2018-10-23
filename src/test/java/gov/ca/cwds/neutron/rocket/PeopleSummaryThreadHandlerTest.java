@@ -9,6 +9,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -35,7 +38,6 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
 public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, EsClientPerson> {
-
   PeopleSummaryThreadHandler target;
   ClientPersonIndexerJob rocket;
   ReplicatedClientDao dao;
@@ -121,11 +123,11 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   @Test
   @Ignore
   public void fetchLastRunNormalizedResults_A$Date$Set() throws Exception {
-    Date lastRunDate = new SimpleDateFormat("yyyy-mm-dd").parse("10-31-2017");
+    final Date lastRunDate = new SimpleDateFormat("yyyy-mm-dd").parse("10-31-2017");
     final Set<String> deletionResults = new HashSet<>();
-    List<ReplicatedClient> actual =
+    final List<ReplicatedClient> actual =
         target.fetchLastRunNormalizedResults(lastRunDate, deletionResults);
-    List<ReplicatedClient> expected = new ArrayList<>();
+    final List<ReplicatedClient> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -142,11 +144,10 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   public void pickPrepDml_A$String$String_T$NeutronCheckedException() throws Exception {
     when(rs.next()).thenThrow(NeutronCheckedException.class);
     when(preparedStatement.executeUpdate()).thenThrow(NeutronCheckedException.class);
-
     rocket = mock(ClientPersonIndexerJob.class);
+
     when(rocket.getFlightPlan()).thenThrow(NeutronCheckedException.class);
     target = new PeopleSummaryThreadHandler(rocket);
-
     String sqlInitialLoad = null;
     String sqlLastChange = null;
     target.pickPrepDml(sqlInitialLoad, sqlLastChange);
@@ -179,7 +180,6 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   public void prepAffectedClients_A$PreparedStatement$Pair_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
-
     Pair<String, String> p = pair;
     target.prepPlacementClients(preparedStatement, p);
   }
@@ -212,6 +212,131 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
   @Test
   public void doneRetrieve_A$() throws Exception {
     target.doneThreadRetrieve();
+  }
+
+  @Test
+  public void read_A$PreparedStatement$Consumer() throws Exception {
+    rocket = mock(ClientPersonIndexerJob.class);
+    when(rocket.isRunning()).thenReturn(true);
+    rocket.allocateThreadHandler();
+    target = new PeopleSummaryThreadHandler(rocket);
+
+    Consumer<ResultSet> consumer = mock(Consumer.class);
+    target.read(preparedStatement, consumer);
+  }
+
+  // @Test
+  // public void readAny_A$ResultSet$NeutronJdbcReader$BiConsumer$String() throws Exception {
+  //
+  //
+  //
+  //
+  // NeutronJdbcReader<RawClient> reader = mock(NeutronJdbcReader.class);
+  // BiConsumer<RawClient, Object> organizer = mock(BiConsumer.class);
+  // String msg = null;
+  //
+  //
+  // target.readAny(rs, reader, organizer, msg);
+  // }
+
+  @Test
+  public void readClient_A$ResultSet() throws Exception {
+    target.readClient(rs);
+  }
+
+  @Test
+  public void readClientAddress_A$ResultSet() throws Exception {
+    target.readClientAddress(rs);
+  }
+
+  @Test
+  public void readAddress_A$ResultSet() throws Exception {
+    target.readAddress(rs);
+  }
+
+  @Test
+  public void readClientCounty_A$ResultSet() throws Exception {
+    target.readClientCounty(rs);
+  }
+
+  @Test
+  public void readAka_A$ResultSet() throws Exception {
+    target.readAka(rs);
+  }
+
+  @Test
+  public void readCase_A$ResultSet() throws Exception {
+    target.readCase(rs);
+  }
+
+  @Test
+  public void readCsec_A$ResultSet() throws Exception {
+    target.readCsec(rs);
+  }
+
+  @Test
+  public void readEthnicity_A$ResultSet() throws Exception {
+    target.readEthnicity(rs);
+  }
+
+  @Test
+  public void readSafetyAlert_A$ResultSet() throws Exception {
+    target.readSafetyAlert(rs);
+  }
+
+  @Test
+  public void handleMainResults_A$ResultSet$Connection() throws Exception {
+    target.handleMainResults(rs, con);
+  }
+
+  @Test(expected = SQLException.class)
+  public void handleMainResults_A$ResultSet$Connection_T$SQLException() throws Exception {
+    when(rs.next()).thenThrow(SQLException.class);
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    target.handleMainResults(rs, con);
+  }
+
+  @Test
+  public void loadClientRange_A$PreparedStatement$Pair() throws Exception {
+    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    Pair<String, String> range = mock(Pair.class);
+    target.loadClientRange(stmtInsClient, range);
+  }
+
+  @Test(expected = SQLException.class)
+  public void loadClientRange_A$PreparedStatement$Pair_T$SQLException() throws Exception {
+    when(rs.next()).thenThrow(SQLException.class);
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    Pair<String, String> range = mock(Pair.class);
+    target.loadClientRange(stmtInsClient, range);
+  }
+
+  @Test
+  public void prepPlacementClients_A$PreparedStatement$Pair() throws Exception {
+    PreparedStatement stmt = mock(PreparedStatement.class);
+    Pair<String, String> p = mock(Pair.class);
+    target.prepPlacementClients(stmt, p);
+  }
+
+  @Test(expected = SQLException.class)
+  public void prepPlacementClients_A$PreparedStatement$Pair_T$SQLException() throws Exception {
+    when(rs.next()).thenThrow(SQLException.class);
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    PreparedStatement stmt = mock(PreparedStatement.class);
+    Pair<String, String> p = mock(Pair.class);
+    target.prepPlacementClients(stmt, p);
+  }
+
+  @Test
+  public void doneThreadRetrieve_A$() throws Exception {
+    target.doneThreadRetrieve();
+  }
+
+  @Test
+  public void getRocket_A$() throws Exception {
+    ClientPersonIndexerJob actual = target.getRocket();
+    assertThat(actual, is(notNullValue()));
   }
 
 }
