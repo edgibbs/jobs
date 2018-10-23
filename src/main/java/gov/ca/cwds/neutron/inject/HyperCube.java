@@ -424,7 +424,7 @@ public class HyperCube extends NeutronGuiceModule {
     // ResultSet.next() BLOWS UP WITHOUT THESE!
     config.setProperty("allowNextOnExhaustedResultSet", "1"); // ARE YOU SERIOUS?!
     config.setProperty("resultSetHoldability", "1"); // Remember to wipe front to back too
-    config.setProperty("enableRowsetSupport", "1"); // Enable DB2 multi-row fetch
+    // config.setProperty("enableRowsetSupport", "1"); // Enable DB2 multi-row fetch
 
     LOGGER.debug("HyperCube.makeCmsSessionFactory: connect");
     return additionalDaos(config).buildSessionFactory();
