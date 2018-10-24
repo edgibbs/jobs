@@ -17,7 +17,6 @@ public class NeutronLongCmdLineName {
 
   public static final String CMD_LINE_LAST_RUN_FILE = "last-run-file";
   public static final String CMD_LINE_LAST_RUN_RANGE = "last-run-range";
-
   public static final String CMD_LINE_BASE_DIRECTORY = "base-directory";
 
   public static final String CMD_LINE_THREADS = "thread-num";

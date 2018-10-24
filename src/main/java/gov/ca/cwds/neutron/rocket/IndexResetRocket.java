@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,6 +11,7 @@ import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
@@ -51,6 +51,11 @@ public abstract class IndexResetRocket
   @Override
   public Date launch(Date lastRunDate) {
     LOGGER.info("INDEX CHECK!");
+
+    // If a range was requested, then don't create a new index or swap aliases.
+    if (flightPlan.isRangeGiven()) {
+      return lastRunDate;
+    }
 
     try {
       // If index name is provided, use it, else take alias from ES config.

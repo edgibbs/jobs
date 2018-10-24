@@ -79,7 +79,8 @@ public class ExitInitialLoadRocket
           logError(sched, summary);
         }
 
-        if (!FlightLog.isGlobalError()) {
+        // If a range was requested, then don't create a new index or swap aliases.
+        if (!FlightLog.isGlobalError() && !flightPlan.isRangeGiven()) {
           // Swap Alias to new index
           final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
           final String alias = esDao.getConfig().getElasticsearchAlias();

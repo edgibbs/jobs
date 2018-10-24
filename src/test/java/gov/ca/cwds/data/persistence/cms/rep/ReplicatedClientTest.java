@@ -25,6 +25,7 @@ import gov.ca.cwds.data.ReadablePhone;
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
@@ -675,6 +676,45 @@ public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddr
   public void setActivePlacementHomeAddress_A$PlacementHomeAddress() throws Exception {
     PlacementHomeAddress activePlacementHomeAddress = mock(PlacementHomeAddress.class);
     target.setActivePlacementHomeAddress(activePlacementHomeAddress);
+  }
+
+  @Test
+  public void getCsecs_A$() throws Exception {
+    Map<String, ElasticSearchPersonCsec> actual = target.getCsecs();
+    Map<String, ElasticSearchPersonCsec> expected = new HashMap<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setCsecs_A$Map() throws Exception {
+    Map<String, ElasticSearchPersonCsec> csecs = new HashMap<String, ElasticSearchPersonCsec>();
+    target.setCsecs(csecs);
+  }
+
+  @Test
+  public void addCsec_A$ElasticSearchPersonCsec() throws Exception {
+    ElasticSearchPersonCsec csec = mock(ElasticSearchPersonCsec.class);
+    target.addCsec(csec);
+  }
+
+  @Test
+  public void getOpenCaseResponsibleAgencyCode_A$() throws Exception {
+    String actual = target.getOpenCaseResponsibleAgencyCode();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setOpenCaseResponsibleAgencyCode_A$String() throws Exception {
+    String openCaseResponsibleAgencyCode = null;
+    target.setOpenCaseResponsibleAgencyCode(openCaseResponsibleAgencyCode);
+  }
+
+  @Test
+  public void getPhones_A$() throws Exception {
+    ApiPhoneAware[] actual = target.getPhones();
+    ApiPhoneAware[] expected = new ApiPhoneAware[0];
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }

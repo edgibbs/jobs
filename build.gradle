@@ -36,7 +36,7 @@ jacoco {
     reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
-version = 0.54
+version = 0.55
 
 repositories {
     mavenLocal()
@@ -72,7 +72,8 @@ dependencies {
 	compile group: "io.dropwizard", name: "dropwizard-hibernate", version: "1.1.0"
     compile group: 'org.hibernate', name: 'hibernate-core',    version: '5.2.17.Final'
 	compile 'org.hibernate:hibernate-c3p0:5.2.17.Final'
-
+    compile group: 'org.hibernate', name: 'hibernate-hikaricp', version: '5.2.17.Final'
+  
 	// Exclude transitive dependencies.
     compile (group: 'gov.ca.cwds.api', name: 'api-core', version: coreApiVersion) {
         exclude group: 'org.glassfish.jersey.core'

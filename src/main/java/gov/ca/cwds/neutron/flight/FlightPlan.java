@@ -166,7 +166,7 @@ public class FlightPlan implements ApiMarker {
       Set<StandardFlightSchedule> excludedRockets) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
-    this.indexName = StringUtils.isBlank(indexName) ? null : indexName;
+    this.indexName = StringUtils.trimToNull(indexName);
     this.overrideLastStartTime = NeutronDateUtils.freshDate(lastStartTime);
     this.overrideLastEndTime = NeutronDateUtils.freshDate(lastEndTime);
     this.lastRunLoc = lastRunLoc;
@@ -193,7 +193,7 @@ public class FlightPlan implements ApiMarker {
   public FlightPlan(final FlightPlan flightPlan) {
     this.esConfigPeopleLoc = flightPlan.esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = flightPlan.esConfigPeopleSummaryLoc;
-    this.indexName = StringUtils.isBlank(flightPlan.indexName) ? null : flightPlan.indexName;
+    this.indexName = StringUtils.trimToNull(flightPlan.indexName);
     this.overrideLastStartTime = flightPlan.overrideLastStartTime;
     this.overrideLastEndTime = flightPlan.overrideLastEndTime;
     this.lastRunLoc = flightPlan.lastRunLoc;
@@ -492,6 +492,12 @@ public class FlightPlan implements ApiMarker {
     return ret;
   }
 
+  /**
+   * Did the caller request to run ranges? If so, then don't create a new index or swap index
+   * aliases.
+   * 
+   * @return true if {@code -r} was passed
+   */
   public boolean isRangeGiven() {
     return rangeGiven;
   }

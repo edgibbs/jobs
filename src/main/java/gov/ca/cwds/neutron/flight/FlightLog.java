@@ -51,7 +51,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FlightLog.class);
 
-  private static volatile boolean GLOBAL_ERROR_FLAG = false;
+  private static volatile boolean globalErrorFlag = false;
 
   /**
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.
@@ -253,7 +253,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     this.fatalError = true;
 
     if (initialLoad) {
-      GLOBAL_ERROR_FLAG = true;
+      globalErrorFlag = true;
     }
 
     done();
@@ -535,7 +535,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public static boolean isGlobalError() {
-    return GLOBAL_ERROR_FLAG;
+    return globalErrorFlag;
   }
 
   /**
@@ -582,5 +582,73 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return buf.toString();
   }
   //@formatter:on
+
+  public static boolean isGlobalErrorFlag() {
+    return globalErrorFlag;
+  }
+
+  public boolean isFatalError() {
+    return fatalError;
+  }
+
+  public boolean isDoneRetrieve() {
+    return doneRetrieve;
+  }
+
+  public boolean isDoneTransform() {
+    return doneTransform;
+  }
+
+  public boolean isDoneIndex() {
+    return doneIndex;
+  }
+
+  public boolean isDoneFlight() {
+    return doneFlight;
+  }
+
+  public AtomicInteger getRecsSentToIndexQueue() {
+    return recsSentToIndexQueue;
+  }
+
+  public AtomicInteger getRecsSentToBulkProcessor() {
+    return recsSentToBulkProcessor;
+  }
+
+  public AtomicInteger getRowsNormalized() {
+    return rowsNormalized;
+  }
+
+  public AtomicInteger getRowsDenormalized() {
+    return rowsDenormalized;
+  }
+
+  public AtomicInteger getRecsBulkPrepared() {
+    return recsBulkPrepared;
+  }
+
+  public AtomicInteger getRecsBulkDeleted() {
+    return recsBulkDeleted;
+  }
+
+  public AtomicInteger getRecsBulkBefore() {
+    return recsBulkBefore;
+  }
+
+  public AtomicInteger getRecsBulkAfter() {
+    return recsBulkAfter;
+  }
+
+  public AtomicInteger getRecsBulkError() {
+    return recsBulkError;
+  }
+
+  public Map<Pair<String, String>, FlightStatus> getInitialLoadRangeStatus() {
+    return initialLoadRangeStatus;
+  }
+
+  public void setStartTime(long startTime) {
+    this.startTime = startTime;
+  }
 
 }
