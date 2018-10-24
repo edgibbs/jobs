@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.lang3.StringUtils;
@@ -253,7 +254,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     this.fatalError = true;
 
     if (initialLoad) {
-      globalErrorFlag = true;
+      globalErrorFlag = true; // Don't swap index aliases!
     }
 
     done();
@@ -410,6 +411,12 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public void markRangeError(final Pair<String, String> pair) {
     setRangeStatus(pair, FlightStatus.FAILED);
+  }
+
+  public synchronized List<Pair<String, String>> getFailedRanges() {
+    return initialLoadRangeStatus.entrySet().stream().sorted()
+        .filter(x -> x.getValue() == FlightStatus.FAILED).map(x -> x.getKey())
+        .collect(Collectors.toList());
   }
 
   // =======================
