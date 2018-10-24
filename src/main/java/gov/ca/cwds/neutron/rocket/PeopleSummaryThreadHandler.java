@@ -17,6 +17,8 @@ import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ETHNICITY;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_PLACEMENT_ADDRESS;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_SAFETY_ALERT;
 import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
+import static java.sql.ResultSet.CONCUR_READ_ONLY;
+import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -446,26 +448,26 @@ public class PeopleSummaryThreadHandler
             con.prepareStatement(pickPrepDml(INSERT_CLIENT_RANGE, INSERT_CLIENT_LAST_CHG));
         final PreparedStatement stmtInsClientPlaceHome =
             con.prepareStatement(pickPrepDml(INSERT_PLACEMENT_CLIENT_FULL, INSERT_CLIENT_DUMMY));
-        final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelClientAddress = con.prepareStatement(SELECT_CLIENT_ADDRESS,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelClientCounty = con.prepareStatement(SELECT_CLIENT_COUNTY,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CASE,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT,
-            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+        final PreparedStatement stmtSelPlacementAddress =
+            con.prepareStatement(sqlPlacementAddress, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelClient =
+            con.prepareStatement(SELECT_CLIENT, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelClientAddress =
+            con.prepareStatement(SELECT_CLIENT_ADDRESS, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelClientCounty =
+            con.prepareStatement(SELECT_CLIENT_COUNTY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelAddress =
+            con.prepareStatement(SELECT_ADDRESS, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelAka =
+            con.prepareStatement(SELECT_AKA, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelCase =
+            con.prepareStatement(SELECT_CASE, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelCsec =
+            con.prepareStatement(SELECT_CSEC, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelEthnicity =
+            con.prepareStatement(SELECT_ETHNICITY, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelSafetyAlert =
+            con.prepareStatement(SELECT_SAFETY_ALERT, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY)) {
 
       // Commit more often by re-inserting client id's into GT_ID.
       // Initial Load client ranges:
