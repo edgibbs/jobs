@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -157,18 +158,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   @JsonIgnore
   private final List<String> warnings = Collections.synchronizedList(new ArrayList<>(512));
-
-  /**
-   * Initial load only.
-   */
-  private final List<Pair<String, String>> initialLoadRangesStarted =
-      Collections.synchronizedList(new ArrayList<>(1024));
-
-  /**
-   * Initial load only.
-   */
-  private final List<Pair<String, String>> initialLoadRangesCompleted =
-      Collections.synchronizedList(new ArrayList<>(1024));
 
   /**
    * Initial load only.
@@ -397,12 +386,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void markRangeStart(final Pair<String, String> pair) {
-    initialLoadRangesStarted.add(pair);
     setRangeStatus(pair, FlightStatus.RUNNING);
   }
 
   public void markRangeComplete(final Pair<String, String> pair) {
-    initialLoadRangesCompleted.add(pair);
+    setRangeStatus(pair, FlightStatus.SUCCEEDED);
   }
 
   public void markRangeSuccess(final Pair<String, String> pair) {
@@ -413,10 +401,28 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     setRangeStatus(pair, FlightStatus.FAILED);
   }
 
-  public synchronized List<Pair<String, String>> getFailedRanges() {
+  // Java doesn't offer an IN operator like SQL.
+  protected boolean filterStatus(FlightStatus actual, FlightStatus... scanFor) {
+    boolean ret = false;
+
+    for (FlightStatus status : scanFor) {
+      if (actual == status) {
+        ret = true;
+        break;
+      }
+    }
+
+    return ret;
+  }
+
+  public List<Pair<String, String>> filterRanges(FlightStatus... statuses) {
     return initialLoadRangeStatus.entrySet().stream().sorted()
-        .filter(x -> x.getValue() == FlightStatus.FAILED).map(x -> x.getKey())
+        .filter(x -> filterStatus(x.getValue(), statuses)).map(x -> x.getKey())
         .collect(Collectors.toList());
+  }
+
+  public List<Pair<String, String>> getFailedRanges() {
+    return filterRanges(FlightStatus.FAILED);
   }
 
   // =======================
@@ -427,16 +433,23 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     affectedDocumentIds.add(docId);
   }
 
-  public List<Pair<String, String>> getInitialLoadRangesStarted() {
+  protected List<Pair<String, String>> buildImmutableList(FlightStatus... statuses) {
+    final TreeSet<Pair<String, String>> unique = new TreeSet<>();
+    for (FlightStatus status : statuses) {
+      unique.addAll(filterRanges(status));
+    }
+
     final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
-    results.addAll(initialLoadRangesStarted);
+    results.addAll(unique);
     return results.build();
   }
 
+  public List<Pair<String, String>> getInitialLoadRangesStarted() {
+    return buildImmutableList(FlightStatus.RUNNING);
+  }
+
   public List<Pair<String, String>> getInitialLoadRangesCompleted() {
-    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
-    results.addAll(initialLoadRangesCompleted);
-    return results.build();
+    return buildImmutableList(FlightStatus.RUNNING, FlightStatus.FAILED);
   }
 
   @JsonProperty("to_index_queue")
@@ -556,8 +569,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
-          .append(pad(initialLoadRangesCompleted.size()));
+          .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
+          .append("\n\tranges completed:")
+          .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
+          .append("\n\tranges failed:")
+          .append(pad(filterRanges(FlightStatus.FAILED).size()));
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
     }
