@@ -71,6 +71,10 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * {@link ReplicatedClient}.
  * </p>
  * 
+ * <p>
+ * NOT thread safe! Each instance of this class should operate in its own thread.
+ * </p>
+ * 
  * @author CWDS API Team
  */
 @SuppressWarnings({"findsecbugs:SQL_INJECTION_JDBC"})
@@ -124,7 +128,7 @@ public class PeopleSummaryThreadHandler
         // DRS: see HyperCube.makeCmsSessionFactory() for magic DB2 settings.
         // Without those settings, rs.next() frequently throws an Exception, because IBM's DB2 JDBC
         // driver does NOT comply with JDBC type 4 standards!
-        while (rocket.isRunning() && rs.next()) { // Stop if the rocket aborts.
+        while (rocket.isRunning() && rs.next()) { // oh DB2 ...
           consumer.accept(rs);
         }
       } finally {
@@ -399,7 +403,7 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
-    // readClient(rs);
+    // readClient(rs); // No longer.
     final int cntrRetrieved = rawClients.size();
 
     LOGGER.info("handleMainResults(): commit");
@@ -459,27 +463,27 @@ public class PeopleSummaryThreadHandler
       // Commit more often by re-inserting client id's into GT_ID.
       // Initial Load client ranges:
       loadClientRange(stmtInsClient, range);
-      read(stmtSelClient, rs -> this.readClient(rs));
-      read(stmtSelClientAddress, rs -> this.readClientAddress(rs));
-      read(stmtSelAddress, rs -> this.readAddress(rs));
+      read(stmtSelClient, rs -> readClient(rs));
+      read(stmtSelClientAddress, rs -> readClientAddress(rs));
+      read(stmtSelAddress, rs -> readAddress(rs));
       con.commit(); // clear temp tables.
 
       loadClientRange(stmtInsClient, range); // Insert client id's again.
-      read(stmtSelClientCounty, rs -> this.readClientCounty(rs));
-      read(stmtSelAka, rs -> this.readAka(rs));
-      read(stmtSelCase, rs -> this.readCase(rs));
-      read(stmtSelCsec, rs -> this.readCsec(rs));
-      read(stmtSelEthnicity, rs -> this.readEthnicity(rs));
-      read(stmtSelSafetyAlert, rs -> this.readSafetyAlert(rs));
-      con.commit();
+      read(stmtSelClientCounty, rs -> readClientCounty(rs));
+      read(stmtSelAka, rs -> readAka(rs));
+      read(stmtSelCase, rs -> readCase(rs));
+      read(stmtSelCsec, rs -> readCsec(rs));
+      read(stmtSelEthnicity, rs -> readEthnicity(rs));
+      read(stmtSelSafetyAlert, rs -> readSafetyAlert(rs));
+      con.commit(); // clear again
 
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
       readPlacementAddress(stmtSelPlacementAddress);
 
-      con.commit();
+      con.commit(); // and clear again. Make DBA's happy.
     } catch (Exception e) {
-      rocket.fail(); // NEXT: fail the BUCKET, NOT the WHOLE FLIGHT!
+      getRocket().getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
       try {
         con.rollback();
       } catch (Exception e2) {
@@ -541,7 +545,8 @@ public class PeopleSummaryThreadHandler
   /**
    * {@inheritDoc}
    * 
-   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys
+   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys into smaller
+   * portions.
    */
   @Override
   public List<ReplicatedClient> fetchLastRunNormalizedResults(Date lastRunDate,
@@ -622,7 +627,9 @@ public class PeopleSummaryThreadHandler
    * Normalize records from MQT/view for same client id.
    * 
    * @param grpRecs recs for same client id
+   * @deprecated EsClientPerson goes away
    */
+  @Deprecated
   protected void normalize(final List<EsClientPerson> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
         .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()

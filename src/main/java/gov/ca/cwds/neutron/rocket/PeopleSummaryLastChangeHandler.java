@@ -110,8 +110,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     final ClientPersonIndexerJob rocket = getRocket();
     final Date lastRunTime = rocket.getFlightLog().getLastChangeSince();
-    LOGGER.info("PULL VIEW: last successful run: {}", lastRunTime);
+    LOGGER.info("handleSecondaryJdbc(): last successful run: {}", lastRunTime);
 
+    // TODO: no longer needed.
     final Class<?> entityClass = rocket.getDenormalizedClass(); // view entity class
     final String queryName = rocket.getFlightPlan().isLoadSealedAndSensitive()
         ? entityClass.getName() + ".findAllUpdatedAfter"
@@ -128,6 +129,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     // RETRIEVE DATA
     // ---------------------------
 
+    // SNAP-725: use the same retrieval logic as Initial Load.
+    // TODO: no big transaction. Commit early and often.
     try (final Session session = rocket.getJobDao().grabSession()) {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
@@ -193,7 +196,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         }
       }
 
-      LOGGER.info(" ***** commit transaction, DONE pulling data *****");
+      LOGGER.info(" ***** commit transaction, DONE retrieving data *****");
       txn.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
