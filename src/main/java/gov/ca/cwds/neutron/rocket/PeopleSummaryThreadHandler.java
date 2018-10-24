@@ -121,6 +121,9 @@ public class PeopleSummaryThreadHandler
 
       // Close ResultSet for driver stability. Can't just close parent statement and session.
       try (final ResultSet rs = stmt.executeQuery()) {
+        // DRS: see HyperCube.makeCmsSessionFactory() for magic DB2 settings.
+        // Without those settings, rs.next() frequently throws an Exception, because IBM's DB2 JDBC
+        // driver does NOT comply with JDBC type 4 standards!
         while (rocket.isRunning() && rs.next()) { // Stop if the rocket aborts.
           consumer.accept(rs);
         }
