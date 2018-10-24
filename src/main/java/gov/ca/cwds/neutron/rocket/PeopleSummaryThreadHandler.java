@@ -411,8 +411,6 @@ public class PeopleSummaryThreadHandler
 
     final FlightLog flightLog = getRocket().getFlightLog();
     flightLog.addToDenormalized(cntrRetrieved);
-    LOGGER.info("handleMainResults() DONE: counts: normalized: {}, de-normalized: {}",
-        normalized.size(), cntrRetrieved);
   }
 
   protected void loadClientRange(final PreparedStatement stmtInsClient, Pair<String, String> range)
@@ -448,32 +446,51 @@ public class PeopleSummaryThreadHandler
             con.prepareStatement(pickPrepDml(INSERT_CLIENT_RANGE, INSERT_CLIENT_LAST_CHG));
         final PreparedStatement stmtInsClientPlaceHome =
             con.prepareStatement(pickPrepDml(INSERT_PLACEMENT_CLIENT_FULL, INSERT_CLIENT_DUMMY));
-        final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
-        final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT);
-        final PreparedStatement stmtSelClientAddress = con.prepareStatement(SELECT_CLIENT_ADDRESS);
-        final PreparedStatement stmtSelClientCounty = con.prepareStatement(SELECT_CLIENT_COUNTY);
-        final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS);
-        final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA);
-        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CASE);
-        final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC);
-        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY);
-        final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT)) {
-      LOGGER.debug("Read rows");
+        final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelClientAddress = con.prepareStatement(SELECT_CLIENT_ADDRESS,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelClientCounty = con.prepareStatement(SELECT_CLIENT_COUNTY,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CASE,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        final PreparedStatement stmtSelSafetyAlert = con.prepareStatement(SELECT_SAFETY_ALERT,
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
 
       // Commit more often by re-inserting client id's into GT_ID.
       // Initial Load client ranges:
       loadClientRange(stmtInsClient, range);
+
+      LOGGER.info("Read client");
       read(stmtSelClient, rs -> readClient(rs));
+      LOGGER.info("Read client address");
       read(stmtSelClientAddress, rs -> readClientAddress(rs));
+      LOGGER.info("Read address");
       read(stmtSelAddress, rs -> readAddress(rs));
       con.commit(); // clear temp tables.
 
       loadClientRange(stmtInsClient, range); // Insert client id's again.
+      LOGGER.info("Read client county");
       read(stmtSelClientCounty, rs -> readClientCounty(rs));
+      LOGGER.info("Read aka");
       read(stmtSelAka, rs -> readAka(rs));
+      LOGGER.info("Read case");
       read(stmtSelCase, rs -> readCase(rs));
+      LOGGER.info("Read csec");
       read(stmtSelCsec, rs -> readCsec(rs));
+      LOGGER.info("Read ethnicity");
       read(stmtSelEthnicity, rs -> readEthnicity(rs));
+      LOGGER.info("Read safety alert");
       read(stmtSelSafetyAlert, rs -> readSafetyAlert(rs));
       con.commit(); // clear again
 
