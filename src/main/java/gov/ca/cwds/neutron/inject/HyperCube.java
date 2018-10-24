@@ -419,6 +419,10 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(SystemMeta.class).addAnnotatedClass(StaffPerson.class)
         .addAnnotatedClass(DatabaseResetEntry.class);
 
+    // Safer to add these to the DB2 JDBC URL, like so:
+    // export
+    // DB_CMS_JDBC_URL='jdbc:db2://db-1a.nonprod-gateway.cwds.io:4018/DBN1SOC:retrieveMessagesFromServerOnGetMessage=true;emulateParameterMetaDataForZCalls=1;allowNextOnExhaustedResultSet=1;resultSetHoldability=1;'
+
     // DRS: IBM's DB2 type 4 JDBC driver is NOT compliant without these arcane settings!
     // SNAP-710: Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032
     // ResultSet.next() BLOWS UP WITHOUT THESE!
