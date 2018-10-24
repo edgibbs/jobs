@@ -423,7 +423,9 @@ public class HyperCube extends NeutronGuiceModule {
     // SNAP-710: Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032
     // ResultSet.next() BLOWS UP WITHOUT THESE!
     config.setProperty("allowNextOnExhaustedResultSet", "1"); // ARE YOU SERIOUS?!
-    config.setProperty("resultSetHoldability", "1"); // Remember to wipe front to back too
+
+    // https://developer.ibm.com/answers/questions/194821/invalid-operation-result-set-is-closed-errorcode-4.html
+    config.setProperty("resultSetHoldability", "2");
     // config.setProperty("enableRowsetSupport", "1"); // Enable DB2 multi-row fetch
 
     LOGGER.debug("HyperCube.makeCmsSessionFactory: connect");
