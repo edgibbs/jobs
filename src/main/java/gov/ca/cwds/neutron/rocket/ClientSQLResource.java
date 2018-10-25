@@ -12,7 +12,7 @@ public class ClientSQLResource implements ApiMarker {
   // =================================
 
   //@formatter:off
-  public static final String INSERT_CLIENT_RANGE =
+  public static final String INS_CLIENT_RANGE =
         "INSERT INTO GT_ID (IDENTIFIER) \n"
       + "SELECT x.IDENTIFIER \n"
       + "FROM CLIENT_T x \n"
@@ -101,7 +101,7 @@ public class ClientSQLResource implements ApiMarker {
       + "FOR READ ONLY WITH UR " ;
   //@formatter:on
 
-  public static final String SELECT_CLIENT_ADDRESS =
+  public static final String SEL_CLIENT_ADDR =
   //@formatter:off
         "SELECT \n"
       + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
@@ -168,7 +168,7 @@ public class ClientSQLResource implements ApiMarker {
       + "FOR READ ONLY WITH UR ";
   //@formatter:on
 
-  public static final String SELECT_CLIENT_COUNTY =
+  public static final String SEL_CLI_COUNTY =
   //@formatter:off
         "SELECT \n"
       + "    clc.CLIENT_ID         AS CLT_IDENTIFIER, \n"
@@ -256,7 +256,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String SELECT_SAFETY_ALERT =
+  public static final String SELECT_SAFETY =
         "SELECT \n"
       + "     gt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
       + "    sal.THIRD_ID          AS SAL_THIRD_ID, \n"
@@ -279,7 +279,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String SELECT_PLACEMENT_ADDRESS =
+  public static final String SEL_PLACEMENT_ADDR =
         "SELECT \n"
     +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_GVR_ENTC, \n"
     +   " x.OHP_ID, x.START_DT, x.END_DT, \n"
@@ -314,11 +314,11 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:off
   public static final String INSERT_CLIENT_DUMMY =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
-    + "SELECT '1234567abc' FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ? AND ?";
+    + "SELECT '1234567abc' FROM SYSIBM.SYSDUMMY1 X WHERE 1=2";
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_PLACEMENT_CLIENT_FULL =
+  public static final String INS_PLACEMENT_CLIENT_FULL =
       "INSERT INTO GT_ID (IDENTIFIER) \n" 
     + "SELECT DISTINCT pe.FKCLIENT_T \n"
     + "FROM PLC_EPST pe \n" 
@@ -326,7 +326,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_CLIENT_LAST_CHG =
+  public static final String INS_CLIENT_LAST_CHG =
       "INSERT INTO GT_REFR_CLT (FKREFERL_T,FKCLIENT_T,SENSTV_IND) \n"
     + "SELECT DISTINCT '' AS FKREFERL_T, x.CLIENT_ID, '' AS SENSTV_IND FROM ( \n"
     + " SELECT s1.CLIENT_ID FROM ( \n"
@@ -389,7 +389,6 @@ public class ClientSQLResource implements ApiMarker {
     + ") x \n"
     + "WHERE x.rn BETWEEN ? AND ?";
   //@formatter:on
-
 
   // =================================
   // OLD SCHOOL:

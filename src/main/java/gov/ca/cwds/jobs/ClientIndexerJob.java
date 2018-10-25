@@ -94,7 +94,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   @Override
   public String getPrepLastChangeSQL() {
     try {
-      final String sql = NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INSERT_CLIENT_LAST_CHG,
+      final String sql = NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INS_CLIENT_LAST_CHG,
           determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
       LOGGER.info("LAST CHANGE SQL: {}", sql);
       return sql;
