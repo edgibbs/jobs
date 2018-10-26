@@ -12,7 +12,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,6 +42,7 @@ import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
 import gov.ca.cwds.data.persistence.cms.StaffPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -59,8 +59,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
     public TestCaseRocket(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
         ReplicatedClientDao clientDao, StaffPersonDao staffPersonDao, String lastRunFile,
-        ObjectMapper mapper, FlightPlan flightPlan,
-        AtomLaunchDirector launchDirector) {
+        ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
       super(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper, flightPlan, launchDirector);
     }
 
@@ -198,8 +197,8 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     when(rsSelClient.getString("SENSTV_IND")).thenReturn("N");
     when(rsSelClient.getString("CLIENT_OPERATION")).thenReturn("U");
 
-    target =
-        new TestCaseRocket(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper, flightPlan, launchDirector);
+    target = new TestCaseRocket(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper,
+        flightPlan, launchDirector);
   }
 
   @Test
@@ -305,7 +304,8 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test(expected = NeutronCheckedException.class)
   public void readStaffWorkers_Args___T__NeutronException() throws Exception {
-    target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan, launchDirector);
+    target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan,
+        launchDirector);
     target.readStaffWorkers();
   }
 
@@ -440,16 +440,12 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void test_prepareUpsertRequest_A$ElasticSearchPerson$ReplicatedPersonCases_T$NeutronException()
       throws Exception {
     final ElasticSearchPerson esp = null;
     final ReplicatedPersonCases p = new ReplicatedPersonCases(DEFAULT_CLIENT_ID);
-    try {
-      target.prepareUpsertRequest(esp, p);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target.prepareUpsertRequest(esp, p);
   }
 
   @Test
@@ -475,7 +471,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     target.prepAffectedClients(stmtInsClient, stmtInsClientCase, pair);
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void test_prepAffectedClients_A$PreparedStatement$PreparedStatement$Pair_T$SQLException()
       throws Exception {
     final PreparedStatement stmtInsClient = prepStmt;
@@ -483,11 +479,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
     doThrow(new SQLException("uh oh")).when(stmtInsClient).setString(any(Integer.class),
         any(String.class));
-    try {
-      target.prepAffectedClients(stmtInsClient, stmtInsClientCase, pair);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    target.prepAffectedClients(stmtInsClient, stmtInsClientCase, pair);
   }
 
   @Test
@@ -496,15 +488,11 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     target.readCaseClients(prepStmt, list);
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void test_readCaseClients_A$PreparedStatement$List_T$SQLException() throws Exception {
     final List<Pair<String, String>> list = new ArrayList<>();
-    try {
-      when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-      target.readCaseClients(prepStmt, list);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    target.readCaseClients(prepStmt, list);
   }
 
   @Test
@@ -513,16 +501,12 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     target.readFocusChildParents(prepStmt, list);
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void test_readFocusChildParents_A$PreparedStatement$List_T$SQLException()
       throws Exception {
     final List<FocusChildParent> list = new ArrayList<FocusChildParent>();
-    try {
-      doThrow(new SQLException("uh oh")).when(rs).getString(any(String.class));
-      target.readFocusChildParents(prepStmt, list);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    doThrow(new SQLException("uh oh")).when(rs).getString(any(String.class));
+    target.readFocusChildParents(prepStmt, list);
   }
 
   @Test
@@ -531,15 +515,11 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     target.readCases(prepStmt, mapCases);
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void test_readCases_A$PreparedStatement$Map_T$SQLException() throws Exception {
     final Map<String, EsCaseRelatedPerson> mapCases = new HashMap<String, EsCaseRelatedPerson>();
-    try {
-      doThrow(new SQLException("uh oh")).when(rs).getString(any(String.class));
-      target.readCases(prepStmt, mapCases);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    doThrow(new SQLException("uh oh")).when(rs).getString(any(String.class));
+    target.readCases(prepStmt, mapCases);
   }
 
   @Test
@@ -550,14 +530,11 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     assertEquals(expected, actual);
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void test_readStaffWorkers_A$_T$NeutronException() throws Exception {
-    try {
-      target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan, launchDirector);
-      target.readStaffWorkers();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target = new TestCaseRocket(dao, esDao, clientDao, null, lastRunFile, mapper, flightPlan,
+        launchDirector);
+    target.readStaffWorkers();
   }
 
   @Test
@@ -605,14 +582,10 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void test_extractCase_A$ResultSet_T$SQLException() throws Exception {
-    try {
-      when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-      target.extractCase(rs);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    target.extractCase(rs);
   }
 
   @Test
@@ -623,16 +596,13 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void test_readClients_A$PreparedStatement$Map_T$NeutronException() throws Exception {
     final PreparedStatement stmtSelClient = prepStmt;
     final Map<String, ReplicatedClient> mapClients = new HashMap<String, ReplicatedClient>();
-    try {
-      doThrow(new SQLException("uh oh")).when(rs).getString(any(String.class));
-      target.readClients(stmtSelClient, mapClients);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+
+    doThrow(new SQLException("uh oh")).when(rs).getString(any(String.class));
+    target.readClients(stmtSelClient, mapClients);
   }
 
   @Test
@@ -718,8 +688,8 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     mapClientCases.put(DEFAULT_CLIENT_ID, set);
 
     final Map mapFocusChildParents = new HashMap();
-    final ReplicatedPersonCases actual = target.reduceClientCases(clientId, mapCases, mapClientCases,
-        mapFocusChildParents);
+    final ReplicatedPersonCases actual =
+        target.reduceClientCases(clientId, mapCases, mapClientCases, mapFocusChildParents);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -751,18 +721,14 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     assertEquals(expected, actual);
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void test_verify_A$Map_T$NeutronException() throws Exception {
     final Map<String, ReplicatedPersonCases> mapReadyClientCases = mock(Map.class);
     when(mapReadyClientCases.get(any(String.class))).thenThrow(IOException.class);
-    try {
-      target.verify(mapReadyClientCases);
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target.verify(mapReadyClientCases);
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void test_runMultiThreadIndexing_A$() throws Exception {
     target.runMultiThreadIndexing();
   }
@@ -773,7 +739,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
     target.runMultiThreadIndexing();
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void test_threadRetrieveByJdbc_A$() throws Exception {
     target.threadRetrieveByJdbc();
   }

@@ -134,7 +134,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     target.normalizeAndQueueIndex(grpRecs);
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void threadExtractJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
   }
@@ -150,16 +150,16 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     when(con.createStatement()).thenThrow(SQLException.class);
     final Pair<String, String> p = pair;
 
-    TestClientIndexerJob target = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
+    final TestClientIndexerJob tgt = new TestClientIndexerJob(dao, esDao, lastRunFile, mapper,
         sessionFactory, flightRecorder, flightPlan, launchDirector);
-    target.setTxn(transaction);
-    target.pullRange(p, null);
+    tgt.setTxn(transaction);
+    tgt.pullRange(p, null);
   }
 
   @Test
   public void getPartitionRanges_Args() throws Exception {
-    final List actual = target.getPartitionRanges();
-    final List expected = new ArrayList<>();
+    final List<Pair<String, String>> actual = target.getPartitionRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
     expected.add(pair);
     assertThat(actual, is(equalTo(expected)));
   }
@@ -232,7 +232,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void threadRetrieveByJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
   }
