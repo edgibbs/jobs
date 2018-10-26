@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,8 +25,8 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
-public class RawClient extends ClientReference
-    implements NeutronJdbcReader<RawClient>, ApiGroupNormalizer<ReplicatedClient> {
+public class RawClient extends ClientReference implements NeutronJdbcReader<RawClient>,
+    ApiGroupNormalizer<ReplicatedClient>, Comparable<RawClient>, Comparator<RawClient> {
 
   private static final long serialVersionUID = 1L;
 
@@ -993,6 +994,16 @@ public class RawClient extends ClientReference
 
   public void setPlacementHomeAddress(PlacementHomeAddress placementHomeAddress) {
     this.placementHomeAddress = placementHomeAddress;
+  }
+
+  @Override
+  public int compare(RawClient o1, RawClient o2) {
+    return o1.getCltId().compareTo(o2.getCltId());
+  }
+
+  @Override
+  public int compareTo(RawClient o) {
+    return compare(this, o);
   }
 
 }

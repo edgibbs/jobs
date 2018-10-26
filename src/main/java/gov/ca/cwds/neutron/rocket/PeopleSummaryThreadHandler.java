@@ -659,10 +659,10 @@ public class PeopleSummaryThreadHandler
    * @deprecated EsClientPerson goes away
    */
   @Deprecated
-  protected void normalize(final List<EsClientPerson> grpRecs) {
+  protected void normalize(final List<RawClient> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
-        .collect(Collectors.groupingBy(EsClientPerson::getNormalizationGroupKey)).entrySet()
-        .stream().map(e -> getRocket().normalizeSingle(e.getValue()))
+        .collect(Collectors.groupingBy(RawClient::getNormalizationGroupKey)).entrySet().stream()
+        .map(e -> getRocket().normalizeSingle(e.getValue()))
         .forEach(n -> normalized.put(n.getId(), n));
   }
 

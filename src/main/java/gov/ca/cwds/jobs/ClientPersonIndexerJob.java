@@ -26,6 +26,7 @@ import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -60,8 +61,8 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  *
  * @author CWDS API Team
  */
-public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, EsClientPerson>
-    implements AtomRowMapper<EsClientPerson>, AtomValidateDocument {
+public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, RawClient>
+    implements AtomRowMapper<RawClient>, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 
@@ -115,8 +116,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public EsClientPerson extract(ResultSet rs) throws SQLException {
-    return EsClientPerson.extract(rs);
+  public RawClient extract(ResultSet rs) throws SQLException {
+    return new RawClient().read(rs);
   }
 
   @Override
@@ -147,17 +148,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     // Return no records from the obsolete MQT.
     // Real work in PeopleSummaryThreadHandler.
     buf.append(
-        "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId'");
-
-    // buf.append("SELECT ").append(ClientSQLResource.LAST_CHG_COLUMNS).append(" FROM ")
-    // .append(dbSchemaName).append('.').append(getInitialLoadViewName())
-    // .append(" x WHERE X.CLT_IDENTIFIER BETWEEN ':fromId' AND ':toId'\n").append("AND 1=2\n");
-    //
-    // if (!getFlightPlan().isLoadSealedAndSensitive()) {
-    // buf.append(" AND x.CLT_SENSTV_IND = 'N'\n");
-    // }
-
-    buf.append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
+        "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId'")
+        .append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
     ret = buf.toString();
     LOGGER.trace("initial load: SQL:\n\n{}\n", ret);
 
@@ -212,8 +204,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
-  public List<ReplicatedClient> normalize(List<EsClientPerson> recs) {
-    return EntityNormalizer.<ReplicatedClient, EsClientPerson>normalizeList(recs);
+  public List<ReplicatedClient> normalize(List<RawClient> recs) {
+    return EntityNormalizer.<ReplicatedClient, RawClient>normalizeList(recs);
   }
 
   /**
