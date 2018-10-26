@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -34,7 +35,8 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
     LaunchCommand.getSettings().setInitialMode(true);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientCountyRocket(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightPlan, launchDirector);
+    target = new ClientCountyRocket(dao, esDao, lastRunFile, MAPPER, sessionFactory, flightPlan,
+        launchDirector);
     pair = Pair.of("aaaaaaaaaa", "9999999999");
 
     when(proc.getOutputParameterValue(any(String.class))).thenReturn(new Integer(0));
@@ -52,14 +54,14 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
 
   @Test
   public void extract_Args__ResultSet() throws Exception {
-    EsClientAddress actual = target.extract(rs);
+    RawClient actual = target.extract(rs);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
     final Class<?> actual = target.getDenormalizedClass();
-    final Class<?> expected = EsClientAddress.class;
+    final Class<?> expected = RawClient.class;
     assertThat(actual, is(equalTo(expected)));
   }
 

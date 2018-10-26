@@ -1,7 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,10 +23,12 @@ import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
@@ -46,8 +46,8 @@ import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
  * 
  * @author CWDS API Team
  */
-public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, EsClientAddress>
-    implements AtomRowMapper<EsClientAddress>, AtomValidateDocument {
+public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, RawClient>
+    implements AtomRowMapper<RawClient>, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 
@@ -71,9 +71,9 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
-    if (flightPlan.isLegacyPeopleMapping()) {
-      EsClientAddress.setLegacyPeopleMapping(true);
-    }
+    // if (flightPlan.isLegacyPeopleMapping()) {
+    // EsClientAddress.setLegacyPeopleMapping(true);
+    // }
   }
 
   @Override
@@ -110,7 +110,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
 
   @Override
   public Class<? extends ApiGroupNormalizer<? extends PersistentObject>> getDenormalizedClass() {
-    return EsClientAddress.class;
+    return RawClient.class;
   }
 
   @Override
@@ -160,8 +160,8 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   // =======================
 
   @Override
-  public EsClientAddress extract(ResultSet rs) throws SQLException {
-    return EsClientAddress.extract(rs);
+  public RawClient extract(ResultSet rs) throws SQLException {
+    return new RawClient().read(rs);
   }
 
   /**
@@ -169,10 +169,10 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
    * 
    * @param grpRecs records for same client id
    */
-  protected void normalizeAndQueueIndex(final List<EsClientAddress> grpRecs) {
+  protected void normalizeAndQueueIndex(final List<RawClient> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential()
-        .collect(Collectors.groupingBy(EsClientAddress::getNormalizationGroupKey)).entrySet()
-        .stream().map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
+        .collect(Collectors.groupingBy(RawClient::getNormalizationGroupKey)).entrySet().stream()
+        .map(e -> normalizeSingle(e.getValue())).forEach(this::addToIndexQueue);
   }
 
   /**
@@ -181,9 +181,9 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   @Override
   public void handleMainResults(final ResultSet rs, Connection con) throws SQLException {
     int cntr = 0;
-    EsClientAddress m;
+    RawClient m;
     Object lastId = new Object();
-    final List<EsClientAddress> grpRecs = new ArrayList<>();
+    final List<RawClient> grpRecs = new ArrayList<>();
 
     // NOTE: Assumes that records are sorted by group key.
     while (!isFailed() && rs.next() && (m = extract(rs)) != null) {
@@ -286,8 +286,8 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Es
   }
 
   @Override
-  public List<ReplicatedClient> normalize(List<EsClientAddress> recs) {
-    return EntityNormalizer.<ReplicatedClient, EsClientAddress>normalizeList(recs);
+  public List<ReplicatedClient> normalize(List<RawClient> recs) {
+    return EntityNormalizer.<ReplicatedClient, RawClient>normalizeList(recs);
   }
 
   @Override

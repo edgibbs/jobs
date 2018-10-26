@@ -20,6 +20,7 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
@@ -29,7 +30,7 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
  * 
  * @author CWDS API Team
  */
-public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddress> {
+public class ClientIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
 
   ReplicatedClientDao dao;
   ClientIndexerJob target;
@@ -57,8 +58,8 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
   @Test
   public void extract_Args__ResultSet() throws Exception {
     when(rs.getString("CLT_IBMSNAP_OPERATION")).thenReturn("I");
-    final EsClientAddress actual = target.extract(rs);
-    final EsClientAddress expected = new EsClientAddress();
+    final RawClient actual = target.extract(rs);
+    final RawClient expected = new RawClient();
     final short s = (short) 0;
     // expected.setCltBirthCountryCodeType(s);
     // expected.setCltBirthStateCodeType(s);
@@ -70,10 +71,10 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
     expected.setCltPrimaryLanguageType(s);
     expected.setCltSecondaryLanguageType(s);
     expected.setCltReligionType(s);
-    expected.setClaAddressType(s);
-    expected.setClaAddressType(s);
-    expected.setClaAddressType(s);
-    expected.setAdrEmergencyExtension(0);
+    // expected.setClaAddressType(s);
+    // expected.setClaAddressType(s);
+    // expected.setClaAddressType(s);
+    // expected.setAdrEmergencyExtension(0);
     // expected.setAdrPrimaryExtension(0);
     // expected.setAdrState(s);
     // expected.setAdrZip4(s);
@@ -99,7 +100,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void normalize_Args__List() throws Exception {
-    List<EsClientAddress> recs = new ArrayList<EsClientAddress>();
+    List<RawClient> recs = new ArrayList<>();
     List<ReplicatedClient> actual = target.normalize(recs);
     List<ReplicatedClient> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
@@ -130,7 +131,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void normalizeAndQueueIndex() throws Exception {
-    List<EsClientAddress> grpRecs = new ArrayList<EsClientAddress>();
+    final List<RawClient> grpRecs = new ArrayList<>();
     target.normalizeAndQueueIndex(grpRecs);
   }
 
@@ -201,7 +202,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, EsClientAddr
 
   @Test
   public void normalizeAndQueueIndex_Args__List() throws Exception {
-    List<EsClientAddress> grpRecs = new ArrayList<EsClientAddress>();
+    final List<RawClient> grpRecs = new ArrayList<>();
     target.normalizeAndQueueIndex(grpRecs);
   }
 
