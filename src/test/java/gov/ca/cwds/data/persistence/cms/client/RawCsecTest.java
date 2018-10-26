@@ -14,12 +14,11 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
-public class RawCsecTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class RawCsecTest extends Goddard<ReplicatedClient, RawClient> {
 
   RawCsec target;
 

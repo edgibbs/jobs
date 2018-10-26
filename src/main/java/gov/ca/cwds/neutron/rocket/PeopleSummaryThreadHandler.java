@@ -40,7 +40,6 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.client.ClientReference;
 import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
@@ -69,8 +68,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * {@link AtomLoadStepHandler} for People Summary index, initial load.
  * 
  * <p>
- * Loads {@link EsClientPerson} and {@link PlacementHomeAddress}, normalizes to
- * {@link ReplicatedClient}.
+ * Loads {@link RawClient} and {@link PlacementHomeAddress}, normalizes to {@link ReplicatedClient}.
  * </p>
  * 
  * <p>

@@ -19,7 +19,6 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -30,7 +29,7 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
  * 
  * @author CWDS API Team
  */
-public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
 
   ReplicatedClientDao dao;
   ClientPersonIndexerJob target;
@@ -89,7 +88,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
     Object actual = target.getDenormalizedClass();
-    Object expected = EsClientPerson.class;
+    Object expected = RawClient.class;
     assertThat(actual, is(equalTo(expected)));
   }
 

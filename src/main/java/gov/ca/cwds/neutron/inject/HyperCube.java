@@ -55,8 +55,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
@@ -401,8 +399,7 @@ public class HyperCube extends NeutronGuiceModule {
   protected SessionFactory makeCmsSessionFactory() {
     LOGGER.debug("HyperCube.makeCmsSessionFactory");
     final Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
-        .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
-        .addAnnotatedClass(EsClientPerson.class).addAnnotatedClass(EsRelationship.class)
+        .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsRelationship.class)
         .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
         .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
         .addAnnotatedClass(ReplicatedCollateralIndividual.class)

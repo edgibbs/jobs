@@ -15,13 +15,12 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
-public class RawAddressTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   RawAddress target;
 

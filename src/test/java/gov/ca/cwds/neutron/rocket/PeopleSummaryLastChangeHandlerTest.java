@@ -19,13 +19,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
-public class PeopleSummaryLastChangeHandlerTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class PeopleSummaryLastChangeHandlerTest extends Goddard<ReplicatedClient, RawClient> {
 
   PeopleSummaryLastChangeHandler target;
   ClientPersonIndexerJob rocket;
