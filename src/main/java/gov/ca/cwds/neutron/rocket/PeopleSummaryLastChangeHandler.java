@@ -33,7 +33,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_SIZE = 14000;
+  private static final int BUNDLE_KEY_SIZE = 10000;
 
   private final List<String> keys = new ArrayList<>(BUNDLE_KEY_SIZE * 2);
 
@@ -111,6 +111,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   protected void insertNextKeyBundle(Connection con, int start, int end) {
     try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
+      LOGGER.debug("commit, clear temp tables");
+      con.commit();
+
       final List<String> subset = keys.subList(start, Math.min(end, keys.size() - 1));
       int cntr = 0;
 
