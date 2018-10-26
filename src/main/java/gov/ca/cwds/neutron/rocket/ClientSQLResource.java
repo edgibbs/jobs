@@ -395,6 +395,11 @@ public class ClientSQLResource implements ApiMarker {
       "SELECT DISTINCT FKCLIENT_T FROM GT_REFR_CLT FOR READ ONLY WITH UR";
   //@formatter:on
 
+  //@formatter:off
+  public static final String INS_LAST_CHG_KEY_BUNDLE =
+      "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
+  //@formatter:on
+
   // =================================
   // OLD SCHOOL:
   // =================================

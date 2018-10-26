@@ -30,9 +30,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_COUNT = 10000;
+  private static final int BUNDLE_KEY_SIZE = 14000;
 
-  private final List<String> keys = new ArrayList<>(BUNDLE_KEY_COUNT * 2);
+  private final List<String> keys = new ArrayList<>(BUNDLE_KEY_SIZE * 2);
 
   /**
    * Preferred ctor.
@@ -106,6 +106,19 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     LOGGER.info("Retrieved {} client keys.", counter);
   }
 
+  protected void insertNextKeyBundle(Connection con, int start, int end) {
+    try (final PreparedStatement ps =
+        con.prepareStatement(ClientSQLResource.INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
+      for (String key : keys) {
+        ps.setString(1, key);
+        ps.addBatch();
+      }
+      ps.executeBatch();
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "ERROR INSERTING KEYS!: {}", e.getMessage());
+    }
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -143,17 +156,25 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         // Auto-close statement.
       }
 
+      LOGGER.info("keys: {}", keys.size());
+
       // REFACTOR: Commit often and early. This block is one *BIG* transaction.
       // Better to reinsert client id's as needed.
       // CATCH: commit clears temp tables, forcing us to find changed clients again.
       // OPTION: use a standing client id table.
 
       // 1-1000, 1001-2000, 2001-3000, etc.
-      for (int start = 1; start < totalKeys; start += BUNDLE_KEY_COUNT) {
-        final int end = start + BUNDLE_KEY_COUNT - 1;
-        LOGGER.info("STEP #2: clear bundle keys");
-        session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
-        this.clearSession(session);
+      for (int start = 1; start < totalKeys; start += BUNDLE_KEY_SIZE) {
+        final int end = start + BUNDLE_KEY_SIZE - 1;
+        if (start > 1) { // next pass
+          LOGGER.info("STEP #1: insert bundle keys");
+          con.commit(); // clear temp tables
+          insertNextKeyBundle(con, start, end);
+        } else {
+          LOGGER.info("STEP #1: clear bundle keys");
+          session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
+          this.clearSession(session);
+        }
 
         LOGGER.info("STEP #3: set bundle keys: start: {}, end: {}", start, end);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
