@@ -16,6 +16,7 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
  * 
  * @author CWDS API Team
  */
+@SuppressWarnings({"squid:S1206"})
 public abstract class ClientReference extends ApiObjectIdentity implements PersistentObject {
 
   private static final long serialVersionUID = 1L;

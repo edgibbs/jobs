@@ -18,6 +18,7 @@ import org.hibernate.annotations.Type;
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
+@SuppressWarnings({"squid:S1206"})
 public class RawAddress extends ClientAddressReference implements NeutronJdbcReader<RawAddress> {
 
   private static final long serialVersionUID = 1L;
