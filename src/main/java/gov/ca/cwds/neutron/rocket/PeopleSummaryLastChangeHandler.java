@@ -1,5 +1,8 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LAST_CHG_KEY_BUNDLE;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_LAST_CHG;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -107,9 +110,12 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   }
 
   protected void insertNextKeyBundle(Connection con, int start, int end) {
-    try (final PreparedStatement ps =
-        con.prepareStatement(ClientSQLResource.INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
-      for (String key : keys) {
+    try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
+      final List<String> subset = keys.subList(start, Math.min(end, keys.size() - 1));
+      int cntr = 0;
+
+      for (String key : subset) {
+        CheeseRay.logEvery(LOGGER, ++cntr, "insert bundle keys", "keys");
         ps.setString(1, key);
         ps.addBatch();
       }
@@ -149,8 +155,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           rocket.runInsertAllLastChangeKeys(session, lastRunTime, rocket.getPrepLastChangeSQLs());
       LOGGER.info("total keys found: {}", totalKeys);
 
-      try (final PreparedStatement stmt =
-          con.prepareStatement(ClientSQLResource.SEL_CLI_LAST_CHG, TFO, CRO)) {
+      try (final PreparedStatement stmt = con.prepareStatement(SEL_CLI_LAST_CHG, TFO, CRO)) {
         read(stmt, rs -> readClientKey(rs));
       } finally {
         // Auto-close statement.
