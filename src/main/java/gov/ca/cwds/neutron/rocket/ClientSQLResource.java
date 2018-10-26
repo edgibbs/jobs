@@ -390,6 +390,11 @@ public class ClientSQLResource implements ApiMarker {
     + "WHERE x.rn BETWEEN ? AND ?";
   //@formatter:on
 
+  //@formatter:off
+  public static final String SEL_CLI_LAST_CHG =
+      "SELECT DISTINCT FKCLIENT_T FROM GT_REFR_CLT FOR READ ONLY WITH UR";
+  //@formatter:on
+
   // =================================
   // OLD SCHOOL:
   // =================================

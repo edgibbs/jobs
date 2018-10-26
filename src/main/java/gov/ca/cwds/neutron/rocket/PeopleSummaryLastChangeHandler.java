@@ -2,6 +2,7 @@ package gov.ca.cwds.neutron.rocket;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,14 +11,11 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
@@ -33,6 +31,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   private static final long serialVersionUID = 1L;
 
   private static final int BUNDLE_KEY_COUNT = 10000;
+
+  private final List<String> keys = new ArrayList<>(BUNDLE_KEY_COUNT * 2);
 
   /**
    * Preferred ctor.
@@ -56,13 +56,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     this.deletionResults = deletionResults;
     final ClientPersonIndexerJob rocket = getRocket();
 
-    // Today we normalize while reading records to minimize memory at the expense of some CPU.
-    // Read from the view, old school.
-    // addAll(getRocket().extractLastRunRecsFromView(lastRunDate, deletionResults));
-
-    LOGGER.info("After view: count: {}", normalized.size());
-
-    // Prod periodically hangs here when calling SessionFactory.getCurrentSession();
+    // CAUTION: Prod can hang here when calling SessionFactory.getCurrentSession();
     // Handle additional JDBC statements, if any.
     Connection con = null;
     try (final Session session = getRocket().getJobDao().grabSession()) {
@@ -95,6 +89,23 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     session.flush();
   }
 
+  protected void readClientKey(final ResultSet rs) {
+    int counter = 0;
+    String k = null;
+    final ClientPersonIndexerJob rocket = getRocket();
+
+    try {
+      while (rocket.isRunning() && rs.next() && (k = rs.getString(1)) != null) {
+        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client key");
+        keys.add(k);
+      }
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT KEY! {}", e.getMessage(), e);
+    }
+
+    LOGGER.info("Retrieved {} client keys.", counter);
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -108,19 +119,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final ClientPersonIndexerJob rocket = getRocket();
     final Date lastRunTime = rocket.getFlightLog().getLastChangeSince();
     LOGGER.info("handleSecondaryJdbc(): last successful run: {}", lastRunTime);
-
-    // TODO: no longer needed.
-    final Class<?> entityClass = rocket.getDenormalizedClass(); // view entity class
-    final String queryName = rocket.getFlightPlan().isLoadSealedAndSensitive()
-        ? entityClass.getName() + ".findAllUpdatedAfter"
-        : entityClass.getName() + ".findAllUpdatedAfterWithUnlimitedAccess";
-
-    LOGGER.debug("query name: {}", queryName);
     handleStartRange(range);
-
-    Transaction txn = null;
-    List<EsClientPerson> recs = null;
-    int totalClientAddressRetrieved = 0;
 
     // ---------------------------
     // RETRIEVE DATA
@@ -132,57 +131,59 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
 
-      final String sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(
-          ClientSQLResource.SEL_PLACEMENT_ADDR, rocket.determineLastSuccessfulRunTime(),
-          rocket.getFlightPlan().getOverrideLastEndTime());
-      LOGGER.info("SQL for Placement Address: \n{}", sqlPlacementAddress);
-      final PreparedStatement stmtSelPlacementAddress = con.prepareStatement(sqlPlacementAddress);
-      con = NeutronJdbcUtils.prepConnection(session);
-      txn = rocket.grabTransaction();
-
-      LOGGER.info("STEP #1: Store changed client keys in GT_REFR_CLT");
+      LOGGER.info("STEP #1: Store changed client keys");
       final int totalKeys =
           rocket.runInsertAllLastChangeKeys(session, lastRunTime, rocket.getPrepLastChangeSQLs());
-      recs = new ArrayList<>(totalKeys * 3);
       LOGGER.info("total keys found: {}", totalKeys);
 
-      // OPTION: Commit often and early. This block is one big transaction.
+      try (final PreparedStatement stmt =
+          con.prepareStatement(ClientSQLResource.SEL_CLI_LAST_CHG, TFO, CRO)) {
+        read(stmt, rs -> readClientKey(rs));
+      } finally {
+        // Auto-close statement.
+      }
+
+      // REFACTOR: Commit often and early. This block is one *BIG* transaction.
       // Better to reinsert client id's as needed.
+      // CATCH: commit clears temp tables, forcing us to find changed clients again.
+      // OPTION: use a standing client id table.
 
       // 1-1000, 1001-2000, 2001-3000, etc.
       for (int start = 1; start < totalKeys; start += BUNDLE_KEY_COUNT) {
         final int end = start + BUNDLE_KEY_COUNT - 1;
-        LOGGER.info("STEP #2: CLEAR GT_ID");
+        LOGGER.info("STEP #2: clear bundle keys");
         session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
         this.clearSession(session);
 
-        LOGGER.info("STEP #3: INSERT keys into GT_ID, bundle: start: {}, end: {}", start, end);
+        LOGGER.info("STEP #3: set bundle keys: start: {}, end: {}", start, end);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
         this.clearSession(session);
 
         // NEW SCHOOL: same logic as Initial Load.
-        super.handleSecondaryJdbc(con, range);
-        super.handleJdbcDone(range);
+        super.handleSecondaryJdbc(con, range); // commits, clears temp tables
       }
 
-      LOGGER.info(" ***** commit transaction, DONE retrieving data *****");
-      txn.commit(); // release database resources, clear temp tables
+      LOGGER.info("***** DONE retrieving data *****");
+      con.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
       try {
-        txn.rollback();
+        con.rollback();
       } catch (Exception e2) {
-        LOGGER.error("handleSecondaryJdbc: NESTED EXCEPTION", e2);
+        LOGGER.warn("handleSecondaryJdbc: NESTED EXCEPTION", e2);
       }
       throw CheeseRay.runtime(LOGGER, e, "OUTER EXTRACT ERROR!: {}", e.getMessage());
     } finally {
       // session goes out of scope
     }
 
-    final List<Thread> threads = new ArrayList<>();
-    rocket.addThread(true, rocket::threadIndex, threads);
-
     LOGGER.info("handleSecondaryJdbc: DONE");
+  }
+
+  @Override
+  public void handleFinishRange(Pair<String, String> range) {
+    keys.clear();
+    super.handleFinishRange(range);
   }
 
 }
