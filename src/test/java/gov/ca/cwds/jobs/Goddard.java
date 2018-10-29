@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -49,12 +50,17 @@ import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.jdbc.Work;
 import org.hibernate.procedure.ProcedureCall;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.ShortType;
 import org.hibernate.type.StringType;
+import org.hibernate.type.TimestampType;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -317,6 +323,26 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     final ScrollableResults scrollableResults = mock(ScrollableResults.class);
     when(nq.scroll(any(ScrollMode.class))).thenReturn(scrollableResults);
+
+    final Query q = Mockito.mock(Query.class);
+    when(sessionFactory.getCurrentSession()).thenReturn(session);
+    when(session.getNamedQuery(any(String.class))).thenReturn(q);
+    when(q.list()).thenReturn(new ArrayList<>());
+
+    when(q.setString(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setShort(any(Short.class), any(Short.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(String.class), any(StringType.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(String.class))).thenReturn(q);
+    when(q.setHibernateFlushMode(any(FlushMode.class))).thenReturn(q);
+    when(q.setReadOnly(any(Boolean.class))).thenReturn(q);
+    when(q.setCacheMode(any(CacheMode.class))).thenReturn(q);
+    when(q.setFetchSize(any(Integer.class))).thenReturn(q);
+    when(q.setCacheable(any(Boolean.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(Timestamp.class), any(TimestampType.class)))
+        .thenReturn(q);
+    when(q.setParameter(any(String.class), any(Short.class), any(ShortType.class))).thenReturn(q);
+    when(q.setParameter(any(String.class), any(Integer.class), any(IntegerType.class)))
+        .thenReturn(q);
 
     // Flight track:
     flightRecord = new FlightLog();

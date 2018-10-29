@@ -5,6 +5,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.hibernate.type.ShortType;
+import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,17 +57,15 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
       if (!txn.isActive()) {
         txn.begin();
       }
+
       final Query<SystemCode> query = session.getNamedQuery(namedQueryName)
-          .setString("foreignKeyMetaTable", foreignKeyMetaTable).setReadOnly(true)
-          .setCacheable(false).setHibernateFlushMode(FlushMode.MANUAL);
+          .setParameter("foreignKeyMetaTable", foreignKeyMetaTable, StringType.INSTANCE)
+          .setReadOnly(true).setCacheable(false).setHibernateFlushMode(FlushMode.MANUAL);
 
       ret = query.list().toArray(new SystemCode[0]);
       LOGGER.info("NeutronSystemCodeDao.findByForeignKeyMetaTable: meta: {}, count: {}",
           foreignKeyMetaTable, ret.length);
-
       // Shares the thread's connection. Do NOT close!
-      // txn.commit();
-      // session.close();
     } catch (Exception h) {
       LOGGER.error("NeutronSystemCodeDao.findByForeignKeyMetaTable: ERROR! {}", h.getMessage(), h);
       throw new DaoException(h);
@@ -85,14 +85,11 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
 
     try {
       final Query<SystemCode> query = session.getNamedQuery(namedQueryName)
-          .setShort("systemId", systemCodeId.shortValue()).setReadOnly(true).setCacheable(false);
+          .setParameter("systemId", systemCodeId.shortValue(), ShortType.INSTANCE).setReadOnly(true)
+          .setCacheable(false);
       query.setHibernateFlushMode(FlushMode.MANUAL);
-
       ret = query.getSingleResult();
-
       // Shares the thread's connection. Do NOT close!
-      // txn.commit();
-      // session.close();
     } catch (Exception h) {
       LOGGER.error("NeutronSystemCodeDao.findBySystemCodeId: ERROR! {}", h.getMessage(), h);
       throw new DaoException(h);
