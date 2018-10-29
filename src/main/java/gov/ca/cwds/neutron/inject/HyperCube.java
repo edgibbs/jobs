@@ -55,8 +55,6 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.EsRelationship;
@@ -401,8 +399,7 @@ public class HyperCube extends NeutronGuiceModule {
   protected SessionFactory makeCmsSessionFactory() {
     LOGGER.debug("HyperCube.makeCmsSessionFactory");
     final Configuration config = makeHibernateConfiguration().configure(getHibernateConfigCms())
-        .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsClientAddress.class)
-        .addAnnotatedClass(EsClientPerson.class).addAnnotatedClass(EsRelationship.class)
+        .addAnnotatedClass(BatchBucket.class).addAnnotatedClass(EsRelationship.class)
         .addAnnotatedClass(EsPersonReferral.class).addAnnotatedClass(EsChildPersonCase.class)
         .addAnnotatedClass(EsParentPersonCase.class).addAnnotatedClass(ReplicatedAttorney.class)
         .addAnnotatedClass(ReplicatedCollateralIndividual.class)
@@ -419,11 +416,18 @@ public class HyperCube extends NeutronGuiceModule {
         .addAnnotatedClass(SystemMeta.class).addAnnotatedClass(StaffPerson.class)
         .addAnnotatedClass(DatabaseResetEntry.class);
 
+    // Safer to add these to the DB2 JDBC URL, like so:
+    // export
+    // DB_CMS_JDBC_URL='jdbc:db2://db-1a.nonprod-gateway.cwds.io:4018/DBN1SOC:retrieveMessagesFromServerOnGetMessage=true;emulateParameterMetaDataForZCalls=1;allowNextOnExhaustedResultSet=1;resultSetHoldability=1;'
+
     // DRS: IBM's DB2 type 4 JDBC driver is NOT compliant without these arcane settings!
     // SNAP-710: Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032
     // ResultSet.next() BLOWS UP WITHOUT THESE!
     config.setProperty("allowNextOnExhaustedResultSet", "1"); // ARE YOU SERIOUS?!
-    config.setProperty("resultSetHoldability", "1"); // Remember to wipe front to back too
+
+    // http://www-01.ibm.com/support/docview.wss?uid=swg21461670
+    // https://developer.ibm.com/answers/questions/194821/invalid-operation-result-set-is-closed-errorcode-4.html
+    config.setProperty("resultSetHoldability", "1");
     // config.setProperty("enableRowsetSupport", "1"); // Enable DB2 multi-row fetch
 
     LOGGER.debug("HyperCube.makeCmsSessionFactory: connect");

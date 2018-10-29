@@ -29,15 +29,15 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
-public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, RawClient> {
   PeopleSummaryThreadHandler target;
   ClientPersonIndexerJob rocket;
   ReplicatedClientDao dao;
@@ -166,7 +166,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Es
 
   @Test
   public void normalize_A$List() throws Exception {
-    List<EsClientPerson> grpRecs = new ArrayList<EsClientPerson>();
+    final List<RawClient> grpRecs = new ArrayList<>();
     target.normalize(grpRecs);
   }
 

@@ -7,13 +7,12 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.jobs.Goddard;
 
-public class RawToEsConverterTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
 
   RawToEsConverter target;
 

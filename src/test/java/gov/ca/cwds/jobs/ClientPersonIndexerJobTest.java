@@ -21,11 +21,11 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 
-public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
 
   ReplicatedClientDao dao;
   ClientPersonIndexerJob target;
@@ -83,7 +83,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void extract_A$ResultSet() throws Exception {
-    final EsClientPerson actual = target.extract(rs);
+    final RawClient actual = target.extract(rs);
     // EsClientPerson expected = null;
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, is(notNullValue()));
@@ -98,7 +98,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
   @Test
   public void getDenormalizedClass_A$() throws Exception {
     final Object actual = target.getDenormalizedClass();
-    final Object expected = EsClientPerson.class;
+    final Object expected = RawClient.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -251,7 +251,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, EsClie
 
   @Test
   public void normalize_A$List() throws Exception {
-    final List<EsClientPerson> recs = new ArrayList<EsClientPerson>();
+    final List<RawClient> recs = new ArrayList<>();
     final List<ReplicatedClient> actual = target.normalize(recs);
     final List<ReplicatedClient> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));

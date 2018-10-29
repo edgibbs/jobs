@@ -230,7 +230,6 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         }
       }
     } catch (InterruptedException e) {
-      fail();
       Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
     }

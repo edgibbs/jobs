@@ -19,7 +19,7 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
@@ -29,7 +29,7 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
  * 
  * @author CWDS API Team
  */
-public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
 
   ReplicatedClientDao dao;
   ClientPersonIndexerJob target;
@@ -59,8 +59,8 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void extract_Args__ResultSet() throws Exception {
     when(rs.getString("CLT_IBMSNAP_OPERATION")).thenReturn("I");
-    final EsClientPerson actual = target.extract(rs);
-    final EsClientPerson expected = new EsClientPerson();
+    final RawClient actual = target.extract(rs);
+    final RawClient expected = new RawClient();
     final short s = (short) 0;
     // expected.setCltBirthCountryCodeType(s);
     // expected.setCltBirthStateCodeType(s);
@@ -72,10 +72,10 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
     expected.setCltPrimaryLanguageType(s);
     expected.setCltSecondaryLanguageType(s);
     expected.setCltReligionType(s);
-    expected.setClaAddressType(s);
-    expected.setClaAddressType(s);
-    expected.setClaAddressType(s);
-    expected.setAdrEmergencyExtension(0);
+    // expected.setClaAddressType(s);
+    // expected.setClaAddressType(s);
+    // expected.setClaAddressType(s);
+    // expected.setAdrEmergencyExtension(0);
     // expected.setAdrPrimaryExtension(0);
     // expected.setAdrState(s);
     // expected.setAdrZip4(s);
@@ -88,7 +88,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
     Object actual = target.getDenormalizedClass();
-    Object expected = EsClientPerson.class;
+    Object expected = RawClient.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -101,7 +101,7 @@ public class ClientSummaryIndexerJobTest extends Goddard<ReplicatedClient, EsCli
 
   @Test
   public void normalize_Args__List() throws Exception {
-    List<EsClientPerson> recs = new ArrayList<EsClientPerson>();
+    List<RawClient> recs = new ArrayList<>();
     List<ReplicatedClient> actual = target.normalize(recs);
     List<ReplicatedClient> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));

@@ -5,11 +5,11 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
-public class SimpleElasticSearchSystemCodeTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class SimpleElasticSearchSystemCodeTest extends Goddard<ReplicatedClient, RawClient> {
 
   SimpleElasticSearchSystemCode target;
 

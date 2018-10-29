@@ -16,14 +16,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
-public class FlightLogTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
 
   FlightLog target;
 

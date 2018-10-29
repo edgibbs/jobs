@@ -238,6 +238,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
     this.getFlightLog().done();
     this.doneIndex();
     this.doneTransform();
+    Thread.currentThread().interrupt();
   }
 
   /**

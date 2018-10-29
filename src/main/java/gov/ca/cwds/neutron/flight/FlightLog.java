@@ -7,8 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.lang3.StringUtils;
@@ -160,18 +162,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   /**
    * Initial load only.
    */
-  private final List<Pair<String, String>> initialLoadRangesStarted =
-      Collections.synchronizedList(new ArrayList<>(1024));
-
-  /**
-   * Initial load only.
-   */
-  private final List<Pair<String, String>> initialLoadRangesCompleted =
-      Collections.synchronizedList(new ArrayList<>(1024));
-
-  /**
-   * Initial load only.
-   */
   private final Map<Pair<String, String>, FlightStatus> initialLoadRangeStatus =
       new ConcurrentHashMap<>();
 
@@ -253,7 +243,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     this.fatalError = true;
 
     if (initialLoad) {
-      globalErrorFlag = true;
+      globalErrorFlag = true; // Don't swap index aliases!
     }
 
     done();
@@ -262,6 +252,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @Override
   public void done() {
     // Once failed, it cannot be rescinded.
+    // TODO: no longer true! You can run failed ranges a second time!
     if (this.status != FlightStatus.FAILED) {
       this.status = FlightStatus.SUCCEEDED;
     }
@@ -396,12 +387,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void markRangeStart(final Pair<String, String> pair) {
-    initialLoadRangesStarted.add(pair);
     setRangeStatus(pair, FlightStatus.RUNNING);
   }
 
   public void markRangeComplete(final Pair<String, String> pair) {
-    initialLoadRangesCompleted.add(pair);
+    setRangeStatus(pair, FlightStatus.SUCCEEDED);
   }
 
   public void markRangeSuccess(final Pair<String, String> pair) {
@@ -412,6 +402,30 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     setRangeStatus(pair, FlightStatus.FAILED);
   }
 
+  // Java doesn't offer an IN operator like SQL.
+  protected boolean filterStatus(FlightStatus actual, FlightStatus... scanFor) {
+    boolean ret = false;
+
+    for (FlightStatus status : scanFor) {
+      if (actual == status) {
+        ret = true;
+        break;
+      }
+    }
+
+    return ret;
+  }
+
+  public List<Pair<String, String>> filterRanges(FlightStatus... statuses) {
+    return initialLoadRangeStatus.entrySet().stream().sorted()
+        .filter(x -> filterStatus(x.getValue(), statuses)).map(x -> x.getKey())
+        .collect(Collectors.toList());
+  }
+
+  public List<Pair<String, String>> getFailedRanges() {
+    return filterRanges(FlightStatus.FAILED);
+  }
+
   // =======================
   // ACCESSORS:
   // =======================
@@ -420,16 +434,23 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     affectedDocumentIds.add(docId);
   }
 
-  public List<Pair<String, String>> getInitialLoadRangesStarted() {
+  protected List<Pair<String, String>> buildImmutableList(FlightStatus... statuses) {
+    final TreeSet<Pair<String, String>> unique = new TreeSet<>();
+    for (FlightStatus status : statuses) {
+      unique.addAll(filterRanges(status));
+    }
+
     final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
-    results.addAll(initialLoadRangesStarted);
+    results.addAll(unique);
     return results.build();
   }
 
+  public List<Pair<String, String>> getInitialLoadRangesStarted() {
+    return buildImmutableList(FlightStatus.RUNNING);
+  }
+
   public List<Pair<String, String>> getInitialLoadRangesCompleted() {
-    final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
-    results.addAll(initialLoadRangesCompleted);
-    return results.build();
+    return buildImmutableList(FlightStatus.RUNNING, FlightStatus.FAILED);
   }
 
   @JsonProperty("to_index_queue")
@@ -549,8 +570,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(initialLoadRangesStarted.size())).append("\n\tranges completed:")
-          .append(pad(initialLoadRangesCompleted.size()));
+          .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
+          .append("\n\tranges completed:")
+          .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
+          .append("\n\tranges failed:")
+          .append(pad(filterRanges(FlightStatus.FAILED).size()));
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
     }

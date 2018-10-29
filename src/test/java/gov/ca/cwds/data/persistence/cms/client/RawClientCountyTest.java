@@ -12,11 +12,10 @@ import java.sql.SQLException;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
-public class RawClientCountyTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class RawClientCountyTest extends Goddard<ReplicatedClient, RawClient> {
 
   RawClientCounty target;
 

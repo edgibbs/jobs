@@ -47,7 +47,6 @@ import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseClient;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
 import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
@@ -63,12 +62,6 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 /**
  * {@link PersistentObject} representing a Client a {@link CmsReplicatedEntity} in the replicated
  * schema.
- *
- * <p>
- * Entity class {@link EsClientAddress} for Materialized Query Table ES_CLIENT_ADDRESS now holds the
- * named queries below. These are left here for tracking purposes and will be removed in the near
- * future.
- * </p>
  *
  * @author CWDS API Team
  */
@@ -403,10 +396,8 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           }
 
           final Short unitType = repAddress.getApiAdrUnitType();
-          if (unitType != null
-              && unitType.intValue() != 0) {
-            esAddress.setUnitType(SystemCodeCache.global()
-                .getSystemCodeShortDescription(unitType));
+          if (unitType != null && unitType.intValue() != 0) {
+            esAddress.setUnitType(SystemCodeCache.global().getSystemCodeShortDescription(unitType));
           }
 
           // SNAP-46: last known phone numbers.

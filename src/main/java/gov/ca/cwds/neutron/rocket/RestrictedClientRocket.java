@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -20,7 +20,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
  * @author CWDS API Team
  */
 public class RestrictedClientRocket extends ClientIndexerJob
-    implements AtomRowMapper<EsClientAddress>, AtomValidateDocument {
+    implements AtomRowMapper<RawClient>, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;
 

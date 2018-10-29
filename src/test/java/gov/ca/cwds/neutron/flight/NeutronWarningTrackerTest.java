@@ -11,11 +11,11 @@ import java.util.Calendar;
 
 import org.junit.Test;
 
-import gov.ca.cwds.data.persistence.cms.EsClientPerson;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
-public class NeutronWarningTrackerTest extends Goddard<ReplicatedClient, EsClientPerson> {
+public class NeutronWarningTrackerTest extends Goddard<ReplicatedClient, RawClient> {
 
   NeutronWarningTracker target;
 

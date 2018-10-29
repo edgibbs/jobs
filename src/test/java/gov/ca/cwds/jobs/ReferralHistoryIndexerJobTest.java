@@ -455,7 +455,7 @@ public class ReferralHistoryIndexerJobTest
     target.pullRange(p, null);
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void threadExtractJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
   }
@@ -636,7 +636,7 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = NeutronRuntimeException.class)
   public void threadRetrieveByJdbc_Args__() throws Exception {
     target.threadRetrieveByJdbc();
   }

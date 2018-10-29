@@ -215,6 +215,14 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
     return ret;
   }
 
+  /**
+   * Prepare CRUD operations for pagination, such as Last Change client id groups.
+   * 
+   * @param session Hibernate session
+   * @param start starting row
+   * @param end ending row
+   * @param sqls SQL statements to paginate
+   */
   default void runInsertRownumBundle(final Session session, int start, int end, String... sqls) {
     for (String sql : sqls) {
       NeutronJdbcUtils.runStatementInsertRownumBundle(session, sql, start, end,

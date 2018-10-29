@@ -60,7 +60,7 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
     target.refreshSchema();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = NeutronRuntimeException.class)
   public void refreshSchema_A$_T$NeutronCheckedException() throws Exception {
     runKillThread(target, 3500L);
     dao = mock(DbResetStatusDao.class);
