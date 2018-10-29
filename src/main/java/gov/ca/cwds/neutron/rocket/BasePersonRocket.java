@@ -48,6 +48,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.data.std.ApiPersonAware;
@@ -124,7 +125,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   /**
    * Elasticsearch client DAO.
    */
-  protected transient ElasticsearchDao esDao;
+  protected transient NeutronElasticSearchDao esDao;
 
   /**
    * Primary Hibernate session factory. Rockets could potentially read from multiple datasources.
@@ -174,7 +175,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * @param launchDirector launch director
    */
   @Inject
-  public BasePersonRocket(final BaseDaoImpl<N> jobDao, final ElasticsearchDao esDao,
+  public BasePersonRocket(final BaseDaoImpl<N> jobDao, final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(lastRunFile, flightPlan);
@@ -1049,7 +1050,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   @Override
-  public ElasticsearchDao getEsDao() {
+  public NeutronElasticSearchDao getEsDao() {
     return esDao;
   }
 

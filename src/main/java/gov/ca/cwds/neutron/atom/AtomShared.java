@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -38,7 +38,7 @@ public interface AtomShared extends ApiMarker {
    * 
    * @return Elasticsearch DAO
    */
-  ElasticsearchDao getEsDao();
+  NeutronElasticSearchDao getEsDao();
 
   /**
    * Jackson ObjectMapper suitable for Elasticsearch document operations.

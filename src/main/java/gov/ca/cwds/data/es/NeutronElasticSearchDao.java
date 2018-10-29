@@ -110,7 +110,7 @@ public class NeutronElasticSearchDao implements Closeable {
       createIndex();
       try {
         // Give Elasticsearch a moment to catch its breath.
-        Thread.sleep(10000L);
+        Thread.sleep(8000L);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         LOGGER.warn("Interrupted!");
@@ -129,10 +129,10 @@ public class NeutronElasticSearchDao implements Closeable {
    */
   public IndexRequest bulkAdd(final ObjectMapper mapper, final String id, final Object obj)
       throws JsonProcessingException {
-    final IndexRequest indexRequest =
+    final IndexRequest ret =
         new IndexRequest(config.getElasticsearchAlias(), config.getElasticsearchDocType(), id);
-    indexRequest.source(mapper.writeValueAsBytes(obj), XContentType.JSON);
-    return indexRequest;
+    ret.source(mapper.writeValueAsBytes(obj), XContentType.JSON);
+    return ret;
   }
 
   /**
@@ -150,7 +150,7 @@ public class NeutronElasticSearchDao implements Closeable {
    */
   private void stop() throws IOException {
     if (client != null) {
-      this.client.close();
+      client.close();
     }
   }
 

@@ -507,8 +507,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test(expected = NeutronCheckedException.class)
   public void elasticsearchClientPeopleSummary_A$() throws Exception {
-    final Client actual = target.elasticsearchClientPeopleSummary();
-    final Client expected = null;
+    final RestHighLevelClient actual = target.elasticsearchClientPeopleSummary();
+    final RestHighLevelClient expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

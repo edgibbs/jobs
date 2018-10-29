@@ -75,6 +75,7 @@ import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -127,7 +128,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
   public ElasticsearchConfiguration esConfig;
-  public ElasticsearchDao esDao;
+  public NeutronElasticSearchDao esDao;
   public Client client;
   public ElasticSearchPerson esp;
 

@@ -4,7 +4,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.listener.NeutronBulkProcessorListener;
@@ -34,7 +34,7 @@ public class HoverCar implements ApiMarker, NeutronBulkProcessorBuilder {
   /**
    * Elasticsearch client DAO.
    */
-  protected transient ElasticsearchDao esDao;
+  protected transient NeutronElasticSearchDao esDao;
 
   /**
    * Constructor.
@@ -42,7 +42,7 @@ public class HoverCar implements ApiMarker, NeutronBulkProcessorBuilder {
    * @param esDao ES DAO
    * @param flightLog progress tracker
    */
-  public HoverCar(final ElasticsearchDao esDao, final FlightLog flightLog) {
+  public HoverCar(final NeutronElasticSearchDao esDao, final FlightLog flightLog) {
     this.esDao = esDao;
     this.flightLog = flightLog;
   }

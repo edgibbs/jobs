@@ -522,10 +522,9 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Singleton
   @Named("elasticsearch.client.people-summary")
-  public Client elasticsearchClientPeopleSummary() throws NeutronCheckedException {
+  public RestHighLevelClient elasticsearchClientPeopleSummary() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticsearchClientPeopleSummary");
-    // return buildElasticsearchClient(elasticSearchConfigPeopleSummary());
-    return null;
+    return buildElasticsearchClient(elasticSearchConfigPeopleSummary());
   }
 
   @Provides
