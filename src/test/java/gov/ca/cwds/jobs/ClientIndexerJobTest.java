@@ -19,7 +19,6 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -87,7 +86,7 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getDenormalizedClass_Args__() throws Exception {
     Object actual = target.getDenormalizedClass();
-    Object expected = EsClientAddress.class;
+    Object expected = RawClient.class;
     assertThat(actual, is(equalTo(expected)));
   }
 
