@@ -99,8 +99,7 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Ra
       LOGGER.info("LAST CHANGE SQL: {}", sql);
       return sql;
     } catch (NeutronCheckedException e) {
-      throw CheeseRay.runtime(LOGGER, e, "CLIENT: ERROR BUILDING LAST CHANGE SQL: {}",
-          e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL: {}", e.getMessage());
     }
   }
 
