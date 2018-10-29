@@ -20,7 +20,7 @@ public class Elasticsearch6ClientBuilder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Elasticsearch6ClientBuilder.class);
 
-  private Elasticsearch6ClientBuilder() {}
+  public Elasticsearch6ClientBuilder() {}
 
   public RestHighLevelClient createAndConfigureESClient(ElasticsearchConfiguration config) {
     RestHighLevelClient client = null;
@@ -37,7 +37,7 @@ public class Elasticsearch6ClientBuilder {
           LOGGER.error("FAILED to close Elasticsearch client", e);
         }
       }
-      throw new ApiException("Error initializing Elasticsearch client: " + e.getMessage(), e);
+      throw new ApiException("ERROR INITIALIZING ELASTICSEARCH CLIENT: " + e.getMessage(), e);
     }
   }
 
@@ -55,7 +55,7 @@ public class Elasticsearch6ClientBuilder {
       if (StringUtils.isNotEmpty(host)) {
         nodesList.add(new HttpHost(host, port));
       } else {
-        LOGGER.warn("There is an empty host for port {}", port);
+        LOGGER.warn("EMPTY HOST FOR PORT {}", port);
       }
     }
 
@@ -64,12 +64,13 @@ public class Elasticsearch6ClientBuilder {
 
   @SuppressWarnings("fb-contrib:CLI_CONSTANT_LIST_INDEX")
   private int getPort(String[] hostPortPair) {
-    return hostPortPair.length > 1 && hostPortPair[1] != null ? Integer.parseInt(hostPortPair[1])
+    return hostPortPair.length > 1 && StringUtils.isNotEmpty(hostPortPair[1])
+        ? Integer.parseInt(hostPortPair[1].trim())
         : -1;
   }
 
   private String getHost(String[] hostPortPair) {
-    return hostPortPair.length > 0 ? hostPortPair[0] : "";
+    return hostPortPair.length > 0 ? hostPortPair[0].trim() : "";
   }
 
 }

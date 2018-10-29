@@ -15,6 +15,7 @@ import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
@@ -31,6 +32,7 @@ import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
@@ -186,7 +188,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void elasticsearchClient_Args__() throws Exception {
-    Client actual = target.elasticsearchClientPeople();
+    RestHighLevelClient actual = target.elasticsearchClientPeople();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -493,7 +495,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void elasticsearchClientPeople_A$() throws Exception {
-    final Client actual = target.elasticsearchClientPeople();
+    final RestHighLevelClient actual = target.elasticsearchClientPeople();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -517,7 +519,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void makeElasticsearchDaoPeople_A$() throws Exception {
-    final ElasticsearchDao actual = target.makeElasticsearchDaoPeople();
+    final NeutronElasticSearchDao actual = target.makeElasticsearchDaoPeople();
     assertThat(actual, is(notNullValue()));
   }
 

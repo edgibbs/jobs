@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.quartz.ListenerManager;
@@ -53,6 +53,7 @@ import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
@@ -102,6 +103,7 @@ import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.Elasticsearch6ClientBuilder;
 import gov.ca.cwds.neutron.vox.XRaySpex;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -478,34 +480,35 @@ public class HyperCube extends NeutronGuiceModule {
   // ELASTICSEARCH:
   // =========================
 
-  // protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
-  // throws NeutronCheckedException {
-  // TransportClient client = null;
-  // LOGGER.debug("HyperCube.buildElasticsearchClient");
-  // try {
-  // client = gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
-  // return client;
-  // } catch (Exception e) {
-  // throw CheeseRay.checked(LOGGER, e,
-  // "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
-  // }
-  // }
+  protected RestHighLevelClient buildElasticsearchClient(final ElasticsearchConfiguration config)
+      throws NeutronCheckedException {
+    RestHighLevelClient client = null;
+    LOGGER.debug("HyperCube.buildElasticsearchClient");
+    try {
+      client = new Elasticsearch6ClientBuilder().createAndConfigureESClient(config);
+      return client;
+    } catch (Exception e) {
+      throw CheeseRay.checked(LOGGER, e,
+          "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
+    }
+  }
 
   /**
    * Elasticsearch 6.x. Instantiate the singleton ElasticSearch client on demand. Initializes X-Pack
    * security.
    * 
-   * @return initialized singleton ElasticSearch client, people index
+   * @return initialized singleton ElasticSearch REST client, people index
    * @throws NeutronCheckedException on ES connection error
    */
   @Provides
   @Singleton
   @Named("elasticsearch.client.people")
-  public Client elasticsearchClientPeople() throws NeutronCheckedException {
+  public RestHighLevelClient elasticsearchClientPeople() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticsearchClientPeople");
-    TransportClient client = null;
+    RestHighLevelClient client = null;
     if (esConfigPeople != null) {
-      // client = buildElasticsearchClient(elasticSearchConfigPeople());
+      client =
+          new Elasticsearch6ClientBuilder().createAndConfigureESClient(elasticSearchConfigPeople());
     }
     return client;
   }
@@ -528,9 +531,9 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Singleton
   @Named("elasticsearch.dao.people")
-  public ElasticsearchDao makeElasticsearchDaoPeople() throws NeutronCheckedException {
+  public NeutronElasticSearchDao makeElasticsearchDaoPeople() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.makeElasticsearchDaoPeople");
-    return new ElasticsearchDao(elasticsearchClientPeople(), elasticSearchConfigPeople());
+    return new NeutronElasticSearchDao(elasticsearchClientPeople(), elasticSearchConfigPeople());
   }
 
   @Provides
