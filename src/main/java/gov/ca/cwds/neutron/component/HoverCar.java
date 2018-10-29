@@ -1,6 +1,12 @@
 package gov.ca.cwds.neutron.component;
 
+import java.util.function.BiConsumer;
+
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 
@@ -55,8 +61,9 @@ public class HoverCar implements ApiMarker, NeutronBulkProcessorBuilder {
    */
   @Override
   public BulkProcessor buildBulkProcessor() {
-    return BulkProcessor
-        .builder(esDao.getClient(), new NeutronBulkProcessorListener(this.flightLog))
+    final BiConsumer<BulkRequest, ActionListener<BulkResponse>> bulkConsumer = (request,
+        bulkListener) -> esDao.getClient().bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
+    return BulkProcessor.builder(bulkConsumer, new NeutronBulkProcessorListener(flightLog))
         .setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
         .setConcurrentRequests(1).build();
   }
