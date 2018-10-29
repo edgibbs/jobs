@@ -15,7 +15,6 @@ import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
@@ -493,38 +492,21 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
-  public void buildElasticsearchClient_A$ElasticsearchConfiguration() throws Exception {
-    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    final TransportClient actual = target.buildElasticsearchClient(config);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test(expected = NeutronCheckedException.class)
-  public void buildElasticsearchClient_A$ElasticsearchConfiguration_T$NeutronCheckedException()
-      throws Exception {
-    target.buildElasticsearchClient(null);
-  }
-
-  @Test
   public void elasticsearchClientPeople_A$() throws Exception {
     final Client actual = target.elasticsearchClientPeople();
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void elasticsearchClientPeople_A$_T$NeutronCheckedException() throws Exception {
-    try {
-      target.setEsConfigPeople(esConfileFile);
-      target.elasticsearchClientPeople();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target.setEsConfigPeople(esConfileFile);
+    target.elasticsearchClientPeople();
   }
 
   @Test(expected = NeutronCheckedException.class)
   public void elasticsearchClientPeopleSummary_A$() throws Exception {
-    Client actual = target.elasticsearchClientPeopleSummary();
-    Client expected = null;
+    final Client actual = target.elasticsearchClientPeopleSummary();
+    final Client expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

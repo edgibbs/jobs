@@ -293,7 +293,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esDao.getClient()).thenReturn(client);
 
-    final Settings settings = Settings.builder().put(new HashMap<String, String>()).build();
+    final Settings settings = Settings.builder().build();
     when(client.settings()).thenReturn(settings);
 
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
