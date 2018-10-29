@@ -1110,4 +1110,22 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
     target.setPlacementHomeAddress(placementHomeAddress);
   }
 
+  @Test
+  public void compare_A$RawClient$RawClient() throws Exception {
+    RawClient o1 = new RawClient();
+    RawClient o2 = new RawClient();
+
+    int actual = target.compare(o1, o2);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void compareTo_A$RawClient() throws Exception {
+    RawClient o = new RawClient();
+    int actual = target.compareTo(o);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }

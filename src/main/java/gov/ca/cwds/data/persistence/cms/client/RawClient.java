@@ -17,6 +17,7 @@ import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
 
@@ -764,11 +765,11 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
   }
 
   public Date getCltFatherParentalRightTermDate() {
-    return cltFatherParentalRightTermDate;
+    return freshDate(cltFatherParentalRightTermDate);
   }
 
   public void setCltFatherParentalRightTermDate(Date cltFatherParentalRightTermDate) {
-    this.cltFatherParentalRightTermDate = cltFatherParentalRightTermDate;
+    this.cltFatherParentalRightTermDate = freshDate(cltFatherParentalRightTermDate);
   }
 
   public void setCltAdjudicatedDelinquentIndicator(String cltAdjudicatedDelinquentIndicator) {
@@ -792,7 +793,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
   }
 
   public void setCltBirthDate(Date cltBirthDate) {
-    this.cltBirthDate = cltBirthDate;
+    this.cltBirthDate = freshDate(cltBirthDate);
   }
 
   public void setCltBirthFacilityName(String cltBirthFacilityName) {
@@ -836,7 +837,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
   }
 
   public void setCltDeathDate(Date cltDeathDate) {
-    this.cltDeathDate = cltDeathDate;
+    this.cltDeathDate = freshDate(cltDeathDate);
   }
 
   public void setCltDeathDateVerifiedIndicator(String cltDeathDateVerifiedIndicator) {
@@ -909,7 +910,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
   }
 
   public void setCltMotherParentalRightTermDate(Date cltMotherParentalRightTermDate) {
-    this.cltMotherParentalRightTermDate = cltMotherParentalRightTermDate;
+    this.cltMotherParentalRightTermDate = freshDate(cltMotherParentalRightTermDate);
   }
 
   public void setCltNamePrefixDescription(String cltNamePrefixDescription) {
@@ -998,7 +999,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
 
   @Override
   public int compare(RawClient o1, RawClient o2) {
-    return o1.getCltId().compareTo(o2.getCltId());
+    return StringUtils.trimToEmpty(o1.getCltId()).compareTo(StringUtils.trimToEmpty(o2.getCltId()));
   }
 
   @Override
