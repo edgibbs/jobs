@@ -161,34 +161,27 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       try (final PreparedStatement stmt = con.prepareStatement(SEL_CLI_LAST_CHG, TFO, CRO)) {
         read(stmt, rs -> readClientKey(rs));
       } finally {
-        // Auto-close statement.
+        LOGGER.info("keys: {}", keys.size());
       }
 
-      LOGGER.info("keys: {}", keys.size());
-
-      // REFACTOR: Commit often and early. This block is one *BIG* transaction.
-      // Better to reinsert client id's as needed.
-      // CATCH: commit clears temp tables, forcing us to find changed clients again.
+      // CATCH: commit clears temp tables, requiring re-insert of client keys.
       // OPTION: use a standing client id table.
-
-      // 1-1000, 1001-2000, 2001-3000, etc.
+      // Iterate bundles. 1-1000, 1001-2000, 2001-3000, etc.
       for (int start = 1; start < totalKeys; start += BUNDLE_KEY_SIZE) {
         final int end = start + BUNDLE_KEY_SIZE - 1;
+        con.commit(); // clear temp tables
+        clearSession(session);
+
         if (start > 1) { // next pass
-          LOGGER.info("STEP #1: insert bundle keys");
-          con.commit(); // clear temp tables
+          LOGGER.info("STEP #2: insert bundle keys: start: {}, end: {}", start, end);
           insertNextKeyBundle(con, start, end);
-        } else {
-          LOGGER.info("STEP #1: clear bundle keys");
-          session.createNativeQuery("DELETE FROM GT_ID").executeUpdate();
-          this.clearSession(session);
         }
 
         LOGGER.info("STEP #3: set bundle keys: start: {}, end: {}", start, end);
         rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
         this.clearSession(session);
 
-        // NEW SCHOOL: same logic as Initial Load.
+        // Same logic as Initial Load.
         super.handleSecondaryJdbc(con, range); // commits, clears temp tables
       }
 

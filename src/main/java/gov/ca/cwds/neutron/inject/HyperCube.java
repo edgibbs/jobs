@@ -478,21 +478,21 @@ public class HyperCube extends NeutronGuiceModule {
   // ELASTICSEARCH:
   // =========================
 
-  protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
-      throws NeutronCheckedException {
-    TransportClient client = null;
-    LOGGER.debug("HyperCube.buildElasticsearchClient");
-    try {
-      client = gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
-      return client;
-    } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e,
-          "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
-    }
-  }
+  // protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
+  // throws NeutronCheckedException {
+  // TransportClient client = null;
+  // LOGGER.debug("HyperCube.buildElasticsearchClient");
+  // try {
+  // client = gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
+  // return client;
+  // } catch (Exception e) {
+  // throw CheeseRay.checked(LOGGER, e,
+  // "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
+  // }
+  // }
 
   /**
-   * Elasticsearch 5.x. Instantiate the singleton ElasticSearch client on demand. Initializes X-Pack
+   * Elasticsearch 6.x. Instantiate the singleton ElasticSearch client on demand. Initializes X-Pack
    * security.
    * 
    * @return initialized singleton ElasticSearch client, people index
@@ -505,13 +505,13 @@ public class HyperCube extends NeutronGuiceModule {
     LOGGER.debug("HyperCube.elasticsearchClientPeople");
     TransportClient client = null;
     if (esConfigPeople != null) {
-      client = buildElasticsearchClient(elasticSearchConfigPeople());
+      // client = buildElasticsearchClient(elasticSearchConfigPeople());
     }
     return client;
   }
 
   /**
-   * Instantiate the singleton Elasticsearch 5.x client on demand and initialize X-Pack security.
+   * Instantiate the singleton Elasticsearch client on demand and initialize X-Pack security.
    * 
    * @return initialized singleton ElasticSearch client, people summary index
    * @throws NeutronCheckedException on ES connection error
@@ -521,7 +521,8 @@ public class HyperCube extends NeutronGuiceModule {
   @Named("elasticsearch.client.people-summary")
   public Client elasticsearchClientPeopleSummary() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticsearchClientPeopleSummary");
-    return buildElasticsearchClient(elasticSearchConfigPeopleSummary());
+    // return buildElasticsearchClient(elasticSearchConfigPeopleSummary());
+    return null;
   }
 
   @Provides

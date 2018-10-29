@@ -25,7 +25,7 @@ apply plugin: 'jacoco'
 project.ext {
     coreApiVersion = "1.7.5_860-RC"
     log4jVersion = "2.8"
-    elasticsearchVersion = "5.5.0"
+    elasticsearchVersion = "6.4.1"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
     dropwizardVersion = "1.1.0"
     powerMockVersion = "1.7.3"
@@ -53,6 +53,7 @@ dependencies {
     // Elasticsearch:
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
+    compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: elasticsearchVersion
     compile ("org.elasticsearch.client:x-pack-transport:" + elasticsearchVersion)
 
     compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
@@ -80,6 +81,8 @@ dependencies {
         exclude group: 'ch.qos.logback'
         exclude group: 'org.slf4j'
         exclude group: 'com.ibm'
+        exclude group: 'org.elasticsearch'
+        exclude group: 'org.elasticsearch.client'
 	}
 
     compile group: "org.glassfish.jersey.ext", name: "jersey-declarative-linking", version: "2.23.2"
