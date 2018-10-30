@@ -325,7 +325,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(csec.getCltId());
         if (c != null) {
           c.addCsec(csec);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "csec");
+          CheeseRay.logEvery(LOGGER, 50, ++counter, "Read", "csec");
         } else {
           LOGGER.warn("ORPHAN CSEC! id: {}, client: {}", csec.getCsecId(), csec.getCltId());
         }
