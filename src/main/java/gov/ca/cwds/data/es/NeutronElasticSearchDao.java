@@ -160,6 +160,7 @@ public class NeutronElasticSearchDao implements Closeable {
    * @param type Index document type
    * @param settingsJsonFile Setting file
    * @param mappingJsonFile Mapping file
+   * @throws IOException unable to connect to ES
    */
   public synchronized void createIndex(final String index, final String type,
       final String settingsJsonFile, final String mappingJsonFile) throws IOException {
@@ -250,6 +251,7 @@ public class NeutronElasticSearchDao implements Closeable {
    * @param alias Alias name
    * @param index Index name
    * @return true if successful
+   * @throws IOException unable to connect to ES
    */
   public synchronized boolean createOrSwapAlias(final String alias, final String index)
       throws IOException {
