@@ -75,10 +75,11 @@ public class PeopleSummaryLastChangeHandlerTest extends Goddard<ReplicatedClient
   @Test(expected = NeutronRuntimeException.class)
   public void handleSecondaryJdbc_A$Connection$Pair_T$SQLException() throws Exception {
     when(con.prepareStatement(any(String.class))).thenThrow(SQLException.class);
+    when(con.prepareStatement(any(String.class), any(Integer.class), any(Integer.class)))
+        .thenThrow(SQLException.class);
 
     final Pair<String, String> range = pair;
     target.handleSecondaryJdbc(con, range);
   }
 
 }
-
