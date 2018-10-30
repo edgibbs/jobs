@@ -30,7 +30,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
+import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
@@ -96,7 +98,7 @@ public class NeutronElasticSearchDao implements Closeable {
       client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
       LOGGER.error("Unable to create index [" + config.getElasticsearchAlias() + "]", e);
-      throw new RuntimeException(e);
+      throw new NeutronRuntimeException(e);
     }
   }
 
@@ -112,16 +114,15 @@ public class NeutronElasticSearchDao implements Closeable {
     LOGGER.warn("CREATE ES INDEX {} with {} shards and {} replicas", index, numShards, numReplicas);
     final Settings indexSettings = Settings.builder().put("number_of_shards", numShards)
         .put("number_of_replicas", numReplicas).build();
-    CreateIndexRequest indexRequest = new CreateIndexRequest(index, indexSettings);
-    client.indices().create(indexRequest, RequestOptions.DEFAULT);
+    client.indices().create(new CreateIndexRequest(index, indexSettings), RequestOptions.DEFAULT);
 
-    PutMappingRequest putMammingRequest = new PutMappingRequest(index);
-    putMammingRequest.type(getConfig().getElasticsearchDocType());
+    final PutMappingRequest reqMapping = new PutMappingRequest(index);
+    reqMapping.type(getConfig().getElasticsearchDocType());
     final String mapping = IOUtils.toString(
         this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"),
         Charset.defaultCharset());
-    putMammingRequest.source(mapping, XContentType.JSON);
-    client.indices().putMapping(putMammingRequest, RequestOptions.DEFAULT);
+    reqMapping.source(mapping, XContentType.JSON);
+    client.indices().putMapping(reqMapping, RequestOptions.DEFAULT);
   }
 
   /**
@@ -144,6 +145,59 @@ public class NeutronElasticSearchDao implements Closeable {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         LOGGER.warn("Interrupted!");
+      }
+    }
+  }
+
+  private String readFile(String sourceFile) throws IOException {
+    return new ApiFileAssistant().readFile(sourceFile);
+  }
+
+  /**
+   * Create ES index based on supplied parameters.
+   *
+   * @param index Index name
+   * @param type Index document type
+   * @param settingsJsonFile Setting file
+   * @param mappingJsonFile Mapping file
+   */
+  public synchronized void createIndex(final String index, final String type,
+      final String settingsJsonFile, final String mappingJsonFile) throws IOException {
+    LOGGER.warn("CREATING ES INDEX [{}] for type [{}] with settings [{}] and mappings [{}]...",
+        index, type, settingsJsonFile, mappingJsonFile);
+
+    final String settingsSource = readFile(settingsJsonFile);
+    final String mappingSource = readFile(mappingJsonFile);
+    final CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);
+    createIndexRequest.settings(settingsSource, XContentType.JSON);
+    createIndexRequest.mapping(type, mappingSource, XContentType.JSON);
+
+    try {
+      client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      LOGGER.error("Unable to create index [" + config.getElasticsearchAlias() + "]", e);
+      throw new NeutronRuntimeException(e);
+    }
+  }
+
+  public synchronized void createIndexIfNeeded(final String index, final String type,
+      final String settingsJsonFile, final String mappingJsonFile) throws IOException {
+    LOGGER.warn("CREATING ES INDEX [{}] for type [{}] with settings [{}] and mappings [{}]...",
+        index, type, settingsJsonFile, mappingJsonFile);
+
+    if (!doesIndexExist(index)) {
+      LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
+      final String settingsSource = readFile(settingsJsonFile);
+      final String mappingSource = readFile(mappingJsonFile);
+      final CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);
+      createIndexRequest.settings(settingsSource, XContentType.JSON);
+      createIndexRequest.mapping(type, mappingSource, XContentType.JSON);
+
+      try {
+        client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+      } catch (IOException e) {
+        LOGGER.error("Unable to create index [" + config.getElasticsearchAlias() + "]", e);
+        throw new NeutronRuntimeException(e);
       }
     }
   }

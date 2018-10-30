@@ -368,6 +368,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     hitArray[0] = hit;
     sr = mock(SearchResponse.class);
 
+    // Remember the Java concept of an INTERFACE?? Thanks, Elasticsearch.
     // when(client.prepareMultiSearch()).thenReturn(mBuilder);
     // when(client.prepareSearch()).thenReturn(sBuilder);
 

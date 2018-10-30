@@ -48,7 +48,7 @@ import gov.ca.cwds.data.BaseDaoImpl;
 import gov.ca.cwds.data.DaoException;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -691,8 +691,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.runInsertAllLastChangeKeys(session, lastRunTime,
-        ClientSQLResource.INS_CLIENT_LAST_CHG);
+    target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INS_CLIENT_LAST_CHG);
   }
 
   @Test
@@ -1159,7 +1158,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getEsDao_A$() throws Exception {
-    final ElasticsearchDao actual = target.getEsDao();
+    final NeutronElasticSearchDao actual = target.getEsDao();
     assertThat(actual, is(notNullValue()));
   }
 
