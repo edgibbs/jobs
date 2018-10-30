@@ -1,7 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LAST_CHG_KEY_BUNDLE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_LAST_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ALL_CLIENT_LAST_CHG;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -111,7 +111,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   protected void insertNextKeyBundle(Connection con, int start, int end) {
     try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
-      LOGGER.debug("commit, clear temp tables");
+      LOGGER.info("key bundle: start: {}, end: {}", start, end);
       con.commit();
 
       final List<String> subset = keys.subList(start, Math.min(end, keys.size() - 1));
@@ -148,40 +148,31 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     // ---------------------------
 
     // SNAP-725: use the same retrieval logic as Initial Load.
-    // NEXT: no big transaction. Commit early and often.
     try (final Session session = rocket.getJobDao().grabSession()) {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
 
-      LOGGER.info("STEP #1: Store changed client keys");
-      final int totalKeys =
-          rocket.runInsertAllLastChangeKeys(session, lastRunTime, rocket.getPrepLastChangeSQLs());
-      LOGGER.info("total keys found: {}", totalKeys);
-
-      try (final PreparedStatement stmt = con.prepareStatement(SEL_CLI_LAST_CHG, TFO, CRO)) {
+      // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
+      LOGGER.info("LAST CHANGE: Get changed client keys");
+      try (final PreparedStatement stmt = con.prepareStatement(SEL_ALL_CLIENT_LAST_CHG, TFO, CRO)) {
         read(stmt, rs -> readClientKey(rs));
       } finally {
-        LOGGER.info("keys: {}", keys.size());
+        // Auto-close statement.
       }
 
-      // CATCH: commit clears temp tables, requiring re-insert of client keys.
-      // OPTION: use a standing client id table.
-      // Iterate bundles. 1-1000, 1001-2000, 2001-3000, etc.
-      for (int start = 1; start < totalKeys; start += BUNDLE_KEY_SIZE) {
-        final int end = start + BUNDLE_KEY_SIZE - 1;
+      final int totalKeys = keys.size();
+      LOGGER.info("keys: {}", totalKeys);
+
+      // CATCH: commit clears temp tables, forcing us to find changed clients again.
+      // OPTION: use a standing client id table and clear it before each run.
+
+      // 0-999, 1000-1999, 2000-2999, etc.
+      for (int start = 0; start < totalKeys; start += BUNDLE_KEY_SIZE) {
         con.commit(); // clear temp tables
-        clearSession(session);
+        final int end = start + BUNDLE_KEY_SIZE - 1; //
+        insertNextKeyBundle(con, start, end);
 
-        if (start > 1) { // next pass
-          LOGGER.info("STEP #2: insert bundle keys: start: {}, end: {}", start, end);
-          insertNextKeyBundle(con, start, end);
-        }
-
-        LOGGER.info("STEP #3: set bundle keys: start: {}, end: {}", start, end);
-        rocket.runInsertRownumBundle(session, start, end, ClientSQLResource.INSERT_NEXT_BUNDLE);
-        this.clearSession(session);
-
-        // Same logic as Initial Load.
+        // NEW SCHOOL: same logic as Initial Load.
         super.handleSecondaryJdbc(con, range); // commits, clears temp tables
       }
 

@@ -5,9 +5,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -77,6 +79,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   private boolean runMultiThread = false;
 
   private boolean multiThreadRetrieveDone = false;
+
+  private Deque<String> rerunClients = new ConcurrentLinkedDeque();
 
   /**
    * Construct batch rocket instance with all required dependencies.
@@ -369,6 +373,14 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     if (!runMultiThread || (runMultiThread && multiThreadRetrieveDone)) {
       super.doneRetrieve();
     }
+  }
+
+  public Deque<String> getRerunClients() {
+    return rerunClients;
+  }
+
+  public void addRerunClient(String clientId) {
+    this.rerunClients.push(clientId);
   }
 
   /**
