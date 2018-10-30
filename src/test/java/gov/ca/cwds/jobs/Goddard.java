@@ -26,7 +26,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -383,9 +382,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     // when(hits.getHits()).thenReturn(hitArray);
     // when(hit.docId()).thenReturn(12345);
 
-    final String useDefaultCharSet = null;
-    when(hit.getSourceAsString()).thenReturn(IOUtils
-        .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
+    // final String useDefaultCharSet = null;
+    // when(hit.getSourceAsString()).thenReturn(IOUtils
+    // .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
 
     systemCodeDao = mock(SystemCodeDao.class);
     systemMetaDao = mock(SystemMetaDao.class);
