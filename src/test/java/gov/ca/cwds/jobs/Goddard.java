@@ -295,12 +295,13 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final Settings settings = Settings.builder().build();
     // when(client.settings()).thenReturn(settings);
 
-    when(esConfig.getElasticsearchAlias()).thenReturn("people");
+    when(esConfig.getElasticsearchAlias()).thenReturn("people-summary");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
     when(esConfig.getElasticsearchCluster()).thenReturn("elasticsearch");
     when(esConfig.getElasticsearchHost()).thenReturn("localhost");
     when(esConfig.getElasticsearchPort()).thenReturn("9300");
-    when(esConfig.getElasticsearchAlias()).thenReturn("people");
+    when(esConfig.getElasticsearchNodes()).thenReturn(
+        "es-inst-1.prod-dc.cwds.io:9300,es-inst-2.prod-dc.cwds.io:9300,es-inst-3.prod-dc.cwds.io:9300");
 
     // Flight options:
     esConfileFile = tempFolder.newFile("es.yml");

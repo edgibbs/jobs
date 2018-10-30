@@ -127,12 +127,12 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     LaunchCommand.setStandardFlightPlan(null);
     flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config" + File.separator + "local.yaml");
-
     flightPlanMgr = mock(AtomFlightPlanManager.class);
 
     target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastRunFile);
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
+    // target.setEsConfigPeople(esConfig); // takes a file, not a config
 
     testBinder = mock(Binder.class);
     target.setTestBinder(testBinder);

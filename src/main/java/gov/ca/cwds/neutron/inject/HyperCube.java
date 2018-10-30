@@ -569,7 +569,7 @@ public class HyperCube extends NeutronGuiceModule {
     ElasticsearchConfiguration ret = null;
     if (esConfigPeople != null) {
       LOGGER.debug("Create NEW ES configuration: people");
-      ret = loadElasticSearchConfig(this.esConfigPeople);
+      ret = loadElasticSearchConfig(esConfigPeople);
     }
     return ret;
   }
@@ -588,7 +588,7 @@ public class HyperCube extends NeutronGuiceModule {
     ElasticsearchConfiguration ret = null;
     if (esConfigPeopleSummary != null) {
       LOGGER.debug("Create NEW ES configuration: people summary");
-      ret = loadElasticSearchConfig(this.esConfigPeopleSummary);
+      ret = loadElasticSearchConfig(esConfigPeopleSummary);
     }
     return ret;
   }
