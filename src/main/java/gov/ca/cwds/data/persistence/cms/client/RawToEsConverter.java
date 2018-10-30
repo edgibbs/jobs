@@ -154,6 +154,7 @@ public class RawToEsConverter {
       convertCase(rc, rawCli, cas);
     }
 
+    // SNAP-729: Neutron Initial Load: restore CSEC.
     LOGGER.trace("convert CSEC");
     for (RawCsec csec : rawCli.getCsec()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert CSEC", "csec");
@@ -188,14 +189,12 @@ public class RawToEsConverter {
   }
 
   protected void convertCase(ReplicatedClient rc, RawClient rawCli, RawCase rawCase) {
-    // Open case id
     rc.setOpenCaseId(rawCase.getOpenCaseId());
     rc.setOpenCaseResponsibleAgencyCode(rawCase.getOpenCaseResponsibleAgencyCode());
   }
 
   protected void convertSafetyAlert(ReplicatedClient rc, RawClient rawCli,
       RawSafetyAlert rawSafetyAlert) {
-    // Last-change mode only. Initial Load omits all deleted records.
     if (StringUtils.isBlank(rawSafetyAlert.getSafetyAlertId())
         || CmsReplicationOperation.D == rawSafetyAlert.getSafetyAlertLastUpdatedOperation()) {
       return;
