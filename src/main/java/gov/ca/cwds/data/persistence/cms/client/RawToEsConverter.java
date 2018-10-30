@@ -154,6 +154,12 @@ public class RawToEsConverter {
       convertCase(rc, rawCli, cas);
     }
 
+    LOGGER.trace("convert CSEC");
+    for (RawCsec csec : rawCli.getCsec()) {
+      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert CSEC", "csec");
+      convertCsec(rc, rawCli, csec);
+    }
+
     return rc;
   }
 
