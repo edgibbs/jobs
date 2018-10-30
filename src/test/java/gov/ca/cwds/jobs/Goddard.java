@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -32,7 +33,6 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.hibernate.CacheMode;
@@ -292,7 +292,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esDao.getClient()).thenReturn(client);
 
-    final Settings settings = Settings.builder().build();
+    // final Settings settings = Settings.builder().build();
     // when(client.settings()).thenReturn(settings);
 
     when(esConfig.getElasticsearchAlias()).thenReturn("people-summary");
@@ -301,12 +301,26 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(esConfig.getElasticsearchHost()).thenReturn("localhost");
     when(esConfig.getElasticsearchPort()).thenReturn("9300");
     when(esConfig.getElasticsearchNodes()).thenReturn(
-        "es-inst-1.prod-dc.cwds.io:9300,es-inst-2.prod-dc.cwds.io:9300,es-inst-3.prod-dc.cwds.io:9300");
+        "es-inst-1.env.cwds.io:9300,es-inst-2.env.cwds.io:9300,es-inst-3.env.cwds.io:9300");
 
     // Flight options:
     esConfileFile = tempFolder.newFile("es.yml");
-    flightPlan = mock(FlightPlan.class);
 
+    try (FileWriter writer = new FileWriter(esConfileFile)) {
+      writer.write("elasticsearch.host: es-inst-1.env.cwds.io\n");
+      writer.write("elasticsearch.port: 9300\n");
+      writer.write("elasticsearch.cluster: es-int\n");
+      writer.write(
+          "elasticsearch.nodes: es-inst-1.env.cwds.io:9300,es-inst-2.env.cwds.io:9300,es-inst-3.env.cwds.io:9300\n");
+      writer.write("elasticsearch.alias: people\n");
+      writer.write("elasticsearch.doctype: person\n");
+      writer.write("elasticsearch.xpack.user: elastic\n");
+      writer.write("elasticsearch.xpack.password: changeme\n");
+    } finally {
+      // auto-close
+    }
+
+    flightPlan = mock(FlightPlan.class);
     when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
     when(flightPlan.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
     when(flightPlan.getThreadCount()).thenReturn(1L);

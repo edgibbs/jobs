@@ -132,7 +132,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastRunFile);
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
-    // target.setEsConfigPeople(esConfig); // takes a file, not a config
+    target.setEsConfigPeople(esConfileFile);
 
     testBinder = mock(Binder.class);
     target.setTestBinder(testBinder);
@@ -499,9 +499,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void elasticsearchClientPeople_A$_T$NeutronCheckedException() throws Exception {
-    target.setEsConfigPeople(esConfileFile);
     target.elasticsearchClientPeople();
   }
 
@@ -532,11 +531,10 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void loadElasticSearchConfig_A$File() throws Exception {
     final ElasticsearchConfiguration actual = target.loadElasticSearchConfig(esConfileFile);
-    final ElasticsearchConfiguration expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -662,8 +660,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void getEsConfigPeople_A$() throws Exception {
     final File actual = target.getEsConfigPeople();
-    final File expected = new File("config/local.yaml");
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
