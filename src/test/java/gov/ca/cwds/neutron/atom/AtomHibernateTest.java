@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.inject.CmsSessionFactory;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
@@ -42,9 +42,9 @@ public class AtomHibernateTest extends Goddard<TestNormalizedEntity, TestDenorma
     private final FlightLog track = new FlightLog();
 
     public TestAtomHibernate(final TestNormalizedEntityDao mainDao,
-        final ElasticsearchDao elasticsearchDao, @LastRunFile final String lastJobRunTimeFilename,
-        final ObjectMapper mapper, @CmsSessionFactory SessionFactory sessionFactory,
-        FlightRecorder jobHistory) {
+        final NeutronElasticSearchDao elasticsearchDao,
+        @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
+        @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
       super(mainDao, elasticsearchDao, lastJobRunTimeFilename, mapper, sessionFactory, jobHistory);
     }
 

@@ -3,18 +3,21 @@ package gov.ca.cwds.neutron.atom;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 
-public class AtomSharedTest extends Goddard {
+public class AtomSharedTest extends Goddard<ReplicatedClient, RawClient> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AtomSharedTest.class);
 
@@ -28,7 +31,7 @@ public class AtomSharedTest extends Goddard {
     }
 
     @Override
-    public ElasticsearchDao getEsDao() {
+    public NeutronElasticSearchDao getEsDao() {
       return null;
     }
 
@@ -49,6 +52,15 @@ public class AtomSharedTest extends Goddard {
 
   }
 
+  AtomShared target;
+
+  @Before
+  @Override
+  public void setup() throws Exception {
+    super.setup();
+    target = new TestAtomShared();
+  }
+
   @Test
   public void type() throws Exception {
     assertThat(AtomShared.class, notNullValue());
@@ -56,13 +68,11 @@ public class AtomSharedTest extends Goddard {
 
   @Test
   public void instantiation() throws Exception {
-    AtomShared target = new TestAtomShared();
     assertThat(target, notNullValue());
   }
 
   @Test
   public void nameThread_Args__String() throws Exception {
-    AtomShared target = new TestAtomShared();
     String title = "wedgie";
     target.nameThread(title);
   }

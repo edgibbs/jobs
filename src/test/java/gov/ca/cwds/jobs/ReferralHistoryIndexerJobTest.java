@@ -31,7 +31,7 @@ import com.ibm.db2.jcc.DB2SystemMonitor;
 import gov.ca.cwds.dao.cms.ReplicatedPersonReferralsDao;
 import gov.ca.cwds.data.es.ElasticSearchPersonAllegation;
 import gov.ca.cwds.data.es.ElasticSearchPersonReferral;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.EsPersonReferral;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonReferrals;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -53,8 +53,8 @@ public class ReferralHistoryIndexerJobTest
     private boolean throwOnRanges = false;
 
     public TestReferralHistoryIndexerJob(ReplicatedPersonReferralsDao clientDao,
-        ElasticsearchDao esDao, String lastRunFile, ObjectMapper mapper, FlightPlan flightPlan,
-        AtomLaunchDirector launchDirector) {
+        NeutronElasticSearchDao esDao, String lastRunFile, ObjectMapper mapper,
+        FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
       super(clientDao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
     }
 

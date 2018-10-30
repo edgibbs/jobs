@@ -32,7 +32,7 @@ import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -74,7 +74,6 @@ import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -129,7 +128,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
   public ElasticsearchConfiguration esConfig;
   public NeutronElasticSearchDao esDao;
-  public Client client;
+  public RestHighLevelClient client;
   public ElasticSearchPerson esp;
 
   public File tempFile;
@@ -219,7 +218,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     listenerManager = mock(ListenerManager.class);
     flightPlanManager = mock(AtomFlightPlanManager.class);
     proc = mock(ProcedureCall.class);
-    client = mock(Client.class);
+    client = mock(RestHighLevelClient.class);
 
     final TestNormalizedEntityDao testNormalizedEntityDao =
         new TestNormalizedEntityDao(sessionFactory);
@@ -288,14 +287,14 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     // Elasticsearch basics:
     esp = new ElasticSearchPerson();
-    esDao = mock(ElasticsearchDao.class);
+    esDao = mock(NeutronElasticSearchDao.class);
     esConfig = mock(ElasticsearchConfiguration.class);
 
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esDao.getClient()).thenReturn(client);
 
     final Settings settings = Settings.builder().build();
-    when(client.settings()).thenReturn(settings);
+    // when(client.settings()).thenReturn(settings);
 
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
@@ -362,14 +361,15 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final MultiSearchResponse.Item[] items = new MultiSearchResponse.Item[1];
     items[0] = item;
 
-    hits = mock(SearchHits.class);
-    hit = mock(SearchHit.class);
+    // CANS-627: ES 6.x makes these classes final :-(
+    hits = SearchHits.empty();
+    hit = new SearchHit(12345);
     hitArray = new SearchHit[1];
     hitArray[0] = hit;
     sr = mock(SearchResponse.class);
 
-    when(client.prepareMultiSearch()).thenReturn(mBuilder);
-    when(client.prepareSearch()).thenReturn(sBuilder);
+    // when(client.prepareMultiSearch()).thenReturn(mBuilder);
+    // when(client.prepareSearch()).thenReturn(sBuilder);
 
     when(mBuilder.add(any(SearchRequestBuilder.class))).thenReturn(mBuilder);
     when(mBuilder.get()).thenReturn(multiResponse);
@@ -377,9 +377,10 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(multiResponse.getResponses()).thenReturn(items);
     when(item.getResponse()).thenReturn(sr);
     when(sr.getHits()).thenReturn(hits);
-    when(hits.getHits()).thenReturn(hitArray);
 
-    when(hit.docId()).thenReturn(12345);
+    // CANS-627: ES 6.x makes these classes final :-(
+    // when(hits.getHits()).thenReturn(hitArray);
+    // when(hit.docId()).thenReturn(12345);
 
     final String useDefaultCharSet = null;
     when(hit.getSourceAsString()).thenReturn(IOUtils

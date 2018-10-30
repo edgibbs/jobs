@@ -16,7 +16,7 @@ import org.hibernate.SessionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.inject.CmsSessionFactory;
@@ -42,7 +42,7 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
   private boolean blowup = false;
 
   @Inject
-  public TestIndexerJob(final TestNormalizedEntityDao dao, final ElasticsearchDao esDao,
+  public TestIndexerJob(final TestNormalizedEntityDao dao, final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastJobRunTimeFilename, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightRecorder jobHistory) {
     super(dao, esDao, lastJobRunTimeFilename, mapper, null, null);
