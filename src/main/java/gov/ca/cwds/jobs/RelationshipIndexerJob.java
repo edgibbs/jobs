@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.io.IOException;
 import java.sql.Connection;
@@ -104,7 +105,7 @@ public class RelationshipIndexerJob
    */
   @Inject
   public RelationshipIndexerJob(final ReplicatedRelationshipsDao dao,
-      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people") final NeutronElasticSearchDao esDao,
       @LastRunFile String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector );

@@ -4,6 +4,7 @@ import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -109,7 +110,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   @Inject
   public CaseRocket(ReplicatedPersonCasesDao dao,
-      @Named("elasticsearch.dao.people") ElasticsearchDao esDao, ReplicatedClientDao clientDao,
+      @Named("elasticsearch.dao.people") NeutronElasticSearchDao esDao, ReplicatedClientDao clientDao,
       StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile, ObjectMapper mapper,
       FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);

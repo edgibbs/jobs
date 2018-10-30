@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -89,7 +90,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    */
   @Inject
   public ClientPersonIndexerJob(final ReplicatedClientDao dao,
-      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people-summary") final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);

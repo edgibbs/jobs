@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -35,7 +36,7 @@ public class RestrictedClientRocket extends ClientIndexerJob
    * @param launchDirector launch director
    */
   @Inject
-  public RestrictedClientRocket(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
+  public RestrictedClientRocket(final ReplicatedClientDao dao, final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);

@@ -6,6 +6,7 @@ import com.google.inject.name.Named;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -30,7 +31,7 @@ public class IndexResetPeopleRocket extends IndexResetRocket {
    */
   @Inject
   public IndexResetPeopleRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao, final ObjectMapper mapper,
+      @Named("elasticsearch.dao.people") final NeutronElasticSearchDao esDao, final ObjectMapper mapper,
       FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, mapper, flightPlan, launchDirector);
   }

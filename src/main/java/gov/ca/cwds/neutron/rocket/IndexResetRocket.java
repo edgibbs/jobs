@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -39,7 +40,7 @@ public abstract class IndexResetRocket
    * @param launchDirector launch director
    */
   public IndexResetRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan,
+      final NeutronElasticSearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
   }

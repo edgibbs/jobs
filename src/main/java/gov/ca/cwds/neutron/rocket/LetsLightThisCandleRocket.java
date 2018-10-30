@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.Date;
 
@@ -43,7 +44,7 @@ public class LetsLightThisCandleRocket
    */
   @Inject
   public LetsLightThisCandleRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people-summary") final NeutronElasticSearchDao esDao,
       final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);

@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -33,7 +34,7 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
    * @param flightPlan this rocket's flight plan
    * @param launchDirector common launch director
    */
-  public InitialLoadJdbcRocket(BaseDaoImpl<T> dao, ElasticsearchDao esDao, String lastRunFile,
+  public InitialLoadJdbcRocket(BaseDaoImpl<T> dao, final NeutronElasticSearchDao esDao, String lastRunFile,
       ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
