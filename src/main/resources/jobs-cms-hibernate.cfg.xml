@@ -42,11 +42,11 @@
 
 		<!-- HikariCP connection pool: -->
 		<!-- https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby -->
-		<property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider</property>
+		<property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
 		<property name="hibernate.hikari.autoCommit">false</property>
 		<property name="hibernate.hikari.maxLifetime">300000</property>
 		<property name="hibernate.hikari.minimumIdle">4</property>
-		<property name="hibernate.hikari.maximumPoolSize">16</property>
+		<property name="hibernate.hikari.maximumPoolSize">12</property>
 		<property name="hibernate.hikari.registerMbeans">true</property>
 
 		<!-- C3P0 connection pool: -->

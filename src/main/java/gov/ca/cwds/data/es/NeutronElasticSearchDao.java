@@ -1,14 +1,9 @@
 package gov.ca.cwds.data.es;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.Charset;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
@@ -28,6 +23,14 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
+
+import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
+
 /**
  * A DAO for Elasticsearch with writing indexes functionality. It is not intended for searching, nor
  * it can contain any index-specific code or hardcoded mapping.
@@ -42,9 +45,9 @@ public class NeutronElasticSearchDao implements Closeable {
 
   private static final org.slf4j.Logger LOGGER =
       LoggerFactory.getLogger(NeutronElasticSearchDao.class);
+
   private static final int TIMEOUT_MILLIS = 1500;
   private static final int NUMBER_OF_SHARDS = 5;
-
   private static final int NUMBER_OF_REPLICAS = 1;
 
   /**
@@ -175,13 +178,15 @@ public class NeutronElasticSearchDao implements Closeable {
     try {
       if (doesIndexExist(index) && getClient().indices()
           .delete(new DeleteIndexRequest(index).timeout(TimeValue.timeValueMillis(TIMEOUT_MILLIS)),
-              RequestOptions.DEFAULT).isAcknowledged()) {
+              RequestOptions.DEFAULT)
+          .isAcknowledged()) {
         LOGGER.warn("\n\n\t>>>>>> DELETE INDEX {}! <<<<<<\n\n", index);
       }
     } catch (IOException e) {
       throw CheeseRay.runtime(LOGGER, e, "DELETE INDEX FAILED! {}", e.getMessage());
     }
   }
+
   /**
    * Creates or swaps index alias
    *
@@ -190,47 +195,48 @@ public class NeutronElasticSearchDao implements Closeable {
    * @return true if successful
    */
   public synchronized boolean createOrSwapAlias(final String alias, final String index) {
-
+    // final MetaData clusterMeta = getMetaData();
     String oldIndex = StringUtils.EMPTY;
 
-    if (clusterMeta.hasIndex(alias)) {
-      LOGGER.warn("CAN'T CREATE ALIAS {}! Index with the same name already exist. ", alias);
+    if (doesIndexExist(alias)) {
+      LOGGER.warn("CAN'T CREATE ALIAS {}! Index with the same name already exists!", alias);
       return false;
-    } else if (!clusterMeta.hasIndex(index)) {
-      LOGGER.warn("CAN'T CREATE ALIAS {}! Index with the name {} doesn't  exist. ",alias, index);
+    } else if (!doesIndexExist(index)) {
+      LOGGER.warn("CAN'T CREATE ALIAS {}! Index with the name {} doesn't  exist!", alias, index);
       return false;
     } else if (clusterMeta.hasAlias(alias)) {
-      //Only one index assumed to be associated with alias.
-      oldIndex = clusterMeta.getAliasAndIndexLookup().get(alias).getIndices().get(0).getIndex()
-          .getName();
+      // Only one index assumed to be associated with alias.
+      oldIndex =
+          clusterMeta.getAliasAndIndexLookup().get(alias).getIndices().get(0).getIndex().getName();
       LOGGER.info("Swapping Alias {} from Index {} to Index {}.", alias, oldIndex, index);
     } else {
       LOGGER.info("Creating Alias {} for Index {}.", alias, index);
     }
 
     return createOrSwapAlias(alias, index, oldIndex);
-
   }
 
   /**
    *
    * @param alias Alias name
    * @param index New Index name
-   * @param oldIndex  Current Index Name
+   * @param oldIndex Current Index Name
    * @return true if successful
    */
   private boolean createOrSwapAlias(final String alias, final String index, final String oldIndex) {
     try {
       if (StringUtils.isBlank(oldIndex)) {
-        return client.indices().updateAliases(new IndicesAliasesRequest()
-            .addAliasAction(new AliasActions(Type.ADD).index(index).alias(alias))
-            .timeout(TimeValue.timeValueMillis(TIMEOUT_MILLIS)), RequestOptions.DEFAULT)
+        return client.indices()
+            .updateAliases(new IndicesAliasesRequest()
+                .addAliasAction(new AliasActions(Type.ADD).index(index).alias(alias))
+                .timeout(TimeValue.timeValueMillis(TIMEOUT_MILLIS)), RequestOptions.DEFAULT)
             .isAcknowledged();
       } else {
-        return client.indices().updateAliases(new IndicesAliasesRequest()
-            .addAliasAction(new AliasActions(Type.REMOVE).index(oldIndex).alias(alias))
-            .addAliasAction(new AliasActions(Type.ADD).index(index).alias(alias))
-            .timeout(TimeValue.timeValueMillis(TIMEOUT_MILLIS)), RequestOptions.DEFAULT)
+        return client.indices()
+            .updateAliases(new IndicesAliasesRequest()
+                .addAliasAction(new AliasActions(Type.REMOVE).index(oldIndex).alias(alias))
+                .addAliasAction(new AliasActions(Type.ADD).index(index).alias(alias))
+                .timeout(TimeValue.timeValueMillis(TIMEOUT_MILLIS)), RequestOptions.DEFAULT)
             .isAcknowledged();
       }
     } catch (IOException e) {
@@ -246,16 +252,18 @@ public class NeutronElasticSearchDao implements Closeable {
    */
   public boolean doesIndexExist(final String indexOrAlias) {
     try {
-      final boolean answer = client.indices()
-          .exists(new GetIndexRequest().indices(indexOrAlias), RequestOptions.DEFAULT) || client
-          .indices().existsAlias(new GetAliasesRequest(indexOrAlias), RequestOptions.DEFAULT);
+      boolean answer = client.indices().exists(new GetIndexRequest().indices(indexOrAlias),
+          RequestOptions.DEFAULT);
 
-      if (answer) {
-        LOGGER.warn("ES INDEX {} DOES NOT EXIST!", indexOrAlias);
+      if (!answer) {
+        LOGGER.warn("Index '{}' does not exist. Check alias!", indexOrAlias);
+        answer = client.indices().existsAlias(new GetAliasesRequest(indexOrAlias),
+            RequestOptions.DEFAULT);
       }
+
       return answer;
     } catch (IOException e) {
-      throw CheeseRay.runtime(LOGGER, e, "INDEX OR ALIAS EXIST FAILED! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "INDEX/ALIAS CHECK FAILED! {}", e.getMessage());
     }
   }
 

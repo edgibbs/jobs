@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
@@ -156,13 +157,22 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_ALL_CLIENT_LAST_CHG,
           rocket.determineLastSuccessfulRunTime(), rocket.getFlightPlan().getOverrideLastEndTime());
+      LOGGER.info("LAST CHANGE: Find all changed clients");
 
-      // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
-      LOGGER.info("LAST CHANGE: Get changed client keys");
+      // Get list of changed clients and process in bundles of BUNDLE_KEY_SIZE.
       try (final PreparedStatement stmt = con.prepareStatement(sqlChangedClients, TFO, CRO)) {
         read(stmt, rs -> readClientKey(rs));
       } finally {
         // Auto-close statement.
+      }
+
+      // Add client id's requested to be run again.
+      final Deque<String> reruns = rocket.getRerunClients();
+      if (!reruns.isEmpty()) {
+        String id = null;
+        while ((id = reruns.pollLast()) != null) {
+          keys.add(id);
+        }
       }
 
       final int totalKeys = keys.size();
@@ -181,7 +191,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         super.handleSecondaryJdbc(con, range);
       }
 
-      LOGGER.info("***** DONE retrieving data *****");
+      LOGGER.info("DONE retrieving data");
       con.commit(); // release database resources, clear temp tables
     } catch (Exception e) {
       rocket.fail();
