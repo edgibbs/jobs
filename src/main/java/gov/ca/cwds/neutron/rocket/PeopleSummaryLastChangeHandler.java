@@ -132,7 +132,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
    * {@inheritDoc}
    * 
    * <p>
-   * Read placement home addresses per rule R-02294, Client Abstract Most Recent Address.
+   * Read placement home addresses per rule R-02294, Client Abstract Most Recent Address. Read from
+   * tables using same logic as Initial Load.
    * </p>
    */
   @SuppressWarnings("unchecked")
@@ -172,8 +173,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         final int end = start + BUNDLE_KEY_SIZE - 1; //
         insertNextKeyBundle(con, start, end);
 
-        // NEW SCHOOL: same logic as Initial Load.
-        super.handleSecondaryJdbc(con, range); // commits, clears temp tables
+        // Same logic as Initial Load, commit, clear temp tables.
+        super.handleSecondaryJdbc(con, range);
       }
 
       LOGGER.info("***** DONE retrieving data *****");
