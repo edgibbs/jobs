@@ -20,7 +20,9 @@ public class Elasticsearch6ClientBuilder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Elasticsearch6ClientBuilder.class);
 
-  public Elasticsearch6ClientBuilder() {}
+  public Elasticsearch6ClientBuilder() {
+    // Default, no-op
+  }
 
   public RestHighLevelClient createAndConfigureESClient(ElasticsearchConfiguration config) {
     RestHighLevelClient client = null;
