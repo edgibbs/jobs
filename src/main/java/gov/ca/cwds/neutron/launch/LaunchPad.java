@@ -282,7 +282,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
   @Override
   @Managed(description = "Re-run identifier.\nparam: id to re-run")
-  public void rerunId(String... id) {
+  public void rerunIds(String... id) {
     try {
       LOGGER.warn("RE-RUN ID! rocket: {}, id: {}", rocketName, id);
       // TODO: implement me!

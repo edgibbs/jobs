@@ -44,7 +44,7 @@ public interface AtomLaunchPad extends ApiMarker {
    * 
    * @param ids identifiers to re-run
    */
-  void rerunId(String... ids);
+  void rerunIds(String... ids);
 
   /**
    * Show history of last N flights.
