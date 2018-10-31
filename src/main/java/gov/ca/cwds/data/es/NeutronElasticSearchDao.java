@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.common.ApiFileAssistant;
+import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -121,7 +122,7 @@ public class NeutronElasticSearchDao implements Closeable {
     reqMapping.type(getConfig().getElasticsearchDocType());
     final String mapping = IOUtils.toString(
         this.getClass()
-            .getResourceAsStream("/neutron/elasticsearch/mapping/map_person_summary.json"),
+            .getResourceAsStream(NeutronElasticsearchDefaults.MAPPING_PEOPLE_SUMMARY.getValue()),
         Charset.defaultCharset().name());
     reqMapping.source(mapping, XContentType.JSON);
     client.indices().putMapping(reqMapping, RequestOptions.DEFAULT);

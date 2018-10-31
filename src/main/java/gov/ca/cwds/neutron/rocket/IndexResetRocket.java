@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -83,7 +82,7 @@ public abstract class IndexResetRocket
         }
       }
 
-      getFlightPlan().setIndexName(effectiveIndexName);
+      flightPlan.setIndexName(effectiveIndexName);
       LaunchCommand.getInstance().getCommonFlightPlan().setIndexName(effectiveIndexName);
 
       // If the index is missing, create it.

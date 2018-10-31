@@ -6,8 +6,8 @@ elasticsearch.doctype: person
 elasticsearch.nodes: localhost:9200
 
 # People index:
-# elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
-# elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_5x_snake.json
+elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
+elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_5x_snake.json
 
 # X-Pack:
 # elasticsearch.xpack.user: elastic
