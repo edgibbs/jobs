@@ -417,7 +417,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public List<Pair<String, String>> filterRanges(FlightStatus... statuses) {
-    return initialLoadRangeStatus.entrySet().stream().sorted()
+    return initialLoadRangeStatus.entrySet().stream()
         .filter(x -> filterStatus(x.getValue(), statuses)).map(x -> x.getKey())
         .collect(Collectors.toList());
   }
@@ -570,7 +570,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
+       // .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
           .append("\n\tranges completed:")
           .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
           .append("\n\tranges failed:")
