@@ -416,6 +416,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return ret;
   }
 
+  /**
+   * <strong>WARNING:</strong> Sorting the stream caused runtime errors on Java 8 181 but not on
+   * 151.
+   * 
+   * @param statuses list of statuses to keep
+   * @return ranges matching the requested statuses
+   */
   public List<Pair<String, String>> filterRanges(FlightStatus... statuses) {
     return initialLoadRangeStatus.entrySet().stream()
         .filter(x -> filterStatus(x.getValue(), statuses)).map(x -> x.getKey())
@@ -570,11 +577,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:")
-       // .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
-          .append("\n\tranges completed:")
-          .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
-          .append("\n\tranges failed:")
-          .append(pad(filterRanges(FlightStatus.FAILED).size()));
+         .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
+         .append("\n\tranges completed:")
+         .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
+         .append("\n\tranges failed:")
+         .append(pad(filterRanges(FlightStatus.FAILED).size()));
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
     }
