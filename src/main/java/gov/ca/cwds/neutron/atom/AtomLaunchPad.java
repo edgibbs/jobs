@@ -42,7 +42,7 @@ public interface AtomLaunchPad extends ApiMarker {
    * Re-run record identifier during next run of rocket's last change mode. Use to re-run clients or
    * reporters that may have been missed.
    * 
-   * @param id identifier to re-run
+   * @param ids identifiers to re-run
    */
   void rerunId(String... ids);
 
