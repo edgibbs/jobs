@@ -84,7 +84,7 @@ public class NeutronElasticSearchDao implements Closeable {
   /**
    * Create an index before blasting documents into it.
    */
-  private void createIndex() {
+  protected void createIndex() {
     LOGGER.warn("CREATING ES INDEX [{}] for type [{}]", config.getElasticsearchAlias(),
         config.getElasticsearchDocType());
 
@@ -110,7 +110,8 @@ public class NeutronElasticSearchDao implements Closeable {
    * @param numReplicas number of replicas
    * @throws IOException on disconnect, hang, etc.
    */
-  private void createIndex(final String index, int numShards, int numReplicas) throws IOException {
+  protected void createIndex(final String index, int numShards, int numReplicas)
+      throws IOException {
     LOGGER.warn("CREATE ES INDEX {} with {} shards and {} replicas", index, numShards, numReplicas);
     final Settings indexSettings = Settings.builder().put("number_of_shards", numShards)
         .put("number_of_replicas", numReplicas).build();
@@ -134,7 +135,7 @@ public class NeutronElasticSearchDao implements Closeable {
    * </p>
    */
   @SuppressWarnings({"findbugs:SWL_SLEEP_WITH_LOCK_HELD", "squid:S2276"})
-  public synchronized void createIndexIfMissing() {
+  public synchronized void createIndexIfMissing() throws NeutronCheckedException {
     final String index = config.getElasticsearchAlias();
     if (!doesIndexExist(index)) {
       LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
@@ -163,42 +164,41 @@ public class NeutronElasticSearchDao implements Closeable {
    * @throws IOException unable to connect to ES
    */
   public synchronized void createIndex(final String index, final String type,
-      final String settingsJsonFile, final String mappingJsonFile) throws IOException {
+      final String settingsJsonFile, final String mappingJsonFile) throws NeutronCheckedException {
     LOGGER.warn("CREATING ES INDEX [{}] for type [{}] with settings [{}] and mappings [{}]...",
         index, type, settingsJsonFile, mappingJsonFile);
-
-    final String settingsSource = readFile(settingsJsonFile);
-    final String mappingSource = readFile(mappingJsonFile);
-    final CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);
-    createIndexRequest.settings(settingsSource, XContentType.JSON);
-    createIndexRequest.mapping(type, mappingSource, XContentType.JSON);
 
     try {
-      client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
-    } catch (IOException e) {
-      LOGGER.error("Unable to create index [" + config.getElasticsearchAlias() + "]", e);
-      throw new NeutronRuntimeException(e);
-    }
-  }
-
-  public synchronized void createIndexIfNeeded(final String index, final String type,
-      final String settingsJsonFile, final String mappingJsonFile) throws IOException {
-    LOGGER.warn("CREATING ES INDEX [{}] for type [{}] with settings [{}] and mappings [{}]...",
-        index, type, settingsJsonFile, mappingJsonFile);
-
-    if (!doesIndexExist(index)) {
-      LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
       final String settingsSource = readFile(settingsJsonFile);
       final String mappingSource = readFile(mappingJsonFile);
       final CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);
       createIndexRequest.settings(settingsSource, XContentType.JSON);
       createIndexRequest.mapping(type, mappingSource, XContentType.JSON);
 
+      client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+    } catch (Exception e) {
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO CREATE INDEX '{}'! {}", index, e.getMessage());
+    }
+  }
+
+  public synchronized void createIndexIfNeeded(final String index, final String type,
+      final String settingsJsonFile, final String mappingJsonFile) throws NeutronCheckedException {
+    LOGGER.warn("CREATING ES INDEX [{}] for type [{}] with settings [{}] and mappings [{}]...",
+        index, type, settingsJsonFile, mappingJsonFile);
+
+    if (!doesIndexExist(index)) {
       try {
+        LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
+        final String settingsSource = readFile(settingsJsonFile);
+        final String mappingSource = readFile(mappingJsonFile);
+        final CreateIndexRequest createIndexRequest = new CreateIndexRequest(index);
+        createIndexRequest.settings(settingsSource, XContentType.JSON);
+        createIndexRequest.mapping(type, mappingSource, XContentType.JSON);
+
         client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
-      } catch (IOException e) {
-        LOGGER.error("Unable to create index [" + config.getElasticsearchAlias() + "]", e);
-        throw new NeutronRuntimeException(e);
+      } catch (Exception e) {
+        throw CheeseRay.checked(LOGGER, e, "FAILED TO CREATE INDEX '{}'! {}", index,
+            e.getMessage());
       }
     }
   }
@@ -232,7 +232,7 @@ public class NeutronElasticSearchDao implements Closeable {
     }
   }
 
-  public synchronized void deleteIndex(final String index) {
+  public synchronized void deleteIndex(final String index) throws NeutronCheckedException {
     try {
       if (doesIndexExist(index) && getClient().indices()
           .delete(new DeleteIndexRequest(index).timeout(TimeValue.timeValueMillis(TIMEOUT_MILLIS)),
@@ -240,8 +240,8 @@ public class NeutronElasticSearchDao implements Closeable {
           .isAcknowledged()) {
         LOGGER.warn("\n\n\t>>>>>> DELETE INDEX {}! <<<<<<\n\n", index);
       }
-    } catch (IOException e) {
-      throw CheeseRay.runtime(LOGGER, e, "DELETE INDEX FAILED! {}", e.getMessage());
+    } catch (Exception e) {
+      throw CheeseRay.checked(LOGGER, e, "DELETE INDEX FAILED! {}", e.getMessage());
     }
   }
 
@@ -254,7 +254,7 @@ public class NeutronElasticSearchDao implements Closeable {
    * @throws IOException unable to connect to ES
    */
   public synchronized boolean createOrSwapAlias(final String alias, final String index)
-      throws IOException {
+      throws NeutronCheckedException {
     String oldIndex = StringUtils.EMPTY;
 
     if (doesIndexExist(alias)) {
@@ -264,15 +264,18 @@ public class NeutronElasticSearchDao implements Closeable {
       LOGGER.warn("CAN'T CREATE ALIAS {}! Index with the name {} doesn't exist!", alias, index);
       return false;
     } else if (doesAliasExist(alias)) {
-      // Assumes that only one index is associated with an alias.
-      // Map of indices and their aliases.
-      final Map<String, Set<AliasMetaData>> aliases = client.indices()
-          .getAlias(new GetAliasesRequest(alias), RequestOptions.DEFAULT).getAliases();
-      if (!aliases.isEmpty()) {
-        for (Map.Entry<String, Set<AliasMetaData>> entry : aliases.entrySet()) {
-          oldIndex = entry.getKey();
-          break;
+      try {
+        // Map of indices and their aliases.
+        final Map<String, Set<AliasMetaData>> aliases = client.indices()
+            .getAlias(new GetAliasesRequest(alias), RequestOptions.DEFAULT).getAliases();
+        if (!aliases.isEmpty()) {
+          for (Map.Entry<String, Set<AliasMetaData>> entry : aliases.entrySet()) {
+            oldIndex = entry.getKey();
+            break;
+          }
         }
+      } catch (Exception e) {
+        throw CheeseRay.checked(LOGGER, e, "DELETE INDEX FAILED! {}", e.getMessage());
       }
 
       LOGGER.info("Swapping Alias {} from Index {} to Index {}.", alias, oldIndex, index);
@@ -317,20 +320,20 @@ public class NeutronElasticSearchDao implements Closeable {
    * @param indexOrAlias index name or alias
    * @return whether the index or alias exists
    */
-  public boolean doesIndexExist(final String indexOrAlias) {
+  public boolean doesIndexExist(final String indexOrAlias) throws NeutronCheckedException {
     try {
       return client.indices().exists(new GetIndexRequest().indices(indexOrAlias),
           RequestOptions.DEFAULT);
     } catch (IOException e) {
-      throw CheeseRay.runtime(LOGGER, e, "INDEX CHECK FAILED! {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "INDEX CHECK FAILED! {}", e.getMessage());
     }
   }
 
-  public boolean doesAliasExist(final String alias) {
+  public boolean doesAliasExist(final String alias) throws NeutronCheckedException {
     try {
       return client.indices().existsAlias(new GetAliasesRequest(alias), RequestOptions.DEFAULT);
     } catch (IOException e) {
-      throw CheeseRay.runtime(LOGGER, e, "ALIAS CHECK FAILED! {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "ALIAS CHECK FAILED! {}", e.getMessage());
     }
   }
 
