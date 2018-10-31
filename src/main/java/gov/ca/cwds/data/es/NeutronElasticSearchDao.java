@@ -133,6 +133,8 @@ public class NeutronElasticSearchDao implements Closeable {
    * Method is intentionally synchronized to prevent race conditions and multiple attempts to create
    * the same index.
    * </p>
+   * 
+   * @throws NeutronCheckedException on error
    */
   @SuppressWarnings({"findbugs:SWL_SLEEP_WITH_LOCK_HELD", "squid:S2276"})
   public synchronized void createIndexIfMissing() throws NeutronCheckedException {
@@ -161,7 +163,7 @@ public class NeutronElasticSearchDao implements Closeable {
    * @param type Index document type
    * @param settingsJsonFile Setting file
    * @param mappingJsonFile Mapping file
-   * @throws IOException unable to connect to ES
+   * @throws NeutronCheckedException on error
    */
   public synchronized void createIndex(final String index, final String type,
       final String settingsJsonFile, final String mappingJsonFile) throws NeutronCheckedException {
@@ -251,7 +253,7 @@ public class NeutronElasticSearchDao implements Closeable {
    * @param alias Alias name
    * @param index Index name
    * @return true if successful
-   * @throws IOException unable to connect to ES
+   * @throws NeutronCheckedException on error
    */
   public synchronized boolean createOrSwapAlias(final String alias, final String index)
       throws NeutronCheckedException {
@@ -319,6 +321,7 @@ public class NeutronElasticSearchDao implements Closeable {
    *
    * @param indexOrAlias index name or alias
    * @return whether the index or alias exists
+   * @throws NeutronCheckedException on error
    */
   public boolean doesIndexExist(final String indexOrAlias) throws NeutronCheckedException {
     try {
