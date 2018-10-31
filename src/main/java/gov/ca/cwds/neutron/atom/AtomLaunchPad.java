@@ -39,6 +39,14 @@ public interface AtomLaunchPad extends ApiMarker {
   void waybackHours(int hoursInPast);
 
   /**
+   * Re-run record identifier during next run of rocket's last change mode. Use to re-run clients or
+   * reporters that may have been missed.
+   * 
+   * @param id identifier to re-run
+   */
+  void rerunId(String... ids);
+
+  /**
    * Show history of last N flights.
    * 
    * @return flight history
@@ -83,6 +91,13 @@ public interface AtomLaunchPad extends ApiMarker {
    */
   String shutdown() throws NeutronCheckedException;
 
+  boolean isVetoExecution();
+
+  void setVetoExecution(boolean vetoExecution);
+
+  // ==================
+  // ACCESSORS:
+  // ==================
 
   FlightPlan getFlightPlan();
 
@@ -93,9 +108,5 @@ public interface AtomLaunchPad extends ApiMarker {
 
   AtomFlightRecorder getFlightRecorder();
 
-
-  boolean isVetoExecution();
-
-  void setVetoExecution(boolean vetoExecution);
 
 }

@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -138,6 +139,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   protected FlightLog flightLog = new FlightLog();
 
   protected transient AtomLaunchDirector launchDirector;
+
+  protected Deque<String> rerunIds = new ConcurrentLinkedDeque();
 
   /**
    * Queue of raw, denormalized records waiting to be normalized.
@@ -1088,6 +1091,18 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
   public void setMapper(ObjectMapper mapper) {
     this.mapper = mapper;
+  }
+
+  public Deque<String> getRerunIds() {
+    return rerunIds;
+  }
+
+  public void addRerunIds(String... ids) {
+    for (String id : ids) {
+      if (StringUtils.isNotBlank(id)) {
+        rerunIds.push(id.trim());
+      }
+    }
   }
 
 }

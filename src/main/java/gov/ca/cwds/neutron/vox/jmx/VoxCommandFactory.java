@@ -7,9 +7,15 @@ import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
 
+/**
+ * Factory produces registered VOX command actions (remote method invocation) by type.
+ * 
+ * @author CWDS API Team
+ */
 public final class VoxCommandFactory implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
+
   private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandFactory.class);
 
   private VoxCommandFactory() {

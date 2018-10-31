@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.vox.jmx;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandStop;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandWayBack;
 
 /**
- * Registered VOX command actions.
+ * Registered VOX command actions (remote method invocation).
  * 
  * @author CWDS API Team
  */
@@ -47,10 +48,12 @@ public enum VoxCommandType {
   private static final Map<String, VoxCommandType> typeMap;
 
   static {
-    typeMap = new HashMap<>();
+    final Map<String, VoxCommandType> types = new HashMap<>();
     for (VoxCommandType e : VoxCommandType.values()) {
-      typeMap.put(e.key, e);
+      types.put(e.key, e);
     }
+
+    typeMap = Collections.unmodifiableMap(types);
   }
 
   private VoxCommandType(final Class<? extends VoxCommandAction> klass, String key) {

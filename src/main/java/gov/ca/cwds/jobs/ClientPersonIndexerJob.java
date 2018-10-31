@@ -79,7 +79,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private boolean multiThreadRetrieveDone = false;
 
-  private Deque<String> rerunClients = new ConcurrentLinkedDeque();
+  private Deque<String> rerunIds = new ConcurrentLinkedDeque();
 
   /**
    * Construct batch rocket instance with all required dependencies.
@@ -149,7 +149,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     final StringBuilder buf = new StringBuilder();
 
     // Return no records from the obsolete MQT.
-    // Real work in PeopleSummaryThreadHandler.
+    // Then real work is in PeopleSummaryThreadHandler.
     buf.append(
         "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId'")
         .append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
@@ -372,14 +372,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     if (!runMultiThread || (runMultiThread && multiThreadRetrieveDone)) {
       super.doneRetrieve();
     }
-  }
-
-  public Deque<String> getRerunClients() {
-    return rerunClients;
-  }
-
-  public void addRerunClient(String clientId) {
-    this.rerunClients.push(clientId);
   }
 
   /**
