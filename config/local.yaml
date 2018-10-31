@@ -1,9 +1,9 @@
 elasticsearch.host: localhost
-elasticsearch.port: 9300
+elasticsearch.port: 9200
 elasticsearch.cluster: elasticsearch
 elasticsearch.alias: people
 elasticsearch.doctype: person
-elasticsearch.nodes: localhost:9300
+elasticsearch.nodes: localhost:9200
 
 # People index:
 # elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
