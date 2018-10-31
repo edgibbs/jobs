@@ -4,13 +4,17 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -567,6 +571,228 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void failValidation_A$() throws Exception {
     target.failValidation();
+  }
+
+  @Test
+  public void addToDenormalized_A$int() throws Exception {
+    int addMe = 0;
+    int actual = target.addToDenormalized(addMe);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void incrementDenormalized_A$() throws Exception {
+    int actual = target.incrementDenormalized();
+    int expected = 1;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRangeStatus_A$Pair$FlightStatus() throws Exception {
+    final Pair<String, String> pair = mock(Pair.class);
+    final FlightStatus flightStatus = FlightStatus.FAILED;
+    target.setRangeStatus(pair, flightStatus);
+  }
+
+  @Test
+  public void markRangeSuccess_A$Pair() throws Exception {
+    Pair<String, String> pair = mock(Pair.class);
+    target.markRangeSuccess(pair);
+  }
+
+  @Test
+  public void markRangeError_A$Pair() throws Exception {
+    Pair<String, String> pair = mock(Pair.class);
+    target.markRangeError(pair);
+  }
+
+  @Test
+  public void filterStatus_A$FlightStatus$FlightStatusArray() throws Exception {
+    final FlightStatus actual_ = FlightStatus.SUCCEEDED;
+    final FlightStatus[] scanFor = new FlightStatus[] {};
+    boolean actual = target.filterStatus(actual_, scanFor);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void filterRanges_A$FlightStatusArray() throws Exception {
+    FlightStatus[] statuses = new FlightStatus[] {};
+    List actual = target.filterRanges(statuses);
+    List expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getFailedRanges_A$() throws Exception {
+    target.setRangeStatus(pair, FlightStatus.FAILED);
+    List<Pair<String, String>> actual = target.getFailedRanges();
+    List<Pair<String, String>> expected = new ArrayList<>();
+    expected.add(pair);
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void buildImmutableList_A$FlightStatusArray() throws Exception {
+    final FlightStatus[] statuses = new FlightStatus[] {FlightStatus.SUCCEEDED};
+    final List actual = target.buildImmutableList(statuses);
+    final List expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getCurrentDenormalized_A$() throws Exception {
+    int actual = target.getCurrentDenormalized();
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getWarnings_A$() throws Exception {
+    List<String> actual = target.getWarnings();
+    List<String> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getStartTimeAsDate_A$() throws Exception {
+    Date actual = target.getStartTimeAsDate();
+    Date expected = new Date();
+    Thread.sleep(100);
+    assertThat(actual, is(lessThanOrEqualTo(expected)));
+  }
+
+  @Test
+  public void getEndTimeAsDate_A$() throws Exception {
+    Date actual = target.getEndTimeAsDate();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isGlobalError_A$() throws Exception {
+    boolean actual = FlightLog.isGlobalError();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isGlobalErrorFlag_A$() throws Exception {
+    boolean actual = FlightLog.isGlobalErrorFlag();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isFatalError_A$() throws Exception {
+    boolean actual = target.isFatalError();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneRetrieve_A$() throws Exception {
+    boolean actual = target.isDoneRetrieve();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneTransform_A$() throws Exception {
+    boolean actual = target.isDoneTransform();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneIndex_A$() throws Exception {
+    boolean actual = target.isDoneIndex();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneFlight_A$() throws Exception {
+    boolean actual = target.isDoneFlight();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getRecsSentToIndexQueue_A$() throws Exception {
+    AtomicInteger actual = target.getRecsSentToIndexQueue();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsSentToBulkProcessor_A$() throws Exception {
+    final AtomicInteger actual = target.getRecsSentToBulkProcessor();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRowsNormalized_A$() throws Exception {
+    AtomicInteger actual = target.getRowsNormalized();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRowsDenormalized_A$() throws Exception {
+    AtomicInteger actual = target.getRowsDenormalized();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkPrepared_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkPrepared();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkDeleted_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkDeleted();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkBefore_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkBefore();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkAfter_A$() throws Exception {
+    final AtomicInteger actual = target.getRecsBulkAfter();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkError_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkError();
+    final AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getInitialLoadRangeStatus_A$() throws Exception {
+    Map actual = target.getInitialLoadRangeStatus();
+    Map expected = new HashMap<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setStartTime_A$long() throws Exception {
+    long startTime = 0L;
+    target.setStartTime(startTime);
   }
 
 }
