@@ -1,6 +1,6 @@
 {
 	"_all": {
-		"enabled": true
+		"enabled": false
 	},
 	"properties": {
 		"id": {
