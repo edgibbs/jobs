@@ -569,8 +569,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t").append(rocketName);
 
     if (initialLoad) {
-      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-          .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
+      buf.append("\n\n    INITIAL LOAD:")
+       // .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
           .append("\n\tranges completed:")
           .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
           .append("\n\tranges failed:")
