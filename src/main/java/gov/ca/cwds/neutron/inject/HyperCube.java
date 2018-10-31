@@ -501,12 +501,14 @@ public class HyperCube extends NeutronGuiceModule {
   @Named("elasticsearch.client.people")
   public RestHighLevelClient elasticsearchClientPeople() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticsearchClientPeople");
-    RestHighLevelClient client = null;
+    RestHighLevelClient ret = null;
+
     if (esConfigPeople != null) {
-      client =
+      ret =
           new Elasticsearch6ClientBuilder().createAndConfigureESClient(elasticSearchConfigPeople());
     }
-    return client;
+
+    return ret;
   }
 
   /**

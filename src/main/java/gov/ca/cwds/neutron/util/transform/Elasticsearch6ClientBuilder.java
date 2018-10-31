@@ -37,7 +37,7 @@ public class Elasticsearch6ClientBuilder {
         try {
           ret.close();
         } catch (IOException e1) {
-          LOGGER.error("FAILED to close Elasticsearch client", e);
+          LOGGER.error("FAILED TO CLOSE ELASTICSEARCH CLIENT", e);
         }
       }
 

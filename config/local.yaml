@@ -3,16 +3,17 @@ elasticsearch.port: 9300
 elasticsearch.cluster: elasticsearch
 elasticsearch.alias: people
 elasticsearch.doctype: person
+elasticsearch.nodes: localhost:9300
 
-# People index
-#elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
-#elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_5x_snake.json
+# People index:
+# elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
+# elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_5x_snake.json
 
-# People summary index
-#elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
-#elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_summary.json
+# People summary index:
+# elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
+# elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_summary.json
 
-# xpack
-#elasticsearch.xpack.user: neutron
-#elasticsearch.xpack.password: neutron
+# X-Pack:
+elasticsearch.xpack.user: elastic
+elasticsearch.xpack.password: changeme
 
