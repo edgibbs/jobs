@@ -5,7 +5,6 @@ import java.util.Properties;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -52,7 +51,6 @@ import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
@@ -173,7 +171,7 @@ public class HyperCube extends NeutronGuiceModule {
     this.flightPlan = flightPlan;
 
     if (StringUtils.isNotBlank(flightPlan.getEsConfigPeopleSummaryLoc())) {
-      this.esConfigPeopleSummary = new File(flightPlan.getEsConfigPeopleSummaryLoc());
+      esConfigPeopleSummary = new File(flightPlan.getEsConfigPeopleSummaryLoc());
     }
   }
 
@@ -482,11 +480,9 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected RestHighLevelClient buildElasticsearchClient(final ElasticsearchConfiguration config)
       throws NeutronCheckedException {
-    RestHighLevelClient client = null;
     LOGGER.debug("HyperCube.buildElasticsearchClient");
     try {
-      client = new Elasticsearch6ClientBuilder().createAndConfigureESClient(config);
-      return client;
+      return new Elasticsearch6ClientBuilder().createAndConfigureESClient(config);
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e,
           "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
@@ -538,11 +534,12 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Singleton
   @Named("elasticsearch.dao.people-summary")
-  public ElasticsearchDao makeElasticsearchDaoPeopleSummary(
-      @Named("elasticsearch.client.people-summary") Client client,
-      @Named("elasticsearch.config.people-summary") ElasticsearchConfiguration config) {
+  public NeutronElasticSearchDao makeElasticsearchDaoPeopleSummary(
+      @Named("elasticsearch.config.people-summary") ElasticsearchConfiguration config)
+      throws NeutronCheckedException {
     LOGGER.debug("HyperCube.makeElasticsearchDaoPeopleSummary");
-    return new ElasticsearchDao(client, config);
+    return new NeutronElasticSearchDao(elasticsearchClientPeopleSummary(),
+        elasticSearchConfigPeopleSummary());
   }
 
   protected ElasticsearchConfiguration loadElasticSearchConfig(File esConfig)
@@ -567,10 +564,12 @@ public class HyperCube extends NeutronGuiceModule {
   public ElasticsearchConfiguration elasticSearchConfigPeople() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticSearchConfigPeople");
     ElasticsearchConfiguration ret = null;
+
     if (esConfigPeople != null) {
       LOGGER.debug("Create NEW ES configuration: people");
       ret = loadElasticSearchConfig(esConfigPeople);
     }
+
     return ret;
   }
 
@@ -586,10 +585,12 @@ public class HyperCube extends NeutronGuiceModule {
       throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticSearchConfigPeopleSummary");
     ElasticsearchConfiguration ret = null;
+
     if (esConfigPeopleSummary != null) {
       LOGGER.debug("Create NEW ES configuration: people summary");
       ret = loadElasticSearchConfig(esConfigPeopleSummary);
     }
+
     return ret;
   }
 
@@ -723,6 +724,18 @@ public class HyperCube extends NeutronGuiceModule {
 
   public void setEsConfigPeople(File esConfigPeople) {
     this.esConfigPeople = esConfigPeople;
+  }
+
+  public String getLastJobRunTimeFilename() {
+    return lastJobRunTimeFilename;
+  }
+
+  public void setLastJobRunTimeFilename(String lastJobRunTimeFilename) {
+    this.lastJobRunTimeFilename = lastJobRunTimeFilename;
+  }
+
+  public void setEsConfigPeopleSummary(File esConfigPeopleSummary) {
+    this.esConfigPeopleSummary = esConfigPeopleSummary;
   }
 
 }

@@ -14,7 +14,6 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.function.Function;
 
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -31,7 +30,6 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -133,6 +131,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
     target.setEsConfigPeople(esConfileFile);
+    target.setEsConfigPeopleSummary(esConfileFile);
 
     testBinder = mock(Binder.class);
     target.setTestBinder(testBinder);
@@ -504,14 +503,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     target.elasticsearchClientPeople();
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void elasticsearchClientPeopleSummary_A$() throws Exception {
     final RestHighLevelClient actual = target.elasticsearchClientPeopleSummary();
-    final RestHighLevelClient expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void elasticsearchClientPeopleSummary_A$_T$NeutronCheckedException() throws Exception {
     target.elasticsearchClientPeopleSummary();
   }
@@ -525,9 +523,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void makeElasticsearchDaoPeopleSummary_A$Client$ElasticsearchConfiguration()
       throws Exception {
-    final Client client = mock(Client.class);
-    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    final ElasticsearchDao actual = target.makeElasticsearchDaoPeopleSummary(client, config);
+    final NeutronElasticSearchDao actual = target.makeElasticsearchDaoPeopleSummary(esConfig);
     assertThat(actual, is(notNullValue()));
   }
 

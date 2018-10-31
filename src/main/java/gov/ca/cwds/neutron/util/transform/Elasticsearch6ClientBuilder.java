@@ -13,8 +13,9 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
-import gov.ca.cwds.rest.api.ApiException;
 
 public class Elasticsearch6ClientBuilder {
 
@@ -24,23 +25,27 @@ public class Elasticsearch6ClientBuilder {
     // Default, no-op
   }
 
-  public RestHighLevelClient createAndConfigureESClient(ElasticsearchConfiguration config) {
-    RestHighLevelClient client = null;
+  public RestHighLevelClient createAndConfigureESClient(ElasticsearchConfiguration config)
+      throws NeutronCheckedException {
+    RestHighLevelClient ret = null;
     try {
-      client = new RestHighLevelClient(
+      ret = new RestHighLevelClient(
           RestClient.builder(getHttpHosts(parseNodes(config.getElasticsearchNodes()))));
-      return client;
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
       LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
-      if (client != null) {
+      if (ret != null) {
         try {
-          client.close();
+          ret.close();
         } catch (IOException e1) {
           LOGGER.error("FAILED to close Elasticsearch client", e);
         }
       }
-      throw new ApiException("ERROR INITIALIZING ELASTICSEARCH CLIENT: " + e.getMessage(), e);
+
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO CREATE ELASTICSEARCH CLIENT! {}",
+          e.getMessage(), e);
     }
+
+    return ret;
   }
 
   protected List<String> parseNodes(String delimNodes) {
