@@ -621,14 +621,14 @@ public class PeopleSummaryThreadHandler
    */
   protected String pickPrepDml(String sqlInitialLoad, String sqlLastChange)
       throws NeutronCheckedException {
-    final String sql =
-        getRocket().getFlightPlan().isLastRunMode()
-            ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange,
-                getRocket().determineLastSuccessfulRunTime(),
-                getRocket().getFlightPlan().getOverrideLastEndTime())
+    final ClientPersonIndexerJob r = getRocket();
+    final String ret =
+        r.getFlightPlan().isLastRunMode()
+            ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange, r.determineLastSuccessfulRunTime(),
+                r.getFlightPlan().getOverrideLastEndTime())
             : sqlInitialLoad; // initial mode
-    LOGGER.trace("Prep SQL: \n{}", sql);
-    return sql;
+    LOGGER.trace("Prep SQL: \n{}", ret);
+    return ret;
   }
 
   public void addAll(Collection<ReplicatedClient> collection) {
