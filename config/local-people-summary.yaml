@@ -5,8 +5,8 @@ elasticsearch.doctype: person-summary
 elasticsearch.cluster: elasticsearch
 
 # People summary index:
-elasticsearch.index.setting.file: /elasticsearch/setting/people-index-settings.json
-elasticsearch.document.mapping.file: /elasticsearch/mapping/map_person_summary.json
+elasticsearch.index.setting.file: /neutron/elasticsearch/setting/people-index-settings.json
+elasticsearch.document.mapping.file: /neutron/elasticsearch/mapping/map_person_summary.json
 
 # X-Pack:
 # elasticsearch.xpack.user: elastic
