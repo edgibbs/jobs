@@ -417,7 +417,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public List<Pair<String, String>> filterRanges(FlightStatus... statuses) {
-    return initialLoadRangeStatus.entrySet().stream().sorted()
+    return initialLoadRangeStatus.entrySet().stream()
         .filter(x -> filterStatus(x.getValue(), statuses)).map(x -> x.getKey())
         .collect(Collectors.toList());
   }
