@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.flight;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +33,6 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.utils.JsonUtils;
 import io.dropwizard.jackson.JsonSnakeCase;
@@ -509,11 +510,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public Date getLastChangeSince() {
-    return NeutronDateUtils.freshDate(lastChangeSince);
+    return freshDate(lastChangeSince);
   }
 
   public void setLastChangeSince(Date lastChangeSince) {
-    this.lastChangeSince = NeutronDateUtils.freshDate(lastChangeSince);
+    this.lastChangeSince = freshDate(lastChangeSince);
   }
 
   public String getRocketName() {
