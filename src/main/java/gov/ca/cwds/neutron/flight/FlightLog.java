@@ -573,8 +573,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
        // .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
           .append("\n\tranges completed:")
           .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
-          .append("\n\tranges failed:")
-          .append(pad(filterRanges(FlightStatus.FAILED).size()));
+       // .append("\n\tranges failed:")
+       // .append(pad(filterRanges(FlightStatus.FAILED).size()))
+          ;
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
     }
