@@ -542,8 +542,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void elasticSearchConfigPeopleSummary_A$() throws Exception {
     final ElasticsearchConfiguration actual = target.elasticSearchConfigPeopleSummary();
-    final ElasticsearchConfiguration expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -649,8 +648,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void getEsConfigPeopleSummary_A$() throws Exception {
     final File actual = target.getEsConfigPeopleSummary();
-    final File expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
