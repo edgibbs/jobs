@@ -120,8 +120,9 @@ public class NeutronElasticSearchDao implements Closeable {
     final PutMappingRequest reqMapping = new PutMappingRequest(index);
     reqMapping.type(getConfig().getElasticsearchDocType());
     final String mapping = IOUtils.toString(
-        this.getClass().getResourceAsStream("/elasticsearch/mapping/map_person_5x_snake.json"),
-        Charset.defaultCharset());
+        this.getClass()
+            .getResourceAsStream("/neutron/elasticsearch/mapping/map_person_summary.json"),
+        Charset.defaultCharset().name());
     reqMapping.source(mapping, XContentType.JSON);
     client.indices().putMapping(reqMapping, RequestOptions.DEFAULT);
   }
@@ -144,7 +145,7 @@ public class NeutronElasticSearchDao implements Closeable {
       createIndex();
       try {
         // Give Elasticsearch a moment to catch its breath.
-        Thread.sleep(8000L);
+        Thread.sleep(5000L);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         LOGGER.warn("Interrupted!");

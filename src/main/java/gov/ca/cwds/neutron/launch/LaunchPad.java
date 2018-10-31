@@ -318,7 +318,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Managed(description = "Pause rocket flight")
   public void pause() throws NeutronCheckedException {
     try {
-      LOGGER.warn("PAUSE ROCKET! {}", rocketName);
+      LOGGER.warn("PAUSE FLIGHT! {}", rocketName);
       scheduler.pauseTrigger(triggerKey);
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "FAILED TO PAUSE FLIGHT! rocket: {}", rocketName);
