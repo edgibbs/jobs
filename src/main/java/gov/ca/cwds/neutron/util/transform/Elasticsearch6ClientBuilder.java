@@ -31,9 +31,8 @@ public class Elasticsearch6ClientBuilder {
     try {
       ret = new RestHighLevelClient(
           RestClient.builder(getHttpHosts(parseNodes(config.getElasticsearchNodes()))));
-      LOGGER.debug("Is ES client connected?", ret);
     } catch (Exception e) {
-      LOGGER.error("Error initializing Elasticsearch client: {}", e.getMessage(), e);
+      LOGGER.error("ERROR INITIALIZING ELASTICSEARCH CLIENT: {}", e.getMessage(), e);
       if (ret != null) {
         try {
           ret.close();
