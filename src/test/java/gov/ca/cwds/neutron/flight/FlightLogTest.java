@@ -569,4 +569,13 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
     target.failValidation();
   }
 
+  @Test
+  public void getFailedRanges_A$() throws Exception {
+    target.setRangeStatus(pair, FlightStatus.FAILED);
+    final List<Pair<String, String>> actual = target.getFailedRanges();
+    final List<Pair<String, String>> expected = new ArrayList<>();
+    expected.add(pair);
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }
