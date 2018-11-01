@@ -32,6 +32,9 @@ import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.ElasticMockFactory;
+import org.elasticsearch.client.IndicesClient;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -291,6 +294,14 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esDao.getClient()).thenReturn(client);
+
+    final RestClient restClient = mock(RestClient.class);
+    client.setClient(restClient);
+    final ElasticMockFactory esMockFactory = new ElasticMockFactory(client);
+    final IndicesClient indicesClient = esMockFactory.makeIndicesClient();
+
+    when(client.indices()).thenReturn(indicesClient);
+    when(client.indices()).thenReturn(indicesClient);
 
     // final Settings settings = Settings.builder().build();
     // when(client.settings()).thenReturn(settings);
