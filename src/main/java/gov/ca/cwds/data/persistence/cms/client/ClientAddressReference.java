@@ -19,9 +19,10 @@ public class ClientAddressReference extends ClientReference {
   protected String claId;
 
   @Override
-  public ClientReference read(ResultSet rs) throws SQLException {
+  public ClientAddressReference read(ResultSet rs) throws SQLException {
+    super.read(rs);
     this.claId = ifNull(rs.getString("CLA_IDENTIFIER"));
-    return super.read(rs);
+    return this;
   }
 
   @Override

@@ -41,8 +41,7 @@ public abstract class ClientReference extends ApiObjectIdentity implements Persi
   @Override
   public int hashCode() {
     final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + ((getCltId() == null) ? 0 : getCltId().hashCode());
+    int result = prime * ((getCltId() == null) ? 0 : getCltId().hashCode());
     return result;
   }
 

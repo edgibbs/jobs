@@ -117,6 +117,7 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
   @Override
   public RawAddress read(ResultSet rs) throws SQLException {
     super.read(rs);
+
     this.adrId = ifNull(rs.getString("ADR_IDENTIFIER"));
     this.adrCity = ifNull(rs.getString("ADR_CITY_NM"));
     this.adrEmergencyNumber = rs.getLong("ADR_EMRG_TELNO");
@@ -144,6 +145,7 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     this.adrReplicationOperation =
         CmsReplicationOperation.strToRepOp(rs.getString("ADR_IBMSNAP_OPERATION"));
     this.adrReplicationDate = rs.getDate("ADR_IBMSNAP_LOGMARKER");
+
     return this;
   }
 
