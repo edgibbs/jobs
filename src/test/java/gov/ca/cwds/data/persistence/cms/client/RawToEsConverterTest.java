@@ -56,7 +56,7 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
     ReplicatedClient rc = new ReplicatedClient();
     RawClient rawCli = new RawClient();
     RawCsec rawCsec = new RawCsec();
-    target.convertCsec(rc, rawCli, rawCsec);
+    target.convertCsec(rc, rawCsec);
   }
 
   @Test
@@ -64,7 +64,7 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
     ReplicatedClient rc = new ReplicatedClient();
     RawClient rawCli = new RawClient();
     RawCase rawCase = mock(RawCase.class);
-    target.convertCase(rc, rawCli, rawCase);
+    target.convertCase(rc, rawCase);
   }
 
   @Test
@@ -80,7 +80,7 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
     ReplicatedClient rc = new ReplicatedClient();
     RawClient rawCli = new RawClient();
     RawEthnicity rawEthnicity = mock(RawEthnicity.class);
-    target.convertEthnicity(rc, rawCli, rawEthnicity);
+    target.convertEthnicity(rc, rawEthnicity);
   }
 
   @Test
@@ -88,7 +88,7 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
     ReplicatedClient rc = new ReplicatedClient();
     RawClient rawCli = new RawClient();
     RawAka rawAka = mock(RawAka.class);
-    target.convertAka(rc, rawCli, rawAka);
+    target.convertAka(rc, rawAka);
   }
 
   @Test
@@ -96,7 +96,7 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
     ReplicatedClient rc = new ReplicatedClient();
     RawClient rawCli = new RawClient();
     RawClientCounty rawCounty = mock(RawClientCounty.class);
-    target.convertClientCounty(rc, rawCli, rawCounty);
+    target.convertClientCounty(rc, rawCounty);
   }
 
   @Test
@@ -116,7 +116,7 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
     RawClient rawCli = new RawClient();
     RawClientAddress rawCa = mock(RawClientAddress.class);
     RawAddress rawAdr = mock(RawAddress.class);
-    ReplicatedAddress actual = target.convertAddress(rc, repCa, rawCli, rawCa, rawAdr);
+    ReplicatedAddress actual = target.convertAddress(repCa, rawCli, rawCa, rawAdr);
     // ReplicatedAddress expected = null;
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, is(notNullValue()));

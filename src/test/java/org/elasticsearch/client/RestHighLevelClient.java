@@ -244,13 +244,13 @@ public class RestHighLevelClient implements Closeable {
    * Returns the low-level client that the current high-level client instance is using to perform
    * requests
    */
-  public final RestClient getLowLevelClient() {
+  public RestClient getLowLevelClient() {
     return client;
   }
 
   @Override
-  public final void close() throws IOException {
-    doClose.accept(client);
+  public void close() throws IOException {
+    getDoClose().accept(client); // DRS
   }
 
   /**
@@ -271,7 +271,7 @@ public class RestHighLevelClient implements Closeable {
    * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster.html">Cluster
    * API on elastic.co</a>
    */
-  public final ClusterClient cluster() {
+  public ClusterClient cluster() {
     return clusterClient;
   }
 
@@ -282,7 +282,7 @@ public class RestHighLevelClient implements Closeable {
    * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html">Ingest
    * API on elastic.co</a>
    */
-  public final IngestClient ingest() {
+  public IngestClient ingest() {
     return ingestClient;
   }
 
@@ -1503,7 +1503,7 @@ public class RestHighLevelClient implements Closeable {
     req.setOptions(options);
     Response response;
     try {
-      response = getClient().performRequest(req); // DRS
+      response = getLowLevelClient().performRequest(req); // DRS
     } catch (ResponseException e) {
       if (ignores.contains(e.getResponse().getStatusLine().getStatusCode())) {
         try {
@@ -1572,7 +1572,7 @@ public class RestHighLevelClient implements Closeable {
     req.setOptions(options);
 
     ResponseListener responseListener = wrapResponseListener(responseConverter, listener, ignores);
-    client.performRequestAsync(req, responseListener);
+    getLowLevelClient().performRequestAsync(req, responseListener); // DRS
   }
 
   final <Resp> ResponseListener wrapResponseListener(
@@ -1798,4 +1798,13 @@ public class RestHighLevelClient implements Closeable {
   public void setClient(RestClient client) {
     this.client = client;
   }
+
+  public CheckedConsumer<RestClient, IOException> getDoClose() {
+    return doClose;
+  }
+
+  public void setDoClose(CheckedConsumer<RestClient, IOException> doClose) {
+    this.doClose = doClose;
+  }
+
 }

@@ -124,21 +124,21 @@ public class RawToEsConverter {
     LOGGER.trace("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client county", "cc");
-      convertClientCounty(rc, rawCli, cc);
+      convertClientCounty(rc, cc);
     }
 
     counter = 0;
     LOGGER.trace("convert aka");
     for (RawAka aka : rawCli.getAka()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert aka", "aka");
-      convertAka(rc, rawCli, aka);
+      convertAka(rc, aka);
     }
 
     counter = 0;
     LOGGER.trace("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert ethnicity", "eth");
-      convertEthnicity(rc, rawCli, eth);
+      convertEthnicity(rc, eth);
     }
 
     counter = 0;
@@ -151,20 +151,20 @@ public class RawToEsConverter {
     LOGGER.trace("convert case");
     for (RawCase cas : rawCli.getCases()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert case", "cas");
-      convertCase(rc, rawCli, cas);
+      convertCase(rc, cas);
     }
 
     // SNAP-729: Neutron Initial Load: restore CSEC.
     LOGGER.trace("convert CSEC");
     for (RawCsec csec : rawCli.getCsec()) {
       CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert CSEC", "csec");
-      convertCsec(rc, rawCli, csec);
+      convertCsec(rc, csec);
     }
 
     return rc;
   }
 
-  protected void convertCsec(ReplicatedClient rc, RawClient rawCli, RawCsec rawCsec) {
+  protected void convertCsec(ReplicatedClient rc, RawCsec rawCsec) {
     if (StringUtils.isBlank(rawCsec.getCsecId())
         || CmsReplicationOperation.D == rawCsec.getCsecLastUpdatedOperation()) {
       return;
@@ -188,42 +188,40 @@ public class RawToEsConverter {
     rc.addCsec(csec);
   }
 
-  protected void convertCase(ReplicatedClient rc, RawClient rawCli, RawCase rawCase) {
+  protected void convertCase(ReplicatedClient rc, RawCase rawCase) {
     rc.setOpenCaseId(rawCase.getOpenCaseId());
     rc.setOpenCaseResponsibleAgencyCode(rawCase.getOpenCaseResponsibleAgencyCode());
   }
 
-  protected void convertSafetyAlert(ReplicatedClient rc, RawClient rawCli,
-      RawSafetyAlert rawSafetyAlert) {
-    if (StringUtils.isBlank(rawSafetyAlert.getSafetyAlertId())
-        || CmsReplicationOperation.D == rawSafetyAlert.getSafetyAlertLastUpdatedOperation()) {
+  protected void convertSafetyAlert(ReplicatedClient rc, RawClient rawCli, RawSafetyAlert rawSaf) {
+    if (StringUtils.isBlank(rawSaf.getSafetyAlertId())
+        || CmsReplicationOperation.D == rawSaf.getSafetyAlertLastUpdatedOperation()) {
       return;
     }
 
     final ElasticSearchSafetyAlert alert = new ElasticSearchSafetyAlert();
-    alert.setId(rawSafetyAlert.getSafetyAlertId());
+    alert.setId(rawSaf.getSafetyAlertId());
 
     final ElasticSearchSafetyAlert.Activation activation =
         new ElasticSearchSafetyAlert.Activation();
     alert.setActivation(activation);
 
     activation.setActivationReasonDescription(SystemCodeCache.global()
-        .getSystemCodeShortDescription(rawSafetyAlert.getSafetyAlertActivationReasonCode()));
-    activation.setActivationReasonId(rawSafetyAlert.getSafetyAlertActivationReasonCode() != null
-        ? rawSafetyAlert.getSafetyAlertActivationReasonCode().toString()
+        .getSystemCodeShortDescription(rawSaf.getSafetyAlertActivationReasonCode()));
+    activation.setActivationReasonId(rawSaf.getSafetyAlertActivationReasonCode() != null
+        ? rawSaf.getSafetyAlertActivationReasonCode().toString()
         : null);
 
     final ElasticSearchSystemCode activationCounty = new ElasticSearchSystemCode();
     activation.setActivationCounty(activationCounty);
     activationCounty.setDescription(SystemCodeCache.global()
-        .getSystemCodeShortDescription(rawSafetyAlert.getSafetyAlertActivationCountyCode()));
-    activationCounty.setId(rawSafetyAlert.getSafetyAlertActivationCountyCode() != null
-        ? rawSafetyAlert.getSafetyAlertActivationCountyCode().toString()
+        .getSystemCodeShortDescription(rawSaf.getSafetyAlertActivationCountyCode()));
+    activationCounty.setId(rawSaf.getSafetyAlertActivationCountyCode() != null
+        ? rawSaf.getSafetyAlertActivationCountyCode().toString()
         : null);
 
-    activation
-        .setActivationDate(DomainChef.cookDate(rawSafetyAlert.getSafetyAlertActivationDate()));
-    activation.setActivationExplanation(rawSafetyAlert.getSafetyAlertActivationExplanation());
+    activation.setActivationDate(DomainChef.cookDate(rawSaf.getSafetyAlertActivationDate()));
+    activation.setActivationExplanation(rawSaf.getSafetyAlertActivationExplanation());
 
     final ElasticSearchSafetyAlert.Deactivation deactivation =
         new ElasticSearchSafetyAlert.Deactivation();
@@ -233,28 +231,25 @@ public class RawToEsConverter {
     deactivation.setDeactivationCounty(deactivationCounty);
 
     deactivationCounty.setDescription(SystemCodeCache.global()
-        .getSystemCodeShortDescription(rawSafetyAlert.getSafetyAlertDeactivationCountyCode()));
-    deactivationCounty.setId(rawSafetyAlert.getSafetyAlertDeactivationCountyCode() != null
-        ? rawSafetyAlert.getSafetyAlertDeactivationCountyCode().toString()
+        .getSystemCodeShortDescription(rawSaf.getSafetyAlertDeactivationCountyCode()));
+    deactivationCounty.setId(rawSaf.getSafetyAlertDeactivationCountyCode() != null
+        ? rawSaf.getSafetyAlertDeactivationCountyCode().toString()
         : null);
 
-    deactivation
-        .setDeactivationDate(DomainChef.cookDate(rawSafetyAlert.getSafetyAlertDeactivationDate()));
-    deactivation.setDeactivationExplanation(rawSafetyAlert.getSafetyAlertDeactivationExplanation());
+    deactivation.setDeactivationDate(DomainChef.cookDate(rawSaf.getSafetyAlertDeactivationDate()));
+    deactivation.setDeactivationExplanation(rawSaf.getSafetyAlertDeactivationExplanation());
 
-    alert.setLegacyDescriptor(
-        ElasticTransformer.createLegacyDescriptor(rawSafetyAlert.getSafetyAlertId(),
-            rawSafetyAlert.getSafetyAlertLastUpdatedTimestamp(), LegacyTable.SAFETY_ALERT));
+    alert.setLegacyDescriptor(ElasticTransformer.createLegacyDescriptor(rawSaf.getSafetyAlertId(),
+        rawSaf.getSafetyAlertLastUpdatedTimestamp(), LegacyTable.SAFETY_ALERT));
 
     rc.addSafetyAlert(alert);
   }
 
-  protected void convertEthnicity(ReplicatedClient rc, RawClient rawCli,
-      RawEthnicity rawEthnicity) {
+  protected void convertEthnicity(ReplicatedClient rc, RawEthnicity rawEthnicity) {
     rc.addClientRace(rawEthnicity.getClientEthnicityCode());
   }
 
-  protected void convertAka(ReplicatedClient rc, RawClient rawCli, RawAka rawAka) {
+  protected void convertAka(ReplicatedClient rc, RawAka rawAka) {
     if (StringUtils.isBlank(rawAka.getAkaId())
         || CmsReplicationOperation.D == rawAka.getAkaLastUpdatedOperation()) {
       return;
@@ -294,8 +289,7 @@ public class RawToEsConverter {
     rc.addAka(aka);
   }
 
-  protected void convertClientCounty(ReplicatedClient rc, RawClient rawCli,
-      RawClientCounty rawCounty) {
+  protected void convertClientCounty(ReplicatedClient rc, RawClientCounty rawCounty) {
     rc.addClientCounty(rawCounty.getClientCounty());
   }
 
@@ -319,12 +313,12 @@ public class RawToEsConverter {
     rc.addClientAddress(rca);
 
     if (rawCliAdr.getAddress() != null) {
-      rca.addAddress(convertAddress(rc, rca, rawCli, rawCliAdr, rawCliAdr.getAddress()));
+      rca.addAddress(convertAddress(rca, rawCli, rawCliAdr, rawCliAdr.getAddress()));
     }
   }
 
-  protected ReplicatedAddress convertAddress(ReplicatedClient rc, ReplicatedClientAddress repCa,
-      RawClient rawCli, RawClientAddress rawCa, RawAddress rawAdr) {
+  protected ReplicatedAddress convertAddress(ReplicatedClientAddress repCa, RawClient rawCli,
+      RawClientAddress rawCa, RawAddress rawAdr) {
     final ReplicatedAddress adr = new ReplicatedAddress();
     adr.setId(rawAdr.getAdrId());
     adr.setAddressDescription(rawAdr.getAdrAddressDescription());

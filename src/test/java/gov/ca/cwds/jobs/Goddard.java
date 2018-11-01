@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -42,6 +43,7 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.CheckedConsumer;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.hibernate.CacheMode;
@@ -90,6 +92,7 @@ import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
@@ -293,7 +296,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(meta.getDatabaseProductVersion()).thenReturn("DSN11010");
 
-    // Elasticsearch basics:
+    // Elasticsearch: an enigmatic conundrum:
     esp = new ElasticSearchPerson();
     esDao = mock(NeutronElasticSearchDao.class);
     esConfig = mock(ElasticsearchConfiguration.class);
@@ -310,15 +313,20 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final Header header = mock(Header.class);
     final HeaderElement headerElement = mock(HeaderElement.class);
     final HeaderElement[] headerElements = {headerElement};
+    final CheckedConsumer<RestClient, IOException> doClose = (rc) -> System.out.println("consume");
 
     when(client.indices()).thenReturn(indicesClient);
+    when(client.getLowLevelClient()).thenReturn(restClient);
     when(client.getClient()).thenReturn(restClient);
+    when(client.getDoClose()).thenReturn(doClose);
 
     when(restClient.performRequest(any(Request.class))).thenReturn(esResponse);
-    when(esResponse.getStatusLine()).thenReturn(statusLine);
     when(statusLine.getStatusCode()).thenReturn(200);
-    when(esResponse.getEntity()).thenReturn(httpEntity);
     when(httpEntity.getContentType()).thenReturn(header);
+
+    when(esResponse.getStatusLine()).thenReturn(statusLine);
+    when(esResponse.getEntity()).thenReturn(httpEntity);
+
     when(header.getElements()).thenReturn(headerElements);
     when(header.getName()).thenReturn("application");
     when(header.getValue()).thenReturn("json");
@@ -330,19 +338,23 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
     when(esConfig.getElasticsearchCluster()).thenReturn("elasticsearch");
     when(esConfig.getElasticsearchHost()).thenReturn("localhost");
-    when(esConfig.getElasticsearchPort()).thenReturn("9300");
+    when(esConfig.getElasticsearchPort()).thenReturn("9200");
     when(esConfig.getElasticsearchNodes()).thenReturn(
-        "es-inst-1.env.cwds.io:9300,es-inst-2.env.cwds.io:9300,es-inst-3.env.cwds.io:9300");
+        "es-inst-1.env.cwds.io:9200,es-inst-2.env.cwds.io:9200,es-inst-3.env.cwds.io:9200");
+    when(esConfig.getIndexSettingFile()).thenReturn(getClass()
+        .getResource(NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue()).getPath());
+    when(esConfig.getDocumentMappingFile()).thenReturn(getClass()
+        .getResource(NeutronElasticsearchDefaults.MAPPING_PEOPLE_SUMMARY.getValue()).getPath());
 
     // Flight options:
     esConfileFile = tempFolder.newFile("es.yml");
 
     try (FileWriter writer = new FileWriter(esConfileFile)) {
       writer.write("elasticsearch.host: es-inst-1.env.cwds.io\n");
-      writer.write("elasticsearch.port: 9300\n");
+      writer.write("elasticsearch.port: 9200\n");
       writer.write("elasticsearch.cluster: es-int\n");
       writer.write(
-          "elasticsearch.nodes: es-inst-1.env.cwds.io:9300,es-inst-2.env.cwds.io:9300,es-inst-3.env.cwds.io:9300\n");
+          "elasticsearch.nodes: es-inst-1.env.cwds.io:9200,es-inst-2.env.cwds.io:9200,es-inst-3.env.cwds.io:9200\n");
       writer.write("elasticsearch.alias: people\n");
       writer.write("elasticsearch.doctype: person\n");
       writer.write("elasticsearch.xpack.user: elastic\n");

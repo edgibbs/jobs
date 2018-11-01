@@ -33,7 +33,6 @@ import com.google.inject.Inject;
 import gov.ca.cwds.common.ApiFileAssistant;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
@@ -85,7 +84,7 @@ public class NeutronElasticSearchDao implements Closeable {
   /**
    * Create an index before blasting documents into it.
    */
-  protected void createIndex() {
+  protected void createIndex() throws NeutronCheckedException {
     LOGGER.warn("CREATING ES INDEX [{}] for type [{}]", config.getElasticsearchAlias(),
         config.getElasticsearchDocType());
 
@@ -98,8 +97,8 @@ public class NeutronElasticSearchDao implements Closeable {
     try {
       client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
     } catch (IOException e) {
-      LOGGER.error("Unable to create index [" + config.getElasticsearchAlias() + "]", e);
-      throw new NeutronRuntimeException(e);
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO CREATE INDEX '{}'! {}",
+          config.getElasticsearchAlias(), e.getMessage());
     }
   }
 
@@ -121,7 +120,7 @@ public class NeutronElasticSearchDao implements Closeable {
     final PutMappingRequest reqMapping = new PutMappingRequest(index);
     reqMapping.type(getConfig().getElasticsearchDocType());
     final String mapping = IOUtils.toString(
-        this.getClass()
+        getClass()
             .getResourceAsStream(NeutronElasticsearchDefaults.MAPPING_PEOPLE_SUMMARY.getValue()),
         Charset.defaultCharset().name());
     reqMapping.source(mapping, XContentType.JSON);
