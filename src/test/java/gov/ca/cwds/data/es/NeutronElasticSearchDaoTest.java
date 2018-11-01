@@ -3,8 +3,9 @@ package gov.ca.cwds.data.es;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.any;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -17,7 +18,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
@@ -100,7 +100,7 @@ public class NeutronElasticSearchDaoTest
     target.createIndexIfMissing();
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void createIndex_A$String$String$String$String() throws Exception {
     target.createIndex(index, type, settingsJsonFile, mappingJsonFile);
   }
@@ -128,7 +128,7 @@ public class NeutronElasticSearchDaoTest
     target.createIndexIfNeeded(index);
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void deleteIndex_A$String() throws Exception {
     target.deleteIndex(index);
   }
@@ -180,17 +180,15 @@ public class NeutronElasticSearchDaoTest
 
   @Test
   public void bulkAdd_A$ObjectMapper$String$Object() throws Exception {
-    final ObjectMapper mapper = mock(ObjectMapper.class);
-    final Object obj = null;
+    final Object obj = "hello world";
     final IndexRequest actual = target.bulkAdd(mapper, id, obj);
-    final IndexRequest expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test(expected = JsonProcessingException.class)
   public void bulkAdd_A$ObjectMapper$String$Object_T$JsonProcessingException() throws Exception {
-    final ObjectMapper mapper = mock(ObjectMapper.class);
-    final Object obj = null;
+    when(mapper.writeValueAsBytes(any(Object.class))).thenThrow(JsonProcessingException.class);
+    final Object obj = "hello world";
     target.bulkAdd(mapper, id, obj);
   }
 
@@ -207,7 +205,7 @@ public class NeutronElasticSearchDaoTest
 
   @Test(expected = IOException.class)
   public void close_A$_T$IOException() throws Exception {
-    when(client.indices()).thenThrow(IOException.class);
+    doThrow(IOException.class).when(client).close();
     target.close();
   }
 
