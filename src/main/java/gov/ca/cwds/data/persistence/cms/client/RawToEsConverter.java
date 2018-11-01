@@ -92,7 +92,12 @@ public class RawToEsConverter {
     rc.setPrimaryEthnicityType(rawCli.getCltPrimaryEthnicityType());
 
     // Languages
-    rc.setPrimaryLanguageType(rawCli.getCltPrimaryLanguageType());
+    final Short s = rawCli.getCltPrimaryLanguageType();
+    if (s != null && s.shortValue() != 0 && s.shortValue() != 1253) {
+      LOGGER.trace("Not English");
+    }
+
+    rc.setPrimaryLanguageType(s);
     rc.setSecondaryLanguageType(rawCli.getCltSecondaryLanguageType());
 
     rc.setReligionType(rawCli.getCltReligionType());

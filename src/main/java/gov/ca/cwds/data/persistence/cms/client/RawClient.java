@@ -291,6 +291,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
   @Override
   public RawClient read(final ResultSet rs) throws SQLException {
     super.read(rs);
+
     this.cltSensitivityIndicator = ifNull(rs.getString("CLT_SENSTV_IND"));
     this.cltSoc158SealedClientIndicator = ifNull(rs.getString("CLT_SOC158_IND"));
     this.cltAdjudicatedDelinquentIndicator = ifNull(rs.getString("CLT_ADJDEL_IND"));
@@ -345,6 +346,27 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltPrevOtherDescription = ifNull(rs.getString("CLT_POTH_DESC"));
     this.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
     this.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
+
+    // Languages:
+    this.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
+    this.cltSecondaryLanguageType = rs.getShort("CLT_S_LANG_TC");
+
+    this.cltReligionType = rs.getShort("CLT_RLGN_TPC");
+    this.cltSensitiveHlthInfoOnFileIndicator = ifNull(rs.getString("CLT_SNTV_HLIND"));
+    this.cltSoc158PlacementCode = ifNull(rs.getString("CLT_SOCPLC_CD"));
+    this.cltSocialSecurityNumChangedCode = ifNull(rs.getString("CLT_SSN_CHG_CD"));
+    this.cltSocialSecurityNumber = ifNull(rs.getString("CLT_SS_NO"));
+    this.cltSuffixTitleDescription = ifNull(rs.getString("CLT_SUFX_TLDSC"));
+    this.cltTribalAncestryClientIndicatorVar = ifNull(rs.getString("CLT_TRBA_CLT_B"));
+    this.cltTribalMembrshpVerifctnIndicatorVar = ifNull(rs.getString("CLT_TR_MBVRT_B"));
+    this.cltUnemployedParentCode = ifNull(rs.getString("CLT_UNEMPLY_CD"));
+    this.cltZippyCreatedIndicator = ifNull(rs.getString("CLT_ZIPPY_IND"));
+    this.cltLastUpdatedId = ifNull(rs.getString("CLT_LST_UPD_ID"));
+    this.cltLastUpdatedTime = rs.getTimestamp("CLT_LST_UPD_TS");
+
+    this.setCltReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString("CLT_IBMSNAP_OPERATION")));
+    this.setCltReplicationDate(rs.getDate("CLT_IBMSNAP_LOGMARKER"));
 
     return this;
   }
