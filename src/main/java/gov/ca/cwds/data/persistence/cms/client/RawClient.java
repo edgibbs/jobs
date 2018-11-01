@@ -346,6 +346,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
     this.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
+    // SNAP-731: missing language, SSN, religion, etc.
     this.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
     this.cltSecondaryLanguageType = rs.getShort("CLT_S_LANG_TC");
 

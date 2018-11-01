@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
+import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.LOG_EVERY;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_DUMMY;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLIENT_LAST_CHG;
@@ -153,7 +154,7 @@ public class PeopleSummaryThreadHandler
         // Find associated raw client, if any, and link.
         c = rawClients.get(t.getCltId());
         organizer.accept(c, t); // NOT WORKING??
-        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", msg);
+        CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", msg);
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
@@ -183,7 +184,7 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (c = new RawClient().read(rs)) != null) {
         rawClients.put(c.getCltId(), c);
-        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client");
+        CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "client");
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
@@ -202,7 +203,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cla.getCltId());
         if (c != null) {
           c.addClientAddress(cla);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client address");
+          CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "client address");
         } else {
           LOGGER.warn("ORPHAN CLIENT ADDRESS! id: {}, client: {}", cla.getClaId(), cla.getCltId());
         }
@@ -224,7 +225,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(adr.getCltId());
         if (c != null) {
           c.getClientAddress().get(adr.getClaId()).setAddress(adr);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "address");
+          CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "address");
         } else {
           LOGGER.warn("ORPHAN ADDRESS! id: {}, client: {}", adr.getAdrId(), adr.getCltId());
         }
@@ -250,7 +251,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cc.getCltId());
         if (c != null) {
           c.addClientCounty(cc);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client county");
+          CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "client county");
         } else {
           LOGGER.warn("ORPHAN CLIENT COUNTY! id: {}, client: {}", cc.getCltId(), cc.getCltId());
         }
@@ -275,7 +276,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(aka.getCltId());
         if (c != null) {
           c.addAka(aka);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "aka");
+          CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "aka");
         } else {
           LOGGER.warn("ORPHAN AKA! id: {}, client: {}", aka.getAkaId(), aka.getCltId());
         }
@@ -300,7 +301,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cas.getCltId());
         if (c != null) {
           c.addCase(cas);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "case");
+          CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "case");
         } else {
           LOGGER.warn("ORPHAN CASE! id: {}, client: {}", cas.getOpenCaseId(), cas.getCltId());
         }
@@ -350,7 +351,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(eth.getCltId());
         if (c != null) {
           c.addEthnicity(eth);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "ethnicity");
+          CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "ethnicity");
         } else {
           LOGGER.warn("ORPHAN ETHNICITY! id: {}, client: {}", eth.getClientEthnicityId(),
               eth.getCltId());
@@ -377,7 +378,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(saf.getCltId());
         if (c != null) {
           c.addSafetyAlert(saf);
-          CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "safety");
+          CheeseRay.logEvery(LOGGER, LOG_EVERY.getValue(), ++counter, "Read", "safety");
         } else {
           LOGGER.warn("ORPHAN SAFETY ALERT! id: {}, client: {}", saf.getSafetyAlertId(),
               saf.getCltId());
