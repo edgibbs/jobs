@@ -26,7 +26,6 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
-@SuppressWarnings({"squid:S2160"})
 public class RawClient extends ClientReference implements NeutronJdbcReader<RawClient>,
     ApiGroupNormalizer<ReplicatedClient>, Comparable<RawClient>, Comparator<RawClient> {
 
@@ -347,7 +346,6 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
     this.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
-    // Languages:
     this.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
     this.cltSecondaryLanguageType = rs.getShort("CLT_S_LANG_TC");
 
