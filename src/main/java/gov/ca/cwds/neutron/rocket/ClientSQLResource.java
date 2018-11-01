@@ -119,12 +119,13 @@ public class ClientSQLResource implements ApiMarker {
       + "    cla.IBMSNAP_LOGMARKER AS CLA_IBMSNAP_LOGMARKER, \n"
       + "    cla.IBMSNAP_OPERATION AS CLA_IBMSNAP_OPERATION \n"
       + "FROM GT_ID      gt \n"
-      + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T AND cla.EFF_END_DT IS NULL \n"
+      + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T \n"
       + "JOIN ADDRS_T   adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
-      + "WHERE cla.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "WHERE cla.EFF_END_DT IS NULL \n"
+      + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
       + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
-      + "FOR READ ONLY WITH UR " ;
+      + "FOR READ ONLY WITH UR ";
   //@formatter:on
 
   //@formatter:off
