@@ -474,7 +474,9 @@ public class PeopleSummaryThreadHandler
 
       // Commit more often by re-inserting client id's into GT_ID.
       // Initial Load client ranges:
-      loadClientRange(stmtInsClient, range);
+      if (isInitialLoad()) {
+        loadClientRange(stmtInsClient, range);
+      }
 
       LOGGER.info("Read client");
       read(stmtSelClient, rs -> readClient(rs));
