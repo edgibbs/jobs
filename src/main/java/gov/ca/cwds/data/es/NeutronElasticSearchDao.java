@@ -154,10 +154,6 @@ public class NeutronElasticSearchDao implements Closeable {
     }
   }
 
-  private String readFile(String sourceFile) throws IOException {
-    return new ApiFileAssistant().readFile(sourceFile);
-  }
-
   /**
    * Create ES index based on supplied parameters.
    *
@@ -313,7 +309,7 @@ public class NeutronElasticSearchDao implements Closeable {
                 .timeout(TimeValue.timeValueMillis(TIMEOUT_MILLIS)), RequestOptions.DEFAULT)
             .isAcknowledged();
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "CREATE OR SWAP ALIAS FAILED! {}", e.getMessage());
     }
   }
@@ -329,7 +325,7 @@ public class NeutronElasticSearchDao implements Closeable {
     try {
       return client.indices().exists(new GetIndexRequest().indices(indexOrAlias),
           RequestOptions.DEFAULT);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "INDEX CHECK FAILED! {}", e.getMessage());
     }
   }
@@ -337,7 +333,7 @@ public class NeutronElasticSearchDao implements Closeable {
   public boolean doesAliasExist(final String alias) throws NeutronCheckedException {
     try {
       return client.indices().existsAlias(new GetAliasesRequest(alias), RequestOptions.DEFAULT);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "ALIAS CHECK FAILED! {}", e.getMessage());
     }
   }
@@ -394,6 +390,10 @@ public class NeutronElasticSearchDao implements Closeable {
    */
   public RestHighLevelClient getClient() {
     return client;
+  }
+
+  private String readFile(String sourceFile) throws IOException {
+    return new ApiFileAssistant().readFile(sourceFile);
   }
 
 }
