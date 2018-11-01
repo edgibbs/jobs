@@ -178,7 +178,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // 0-999, 1000-1999, 2000-2999, etc.
       for (int start = 0; start < totalKeys; start += BUNDLE_KEY_SIZE) {
-        con.commit(); // clear temp tables
         final int end = start + BUNDLE_KEY_SIZE - 1; //
         insertNextKeyBundle(con, start, end);
 
