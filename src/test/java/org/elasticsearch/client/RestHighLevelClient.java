@@ -191,9 +191,10 @@ import org.elasticsearch.search.suggest.term.TermSuggestion;
  */
 public class RestHighLevelClient implements Closeable {
 
-  private RestClient client; // DRS: for testing
-  private final NamedXContentRegistry registry;
-  private final CheckedConsumer<RestClient, IOException> doClose;
+  // DRS: removed "final" from these member variables.
+  private RestClient client;
+  private NamedXContentRegistry registry;
+  private CheckedConsumer<RestClient, IOException> doClose;
 
   private final IndicesClient indicesClient = new IndicesClient(this);
   private final ClusterClient clusterClient = new ClusterClient(this);
@@ -1502,7 +1503,7 @@ public class RestHighLevelClient implements Closeable {
     req.setOptions(options);
     Response response;
     try {
-      response = client.performRequest(req);
+      response = getClient().performRequest(req); // DRS
     } catch (ResponseException e) {
       if (ignores.contains(e.getResponse().getStatusLine().getStatusCode())) {
         try {

@@ -28,12 +28,18 @@ import javax.persistence.EntityManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.ElasticMockFactory;
 import org.elasticsearch.client.IndicesClient;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.SearchHit;
@@ -296,12 +302,26 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(esDao.getClient()).thenReturn(client);
 
     final RestClient restClient = mock(RestClient.class);
-    client.setClient(restClient);
     final ElasticMockFactory esMockFactory = new ElasticMockFactory(client);
     final IndicesClient indicesClient = esMockFactory.makeIndicesClient();
+    final Response esResponse = mock(Response.class);
+    final StatusLine statusLine = mock(StatusLine.class);
+    final HttpEntity httpEntity = mock(HttpEntity.class);
+    final Header header = mock(Header.class);
+    final HeaderElement headerElement = mock(HeaderElement.class);
+    final HeaderElement[] headerElements = {headerElement};
 
     when(client.indices()).thenReturn(indicesClient);
-    when(client.indices()).thenReturn(indicesClient);
+    when(client.getClient()).thenReturn(restClient);
+
+    when(restClient.performRequest(any(Request.class))).thenReturn(esResponse);
+    when(esResponse.getStatusLine()).thenReturn(statusLine);
+    when(statusLine.getStatusCode()).thenReturn(200);
+    when(esResponse.getEntity()).thenReturn(httpEntity);
+    when(httpEntity.getContentType()).thenReturn(header);
+    when(header.getElements()).thenReturn(headerElements);
+    when(header.getName()).thenReturn("application");
+    when(header.getValue()).thenReturn("json");
 
     // final Settings settings = Settings.builder().build();
     // when(client.settings()).thenReturn(settings);

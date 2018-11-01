@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
@@ -93,6 +94,7 @@ public class NeutronElasticSearchDaoTest
 
   @Test(expected = NeutronCheckedException.class)
   public void createIndexIfMissing_A$_T$NeutronCheckedException() throws Exception {
+    when(client.indices()).thenThrow(IOException.class);
     target.createIndexIfMissing();
   }
 
@@ -115,6 +117,7 @@ public class NeutronElasticSearchDaoTest
   @Test(expected = NeutronCheckedException.class)
   public void createIndexIfNeeded_A$String$String$String$String_T$NeutronCheckedException()
       throws Exception {
+    when(client.indices()).thenThrow(IOException.class);
     target.createIndexIfNeeded(index, type, settingsJsonFile, mappingJsonFile);
   }
 
@@ -142,18 +145,20 @@ public class NeutronElasticSearchDaoTest
 
   @Test(expected = NeutronCheckedException.class)
   public void createOrSwapAlias_A$String$String_T$NeutronCheckedException() throws Exception {
+    when(client.indices()).thenThrow(IOException.class);
     target.createOrSwapAlias(alias, index);
   }
 
   @Test
   public void doesIndexExist_A$String() throws Exception {
     boolean actual = target.doesIndexExist(indexOrAlias);
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test(expected = NeutronCheckedException.class)
   public void doesIndexExist_A$String_T$NeutronCheckedException() throws Exception {
+    when(client.indices()).thenThrow(IOException.class);
     final String indexOrAlias = TEST_IDX;
     target.doesIndexExist(indexOrAlias);
   }
@@ -161,12 +166,13 @@ public class NeutronElasticSearchDaoTest
   @Test
   public void doesAliasExist_A$String() throws Exception {
     final boolean actual = target.doesAliasExist(alias);
-    final boolean expected = false;
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test(expected = NeutronCheckedException.class)
   public void doesAliasExist_A$String_T$NeutronCheckedException() throws Exception {
+    when(client.indices()).thenThrow(IOException.class);
     target.doesAliasExist(alias);
   }
 
