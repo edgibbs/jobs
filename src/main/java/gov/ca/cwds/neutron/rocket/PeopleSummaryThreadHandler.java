@@ -430,6 +430,10 @@ public class PeopleSummaryThreadHandler
     LOGGER.debug("client count: {}", clientCount);
   }
 
+  protected boolean isInitialLoad() {
+    return true;
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -480,8 +484,12 @@ public class PeopleSummaryThreadHandler
 
       LOGGER.info("Read address");
       read(stmtSelAddress, rs -> readAddress(rs));
-      con.commit(); // clear temp tables.
-      loadClientRange(stmtInsClient, range); // Insert client id's again.
+
+      // SNAP-731: missing addresses.
+      if (isInitialLoad()) {
+        con.commit(); // clear temp tables.
+        loadClientRange(stmtInsClient, range); // Insert client id's again.
+      }
 
       LOGGER.info("Read client county");
       read(stmtSelClientCounty, rs -> readClientCounty(rs));

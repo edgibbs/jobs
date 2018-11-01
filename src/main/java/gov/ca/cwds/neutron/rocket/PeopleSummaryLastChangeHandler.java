@@ -129,6 +129,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     }
   }
 
+  @Override
+  protected boolean isInitialLoad() {
+    return false;
+  }
+
   /**
    * {@inheritDoc}
    * 
