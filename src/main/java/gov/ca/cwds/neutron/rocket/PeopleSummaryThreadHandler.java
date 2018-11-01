@@ -548,7 +548,6 @@ public class PeopleSummaryThreadHandler
 
   @Override
   public void handleJdbcDone(final Pair<String, String> range) {
-    // LOGGER.info("client address count: {}", );
     final RawToEsConverter conv = new RawToEsConverter();
     this.rawClients.values().stream().map(r -> r.normalize(conv))
         .forEach(c -> normalized.put(c.getId(), c));
