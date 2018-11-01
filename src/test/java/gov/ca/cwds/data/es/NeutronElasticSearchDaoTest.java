@@ -14,7 +14,6 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -71,33 +70,14 @@ public class NeutronElasticSearchDaoTest
     assertThat(actual, is(notNullValue()));
   }
 
-  @Ignore
-  @Test
-  public void createIndex_A$() throws Exception {
-    target.createIndex();
-  }
-
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void createIndex_A$String$int$int() throws Exception {
     target.createIndex(index, numShards, numReplicas);
   }
 
-  @Test(expected = IOException.class)
-  public void createIndex_A$String$int$int_T$IOException() throws Exception {
-    int numShards = 0;
-    int numReplicas = 0;
-    target.createIndex(index, numShards, numReplicas);
-  }
-
-  @Test
-  public void createIndexIfMissing_A$() throws Exception {
-    target.createIndexIfMissing();
-  }
-
   @Test(expected = NeutronCheckedException.class)
-  public void createIndexIfMissing_A$_T$NeutronCheckedException() throws Exception {
-    when(client.indices()).thenThrow(IOException.class);
-    target.createIndexIfMissing();
+  public void createIndex_A$String$int$int_T$IOException() throws Exception {
+    target.createIndex(index, numShards, numReplicas);
   }
 
   @Test(expected = NeutronCheckedException.class)

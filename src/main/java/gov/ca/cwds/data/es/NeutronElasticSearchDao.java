@@ -83,73 +83,31 @@ public class NeutronElasticSearchDao implements Closeable {
 
   /**
    * Create an index before blasting documents into it.
-   */
-  protected void createIndex() throws NeutronCheckedException {
-    LOGGER.warn("CREATING ES INDEX [{}] for type [{}]", config.getElasticsearchAlias(),
-        config.getElasticsearchDocType());
-
-    final CreateIndexRequest createIndexRequest =
-        new CreateIndexRequest(config.getElasticsearchAlias());
-    createIndexRequest.settings(config.getIndexSettingFile(), XContentType.JSON);
-    createIndexRequest.mapping(config.getElasticsearchDocType(), config.getDocumentMappingFile(),
-        XContentType.JSON);
-
-    try {
-      client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
-    } catch (IOException e) {
-      throw CheeseRay.checked(LOGGER, e, "FAILED TO CREATE INDEX '{}'! {}",
-          config.getElasticsearchAlias(), e.getMessage());
-    }
-  }
-
-  /**
-   * Create an index before blasting documents into it.
    *
    * @param index index name or alias
    * @param numShards number of shards
    * @param numReplicas number of replicas
-   * @throws IOException on disconnect, hang, etc.
+   * @throws NeutronCheckedException on disconnect, hang, etc.
    */
   protected void createIndex(final String index, int numShards, int numReplicas)
-      throws IOException {
+      throws NeutronCheckedException {
     LOGGER.warn("CREATE ES INDEX {} with {} shards and {} replicas", index, numShards, numReplicas);
-    final Settings indexSettings = Settings.builder().put("number_of_shards", numShards)
-        .put("number_of_replicas", numReplicas).build();
-    client.indices().create(new CreateIndexRequest(index, indexSettings), RequestOptions.DEFAULT);
+    try {
+      final Settings indexSettings = Settings.builder().put("number_of_shards", numShards)
+          .put("number_of_replicas", numReplicas).build();
+      client.indices().create(new CreateIndexRequest(index, indexSettings), RequestOptions.DEFAULT);
 
-    final PutMappingRequest reqMapping = new PutMappingRequest(index);
-    reqMapping.type(getConfig().getElasticsearchDocType());
-    final String mapping = IOUtils.toString(
-        getClass()
-            .getResourceAsStream(NeutronElasticsearchDefaults.MAPPING_PEOPLE_SUMMARY.getValue()),
-        Charset.defaultCharset().name());
-    reqMapping.source(mapping, XContentType.JSON);
-    client.indices().putMapping(reqMapping, RequestOptions.DEFAULT);
-  }
-
-  /**
-   * Create an index, if missing.
-   *
-   * <p>
-   * Method is intentionally synchronized to prevent race conditions and multiple attempts to create
-   * the same index.
-   * </p>
-   * 
-   * @throws NeutronCheckedException on error
-   */
-  @SuppressWarnings({"findbugs:SWL_SLEEP_WITH_LOCK_HELD", "squid:S2276"})
-  public synchronized void createIndexIfMissing() throws NeutronCheckedException {
-    final String index = config.getElasticsearchAlias();
-    if (!doesIndexExist(index)) {
-      LOGGER.warn("ES INDEX {} DOES NOT EXIST!!", index);
-      createIndex();
-      try {
-        // Give Elasticsearch a moment to catch its breath.
-        Thread.sleep(5000L);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        LOGGER.warn("Interrupted!");
-      }
+      final PutMappingRequest reqMapping = new PutMappingRequest(index);
+      reqMapping.type(getConfig().getElasticsearchDocType());
+      final String mapping = IOUtils.toString(
+          getClass()
+              .getResourceAsStream(NeutronElasticsearchDefaults.MAPPING_PEOPLE_SUMMARY.getValue()),
+          Charset.defaultCharset().name());
+      reqMapping.source(mapping, XContentType.JSON);
+      client.indices().putMapping(reqMapping, RequestOptions.DEFAULT);
+    } catch (Exception e) {
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO CREATE INDEX '{}'! {}",
+          config.getElasticsearchAlias(), e.getMessage());
     }
   }
 
@@ -226,7 +184,7 @@ public class NeutronElasticSearchDao implements Closeable {
         // Give Elasticsearch a moment to catch its breath.
         Thread.sleep(2000); // NOSONAR
       }
-    } catch (InterruptedException | IOException e) {
+    } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "CREATE INDEX FAILED! {}", e.getMessage());
     }
   }
