@@ -15,7 +15,6 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
-import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -112,52 +111,40 @@ public class RawToEsConverter {
     rc.setReplicationOperation(rawCli.getCltReplicationOperation());
     rc.setLastUpdatedTime(rawCli.getCltLastUpdatedTime());
 
-    int counter = 0;
     final Collection<RawClientAddress> coll = rawCli.getClientAddress().values();
     LOGGER.trace("convert client address: count: {}", coll.size());
     for (RawClientAddress rca : coll) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client address", "ca");
       convertClientAddress(rc, rawCli, rca);
     }
 
-    counter = 0;
     LOGGER.trace("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert client county", "cc");
       convertClientCounty(rc, rawCli, cc);
     }
 
-    counter = 0;
     LOGGER.trace("convert aka");
     for (RawAka aka : rawCli.getAka()) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert aka", "aka");
       convertAka(rc, rawCli, aka);
     }
 
-    counter = 0;
     LOGGER.trace("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert ethnicity", "eth");
       convertEthnicity(rc, rawCli, eth);
     }
 
-    counter = 0;
     LOGGER.trace("convert safety alert");
     for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert safety alert", "saf");
       convertSafetyAlert(rc, rawCli, saf);
     }
 
     LOGGER.trace("convert case");
     for (RawCase cas : rawCli.getCases()) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert case", "cas");
       convertCase(rc, rawCli, cas);
     }
 
     // SNAP-729: Neutron Initial Load: restore CSEC.
     LOGGER.trace("convert CSEC");
     for (RawCsec csec : rawCli.getCsec()) {
-      CheeseRay.logEvery(LOGGER, 1000, ++counter, "Convert CSEC", "csec");
       convertCsec(rc, rawCli, csec);
     }
 
