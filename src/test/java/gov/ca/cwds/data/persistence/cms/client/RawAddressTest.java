@@ -2,7 +2,6 @@ package gov.ca.cwds.data.persistence.cms.client;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -394,7 +393,7 @@ public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
   public void hashCode_A$() throws Exception {
     int actual = target.hashCode();
     int expected = 0;
-    assertThat(actual, is(not(expected)));
+    assertThat(actual, is(equalTo(expected)));
   }
 
 }
