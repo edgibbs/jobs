@@ -21,13 +21,13 @@ import gov.ca.cwds.neutron.launch.LaunchDirector;
  * 
  * @author CWDS API Team
  */
-public class LetsLightThisCandleRocket
+public class LightThisCandleRocket
     extends BasePersonRocket<ReplicatedOtherAdultInPlacemtHome, ReplicatedOtherAdultInPlacemtHome> {
 
   private static final long serialVersionUID = 1L;
 
   private static final ConditionalLogger LOGGER =
-      new JetPackLogger(LetsLightThisCandleRocket.class);
+      new JetPackLogger(LightThisCandleRocket.class);
 
   private transient LaunchDirector launchDirector1;
 
@@ -42,7 +42,7 @@ public class LetsLightThisCandleRocket
    * @param launchDirector launch director
    */
   @Inject
-  public LetsLightThisCandleRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
+  public LightThisCandleRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
       final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {

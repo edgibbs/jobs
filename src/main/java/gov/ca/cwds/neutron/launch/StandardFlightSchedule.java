@@ -38,24 +38,24 @@ import gov.ca.cwds.neutron.rocket.CaseRocket;
 import gov.ca.cwds.neutron.rocket.ExitInitialLoadRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
-import gov.ca.cwds.neutron.rocket.LetsLightThisCandleRocket;
+import gov.ca.cwds.neutron.rocket.LightThisCandleRocket;
 import gov.ca.cwds.neutron.rocket.SchemaResetRocket;
 
 /**
- * Standard rocket settings for Initial Load and On-going (continuous) modes.
+ * Standard rocket settings for both modes, Initial Load and Last Change (on-going, continuous).
  * 
  * @author CWDS API Team
  */
 public enum StandardFlightSchedule {
 
-  // =======================
+  // ===============================
   // RECREATE INDEXES:
-  // =======================
+  // ===============================
 
   /**
    * Dummy, just starts the Quartz schedule process.
    */
-  LIGHT_THIS_CANDLE(LetsLightThisCandleRocket.class, // rocket class
+  LIGHT_THIS_CANDLE(LightThisCandleRocket.class, // rocket class
       "light_this_candle", // rocket name
       1, // initial load order
       0, // start delay seconds. N/A.
@@ -145,9 +145,9 @@ public enum StandardFlightSchedule {
   OTHER_CHILD_IN_HOME_S(OtherChildInPlacemtHomeSIndexerJob.class, "ps_other_child", 55, 120, 65,
       null, true, true, false),
 
-  // =======================
+  // ===============================
   // PEOPLE INDEX ROCKETS:
-  // =======================
+  // ===============================
 
   /**
    * Essential document root: Client.
@@ -209,9 +209,9 @@ public enum StandardFlightSchedule {
    */
   REFERRAL(ReferralHistoryIndexerJob.class, "referral", 45, 30, 700, "referrals", true, true, true),
 
-  // =======================
+  // ===============================
   // SCREENINGS:
-  // =======================
+  // ===============================
 
   /**
    * Screenings in People index, <strong>NOT</strong> the separate Screenings index.
@@ -219,9 +219,9 @@ public enum StandardFlightSchedule {
   INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 90, 20, 900, "screenings", true,
       true, true),
 
-  // =======================
+  // ===============================
   // DB2 SCHEMA RESET:
-  // =======================
+  // ===============================
 
   /**
    * Reset test schema. Automatic prevents reset of production-like schemas.
@@ -229,15 +229,9 @@ public enum StandardFlightSchedule {
   RESET_TEST_SCHEMA(SchemaResetRocket.class, "reset_schema", 2000, 2000000, 10000, null, false,
       false, true),
 
-  // =======================
-  // SYSTEM CODES:
-  // =======================
-
-  // TODO: INT-1576: add SystemCodesLoaderJob to Initial Load.
-
-  // =======================
+  // ===============================
   // UTILITY:
-  // =======================
+  // ===============================
 
   /**
    * Exit the initial load process.
