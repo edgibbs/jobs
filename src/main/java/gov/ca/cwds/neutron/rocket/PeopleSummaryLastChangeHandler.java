@@ -128,7 +128,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     int ret = 0;
 
     try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
-      LOGGER.info("key bundle: start: {}, end: {}", start, end);
+      LOGGER.debug("key bundle: start: {}, end: {}", start, end);
       con.commit();
 
       final List<String> subset = keys.subList(start, Math.min(end, keys.size() - 1));
@@ -141,7 +141,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
       ps.executeBatch();
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR INSERTING KEYS!: {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR INSERTING CLIENT KEYS!: {}", e.getMessage());
     }
 
     LOGGER.debug("insertNextKeyBundle(): done: count: {}", ret);

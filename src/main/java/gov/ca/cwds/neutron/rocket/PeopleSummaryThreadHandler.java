@@ -132,15 +132,15 @@ public class PeopleSummaryThreadHandler
       // Close ResultSet for driver stability, despite JDBC standard (close parent Statement).
       // DB2 driver gets confused, if you just close parent statement and session.
       try (final ResultSet rs = stmt.executeQuery()) {
-        while (rocket.isRunning() && rs.next()) {
-          consumer.accept(rs);
-        }
+        consumer.accept(rs);
       } finally {
         // Auto-close result set.
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "SELECT FAILED! {}", e.getMessage(), e);
     }
+
+    LOGGER.debug("read(): done");
   }
 
   protected <T extends ClientReference> void readAny(final ResultSet rs,
@@ -155,7 +155,7 @@ public class PeopleSummaryThreadHandler
         // Find associated raw client, if any, and link.
         c = rawClients.get(t.getCltId());
         organizer.accept(c, t); // NOT WORKING??
-        CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", msg);
+        CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", msg);
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
@@ -186,7 +186,7 @@ public class PeopleSummaryThreadHandler
     try {
       while (rocket.isRunning() && rs.next() && (c = new RawClient().read(rs)) != null) {
         rawClients.put(c.getCltId(), c);
-        CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "client");
+        CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "client");
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
@@ -206,7 +206,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cla.getCltId());
         if (c != null) {
           c.addClientAddress(cla);
-          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "client address");
+          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "client address");
         } else {
           LOGGER.warn("ORPHAN CLIENT ADDRESS! id: {}, client: {}", cla.getClaId(), cla.getCltId());
         }
@@ -229,7 +229,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(adr.getCltId());
         if (c != null) {
           c.getClientAddress().get(adr.getClaId()).setAddress(adr);
-          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "address");
+          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "address");
         } else {
           LOGGER.warn("ORPHAN ADDRESS! id: {}, client: {}", adr.getAdrId(), adr.getCltId());
         }
@@ -256,7 +256,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cc.getCltId());
         if (c != null) {
           c.addClientCounty(cc);
-          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "client county");
+          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "client county");
         } else {
           LOGGER.warn("ORPHAN CLIENT COUNTY! id: {}, client: {}", cc.getCltId(), cc.getCltId());
         }
@@ -282,7 +282,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(aka.getCltId());
         if (c != null) {
           c.addAka(aka);
-          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "aka");
+          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "aka");
         } else {
           LOGGER.warn("ORPHAN AKA! id: {}, client: {}", aka.getAkaId(), aka.getCltId());
         }
@@ -308,7 +308,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(cas.getCltId());
         if (c != null) {
           c.addCase(cas);
-          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "case");
+          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "case");
         } else {
           LOGGER.warn("ORPHAN CASE! id: {}, client: {}", cas.getOpenCaseId(), cas.getCltId());
         }
@@ -334,7 +334,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(csec.getCltId());
         if (c != null) {
           c.addCsec(csec);
-          CheeseRay.logEvery(LOGGER, 50, ++counter, "Read", "csec");
+          CheeseRay.logEvery(LOGGER, 50, ++counter, "read", "csec");
         } else {
           LOGGER.warn("ORPHAN CSEC! id: {}, client: {}", csec.getCsecId(), csec.getCltId());
         }
@@ -360,7 +360,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(eth.getCltId());
         if (c != null) {
           c.addEthnicity(eth);
-          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "ethnicity");
+          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "ethnicity");
         } else {
           LOGGER.warn("ORPHAN ETHNICITY! id: {}, client: {}", eth.getClientEthnicityId(),
               eth.getCltId());
@@ -370,7 +370,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ETHNICITY! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} case records.", counter);
+    LOGGER.info("Retrieved {} ethnicity records.", counter);
   }
 
   protected void readSafetyAlert(final ResultSet rs) {
@@ -388,7 +388,7 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(saf.getCltId());
         if (c != null) {
           c.addSafetyAlert(saf);
-          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "Read", "safety");
+          CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "safety");
         } else {
           LOGGER.warn("ORPHAN SAFETY ALERT! id: {}, client: {}", saf.getSafetyAlertId(),
               saf.getCltId());
@@ -479,10 +479,8 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(sqlPlacementAddress, TFO, CRO);
         final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT, TFO, CRO);
-        final PreparedStatement stmtSelClientAddress =
-            con.prepareStatement(SEL_CLIENT_ADDR, TFO, CRO);
-        final PreparedStatement stmtSelClientCounty =
-            con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
+        final PreparedStatement stmtSelCliAddr = con.prepareStatement(SEL_CLIENT_ADDR, TFO, CRO);
+        final PreparedStatement stmtSelCliCnty = con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
         final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS, TFO, CRO);
         final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA, TFO, CRO);
         final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CASE, TFO, CRO);
@@ -498,15 +496,14 @@ public class PeopleSummaryThreadHandler
 
       // SNAP-735: missing addresses.
       LOGGER.info("Read client address");
-      loadClientRange(con, stmtInsClient, range);
-      read(stmtSelClientAddress, rs -> readClientAddress(rs));
+      read(stmtSelCliAddr, rs -> readClientAddress(rs));
 
       LOGGER.info("Read address");
       read(stmtSelAddress, rs -> readAddress(rs));
 
       loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
       LOGGER.info("Read client county");
-      read(stmtSelClientCounty, rs -> readClientCounty(rs));
+      read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
       LOGGER.info("Read aka");
       read(stmtSelAka, rs -> readAka(rs));
