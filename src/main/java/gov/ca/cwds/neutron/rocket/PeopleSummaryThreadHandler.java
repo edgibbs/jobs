@@ -144,7 +144,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected <T extends ClientReference> void readAny(final ResultSet rs,
-      NeutronJdbcReader<T> reader, BiConsumer<RawClient, T> organizer, String msg) {
+      NeutronJdbcReader<T> reader, BiConsumer<ClientReference, T> organizer, String msg) {
     LOGGER.debug("readAny(): begin");
     int counter = 0;
     RawClient c = null;
