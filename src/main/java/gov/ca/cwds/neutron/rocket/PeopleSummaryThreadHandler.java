@@ -124,6 +124,7 @@ public class PeopleSummaryThreadHandler
   // =================================
 
   protected void read(final PreparedStatement stmt, Consumer<ResultSet> consumer) {
+    LOGGER.trace("read(): begin");
     try {
       stmt.setMaxRows(0);
       stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
@@ -141,7 +142,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "SELECT FAILED! {}", e.getMessage(), e);
     }
 
-    LOGGER.debug("read(): done");
+    LOGGER.trace("read(): done");
   }
 
   protected <T extends ClientReference> void readAny(final ResultSet rs,
