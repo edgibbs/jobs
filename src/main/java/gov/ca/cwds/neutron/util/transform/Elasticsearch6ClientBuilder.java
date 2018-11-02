@@ -15,6 +15,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,16 +32,22 @@ public class Elasticsearch6ClientBuilder {
       throws NeutronCheckedException {
     RestHighLevelClient ret = null;
     try {
+      final String user = config.getUser();
+      final String password = config.getPassword();
+      final boolean userPass = StringUtils.isNotBlank(user) && StringUtils.isNotBlank(password);
       HttpHost[] httpHosts = getHttpHosts(parseNodes(config.getElasticsearchNodes()));
-      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-      for (HttpHost httpHost : httpHosts) {
-        credentialsProvider.setCredentials(
-            new AuthScope(httpHost.getHostName(), httpHost.getPort(), null, null),
-            new UsernamePasswordCredentials(config.getUser(), config.getPassword()));
+      RestClientBuilder restClientBuilder = RestClient.builder(httpHosts);
+      if (userPass) {
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        for (HttpHost httpHost : httpHosts) {
+          credentialsProvider.setCredentials(
+              new AuthScope(httpHost.getHostName(), httpHost.getPort(), null, null),
+              new UsernamePasswordCredentials(user, password));
+        }
+        restClientBuilder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
+            .setDefaultCredentialsProvider(credentialsProvider));
       }
-      ret = new RestHighLevelClient(RestClient.builder(httpHosts).setHttpClientConfigCallback(
-          httpClientBuilder -> httpClientBuilder
-              .setDefaultCredentialsProvider(credentialsProvider)));
+      ret = new RestHighLevelClient(restClientBuilder);
 
     } catch (Exception e) {
       LOGGER.error("ERROR INITIALIZING ELASTICSEARCH CLIENT: {}", e.getMessage(), e);
