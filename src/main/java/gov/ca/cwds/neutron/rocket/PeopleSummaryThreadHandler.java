@@ -523,7 +523,13 @@ public class PeopleSummaryThreadHandler
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // and clear again. Make DBA's happy.
     } catch (Exception e) {
-      getRocket().getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
+      LOGGER.error("handleSecondaryJdbc: BOOM!", e);
+      if (isInitialLoad()) {
+        rocket.getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
+      } else {
+        rocket.fail();
+      }
+
       try {
         con.rollback();
       } catch (Exception e2) {
