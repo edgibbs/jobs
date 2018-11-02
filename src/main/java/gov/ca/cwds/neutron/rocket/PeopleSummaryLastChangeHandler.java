@@ -118,6 +118,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
     LOGGER.debug("loadClientRange(): begin");
+    con.commit();
     final int clientCount = insertNextKeyBundle(con, rangeStart, rangeEnd);
     LOGGER.info("loadClientRange(): client count: {}", clientCount);
   }
