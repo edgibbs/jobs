@@ -163,7 +163,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("{} {} recs retrieved", msg, counter);
+    LOGGER.debug("{} {} recs retrieved", msg, counter);
   }
 
   protected void readClient(final ResultSet rs) {
