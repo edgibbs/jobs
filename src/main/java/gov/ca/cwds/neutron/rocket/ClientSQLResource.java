@@ -393,7 +393,7 @@ public class ClientSQLResource implements ApiMarker {
     + "      WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "  UNION ALL SELECT cla.FKCLIENT_T AS CLIENT_ID \n"
     + "      FROM CL_ADDRT cla \n"
-    + "      JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER  \n"
+    + "      JOIN ADDRS_T  adr ON cla.FKADDRS_T = adr.IDENTIFIER  \n"
     + "      WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "  UNION ALL SELECT eth.ESTBLSH_ID AS CLIENT_ID \n"
     + "      FROM CLSCP_ET eth \n"

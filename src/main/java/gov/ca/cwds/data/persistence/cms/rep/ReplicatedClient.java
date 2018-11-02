@@ -331,7 +331,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     clientAddresses.stream().filter(ReplicatedClientAddress::isActive) // active only
         .sorted(Comparator
             .comparing(ReplicatedClientAddress::isResidence,
-                Comparator.nullsLast(Comparator.reverseOrder())) // residence next
+                Comparator.nullsLast(Comparator.reverseOrder())) // residence first
             .thenComparing(ReplicatedClientAddress::getEffStartDt, // start date, descending
                 Comparator.nullsLast(Comparator.reverseOrder())))
         .forEach(sortedClientAddresses::add);

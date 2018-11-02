@@ -129,12 +129,10 @@ public class PeopleSummaryThreadHandler
       stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
       stmt.setFetchSize(FETCH_SIZE.getValue());
 
-      // Close ResultSet for driver stability. Can't just close parent statement and session.
+      // Close ResultSet for driver stability, despite JDBC standard (close parent Statement).
+      // DB2 driver gets confused, if you just close parent statement and session.
       try (final ResultSet rs = stmt.executeQuery()) {
-        // DRS: see HyperCube.makeCmsSessionFactory() for magic DB2 settings.
-        // Without those settings, rs.next() frequently throws an Exception, because IBM's DB2 JDBC
-        // driver does NOT comply with JDBC type 4 standards!
-        while (rocket.isRunning() && rs.next()) { // oh DB2 ...
+        while (rocket.isRunning() && rs.next()) {
           consumer.accept(rs);
         }
       } finally {
@@ -147,6 +145,7 @@ public class PeopleSummaryThreadHandler
 
   protected <T extends ClientReference> void readAny(final ResultSet rs,
       NeutronJdbcReader<T> reader, BiConsumer<RawClient, T> organizer, String msg) {
+    LOGGER.debug("readAny(): begin");
     int counter = 0;
     RawClient c = null;
     T t;
@@ -180,6 +179,7 @@ public class PeopleSummaryThreadHandler
     // throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
     // }
 
+    LOGGER.debug("readClient(): begin");
     int counter = 0;
     RawClient c = null;
 
@@ -196,7 +196,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientAddress(final ResultSet rs) {
-    LOGGER.info("readClientAddress(): begin");
+    LOGGER.debug("readClientAddress(): begin");
     int counter = 0;
     RawClient c = null;
     RawClientAddress cla = null;
@@ -219,7 +219,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readAddress(final ResultSet rs) {
-    LOGGER.info("readAddress(): begin");
+    LOGGER.debug("readAddress(): begin");
     int counter = 0;
     RawAddress adr = null;
     RawClient c = null;
@@ -246,6 +246,7 @@ public class PeopleSummaryThreadHandler
     // readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc),
     // "client county");
 
+    LOGGER.debug("readClientCounty(): begin");
     int counter = 0;
     RawClient c = null;
     RawClientCounty cc = null;
@@ -271,6 +272,7 @@ public class PeopleSummaryThreadHandler
     // Should work but doesn't.
     // readAny(rs, new RawAka().read(rs), (c, aka) -> c.addAka(aka), "aka");
 
+    LOGGER.debug("readAka(): begin");
     int counter = 0;
     RawClient c = null;
     RawAka aka = null;
@@ -296,6 +298,7 @@ public class PeopleSummaryThreadHandler
     // Ditto.
     // readAny(rs, new RawCase().read(rs), (c, cas) -> c.addCase(cas), "case");
 
+    LOGGER.debug("readCase(): begin");
     int counter = 0;
     RawClient c = null;
     RawCase cas = null;
@@ -321,6 +324,7 @@ public class PeopleSummaryThreadHandler
     // Ditto.
     // readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec), "csec");
 
+    LOGGER.debug("readCsec(): begin");
     int counter = 0;
     RawClient c = null;
     RawCsec csec = null;
@@ -346,6 +350,7 @@ public class PeopleSummaryThreadHandler
     // Ditto.
     // readAny(rs, new RawEthnicity().read(rs), (c, eth) -> c.addEthnicity(eth), "ethnicity");
 
+    LOGGER.debug("readEthnicity(): begin");
     int counter = 0;
     RawClient c = null;
     RawEthnicity eth = null;
@@ -373,6 +378,7 @@ public class PeopleSummaryThreadHandler
     // readAny(rs, new RawSafetyAlert().read(rs), (c, saf) -> c.addSafetyAlert(saf), "safety
     // alert");
 
+    LOGGER.debug("readSafetyAlert(): begin");
     int counter = 0;
     RawClient c = null;
     RawSafetyAlert saf = null;
@@ -423,16 +429,17 @@ public class PeopleSummaryThreadHandler
 
   protected void loadClientRange(final PreparedStatement stmtInsClient, Pair<String, String> range)
       throws SQLException {
+    LOGGER.debug("loadClientRange(): begin");
     // Initial Load client ranges.
     try {
       stmtInsClient.setString(1, range.getLeft());
       stmtInsClient.setString(2, range.getRight());
     } catch (Exception e) {
-      LOGGER.trace("FAILED TO SET RANGES. Last change mode?", e);
+      LOGGER.trace("loadClientRange(): FAILED TO SET RANGES. Last change mode?", e);
     }
 
     final int clientCount = stmtInsClient.executeUpdate();
-    LOGGER.debug("client count: {}", clientCount);
+    LOGGER.info("loadClientRange(): client count: {}", clientCount);
   }
 
   protected boolean isInitialLoad() {
@@ -482,7 +489,10 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelSafety = con.prepareStatement(SELECT_SAFETY, TFO, CRO)) {
 
       // Client keys for this bundle.
-      loadClientRange(stmtInsClient, range);
+      if (isInitialLoad()) {
+        con.commit(); // free db resources
+        loadClientRange(stmtInsClient, range);
+      }
 
       LOGGER.info("Read client");
       read(stmtSelClient, rs -> readClient(rs));
@@ -494,8 +504,10 @@ public class PeopleSummaryThreadHandler
       read(stmtSelAddress, rs -> readAddress(rs));
 
       // SNAP-731: missing addresses.
-      con.commit(); // clear temp tables.
-      loadClientRange(stmtInsClient, range); // Insert client id's again.
+      if (isInitialLoad()) {
+        con.commit(); // free db resources
+        loadClientRange(stmtInsClient, range); // Insert client id's again.
+      }
 
       LOGGER.info("Read client county");
       read(stmtSelClientCounty, rs -> readClientCounty(rs));

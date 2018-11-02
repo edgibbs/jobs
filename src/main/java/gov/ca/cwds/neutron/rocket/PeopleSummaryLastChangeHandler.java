@@ -111,11 +111,13 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   }
 
   protected void insertNextKeyBundle(Connection con, int start, int end) {
+    LOGGER.debug("insertNextKeyBundle(): begin");
     try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
       LOGGER.info("key bundle: start: {}, end: {}", start, end);
       con.commit();
 
       final List<String> subset = keys.subList(start, Math.min(end, keys.size() - 1));
+      LOGGER.debug("insertNextKeyBundle(): subset size: {}", subset.size());
       int cntr = 0;
 
       for (String key : subset) {
@@ -127,6 +129,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR INSERTING KEYS!: {}", e.getMessage());
     }
+
+    LOGGER.debug("insertNextKeyBundle(): done: ");
   }
 
   @Override
@@ -183,12 +187,12 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         final int end = start + BUNDLE_KEY_SIZE - 1; //
         insertNextKeyBundle(con, start, end);
 
-        // Same logic as Initial Load, commit, clear temp tables.
+        // Same logic as Initial Load, commit, free db resources.
         super.handleSecondaryJdbc(con, range);
       }
 
       LOGGER.info("***** DONE retrieving data *****");
-      con.commit(); // release database resources, clear temp tables
+      con.commit(); // free db resources
     } catch (Exception e) {
       rocket.fail();
       try {

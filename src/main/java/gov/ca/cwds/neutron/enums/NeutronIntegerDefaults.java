@@ -45,9 +45,9 @@ public enum NeutronIntegerDefaults {
   FETCH_SIZE(5000),
 
   /**
-   * Let queries run -- until it's time to give up. 1 hour.
+   * Let queries run -- until it's time to give up. Default to 3 minutes.
    */
-  QUERY_TIMEOUT_IN_SECONDS(3600),
+  QUERY_TIMEOUT_IN_SECONDS(180),
 
   /**
    * Log every N records.
