@@ -40,6 +40,7 @@ import gov.ca.cwds.neutron.rocket.IndexResetPeopleRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.LightThisCandleRocket;
 import gov.ca.cwds.neutron.rocket.SchemaResetRocket;
+import gov.ca.cwds.neutron.rocket.VoxListenerRocket;
 
 /**
  * Standard rocket settings for both modes, Initial Load and Last Change (on-going, continuous).
@@ -94,6 +95,20 @@ public enum StandardFlightSchedule {
       false // People index
   ),
 
+  /**
+   * If requested, drop and create Elasticsearch People Summary index.
+   */
+  VOX_ROCKET(VoxListenerRocket.class, // rocket class
+      "vox", // rocket name
+      5, // initial load order
+      60000, // start delay seconds. N/A.
+      60000, // execute every N seconds. N/A.
+      null, // last run priority. N/A.
+      true, // run in Last Change mode
+      false, // run in Initial Load
+      false // People index
+  ),
+
   // ===============================
   // PEOPLE SUMMARY INDEX ROCKETS:
   // ===============================
@@ -101,7 +116,7 @@ public enum StandardFlightSchedule {
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 5, 20, 1000, null, true, true,
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 20, 1000, null, true, true,
       false),
 
   /**

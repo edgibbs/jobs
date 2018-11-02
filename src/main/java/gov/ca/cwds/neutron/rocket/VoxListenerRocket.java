@@ -34,6 +34,8 @@ public class VoxListenerRocket
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(VoxListenerRocket.class);
 
+  private int iterations;
+
   /**
    * Construct rocket with all required dependencies.
    * 
@@ -43,13 +45,15 @@ public class VoxListenerRocket
    * @param launchDirector1 command launch director
    * @param flightPlan command line options
    * @param launchDirector launch director
+   * @param iterations TODO
    */
   @Inject
   public VoxListenerRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
       final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
-      AtomLaunchDirector launchDirector) {
+      AtomLaunchDirector launchDirector, Integer iterations) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
+    this.iterations = iterations == 0 ? 1000 : iterations;
   }
 
   @Override
@@ -60,7 +64,7 @@ public class VoxListenerRocket
 
     try {
       // Listen for VOX commands.
-      for (int i = 0; i < 100; i++) {
+      for (int i = 0; i < iterations; i++) {
         CheeseRay.logEvery(LOGGER, ++counter, "Dummy", "vox");
         Thread.sleep(100L);
       }
