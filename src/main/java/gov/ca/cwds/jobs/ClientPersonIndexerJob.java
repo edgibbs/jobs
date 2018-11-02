@@ -79,7 +79,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private boolean multiThreadRetrieveDone = false;
 
-  private Deque<String> rerunClients = new ConcurrentLinkedDeque();
+  private Deque<String> rerunClients = new ConcurrentLinkedDeque<>();
 
   /**
    * Construct batch rocket instance with all required dependencies.

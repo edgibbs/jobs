@@ -427,8 +427,8 @@ public class PeopleSummaryThreadHandler
     flightLog.addToDenormalized(cntrRetrieved);
   }
 
-  protected void loadClientRange(final PreparedStatement stmtInsClient, Pair<String, String> range)
-      throws SQLException {
+  protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
+      Pair<String, String> range) throws SQLException {
     LOGGER.debug("loadClientRange(): begin");
     // Initial Load client ranges.
     try {
@@ -489,10 +489,8 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelSafety = con.prepareStatement(SELECT_SAFETY, TFO, CRO)) {
 
       // Client keys for this bundle.
-      if (isInitialLoad()) {
-        con.commit(); // free db resources
-        loadClientRange(stmtInsClient, range);
-      }
+      con.commit(); // free db resources
+      loadClientRange(con, stmtInsClient, range);
 
       LOGGER.info("Read client");
       read(stmtSelClient, rs -> readClient(rs));
@@ -504,10 +502,8 @@ public class PeopleSummaryThreadHandler
       read(stmtSelAddress, rs -> readAddress(rs));
 
       // SNAP-731: missing addresses.
-      if (isInitialLoad()) {
-        con.commit(); // free db resources
-        loadClientRange(stmtInsClient, range); // Insert client id's again.
-      }
+      con.commit(); // free db resources
+      loadClientRange(con, stmtInsClient, range); // Insert client id's again.
 
       LOGGER.info("Read client county");
       read(stmtSelClientCounty, rs -> readClientCounty(rs));

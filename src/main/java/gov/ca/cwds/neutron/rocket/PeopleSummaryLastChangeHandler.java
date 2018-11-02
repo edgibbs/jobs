@@ -38,6 +38,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private final List<String> keys = new ArrayList<>(BUNDLE_KEY_SIZE * 2);
 
+  private int rangeStart = 0;
+
+  private int rangeEnd = 0;
+
   /**
    * Preferred ctor.
    * 
@@ -93,7 +97,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     session.flush();
   }
 
-  protected void readClientKey(final ResultSet rs) {
+  protected void readClientKeys(final ResultSet rs) {
     int counter = 0;
     String k = null;
     final ClientPersonIndexerJob rocket = getRocket();
@@ -110,18 +114,27 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     LOGGER.info("Retrieved {} client keys.", counter);
   }
 
-  protected void insertNextKeyBundle(Connection con, int start, int end) {
+  @Override
+  protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
+      Pair<String, String> range) throws SQLException {
+    LOGGER.debug("loadClientRange(): begin");
+    final int clientCount = insertNextKeyBundle(con, rangeStart, rangeEnd);
+    LOGGER.info("loadClientRange(): client count: {}", clientCount);
+  }
+
+  protected int insertNextKeyBundle(Connection con, int start, int end) {
     LOGGER.debug("insertNextKeyBundle(): begin");
+    int ret = 0;
+
     try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
       LOGGER.info("key bundle: start: {}, end: {}", start, end);
       con.commit();
 
       final List<String> subset = keys.subList(start, Math.min(end, keys.size() - 1));
       LOGGER.debug("insertNextKeyBundle(): subset size: {}", subset.size());
-      int cntr = 0;
 
       for (String key : subset) {
-        CheeseRay.logEvery(LOGGER, ++cntr, "insert bundle keys", "keys");
+        CheeseRay.logEvery(LOGGER, ++ret, "insert bundle keys", "keys");
         ps.setString(1, key);
         ps.addBatch();
       }
@@ -130,7 +143,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       throw CheeseRay.runtime(LOGGER, e, "ERROR INSERTING KEYS!: {}", e.getMessage());
     }
 
-    LOGGER.debug("insertNextKeyBundle(): done: ");
+    LOGGER.debug("insertNextKeyBundle(): done: count: {}", ret);
+    return ret;
   }
 
   @Override
@@ -171,7 +185,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
       try (final PreparedStatement stmt = con.prepareStatement(sqlChangedClients, TFO, CRO)) {
-        read(stmt, rs -> readClientKey(rs));
+        read(stmt, rs -> readClientKeys(rs));
       } finally {
         // Auto-close statement.
       }
@@ -183,11 +197,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // OPTION: use a standing client id table and clear it before each run.
 
       // 0-999, 1000-1999, 2000-2999, etc.
-      for (int start = 0; start < totalKeys; start += BUNDLE_KEY_SIZE) {
-        final int end = start + BUNDLE_KEY_SIZE - 1; //
-        insertNextKeyBundle(con, start, end);
-
-        // Same logic as Initial Load, commit, free db resources.
+      for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {
+        rangeEnd = rangeStart + BUNDLE_KEY_SIZE - 1; //
         super.handleSecondaryJdbc(con, range);
       }
 
