@@ -1,21 +1,23 @@
 package gov.ca.cwds.neutron.util.transform;
 
+import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 public class Elasticsearch6ClientBuilder {
 
@@ -29,8 +31,17 @@ public class Elasticsearch6ClientBuilder {
       throws NeutronCheckedException {
     RestHighLevelClient ret = null;
     try {
-      ret = new RestHighLevelClient(
-          RestClient.builder(getHttpHosts(parseNodes(config.getElasticsearchNodes()))));
+      HttpHost[] httpHosts = getHttpHosts(parseNodes(config.getElasticsearchNodes()));
+      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+      for (HttpHost httpHost : httpHosts) {
+        credentialsProvider.setCredentials(
+            new AuthScope(httpHost.getHostName(), httpHost.getPort(), null, null),
+            new UsernamePasswordCredentials(config.getUser(), config.getPassword()));
+      }
+      ret = new RestHighLevelClient(RestClient.builder(httpHosts).setHttpClientConfigCallback(
+          httpClientBuilder -> httpClientBuilder
+              .setDefaultCredentialsProvider(credentialsProvider)));
+
     } catch (Exception e) {
       LOGGER.error("ERROR INITIALIZING ELASTICSEARCH CLIENT: {}", e.getMessage(), e);
       if (ret != null) {
