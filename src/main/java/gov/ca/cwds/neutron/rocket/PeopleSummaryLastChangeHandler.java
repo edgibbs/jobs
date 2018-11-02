@@ -192,6 +192,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       final int totalKeys = keys.size();
       LOGGER.info("keys: {}", totalKeys);
+      rangeStart = rangeEnd = 0;
 
       // CATCH: commit clears temp tables, forcing us to find changed clients again.
       // OPTION: use a standing client id table and clear it before each run.
