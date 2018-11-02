@@ -53,7 +53,7 @@ public class VoxListenerRocket
       final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector, Integer iterations) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
-    this.iterations = iterations == 0 ? 1000 : iterations;
+    this.iterations = iterations == 0 ? 3000 : iterations;
   }
 
   @Override
