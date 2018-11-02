@@ -430,6 +430,8 @@ public class PeopleSummaryThreadHandler
   protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
     LOGGER.debug("loadClientRange(): begin");
+    con.commit(); // free db resources
+
     // Initial Load client ranges.
     try {
       stmtInsClient.setString(1, range.getLeft());
@@ -489,22 +491,20 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelSafety = con.prepareStatement(SELECT_SAFETY, TFO, CRO)) {
 
       // Client keys for this bundle.
-      con.commit(); // free db resources
       loadClientRange(con, stmtInsClient, range);
 
       LOGGER.info("Read client");
       read(stmtSelClient, rs -> readClient(rs));
 
+      // SNAP-735: missing addresses.
       LOGGER.info("Read client address");
+      loadClientRange(con, stmtInsClient, range);
       read(stmtSelClientAddress, rs -> readClientAddress(rs));
 
       LOGGER.info("Read address");
       read(stmtSelAddress, rs -> readAddress(rs));
 
-      // SNAP-731: missing addresses.
-      con.commit(); // free db resources
-      loadClientRange(con, stmtInsClient, range); // Insert client id's again.
-
+      loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
       LOGGER.info("Read client county");
       read(stmtSelClientCounty, rs -> readClientCounty(rs));
 
@@ -522,7 +522,7 @@ public class PeopleSummaryThreadHandler
 
       LOGGER.info("Read safety alert");
       read(stmtSelSafety, rs -> readSafetyAlert(rs));
-      con.commit(); // clear again
+      con.commit(); // free db resources again
 
       LOGGER.info("Insert placement home clients");
       prepPlacementClients(stmtInsClient, range);
@@ -530,7 +530,7 @@ public class PeopleSummaryThreadHandler
 
       LOGGER.info("Read placement home address");
       readPlacementAddress(stmtSelPlacementAddress);
-      con.commit(); // and clear again. Make DBA's happy.
+      con.commit(); // free db resources. Make DBA's happy.
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
 
