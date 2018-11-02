@@ -199,7 +199,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // 0-999, 1000-1999, 2000-2999, etc.
       for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {
-        rangeEnd = rangeStart + BUNDLE_KEY_SIZE - 1; //
+        rangeEnd = Math.max(rangeStart + BUNDLE_KEY_SIZE - 1, totalKeys); //
         range = Pair.of(String.valueOf(rangeStart), String.valueOf(rangeEnd));
         super.handleSecondaryJdbc(con, range);
       }
