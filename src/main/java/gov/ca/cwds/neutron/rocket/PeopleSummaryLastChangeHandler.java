@@ -194,6 +194,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       final int totalKeys = keys.size();
       LOGGER.info("keys: {}", totalKeys);
       rangeStart = rangeEnd = 0;
+      con.commit(); // free db resources
 
       // CATCH: commit clears temp tables, forcing us to find changed clients again.
       // OPTION: use a standing client id table and clear it before each run.
@@ -202,6 +203,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {
         rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, totalKeys - 1); //
         range = Pair.of(String.valueOf(rangeStart), String.valueOf(rangeEnd));
+        LOGGER.debug("last change key subset range: {}", range);
         super.handleSecondaryJdbc(con, range);
       }
 

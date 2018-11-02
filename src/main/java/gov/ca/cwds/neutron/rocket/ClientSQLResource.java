@@ -377,13 +377,13 @@ public class ClientSQLResource implements ApiMarker {
     + "      FROM CSECHIST csh \n"
     + "      WHERE csh.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + " ) s2 \n"
-    + ") x\n";
+    + ") x FOR READ ONLY WITH UR";
   //@formatter:on
 
   //@formatter:off
   public static final String INS_CLIENT_LAST_CHG =
-      "INSERT INTO GT_REFR_CLT (FKREFERL_T,FKCLIENT_T,SENSTV_IND) \n"
-    + "SELECT DISTINCT '' AS FKREFERL_T, x.CLIENT_ID, '' AS SENSTV_IND FROM ( \n"
+      "INSERT INTO GT_ID (IDENTIFIER) \n"
+    + "SELECT DISTINCT x.CLIENT_ID AS IDENTIFIER FROM ( \n"
     + " SELECT s1.CLIENT_ID FROM ( \n"
     + "      SELECT CLT.IDENTIFIER AS CLIENT_ID \n"
     + "      FROM CLIENT_T clt \n"
