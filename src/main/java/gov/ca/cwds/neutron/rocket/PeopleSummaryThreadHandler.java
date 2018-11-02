@@ -129,8 +129,9 @@ public class PeopleSummaryThreadHandler
       stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue());
       stmt.setFetchSize(FETCH_SIZE.getValue());
 
-      // Close ResultSet for driver stability, despite JDBC standard (close parent Statement).
-      // DB2 driver gets confused, if you just close parent statement and session.
+      // Close ResultSet for driver stability, despite the JDBC standard (i.e., close parent
+      // Statement, not child ResultSet). The DB2 driver gets confused, if you just close parent
+      // statement and session without closing the result set.
       try (final ResultSet rs = stmt.executeQuery()) {
         consumer.accept(rs);
       } finally {
@@ -154,7 +155,7 @@ public class PeopleSummaryThreadHandler
       while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
         // Find associated raw client, if any, and link.
         c = rawClients.get(t.getCltId());
-        organizer.accept(c, t); // NOT WORKING??
+        organizer.accept(c, t);
         CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", msg);
       }
     } catch (Exception e) {
@@ -165,20 +166,6 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClient(final ResultSet rs) {
-    // DOESN'T WORK. :-(
-    // Isn't this **logically identical** to the boilerplate code below??
-    // Java should evaluate the lambda expression for each record, just like an interface
-    // implementation, but it doesn't. It evaluates the expression only once. Why??
-
-    // try {
-    // final NeutronJdbcReader<RawClient> reader = new RawClient().read(rs);
-    // final BiConsumer<RawClient, RawClient> organizer =
-    // (ignore, c) -> rawClients.put(c.getCltId(), c);
-    // readAny(rs, reader, organizer, "client");
-    // } catch (Exception e) {
-    // throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT! {}", e.getMessage(), e);
-    // }
-
     LOGGER.debug("readClient(): begin");
     int counter = 0;
     RawClient c = null;
@@ -242,10 +229,6 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientCounty(final ResultSet rs) {
-    // Should work but doesn't.
-    // readAny(rs, new RawClientCounty().read(rs), (c, cc) -> c.addClientCounty(cc),
-    // "client county");
-
     LOGGER.debug("readClientCounty(): begin");
     int counter = 0;
     RawClient c = null;
@@ -269,9 +252,6 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readAka(final ResultSet rs) {
-    // Should work but doesn't.
-    // readAny(rs, new RawAka().read(rs), (c, aka) -> c.addAka(aka), "aka");
-
     LOGGER.debug("readAka(): begin");
     int counter = 0;
     RawClient c = null;
@@ -295,9 +275,6 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readCase(final ResultSet rs) {
-    // Ditto.
-    // readAny(rs, new RawCase().read(rs), (c, cas) -> c.addCase(cas), "case");
-
     LOGGER.debug("readCase(): begin");
     int counter = 0;
     RawClient c = null;
@@ -321,9 +298,6 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readCsec(final ResultSet rs) {
-    // Ditto.
-    // readAny(rs, new RawCsec().read(rs), (c, csec) -> c.addCsec(csec), "csec");
-
     LOGGER.debug("readCsec(): begin");
     int counter = 0;
     RawClient c = null;
@@ -347,9 +321,6 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readEthnicity(final ResultSet rs) {
-    // Ditto.
-    // readAny(rs, new RawEthnicity().read(rs), (c, eth) -> c.addEthnicity(eth), "ethnicity");
-
     LOGGER.debug("readEthnicity(): begin");
     int counter = 0;
     RawClient c = null;
@@ -374,10 +345,6 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readSafetyAlert(final ResultSet rs) {
-    // Ditto.
-    // readAny(rs, new RawSafetyAlert().read(rs), (c, saf) -> c.addSafetyAlert(saf), "safety
-    // alert");
-
     LOGGER.debug("readSafetyAlert(): begin");
     int counter = 0;
     RawClient c = null;
