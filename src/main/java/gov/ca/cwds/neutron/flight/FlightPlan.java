@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.flight;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,7 +29,6 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 /**
  * Represents batch rocket options from the command line.
@@ -167,8 +168,8 @@ public class FlightPlan implements ApiMarker {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.trimToNull(indexName);
-    this.overrideLastStartTime = NeutronDateUtils.freshDate(lastStartTime);
-    this.overrideLastEndTime = NeutronDateUtils.freshDate(lastEndTime);
+    this.overrideLastStartTime = freshDate(lastStartTime);
+    this.overrideLastEndTime = freshDate(lastEndTime);
     this.lastRunLoc = lastRunLoc;
     this.lastRunMode = lastRunMode;
     this.startBucket = startBucket;
@@ -523,7 +524,7 @@ public class FlightPlan implements ApiMarker {
   }
 
   public void setOverrideLastRunTime(Date lastRunTime) {
-    this.overrideLastStartTime = NeutronDateUtils.freshDate(lastRunTime);
+    this.overrideLastStartTime = freshDate(lastRunTime);
   }
 
   public boolean isRefreshMqt() {
@@ -563,11 +564,11 @@ public class FlightPlan implements ApiMarker {
   }
 
   public Date getOverrideLastEndTime() {
-    return NeutronDateUtils.freshDate(overrideLastEndTime);
+    return freshDate(overrideLastEndTime);
   }
 
   public void setOverrideLastEndTime(Date overrideLastEndTime) {
-    this.overrideLastEndTime = NeutronDateUtils.freshDate(overrideLastEndTime);
+    this.overrideLastEndTime = freshDate(overrideLastEndTime);
   }
 
   public boolean isLegacyPeopleMapping() {

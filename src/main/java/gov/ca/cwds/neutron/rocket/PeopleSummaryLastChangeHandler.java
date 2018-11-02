@@ -159,8 +159,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
 
+      final Date overrideLastChgDate = rocket.getFlightPlan().getOverrideLastEndTime();
       final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_ALL_CLIENT_LAST_CHG,
-          rocket.determineLastSuccessfulRunTime(), rocket.getFlightPlan().getOverrideLastEndTime());
+          rocket.determineLastSuccessfulRunTime(),
+          overrideLastChgDate != null ? overrideLastChgDate : new Date());
 
       // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
