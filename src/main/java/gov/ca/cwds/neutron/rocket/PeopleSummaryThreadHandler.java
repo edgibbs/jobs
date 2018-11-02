@@ -524,6 +524,7 @@ public class PeopleSummaryThreadHandler
       con.commit(); // and clear again. Make DBA's happy.
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
+
       if (isInitialLoad()) {
         rocket.getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
       } else {
