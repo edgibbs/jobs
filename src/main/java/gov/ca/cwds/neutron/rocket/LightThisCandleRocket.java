@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.rocket;
 
-import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +10,7 @@ import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
@@ -26,8 +26,7 @@ public class LightThisCandleRocket
 
   private static final long serialVersionUID = 1L;
 
-  private static final ConditionalLogger LOGGER =
-      new JetPackLogger(LightThisCandleRocket.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(LightThisCandleRocket.class);
 
   private transient LaunchDirector launchDirector1;
 
@@ -54,7 +53,7 @@ public class LightThisCandleRocket
   public Date launch(Date lastRunDate) {
     nameThread("start_initial_load");
     if (LaunchCommand.isInitialMode()) {
-      LOGGER.warn("Lets light this candle!");
+      LOGGER.warn("Let's light this candle!");
     }
 
     return lastRunDate;
