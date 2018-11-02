@@ -196,6 +196,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientAddress(final ResultSet rs) {
+    LOGGER.info("readClientAddress(): begin");
     int counter = 0;
     RawClient c = null;
     RawClientAddress cla = null;
@@ -214,10 +215,11 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} client address records.", counter);
+    LOGGER.info("readClientAddress(): Retrieved {} client address records.", counter);
   }
 
   protected void readAddress(final ResultSet rs) {
+    LOGGER.info("readAddress(): begin");
     int counter = 0;
     RawAddress adr = null;
     RawClient c = null;
@@ -236,7 +238,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ ADDRESS! {}", e.getMessage(), e);
     }
 
-    LOGGER.info("Retrieved {} address records.", counter);
+    LOGGER.info("readAddress(): retrieved {} address records.", counter);
   }
 
   protected void readClientCounty(final ResultSet rs) {
@@ -443,6 +445,10 @@ public class PeopleSummaryThreadHandler
    * <p>
    * Read placement home addresses per rule R-02294, Client Abstract Most Recent Address.
    * </p>
+   * 
+   * <p>
+   * Commit more often by re-inserting client id's into GT_ID.
+   * </p>
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
@@ -475,11 +481,8 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY, TFO, CRO);
         final PreparedStatement stmtSelSafety = con.prepareStatement(SELECT_SAFETY, TFO, CRO)) {
 
-      // Commit more often by re-inserting client id's into GT_ID.
-      // Initial Load client ranges:
-      if (isInitialLoad()) {
-        loadClientRange(stmtInsClient, range);
-      }
+      // Client keys for this bundle.
+      loadClientRange(stmtInsClient, range);
 
       LOGGER.info("Read client");
       read(stmtSelClient, rs -> readClient(rs));
@@ -491,10 +494,8 @@ public class PeopleSummaryThreadHandler
       read(stmtSelAddress, rs -> readAddress(rs));
 
       // SNAP-731: missing addresses.
-      if (isInitialLoad()) {
-        con.commit(); // clear temp tables.
-        loadClientRange(stmtInsClient, range); // Insert client id's again.
-      }
+      con.commit(); // clear temp tables.
+      loadClientRange(stmtInsClient, range); // Insert client id's again.
 
       LOGGER.info("Read client county");
       read(stmtSelClientCounty, rs -> readClientCounty(rs));
