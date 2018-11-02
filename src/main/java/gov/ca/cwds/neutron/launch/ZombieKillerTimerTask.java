@@ -19,8 +19,8 @@ import gov.ca.cwds.neutron.rocket.BasePersonRocket;
  * Timer task to abort stalled or runaway rockets.
  * 
  * <p>
- * This zombie killer only kills jobs in Last Change mode, <strong>not Initial Load</strong>, since
- * the latter runs much longer than the former.
+ * This zombie killer only kills jobs in Last Change mode only, <strong>not Initial Load</strong>,
+ * since the latter runs much longer than the former.
  * </p>
  * 
  * @author CWDS API Team
@@ -52,10 +52,9 @@ public class ZombieKillerTimerTask extends TimerTask {
     final FlightLog flightLog = job.getRocket().getFlightLog();
     final long elapsed = System.currentTimeMillis() - flightLog.getStartTime();
 
-    LOGGER.info("Keep flying. rocket: {}, elapsed millis: {}, failed: {}", klass, elapsed,
-        flightLog.isFailed());
-    if ((flightPlan.isLastRunMode() && (flightLog.isRunning() && elapsed > timeToAbort))
-        || flightLog.isFailed()) {
+    LOGGER.info("Check flight. rocket: {}, elapsed millis: {}, failed: {}, max time to abort: {}",
+        klass, elapsed, flightLog.isFailed(), timeToAbort);
+    if (flightPlan.isLastRunMode() && (elapsed > timeToAbort || flightLog.isFailed())) {
       try {
         LOGGER.warn("ABORT FLIGHT! rocket: {}, elapsed millis: {}, failed: {}", klass, elapsed,
             flightLog.isFailed());
@@ -64,6 +63,9 @@ public class ZombieKillerTimerTask extends TimerTask {
       } catch (SchedulerException e) {
         LOGGER.error("FAILED TO ABORT! {} : {}", klass, e.getMessage(), e);
       }
+    } else {
+      LOGGER.info("Let her fly! rocket: {}, elapsed millis: {}, failed: {}, max time to abort: {}",
+          klass, elapsed, flightLog.isFailed(), timeToAbort);
     }
   }
 

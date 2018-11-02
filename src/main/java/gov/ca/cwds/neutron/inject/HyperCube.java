@@ -209,8 +209,8 @@ public class HyperCube extends NeutronGuiceModule {
    */
   protected void bindSystemProperties() {
     final Properties defaults = new Properties();
-    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // default to 1 minute
-    defaults.setProperty("zombie.killer.killAtMillis", "240000"); // default to 4 minutes
+    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // 1 minute
+    defaults.setProperty("zombie.killer.killAtMillis", "900000"); // 15 minutes
 
     final Properties props = new Properties(defaults);
     props.putAll(System.getProperties());
