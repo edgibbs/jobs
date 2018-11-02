@@ -114,17 +114,17 @@ public class RawToEsConverter {
     final Collection<RawClientAddress> coll = rawCli.getClientAddress().values();
     LOGGER.trace("convert client address: count: {}", coll.size());
     for (RawClientAddress rca : coll) {
-      convertClientAddress(rc, rawCli, rca);
+      convertClientAddress(rc, rca);
     }
 
     LOGGER.trace("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
-      convertClientCounty(rc, rawCli, cc);
+      convertClientCounty(rc, cc);
     }
 
     LOGGER.trace("convert aka");
     for (RawAka aka : rawCli.getAka()) {
-      convertAka(rc, rawCli, aka);
+      convertAka(rc, aka);
     }
 
     LOGGER.trace("convert ethnicity");
@@ -134,24 +134,24 @@ public class RawToEsConverter {
 
     LOGGER.trace("convert safety alert");
     for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
-      convertSafetyAlert(rc, rawCli, saf);
+      convertSafetyAlert(rc, saf);
     }
 
     LOGGER.trace("convert case");
     for (RawCase cas : rawCli.getCases()) {
-      convertCase(rc, rawCli, cas);
+      convertCase(rc, cas);
     }
 
     // SNAP-729: Neutron Initial Load: restore CSEC.
     LOGGER.trace("convert CSEC");
     for (RawCsec csec : rawCli.getCsec()) {
-      convertCsec(rc, rawCli, csec);
+      convertCsec(rc, csec);
     }
 
     return rc;
   }
 
-  protected void convertCsec(ReplicatedClient rc, RawClient rawCli, RawCsec rawCsec) {
+  protected void convertCsec(ReplicatedClient rc, RawCsec rawCsec) {
     if (StringUtils.isBlank(rawCsec.getCsecId())
         || CmsReplicationOperation.D == rawCsec.getCsecLastUpdatedOperation()) {
       return;
@@ -175,13 +175,12 @@ public class RawToEsConverter {
     rc.addCsec(csec);
   }
 
-  protected void convertCase(ReplicatedClient rc, RawClient rawCli, RawCase rawCase) {
+  protected void convertCase(ReplicatedClient rc, RawCase rawCase) {
     rc.setOpenCaseId(rawCase.getOpenCaseId());
     rc.setOpenCaseResponsibleAgencyCode(rawCase.getOpenCaseResponsibleAgencyCode());
   }
 
-  protected void convertSafetyAlert(ReplicatedClient rc, RawClient rawCli,
-      RawSafetyAlert rawSafetyAlert) {
+  protected void convertSafetyAlert(ReplicatedClient rc, RawSafetyAlert rawSafetyAlert) {
     if (StringUtils.isBlank(rawSafetyAlert.getSafetyAlertId())
         || CmsReplicationOperation.D == rawSafetyAlert.getSafetyAlertLastUpdatedOperation()) {
       return;
@@ -241,7 +240,7 @@ public class RawToEsConverter {
     rc.addClientRace(rawEthnicity.getClientEthnicityCode());
   }
 
-  protected void convertAka(ReplicatedClient rc, RawClient rawCli, RawAka rawAka) {
+  protected void convertAka(ReplicatedClient rc, RawAka rawAka) {
     if (StringUtils.isBlank(rawAka.getAkaId())
         || CmsReplicationOperation.D == rawAka.getAkaLastUpdatedOperation()) {
       return;
@@ -281,13 +280,11 @@ public class RawToEsConverter {
     rc.addAka(aka);
   }
 
-  protected void convertClientCounty(ReplicatedClient rc, RawClient rawCli,
-      RawClientCounty rawCounty) {
+  protected void convertClientCounty(ReplicatedClient rc, RawClientCounty rawCounty) {
     rc.addClientCounty(rawCounty.getClientCounty());
   }
 
-  protected void convertClientAddress(ReplicatedClient rc, RawClient rawCli,
-      RawClientAddress rawCliAdr) {
+  protected void convertClientAddress(ReplicatedClient rc, RawClientAddress rawCliAdr) {
     final ReplicatedClientAddress rca = new ReplicatedClientAddress();
     rca.setId(rawCliAdr.getClaId());
     rca.setAddressType(rawCliAdr.getClaAddressType());
@@ -306,12 +303,12 @@ public class RawToEsConverter {
     rc.addClientAddress(rca);
 
     if (rawCliAdr.getAddress() != null) {
-      rca.addAddress(convertAddress(rc, rca, rawCli, rawCliAdr, rawCliAdr.getAddress()));
+      rca.addAddress(convertAddress(rc, rca, rawCliAdr, rawCliAdr.getAddress()));
     }
   }
 
   protected ReplicatedAddress convertAddress(ReplicatedClient rc, ReplicatedClientAddress repCa,
-      RawClient rawCli, RawClientAddress rawCa, RawAddress rawAdr) {
+      RawClientAddress rawCa, RawAddress rawAdr) {
     final ReplicatedAddress adr = new ReplicatedAddress();
     adr.setId(rawAdr.getAdrId());
     adr.setAddressDescription(rawAdr.getAdrAddressDescription());
