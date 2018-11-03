@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
@@ -17,6 +18,7 @@ public class XRaySpexTest extends Goddard<ReplicatedClient, RawClient> {
 
   XRaySpex target;
 
+  @Before
   @Override
   public void setup() throws Exception {
     super.setup();
