@@ -480,11 +480,9 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
       throws NeutronCheckedException {
-    TransportClient client = null;
     LOGGER.debug("HyperCube.buildElasticsearchClient");
     try {
-      client = gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
-      return client;
+      return gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e,
           "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
