@@ -34,8 +34,33 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void convert_A$RawClient() throws Exception {
-    RawClient rawCli = new RawClient();
-    ReplicatedClient actual = target.convert(rawCli);
+    final RawClient rawCli = new RawClient();
+
+    final RawCsec rawCsec = new RawCsec();
+    rawCli.addCsec(rawCsec);
+
+    final RawCase rawCase = mock(RawCase.class);
+    rawCli.addCase(rawCase);
+
+    final RawSafetyAlert rawSafetyAlert = mock(RawSafetyAlert.class);
+    rawCli.addSafetyAlert(rawSafetyAlert);
+
+    final RawEthnicity rawEthnicity = mock(RawEthnicity.class);
+    rawCli.addEthnicity(rawEthnicity);
+
+    final RawAka rawAka = mock(RawAka.class);
+    rawCli.addAka(rawAka);
+
+    final RawClientCounty rawCounty = mock(RawClientCounty.class);
+    rawCli.addClientCounty(rawCounty);
+
+    final RawClientAddress rawCliAdr = mock(RawClientAddress.class);
+    rawCli.addClientAddress(rawCliAdr);
+
+    final RawAddress rawAdr = mock(RawAddress.class);
+    rawCliAdr.setAddress(rawAdr);
+
+    final ReplicatedClient actual = target.convert(rawCli);
     // ReplicatedClient expected = null;
     // assertThat(actual, is(equalTo(expected)));
     assertThat(actual, is(notNullValue()));
