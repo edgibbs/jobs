@@ -129,7 +129,7 @@ public class RawToEsConverter {
 
     LOGGER.trace("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
-      convertEthnicity(rc, rawCli, eth);
+      convertEthnicity(rc, eth);
     }
 
     LOGGER.trace("convert safety alert");
@@ -235,8 +235,7 @@ public class RawToEsConverter {
     rc.addSafetyAlert(alert);
   }
 
-  protected void convertEthnicity(ReplicatedClient rc, RawClient rawCli,
-      RawEthnicity rawEthnicity) {
+  protected void convertEthnicity(ReplicatedClient rc, RawEthnicity rawEthnicity) {
     rc.addClientRace(rawEthnicity.getClientEthnicityCode());
   }
 
@@ -303,12 +302,12 @@ public class RawToEsConverter {
     rc.addClientAddress(rca);
 
     if (rawCliAdr.getAddress() != null) {
-      rca.addAddress(convertAddress(rc, rca, rawCliAdr, rawCliAdr.getAddress()));
+      rca.addAddress(convertAddress(rca, rawCliAdr, rawCliAdr.getAddress()));
     }
   }
 
-  protected ReplicatedAddress convertAddress(ReplicatedClient rc, ReplicatedClientAddress repCa,
-      RawClientAddress rawCa, RawAddress rawAdr) {
+  protected ReplicatedAddress convertAddress(ReplicatedClientAddress repCa, RawClientAddress rawCa,
+      RawAddress rawAdr) {
     final ReplicatedAddress adr = new ReplicatedAddress();
     adr.setId(rawAdr.getAdrId());
     adr.setAddressDescription(rawAdr.getAdrAddressDescription());
