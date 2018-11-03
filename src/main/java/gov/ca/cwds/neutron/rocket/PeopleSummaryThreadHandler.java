@@ -36,6 +36,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -218,7 +219,11 @@ public class PeopleSummaryThreadHandler
       while (rocket.isRunning() && rs.next() && (adr = new RawAddress().read(rs)) != null) {
         c = rawClients.get(adr.getCltId());
         if (c != null) {
-          c.getClientAddress().get(adr.getClaId()).setAddress(adr);
+          final Map<String, RawClientAddress> cla = c.getClientAddress();
+          final String addrKey = adr.getClaId();
+          if (cla != null && StringUtils.isNotEmpty(addrKey) && cla.containsKey(addrKey)) {
+            cla.get(addrKey).setAddress(adr);
+          }
           CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "address");
         } else {
           LOGGER.warn("ORPHAN ADDRESS! id: {}, client: {}", adr.getAdrId(), adr.getCltId());
