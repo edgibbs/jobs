@@ -629,7 +629,7 @@ public class PeopleSummaryThreadHandler
   public void addAll(Collection<ReplicatedClient> collection) {
     if (!collection.isEmpty()) {
       if (normalized.size() < collection.size()) {
-        this.normalized = new HashMap<String, ReplicatedClient>(collection.size());
+        this.normalized = new HashMap<>(collection.size());
       }
       collection.stream().forEach(c -> normalized.put(c.getId(), c));
     }

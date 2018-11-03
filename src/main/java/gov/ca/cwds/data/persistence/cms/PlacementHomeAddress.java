@@ -243,7 +243,7 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   }
 
   @Override
-  public ReplicatedClientAddress normalize(Map<Object, ReplicatedClientAddress> arg0) {
+  public ReplicatedClientAddress normalize(Map<Object, ReplicatedClientAddress> ignoreMe) {
     return toReplicatedClientAddress();
   }
 
