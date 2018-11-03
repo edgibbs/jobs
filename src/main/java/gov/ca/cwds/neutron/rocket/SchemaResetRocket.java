@@ -75,6 +75,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       done();
     } catch (Exception e) {
       fail();
+      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR!! {}", e.getMessage());
     }
 
@@ -156,6 +157,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         LOGGER.trace("timeExceeded: {}", timeExceeded);
       } catch (InterruptedException e) {
         fail();
+        Thread.currentThread().interrupt();
         throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
       } finally {
         lock.unlock();
@@ -212,6 +214,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       }
     } catch (InterruptedException e) {
       fail();
+      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
     }
   }
@@ -229,6 +232,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         }
       }
     } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
     }
   }
