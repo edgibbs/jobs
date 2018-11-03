@@ -180,9 +180,9 @@ public class ClientIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void mustDeleteLimitedAccessRecords_Args__2() throws Exception {
-    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(true);
+    // when(flightPlan.isLoadSealedAndSensitive()).thenReturn(true);
     boolean actual = target.mustDeleteLimitedAccessRecords();
-    boolean expected = false;
+    boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 

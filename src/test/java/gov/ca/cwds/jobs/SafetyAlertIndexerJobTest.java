@@ -39,7 +39,7 @@ public class SafetyAlertIndexerJobTest extends Goddard {
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.beginTransaction()).thenReturn(transaction);
-    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
+    // when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
@@ -92,11 +92,11 @@ public class SafetyAlertIndexerJobTest extends Goddard {
 
   @Test
   public void getInitialLoadQuery_Args__sealed() throws Exception {
-    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(true);
+    // when(flightPlan.isLoadSealedAndSensitive()).thenReturn(true);
     String dbSchemaName = "CWSINT";
     String actual = target.getInitialLoadQuery(dbSchemaName).replaceAll("  ", " ").trim();
     String expected =
-        "SELECT x.* FROM CWSINT.VW_LST_SAFETY_ALERT x ORDER BY CLIENT_ID FOR READ ONLY WITH UR";
+        "SELECT x.* FROM CWSINT.VW_LST_SAFETY_ALERT x WHERE x.CLIENT_SENSITIVITY_IND = 'N' ORDER BY CLIENT_ID FOR READ ONLY WITH UR";
     assertThat(actual, is(equalTo(expected)));
   }
 
