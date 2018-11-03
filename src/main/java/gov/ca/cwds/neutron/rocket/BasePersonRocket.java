@@ -690,7 +690,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       if (determineInitialLoad(lastRun)) {
         // Initial mode:
         flightLog.setInitialLoad(true);
-        refreshMQT();
         if (isInitialLoadJdbc()) {
           doInitialLoadJdbc();
         } else {
@@ -716,7 +715,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
       // CHECKSTYLE:ON
       ret = new Date(flightLog.getStartTime());
-    } catch (NeutronCheckedException | RuntimeException e) {
+    } catch (Exception e) {
       fail();
       throw CheeseRay.checked(LOGGER, e, "ROCKET EXPLODED! {}", e.getMessage());
     } finally {

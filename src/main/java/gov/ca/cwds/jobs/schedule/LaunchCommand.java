@@ -332,6 +332,15 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     return instance;
   }
 
+  /**
+   * TESTING ONLY!
+   * 
+   * @param lc test instance
+   */
+  public static void setInstance(LaunchCommand lc) {
+    LaunchCommand.instance = lc;
+  }
+
   protected static FlightPlan parseCommandLine(String... args) throws NeutronCheckedException {
     try {
       return FlightPlan.parseCommandLine(args);
