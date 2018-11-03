@@ -112,7 +112,7 @@ public class RawToEsConverter {
     rc.setLastUpdatedTime(rawCli.getCltLastUpdatedTime());
 
     final Collection<RawClientAddress> coll = rawCli.getClientAddress().values();
-    LOGGER.trace("convert client address: count: {}", coll.size());
+    LOGGER.trace("convert client address");
     for (RawClientAddress rca : coll) {
       convertClientAddress(rc, rca);
     }

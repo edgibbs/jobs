@@ -459,6 +459,11 @@ public class ClientSQLResource implements ApiMarker {
   // OLD SCHOOL:
   // =================================
 
+  /**
+   * Old SQL. Too many columns, slows DB2 to a crawl.
+   * 
+   * @deprecated use smaller SELECT statements listed above
+   */
   @Deprecated
   public static final String LAST_CHG_COLUMNS =
   //@formatter:off
@@ -619,6 +624,11 @@ public class ClientSQLResource implements ApiMarker {
       + " x.LAST_CHG ";
   //@formatter:on
 
+  /**
+   * Old SQL. Too many columns, slows DB2 to a crawl.
+   * 
+   * @deprecated use smaller SELECT statements listed above
+   */
   @Deprecated
   public static final String SELECT_CLIENT_VIEW_LAST_CHANGE =
   //@formatter:off

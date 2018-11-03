@@ -626,10 +626,13 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     }
   }
 
+  /**
+   * Configure queue sizes for last run or initial load.
+   * 
+   * @param lastRun last successful run time
+   */
   protected void sizeQueues(final Date lastRun) {
-    // Configure queue sizes for last run or initial load.
-    // queueNormalize = new LinkedBlockingDeque<>();
-    // queueIndex = new LinkedBlockingDeque<>();
+    // Default implementation is no-op.
   }
 
   protected boolean determineInitialLoad(final Date lastRun) {

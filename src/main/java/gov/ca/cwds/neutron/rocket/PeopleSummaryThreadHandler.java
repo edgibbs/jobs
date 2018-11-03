@@ -98,22 +98,24 @@ public class PeopleSummaryThreadHandler
 
   protected boolean doneHandlerRetrieve = false;
 
-  protected Set<String> deletionResults = new HashSet<>();
+  protected transient Set<String> deletionResults = new HashSet<>();
 
   /**
    * key = client id
    */
-  protected final Map<String, PlacementHomeAddress> placementHomeAddresses = new HashMap<>(5011);
+  protected transient Map<String, PlacementHomeAddress> placementHomeAddresses =
+      new HashMap<>(5011);
 
   /**
    * key = client id
    */
-  protected Map<String, RawClient> rawClients = new HashMap<>(FULL_DENORMALIZED_SIZE);
+  protected transient Map<String, RawClient> rawClients = new HashMap<>(FULL_DENORMALIZED_SIZE);
 
   /**
    * key = client id
    */
-  protected Map<String, ReplicatedClient> normalized = new HashMap<>(FULL_DENORMALIZED_SIZE);
+  protected transient Map<String, ReplicatedClient> normalized =
+      new HashMap<>(FULL_DENORMALIZED_SIZE);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;

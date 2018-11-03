@@ -7,6 +7,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class NeutronCmdLineParser {
 
+  private NeutronCmdLineParser() {
+    // static methods only
+  }
+
   /**
    * Define a command line option.
    * 

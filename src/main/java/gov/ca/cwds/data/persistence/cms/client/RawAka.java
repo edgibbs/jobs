@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -149,11 +151,11 @@ public class RawAka extends ClientReference implements NeutronJdbcReader<RawAka>
   }
 
   public Date getAkaLastUpdatedTimestamp() {
-    return akaLastUpdatedTimestamp;
+    return freshDate(akaLastUpdatedTimestamp);
   }
 
   public void setAkaLastUpdatedTimestamp(Date akaLastUpdatedTimestamp) {
-    this.akaLastUpdatedTimestamp = akaLastUpdatedTimestamp;
+    this.akaLastUpdatedTimestamp = freshDate(akaLastUpdatedTimestamp);
   }
 
   public CmsReplicationOperation getAkaLastUpdatedOperation() {
@@ -165,11 +167,11 @@ public class RawAka extends ClientReference implements NeutronJdbcReader<RawAka>
   }
 
   public Date getAkaReplicationTimestamp() {
-    return akaReplicationTimestamp;
+    return freshDate(akaReplicationTimestamp);
   }
 
   public void setAkaReplicationTimestamp(Date akaReplicationTimestamp) {
-    this.akaReplicationTimestamp = akaReplicationTimestamp;
+    this.akaReplicationTimestamp = freshDate(akaReplicationTimestamp);
   }
 
 }

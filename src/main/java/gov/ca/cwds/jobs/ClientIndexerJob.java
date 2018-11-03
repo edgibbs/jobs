@@ -71,9 +71,6 @@ public class ClientIndexerJob extends InitialLoadJdbcRocket<ReplicatedClient, Ra
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
-    // if (flightPlan.isLegacyPeopleMapping()) {
-    // EsClientAddress.setLegacyPeopleMapping(true);
-    // }
   }
 
   @Override

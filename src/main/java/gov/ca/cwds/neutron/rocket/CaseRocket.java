@@ -633,6 +633,14 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
     return countNormalized;
   }
 
+  protected void logVerification(final Map<String, ReplicatedPersonCases> mapReadyClientCases,
+      final List<Pair<String, String>> tests) throws IOException {
+    for (Pair<String, String> p : tests) {
+      LOGGER.info("TEST: name: {}\n{}", p.getLeft(),
+          ElasticSearchPerson.MAPPER.writeValueAsString(mapReadyClientCases.get(p.getRight())));
+    }
+  }
+
   protected boolean verify(final Map<String, ReplicatedPersonCases> mapReadyClientCases)
       throws NeutronCheckedException {
     if (!isLargeDataSet()) {
@@ -647,10 +655,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
         catchYourBreath(); // Let bulk processor finish
 
         if (LOGGER.isInfoEnabled()) {
-          for (Pair<String, String> p : tests) {
-            LOGGER.info("TEST: name: {}\n{}", p.getLeft(), ElasticSearchPerson.MAPPER
-                .writeValueAsString(mapReadyClientCases.get(p.getRight())));
-          }
+          logVerification(mapReadyClientCases, tests);
         }
       } catch (IOException e) {
         fail();

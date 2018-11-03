@@ -47,9 +47,9 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   private int pollPeriodInSeconds = 60;
 
-  private final Lock lock = new ReentrantLock();
+  private transient Lock lock = new ReentrantLock();
 
-  private final Condition condDone = lock.newCondition();
+  private transient Condition condDone = lock.newCondition();
 
   /**
    * Construct rocket with all required dependencies.

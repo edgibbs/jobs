@@ -356,8 +356,8 @@ public final class NeutronJdbcUtils {
     return work.getTotalProcessed();
   }
 
-  public static int runStatementInsertRownumBundle(final Session session, final String sql,
-      int start, int end, final Function<Connection, PreparedStatement> func) {
+  public static int runStatementInsertRownumBundle(final Session session, int start, int end,
+      final Function<Connection, PreparedStatement> func) {
     final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end, func);
     doWork(session, work);
     return work.getTotalProcessed();

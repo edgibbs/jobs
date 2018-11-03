@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.io.Serializable;
@@ -203,11 +204,11 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
   }
 
   public Date getAdrLastUpdatedTime() {
-    return adrLastUpdatedTime;
+    return freshDate(adrLastUpdatedTime);
   }
 
   public void setAdrLastUpdatedTime(Date adrLastUpdatedTime) {
-    this.adrLastUpdatedTime = adrLastUpdatedTime;
+    this.adrLastUpdatedTime = freshDate(adrLastUpdatedTime);
   }
 
   public Long getAdrMessageNumber() {
@@ -303,11 +304,11 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
   }
 
   public Date getAdrReplicationDate() {
-    return adrReplicationDate;
+    return freshDate(adrReplicationDate);
   }
 
   public void setAdrReplicationDate(Date adrReplicationDate) {
-    this.adrReplicationDate = adrReplicationDate;
+    this.adrReplicationDate = freshDate(adrReplicationDate);
   }
 
   public void setAdrPrimaryExtension(Integer adrPrimaryExtension) {

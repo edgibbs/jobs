@@ -252,14 +252,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @Override
   public void done() {
     // Once failed, it cannot be rescinded.
-    // TODO: no longer true! You can run failed ranges a second time!
+    // NEXT: no longer true! You can run failed ranges a second time!
     if (this.status != FlightStatus.FAILED) {
       this.status = FlightStatus.SUCCEEDED;
     }
 
-    this.endTime = System.currentTimeMillis();
-
     // Done with ALL steps.
+    this.endTime = System.currentTimeMillis();
     this.doneRetrieve = true;
     this.doneIndex = true;
     this.doneTransform = true;

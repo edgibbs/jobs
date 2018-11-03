@@ -28,11 +28,11 @@ public class NeutronTriggerListener implements TriggerListener {
 
   private static final String THREAD_NAME = "neutron_trigger_listener";
 
-  private final LaunchDirector neutronScheduler;
+  private final LaunchDirector launchDirector;
 
   @Inject
-  public NeutronTriggerListener(final LaunchDirector neutronScheduler) {
-    this.neutronScheduler = neutronScheduler;
+  public NeutronTriggerListener(final LaunchDirector director) {
+    this.launchDirector = director;
     NeutronThreadUtils.nameThread(THREAD_NAME, this);
   }
 
@@ -45,7 +45,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerFired(Trigger trigger, JobExecutionContext context) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("Trigger fired: key: {}", key);
-    neutronScheduler.getRocketsInFlight().put(key, (NeutronRocket) context.getJobInstance());
+    launchDirector.getRocketsInFlight().put(key, (NeutronRocket) context.getJobInstance());
   }
 
   /**
@@ -58,9 +58,8 @@ public class NeutronTriggerListener implements TriggerListener {
     boolean answer = true;
 
     try {
-      answer = neutronScheduler.isLaunchVetoed(className);
+      answer = launchDirector.isLaunchVetoed(className);
     } catch (Exception e) {
-      answer = false;
       throw CheeseRay.runtime(LOGGER, e, "NO LAUNCH PAD! rocket: {}", className, e);
     }
 
@@ -72,7 +71,7 @@ public class NeutronTriggerListener implements TriggerListener {
   public void triggerMisfired(Trigger trigger) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("TRIGGER MISFIRED! key: {}", key);
-    neutronScheduler.removeExecutingJob(key);
+    launchDirector.removeExecutingJob(key);
   }
 
   @Override
@@ -80,7 +79,7 @@ public class NeutronTriggerListener implements TriggerListener {
       CompletedExecutionInstruction triggerInstructionCode) {
     final TriggerKey key = trigger.getKey();
     LOGGER.debug("Trigger complete: key: {}", key);
-    neutronScheduler.removeExecutingJob(key);
+    launchDirector.removeExecutingJob(key);
   }
 
 }
