@@ -35,30 +35,40 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void convert_A$RawClient() throws Exception {
     final RawClient rawCli = new RawClient();
+    rawCli.setCltId(DEFAULT_CLIENT_ID);
 
     final RawCsec rawCsec = new RawCsec();
     rawCli.addCsec(rawCsec);
+    rawCsec.setCltId(DEFAULT_CLIENT_ID);
 
     final RawCase rawCase = mock(RawCase.class);
     rawCli.addCase(rawCase);
+    rawCase.setCltId(DEFAULT_CLIENT_ID);
 
     final RawSafetyAlert rawSafetyAlert = mock(RawSafetyAlert.class);
     rawCli.addSafetyAlert(rawSafetyAlert);
+    rawSafetyAlert.setCltId(DEFAULT_CLIENT_ID);
 
     final RawEthnicity rawEthnicity = mock(RawEthnicity.class);
     rawCli.addEthnicity(rawEthnicity);
+    rawEthnicity.setCltId(DEFAULT_CLIENT_ID);
 
     final RawAka rawAka = mock(RawAka.class);
     rawCli.addAka(rawAka);
+    rawEthnicity.setCltId(DEFAULT_CLIENT_ID);
 
     final RawClientCounty rawCounty = mock(RawClientCounty.class);
     rawCli.addClientCounty(rawCounty);
+    rawCounty.setCltId(DEFAULT_CLIENT_ID);
 
     final RawClientAddress rawCliAdr = mock(RawClientAddress.class);
     rawCli.addClientAddress(rawCliAdr);
+    rawCliAdr.setCltId(DEFAULT_CLIENT_ID);
+    rawCliAdr.setClaId(DEFAULT_CLIENT_ID);
 
     final RawAddress rawAdr = mock(RawAddress.class);
     rawCliAdr.setAddress(rawAdr);
+    rawAdr.setClaId(DEFAULT_CLIENT_ID);
 
     final ReplicatedClient actual = target.convert(rawCli);
     // ReplicatedClient expected = null;
