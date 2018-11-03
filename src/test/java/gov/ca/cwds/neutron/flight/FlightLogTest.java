@@ -308,7 +308,7 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
     target.setStartTime(1522185484650L);
     final String actual = target.toJson().trim();
     final String expected =
-        "{\"rocket_name\":\"client\",\"fatal_error\":false,\"done_retrieve\":false,\"done_transform\":false,\"done_index\":false,\"done_flight\":false,\"validation_errors\":false,\"initial_load\":false,\"last_change_since\":null,\"status\":\"NOT_STARTED\",\"initial_load_ranges_started\":[],\"initial_load_ranges_completed\":[],\"initial_load_range_status\":{},\"affected_document_ids\":[],\"running\":true,\"failed\":false,\"retrieve_done\":false,\"transform_done\":false,\"index_done\":false,\"warnings\":[],\"to_index_queue\":0,\"normalized\":0,\"bulk_deleted\":0,\"bulk_prepared\":0,\"bulk_error\":0,\"bulk_after\":0,\"denormalized\":0,\"start_time\":\"2018-03-27T21:18:04.650Z\",\"end_time\":null}";
+        "{\"rocket_name\":\"people_summary\",\"fatal_error\":false,\"done_retrieve\":false,\"done_transform\":false,\"done_index\":false,\"done_flight\":false,\"validation_errors\":false,\"initial_load\":false,\"last_change_since\":null,\"status\":\"NOT_STARTED\",\"initial_load_ranges_started\":[],\"initial_load_ranges_completed\":[],\"initial_load_range_status\":{},\"affected_document_ids\":[],\"running\":true,\"failed\":false,\"retrieve_done\":false,\"transform_done\":false,\"index_done\":false,\"warnings\":[],\"to_index_queue\":0,\"normalized\":0,\"bulk_deleted\":0,\"bulk_prepared\":0,\"bulk_error\":0,\"bulk_after\":0,\"denormalized\":0,\"start_time\":\"2018-03-27T21:18:04.650Z\",\"end_time\":null}";
     System.out.println(actual);
     assertTrue(actual.startsWith(expected.substring(0, 30)));
   }

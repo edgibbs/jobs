@@ -102,7 +102,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getRocketName_Args__() throws Exception {
     final String actual = target.getRocketName();
-    final String expected = "client";
+    final String expected = "people_summary";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -124,7 +124,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getStartDelaySeconds_Args__() throws Exception {
     final int actual = target.getStartDelaySeconds();
-    final int expected = 8;
+    final int expected = 10;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -169,7 +169,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getInitialLoadOrder_Args__() throws Exception {
     final int actual = target.getInitialLoadOrder();
-    final int expected = 12;
+    final int expected = 4;
     assertThat(actual, is(equalTo(expected)));
   }
 
