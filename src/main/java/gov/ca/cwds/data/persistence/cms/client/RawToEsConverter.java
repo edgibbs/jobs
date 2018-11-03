@@ -302,12 +302,11 @@ public class RawToEsConverter {
     rc.addClientAddress(rca);
 
     if (rawCliAdr.getAddress() != null) {
-      rca.addAddress(convertAddress(rca, rawCliAdr, rawCliAdr.getAddress()));
+      rca.addAddress(convertAddress(rawCliAdr, rawCliAdr.getAddress()));
     }
   }
 
-  protected ReplicatedAddress convertAddress(ReplicatedClientAddress repCa, RawClientAddress rawCa,
-      RawAddress rawAdr) {
+  protected ReplicatedAddress convertAddress(RawClientAddress rawCa, RawAddress rawAdr) {
     final ReplicatedAddress adr = new ReplicatedAddress();
     adr.setId(rawAdr.getAdrId());
     adr.setAddressDescription(rawAdr.getAdrAddressDescription());

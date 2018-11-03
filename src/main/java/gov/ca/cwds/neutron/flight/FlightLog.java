@@ -405,8 +405,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   protected boolean filterStatus(FlightStatus actual, FlightStatus... scanFor) {
     boolean ret = false;
 
-    for (FlightStatus status : scanFor) {
-      if (actual == status) {
+    for (FlightStatus state : scanFor) {
+      if (actual == state) {
         ret = true;
         break;
       }

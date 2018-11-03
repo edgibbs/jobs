@@ -54,7 +54,16 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   /**
    * {@inheritDoc}
    * 
-   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys
+   * Handle additional JDBC statements, if any.
+   * 
+   * <p>
+   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys into bundles and
+   * commit frequently.
+   * </p>
+   * 
+   * <p>
+   * CAUTION: Prod can hang here when calling {@code SessionFactory.getCurrentSession()}.
+   * </p>
    */
   @Override
   public List<ReplicatedClient> fetchLastRunNormalizedResults(Date lastRunDate,
@@ -64,8 +73,6 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     this.deletionResults = deletionResults;
     final ClientPersonIndexerJob rocket = getRocket();
 
-    // CAUTION: Prod can hang here when calling SessionFactory.getCurrentSession();
-    // Handle additional JDBC statements, if any.
     Connection con = null;
     try (final Session session = getRocket().getJobDao().grabSession()) {
       con = NeutronJdbcUtils.prepConnection(session);
