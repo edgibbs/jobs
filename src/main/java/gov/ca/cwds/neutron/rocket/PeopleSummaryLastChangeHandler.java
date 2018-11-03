@@ -131,7 +131,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.debug("key bundle: start: {}, end: {}", start, end);
       con.commit();
 
-      final List<String> subset = keys.subList(start, Math.min(end, keys.size() - 1));
+      final List<String> subset = keys.subList(start, Math.max(end, Math.min(keys.size() - 1, 0)));
       LOGGER.debug("insertNextKeyBundle(): subset size: {}", subset.size());
 
       for (String key : subset) {
