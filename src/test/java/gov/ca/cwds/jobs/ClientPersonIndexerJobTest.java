@@ -287,6 +287,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
 
   @Test(expected = NeutronCheckedException.class)
   public void launch_A$Date() throws Exception {
+    when(flightPlan.getOverrideLastRunStartTime()).thenThrow(IllegalStateException.class);
     Date lastSuccessfulRunTime = new Date();
     Date actual = target.launch(lastSuccessfulRunTime);
     Date expected = new Date();

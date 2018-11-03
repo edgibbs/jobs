@@ -413,7 +413,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     mbean = mock(VoxLaunchPadMBean.class);
 
     // Prep Launch Command global calls.
-    flightPlan = new FlightPlan();
+    // flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config/local.yaml");
 
     final File fakeBaseDir = tempFolder.newFolder();

@@ -39,7 +39,7 @@ public class SafetyAlertIndexerJobTest extends Goddard {
 
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.beginTransaction()).thenReturn(transaction);
-    // when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
+    when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esConfig.getElasticsearchAlias()).thenReturn("people");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
