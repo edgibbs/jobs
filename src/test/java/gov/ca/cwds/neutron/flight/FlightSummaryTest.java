@@ -377,7 +377,7 @@ public class FlightSummaryTest {
   public void getLastEnd_A$() throws Exception {
     Date actual = target.getLastEnd();
     Date expected = new Date();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(lessThanOrEqualTo(expected)));
   }
 
   @Test
