@@ -133,10 +133,10 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void pickPrepDml_A$String$String() throws Exception {
-    String sqlInitialLoad = null;
-    String sqlLastChange = null;
+    String sqlInitialLoad = "SELECT x.IDENTIFIER FROM GT_ID x";
+    String sqlLastChange = "SELECT x.IDENTIFIER FROM GT_ID x";
     String actual = target.pickPrepDml(sqlInitialLoad, sqlLastChange);
-    String expected = null;
+    String expected = "SELECT x.IDENTIFIER FROM GT_ID x";
     assertThat(actual, is(equalTo(expected)));
   }
 
