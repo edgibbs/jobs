@@ -430,6 +430,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test(expected = NullPointerException.class)
   public void configure_A$() throws Exception {
     final Binder binder = mock(Binder.class);
+    final AnnotatedBindingBuilder builder = mock(AnnotatedBindingBuilder.class);
+    when(binder.bind(any(Class.class))).thenReturn(builder);
     target.setTestBinder(binder);
     target.configure();
   }

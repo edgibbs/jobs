@@ -3,7 +3,7 @@ package gov.ca.cwds.neutron.rocket.syscode;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.NeutronGuiceModule;
 import com.google.inject.Provides;
 
 import gov.ca.cwds.data.cms.SystemCodeDao;
@@ -18,7 +18,7 @@ import gov.ca.cwds.rest.services.cms.CachingSystemCodeService;
  * 
  * @author CWDS API Team
  */
-public class SystemCodesLoaderModule extends AbstractModule {
+public class SystemCodesLoaderModule extends NeutronGuiceModule {
 
   private String cmsHibernateConfig = "jobs-cms-hibernate.cfg.xml";
 
