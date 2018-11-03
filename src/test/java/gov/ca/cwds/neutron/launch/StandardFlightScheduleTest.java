@@ -21,7 +21,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Override
   public void setup() throws Exception {
     super.setup();
-    target = StandardFlightSchedule.CLIENT;
+    target = StandardFlightSchedule.PEOPLE_SUMMARY;
   }
 
   @Test
@@ -53,7 +53,6 @@ public class StandardFlightScheduleTest extends Goddard {
     expected.add(StandardFlightSchedule.EDUCATION_PROVIDER_S);
     expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME_S);
     expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME_S);
-    expected.add(StandardFlightSchedule.CLIENT);
     expected.add(StandardFlightSchedule.REPORTER);
     expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
     expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
@@ -85,7 +84,6 @@ public class StandardFlightScheduleTest extends Goddard {
     expected.add(StandardFlightSchedule.EDUCATION_PROVIDER_S);
     expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME_S);
     expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME_S);
-    expected.add(StandardFlightSchedule.CLIENT);
     expected.add(StandardFlightSchedule.REPORTER);
     expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
     expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
@@ -146,7 +144,7 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void getNestedElement_Args__() throws Exception {
-    final StandardFlightSchedule target = StandardFlightSchedule.CLIENT;
+    final StandardFlightSchedule target = StandardFlightSchedule.PEOPLE_SUMMARY;
     final String actual = target.getNestedElement();
     final String expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -162,9 +160,9 @@ public class StandardFlightScheduleTest extends Goddard {
 
   @Test
   public void lookupByClass_Args__Class() throws Exception {
-    final Class<?> key = StandardFlightSchedule.CLIENT.getRocketClass();
+    final Class<?> key = StandardFlightSchedule.PEOPLE_SUMMARY.getRocketClass();
     final StandardFlightSchedule actual = StandardFlightSchedule.lookupByRocketClass(key);
-    final StandardFlightSchedule expected = StandardFlightSchedule.CLIENT;
+    final StandardFlightSchedule expected = StandardFlightSchedule.PEOPLE_SUMMARY;
     assertThat(actual, is(equalTo(expected)));
   }
 

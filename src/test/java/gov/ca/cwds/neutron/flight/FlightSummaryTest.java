@@ -31,7 +31,7 @@ public class FlightSummaryTest {
 
   @Before
   public void setup() throws Exception {
-    target = new FlightSummary(StandardFlightSchedule.CLIENT);
+    target = new FlightSummary(StandardFlightSchedule.PEOPLE_SUMMARY);
   }
 
   @Test

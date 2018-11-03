@@ -15,11 +15,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.es.ElasticSearchLegacyDescriptor;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
-public class ReplicatedClientAddressTest extends Goddard<ReplicatedClient, EsClientAddress> {
+public class ReplicatedClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   ReplicatedClientAddress target;
 

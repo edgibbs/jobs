@@ -31,7 +31,7 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
   @Before
   public void setup() throws Exception {
     super.setup();
-    target = new FlightLog(StandardFlightSchedule.CLIENT.getRocketName());
+    target = new FlightLog(StandardFlightSchedule.PEOPLE_SUMMARY.getRocketName());
   }
 
   @Test
@@ -193,7 +193,7 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getJobName_Args__() throws Exception {
     final String actual = target.getRocketName();
-    final String expected = StandardFlightSchedule.CLIENT.getRocketName();
+    final String expected = StandardFlightSchedule.PEOPLE_SUMMARY.getRocketName();
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -520,7 +520,7 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getRocketName_A$() throws Exception {
     String actual = target.getRocketName();
-    String expected = StandardFlightSchedule.CLIENT.getRocketName();
+    String expected = StandardFlightSchedule.PEOPLE_SUMMARY.getRocketName();
     assertThat(actual, is(equalTo(expected)));
   }
 

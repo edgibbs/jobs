@@ -22,7 +22,7 @@ import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.inject.CmsSessionFactory;
-import gov.ca.cwds.jobs.ClientIndexerJob;
+import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
@@ -40,7 +40,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * 
  * @author CWDS API Team
  */
-public class ClientCountyRocket extends ClientIndexerJob
+public class ClientCountyRocket extends ClientPersonIndexerJob
     implements AtomRowMapper<RawClient>, AtomValidateDocument {
 
   private static final long serialVersionUID = 1L;

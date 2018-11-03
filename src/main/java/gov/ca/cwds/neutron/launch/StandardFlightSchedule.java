@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobKey;
 import org.quartz.listeners.JobChainingJobListener;
 
-import gov.ca.cwds.jobs.ClientIndexerJob;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.CollateralIndividualIndexerJob;
 import gov.ca.cwds.jobs.CollateralIndividualSIndexerJob;
@@ -163,11 +162,6 @@ public enum StandardFlightSchedule {
   // ===============================
   // PEOPLE INDEX ROCKETS:
   // ===============================
-
-  /**
-   * Essential document root: Client.
-   */
-  CLIENT(ClientIndexerJob.class, "client", 8, 20, 1000, null, true, true, true),
 
   /**
    * Document root: Reporter.

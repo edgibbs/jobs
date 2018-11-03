@@ -235,7 +235,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         new TestNormalizedEntityDao(sessionFactory);
     mach1Rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
-    flightSchedule = StandardFlightSchedule.CLIENT;
+    flightSchedule = StandardFlightSchedule.PEOPLE_SUMMARY;
 
     final Map<String, Object> sessionProperties = new HashMap<>();
     sessionProperties.put("hibernate.default_schema", "CWSRS1");

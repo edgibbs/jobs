@@ -30,8 +30,8 @@ import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchRaceAndEthnicity;
 import gov.ca.cwds.data.es.ElasticSearchSafetyAlert;
 import gov.ca.cwds.data.es.ElasticSearchSystemCode;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
 import gov.ca.cwds.jobs.Goddard;
@@ -40,7 +40,7 @@ import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.utils.JsonUtils;
 
-public class ReplicatedClientTest extends Goddard<ReplicatedClient, EsClientAddress> {
+public class ReplicatedClientTest extends Goddard<ReplicatedClient, RawClient> {
 
   ReplicatedClient target;
 
