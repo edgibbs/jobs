@@ -435,8 +435,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   protected List<Pair<String, String>> buildImmutableList(FlightStatus... statuses) {
     final TreeSet<Pair<String, String>> unique = new TreeSet<>();
-    for (FlightStatus status : statuses) {
-      unique.addAll(filterRanges(status));
+    for (FlightStatus state : statuses) {
+      unique.addAll(filterRanges(state));
     }
 
     final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();
