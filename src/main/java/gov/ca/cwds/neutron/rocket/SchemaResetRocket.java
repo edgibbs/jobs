@@ -47,9 +47,9 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
 
   private int pollPeriodInSeconds = 60;
 
-  private transient Lock lock = new ReentrantLock();
+  private final Lock lock = new ReentrantLock();
 
-  private transient Condition condDone = lock.newCondition();
+  private final Condition condDone = lock.newCondition();
 
   /**
    * Construct rocket with all required dependencies.
@@ -155,7 +155,6 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         LOGGER.trace("timeExceeded: {}", timeExceeded);
       } catch (InterruptedException e) {
         fail();
-        Thread.currentThread().interrupt();
         throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
       } finally {
         lock.unlock();
@@ -212,7 +211,6 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       }
     } catch (InterruptedException e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
     }
   }
@@ -230,7 +228,6 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
         }
       }
     } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
     }
   }

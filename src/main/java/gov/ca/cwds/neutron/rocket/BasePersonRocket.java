@@ -210,7 +210,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       queueIndex.add(norm); // unbounded
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
     }
   }
@@ -342,7 +341,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       LOGGER.info("PROGRESS TRACK: {}", () -> this.getFlightLog().toString());
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.checked(LOGGER, e, "JDBC EXCEPTION: {}", e);
     } finally {
       done();
@@ -456,7 +454,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "TRANSFORMER: FATAL ERROR: {}", e.getMessage());
     } finally {
       doneTransform();
@@ -489,7 +486,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       LOGGER.debug("Closed ES bulk processor");
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "FATAL INDEXING ERROR: {}", e.getMessage());
     } finally {
       doneIndex();
