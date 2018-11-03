@@ -132,7 +132,7 @@ public class ReplicatedOtherClientNameTest {
   @Test
   public void extract_Args__ResultSet() throws Exception {
     ReplicatedOtherClientName target = new ReplicatedOtherClientName();
-    final ReplicatedOtherClientName actual = target.mapRow(rs);
+    final ReplicatedOtherClientName actual = target.read(rs);
     assertThat(actual, is(notNullValue()));
   }
 
