@@ -44,7 +44,6 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void convertCsec_A$ReplicatedClient$RawClient$RawCsec() throws Exception {
     ReplicatedClient rc = new ReplicatedClient();
-    RawClient rawCli = new RawClient();
     RawCsec rawCsec = new RawCsec();
     target.convertCsec(rc, rawCsec);
   }
@@ -52,7 +51,6 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void convertCase_A$ReplicatedClient$RawClient$RawCase() throws Exception {
     ReplicatedClient rc = new ReplicatedClient();
-    RawClient rawCli = new RawClient();
     RawCase rawCase = mock(RawCase.class);
     target.convertCase(rc, rawCase);
   }
@@ -60,7 +58,6 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void convertSafetyAlert_A$ReplicatedClient$RawClient$RawSafetyAlert() throws Exception {
     ReplicatedClient rc = new ReplicatedClient();
-    RawClient rawCli = new RawClient();
     RawSafetyAlert rawSafetyAlert = mock(RawSafetyAlert.class);
     target.convertSafetyAlert(rc, rawSafetyAlert);
   }
@@ -76,7 +73,6 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void convertAka_A$ReplicatedClient$RawClient$RawAka() throws Exception {
     ReplicatedClient rc = new ReplicatedClient();
-    RawClient rawCli = new RawClient();
     RawAka rawAka = mock(RawAka.class);
     target.convertAka(rc, rawAka);
   }
@@ -84,7 +80,6 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void convertClientCounty_A$ReplicatedClient$RawClient$RawClientCounty() throws Exception {
     ReplicatedClient rc = new ReplicatedClient();
-    RawClient rawCli = new RawClient();
     RawClientCounty rawCounty = mock(RawClientCounty.class);
     target.convertClientCounty(rc, rawCounty);
   }
@@ -93,7 +88,6 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
   public void convertClientAddress_A$ReplicatedClient$RawClient$RawClientAddress()
       throws Exception {
     ReplicatedClient rc = new ReplicatedClient();
-    RawClient rawCli = new RawClient();
     RawClientAddress rawCliAdr = mock(RawClientAddress.class);
     target.convertClientAddress(rc, rawCliAdr);
   }
@@ -103,7 +97,6 @@ public class RawToEsConverterTest extends Goddard<ReplicatedClient, RawClient> {
       throws Exception {
     ReplicatedClient rc = new ReplicatedClient();
     ReplicatedClientAddress repCa = mock(ReplicatedClientAddress.class);
-    RawClient rawCli = new RawClient();
     RawClientAddress rawCa = mock(RawClientAddress.class);
     RawAddress rawAdr = mock(RawAddress.class);
     ReplicatedAddress actual = target.convertAddress(rc, repCa, rawCa, rawAdr);
