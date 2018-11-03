@@ -91,6 +91,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -134,6 +135,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public Injector injector;
   public LaunchCommand lc;
   public TriggerKey triggerKey;
+  public LaunchCommandSettings launchCommandSettings = new LaunchCommandSettings();
 
   public ElasticsearchConfiguration esConfig;
   public ElasticsearchDao esDao;
