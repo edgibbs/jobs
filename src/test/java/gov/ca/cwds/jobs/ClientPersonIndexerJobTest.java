@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -11,7 +12,10 @@ import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -24,6 +28,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
 public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
 
@@ -37,8 +42,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
 
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
-    target =
-        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
     target.allocateThreadHandler();
   }
 
@@ -276,6 +280,114 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
   public void main_A$StringArray_T$Exception() throws Exception {
     final String[] args = new String[] {};
     ClientPersonIndexerJob.main(args);
+  }
+
+  @Test(expected = NeutronCheckedException.class)
+  public void launch_A$Date() throws Exception {
+    when(flightPlan.getOverrideLastRunStartTime()).thenThrow(IllegalStateException.class);
+    Date lastSuccessfulRunTime = new Date();
+    Date actual = target.launch(lastSuccessfulRunTime);
+    Date expected = new Date();
+    assertThat(expected, is(greaterThanOrEqualTo(actual)));
+  }
+
+  @Test(expected = NeutronCheckedException.class)
+  public void launch_A$Date_T$NeutronCheckedException() throws Exception {
+    when(esDao.getConfig()).thenThrow(IllegalStateException.class);
+    Date lastSuccessfulRunTime = new Date();
+    target.launch(lastSuccessfulRunTime);
+  }
+
+  @Test
+  public void fetchLastRunResults_A$Date$Set() throws Exception {
+    Date lastRunDate = new Date();
+    Set<String> deletionResults = new HashSet<>();
+
+    List<ReplicatedClient> actual = target.fetchLastRunResults(lastRunDate, deletionResults);
+    List<ReplicatedClient> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getPrepLastChangeSQLs_A$() throws Exception {
+    String[] actual = target.getPrepLastChangeSQLs();
+    assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void isLargeLoad_A$() throws Exception {
+    boolean actual = target.isLargeLoad();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void handleStartRange_A$Pair() throws Exception {
+    Pair<String, String> range = pair;
+    target.handleStartRange(range);
+  }
+
+  @Test
+  public void handleFinishRange_A$Pair() throws Exception {
+    Pair<String, String> range = pair;
+    target.handleFinishRange(range);
+  }
+
+  @Test
+  public void handleSecondaryJdbc_A$Connection$Pair() throws Exception {
+    Pair<String, String> range = pair;
+    target.handleSecondaryJdbc(con, range);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void handleSecondaryJdbc_A$Connection$Pair_T$SQLException() throws Exception {
+    when(con.prepareStatement(any(String.class))).thenThrow(SQLException.class);
+    when(con.prepareStatement(any(String.class), any(Integer.class), any(Integer.class)))
+        .thenThrow(SQLException.class);
+    Pair<String, String> range = pair;
+    target.handleSecondaryJdbc(con, range);
+  }
+
+  @Test
+  public void handleMainResults_A$ResultSet$Connection() throws Exception {
+    target.handleMainResults(rs, con);
+  }
+
+  @Test(expected = SQLException.class)
+  public void handleMainResults_A$ResultSet$Connection_T$SQLException() throws Exception {
+    doThrow(SQLException.class).when(con).commit();
+    target.handleMainResults(rs, con);
+  }
+
+  @Test
+  public void handleJdbcDone_A$Pair() throws Exception {
+    Pair<String, String> range = pair;
+    target.handleJdbcDone(range);
+  }
+
+  @Test
+  public void allocateThreadHandler_A$() throws Exception {
+    target.allocateThreadHandler();
+  }
+
+  @Test
+  public void deallocateThreadHandler_A$() throws Exception {
+    target.deallocateThreadHandler();
+  }
+
+  @Test
+  public void startMultiThreadRetrieve_A$() throws Exception {
+    target.startMultiThreadRetrieve();
+  }
+
+  @Test
+  public void doneMultiThreadRetrieve_A$() throws Exception {
+    target.doneMultiThreadRetrieve();
+  }
+
+  @Test
+  public void doneRetrieve_A$() throws Exception {
+    target.doneRetrieve();
   }
 
 }

@@ -54,7 +54,7 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = NeutronRuntimeException.class)
   public void refreshSchema_A$() throws Exception {
     runKillThread(target, 3500L);
     target.refreshSchema();

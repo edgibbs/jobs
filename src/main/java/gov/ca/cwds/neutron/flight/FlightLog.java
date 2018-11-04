@@ -252,14 +252,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @Override
   public void done() {
     // Once failed, it cannot be rescinded.
-    // TODO: no longer true! You can run failed ranges a second time!
+    // NEXT: no longer true! You can run failed ranges a second time!
     if (this.status != FlightStatus.FAILED) {
       this.status = FlightStatus.SUCCEEDED;
     }
 
-    this.endTime = System.currentTimeMillis();
-
     // Done with ALL steps.
+    this.endTime = System.currentTimeMillis();
     this.doneRetrieve = true;
     this.doneIndex = true;
     this.doneTransform = true;
@@ -406,8 +405,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   protected boolean filterStatus(FlightStatus actual, FlightStatus... scanFor) {
     boolean ret = false;
 
-    for (FlightStatus status : scanFor) {
-      if (actual == status) {
+    for (FlightStatus state : scanFor) {
+      if (actual == state) {
         ret = true;
         break;
       }
@@ -436,8 +435,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   protected List<Pair<String, String>> buildImmutableList(FlightStatus... statuses) {
     final TreeSet<Pair<String, String>> unique = new TreeSet<>();
-    for (FlightStatus status : statuses) {
-      unique.addAll(filterRanges(status));
+    for (FlightStatus state : statuses) {
+      unique.addAll(filterRanges(state));
     }
 
     final ImmutableList.Builder<Pair<String, String>> results = new ImmutableList.Builder<>();

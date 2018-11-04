@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
 import java.io.Serializable;
@@ -212,15 +213,15 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   }
 
   public Date getLastUpdatedTime() {
-    return lastUpdatedTime;
+    return freshDate(lastUpdatedTime);
   }
 
   public Date getStart() {
-    return start;
+    return freshDate(start);
   }
 
   public Date getEnd() {
-    return end;
+    return freshDate(end);
   }
 
   public Long getPrimaryNumber() {
@@ -242,7 +243,7 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   }
 
   @Override
-  public ReplicatedClientAddress normalize(Map<Object, ReplicatedClientAddress> arg0) {
+  public ReplicatedClientAddress normalize(Map<Object, ReplicatedClientAddress> ignoreMe) {
     return toReplicatedClientAddress();
   }
 

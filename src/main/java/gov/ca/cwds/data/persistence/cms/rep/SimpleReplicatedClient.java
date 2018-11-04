@@ -16,6 +16,6 @@ public class SimpleReplicatedClient extends ReplicatedClient {
   @Override
   protected ElasticSearchSystemCode makeJsonAddressType() {
     return new SimpleElasticSearchSystemCode();
-  };
+  }
 
 }

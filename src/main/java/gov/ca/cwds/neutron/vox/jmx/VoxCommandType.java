@@ -1,16 +1,18 @@
 package gov.ca.cwds.neutron.vox.jmx;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandFetchLogs;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandFlightHistory;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandLastRunStatus;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandPause;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandResume;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandShutdown;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandStop;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandWayBack;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdFetchLogs;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdFlightHistory;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdLastRunStatus;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdPause;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdRerunKey;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdResume;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdShutdown;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdStop;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdWayBack;
 
 /**
  * Registered VOX command actions.
@@ -19,25 +21,27 @@ import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandWayBack;
  */
 public enum VoxCommandType {
 
-  STATUS(VoxCommandLastRunStatus.class, "status"),
+  STATUS(VoxCmdLastRunStatus.class, "status"),
 
-  SHUTDOWN(VoxCommandShutdown.class, "shutdown"),
+  SHUTDOWN(VoxCmdShutdown.class, "shutdown"),
 
-  HISTORY(VoxCommandFlightHistory.class, "history"),
+  HISTORY(VoxCmdFlightHistory.class, "history"),
 
-  LOGS(VoxCommandFetchLogs.class, "logs"),
+  LOGS(VoxCmdFetchLogs.class, "logs"),
 
-  DISABLE(VoxCommandLastRunStatus.class, "disable"),
+  DISABLE(VoxCmdLastRunStatus.class, "disable"),
 
-  ENABLE(VoxCommandLastRunStatus.class, "enable"),
+  ENABLE(VoxCmdLastRunStatus.class, "enable"),
 
-  STOP(VoxCommandStop.class, "stop"),
+  STOP(VoxCmdStop.class, "stop"),
 
-  RESUME(VoxCommandResume.class, "resume"),
+  RESUME(VoxCmdResume.class, "resume"),
 
-  PAUSE(VoxCommandPause.class, "pause"),
+  PAUSE(VoxCmdPause.class, "pause"),
 
-  WAYBACK(VoxCommandWayBack.class, "wayback")
+  WAYBACK(VoxCmdWayBack.class, "wayback"),
+
+  RERUN(VoxCmdRerunKey.class, "rerun")
 
   ;
 
@@ -47,10 +51,13 @@ public enum VoxCommandType {
   private static final Map<String, VoxCommandType> typeMap;
 
   static {
-    typeMap = new HashMap<>();
+    final Map<String, VoxCommandType> types;
+    types = new HashMap<>(VoxCommandType.values().length);
     for (VoxCommandType e : VoxCommandType.values()) {
-      typeMap.put(e.key, e);
+      types.put(e.key, e);
     }
+
+    typeMap = Collections.unmodifiableMap(types);
   }
 
   private VoxCommandType(final Class<? extends VoxCommandAction> klass, String key) {

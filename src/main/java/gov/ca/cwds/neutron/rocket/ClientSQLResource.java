@@ -119,12 +119,13 @@ public class ClientSQLResource implements ApiMarker {
       + "    cla.IBMSNAP_LOGMARKER AS CLA_IBMSNAP_LOGMARKER, \n"
       + "    cla.IBMSNAP_OPERATION AS CLA_IBMSNAP_OPERATION \n"
       + "FROM GT_ID      gt \n"
-      + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T AND cla.EFF_END_DT IS NULL \n"
+      + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T \n"
       + "JOIN ADDRS_T   adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
-      + "WHERE cla.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "WHERE cla.EFF_END_DT IS NULL \n"
+      + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
       + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
-      + "FOR READ ONLY WITH UR " ;
+      + "FOR READ ONLY WITH UR ";
   //@formatter:on
 
   //@formatter:off
@@ -376,13 +377,13 @@ public class ClientSQLResource implements ApiMarker {
     + "      FROM CSECHIST csh \n"
     + "      WHERE csh.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + " ) s2 \n"
-    + ") x\n";
+    + ") x FOR READ ONLY WITH UR";
   //@formatter:on
 
   //@formatter:off
   public static final String INS_CLIENT_LAST_CHG =
-      "INSERT INTO GT_REFR_CLT (FKREFERL_T,FKCLIENT_T,SENSTV_IND) \n"
-    + "SELECT DISTINCT '' AS FKREFERL_T, x.CLIENT_ID, '' AS SENSTV_IND FROM ( \n"
+      "INSERT INTO GT_ID (IDENTIFIER) \n"
+    + "SELECT DISTINCT x.CLIENT_ID AS IDENTIFIER FROM ( \n"
     + " SELECT s1.CLIENT_ID FROM ( \n"
     + "      SELECT CLT.IDENTIFIER AS CLIENT_ID \n"
     + "      FROM CLIENT_T clt \n"
@@ -392,7 +393,7 @@ public class ClientSQLResource implements ApiMarker {
     + "      WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "  UNION ALL SELECT cla.FKCLIENT_T AS CLIENT_ID \n"
     + "      FROM CL_ADDRT cla \n"
-    + "      JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER  \n"
+    + "      JOIN ADDRS_T  adr ON cla.FKADDRS_T = adr.IDENTIFIER  \n"
     + "      WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "  UNION ALL SELECT eth.ESTBLSH_ID AS CLIENT_ID \n"
     + "      FROM CLSCP_ET eth \n"
@@ -458,6 +459,11 @@ public class ClientSQLResource implements ApiMarker {
   // OLD SCHOOL:
   // =================================
 
+  /**
+   * Old SQL. Too many columns, slows DB2 to a crawl.
+   * 
+   * @deprecated use smaller SELECT statements listed above
+   */
   @Deprecated
   public static final String LAST_CHG_COLUMNS =
   //@formatter:off
@@ -618,6 +624,11 @@ public class ClientSQLResource implements ApiMarker {
       + " x.LAST_CHG ";
   //@formatter:on
 
+  /**
+   * Old SQL. Too many columns, slows DB2 to a crawl.
+   * 
+   * @deprecated use smaller SELECT statements listed above
+   */
   @Deprecated
   public static final String SELECT_CLIENT_VIEW_LAST_CHANGE =
   //@formatter:off

@@ -21,7 +21,7 @@ import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.quartz.TriggerKey;
 
-import gov.ca.cwds.jobs.ClientIndexerJob;
+import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -43,7 +43,7 @@ public class LaunchPadTest extends Goddard {
 
     when(launchDirector.getFlightRecorder()).thenReturn(flightRecorder);
     sched = StandardFlightSchedule.REPORTER;
-    target = new LaunchPad(launchDirector, sched, flightPlan);
+    target = new LaunchPad(launchDirector, sched, flightPlan, null);
   }
 
   @Test
@@ -102,7 +102,7 @@ public class LaunchPadTest extends Goddard {
     jdm.put("track", track);
     when(jd.getJobDataMap()).thenReturn(jdm);
 
-    flightRecorder.logFlight(ClientIndexerJob.class, track);
+    flightRecorder.logFlight(ClientPersonIndexerJob.class, track);
     target.status();
   }
 
@@ -122,7 +122,7 @@ public class LaunchPadTest extends Goddard {
   public void history_Args__() throws Exception {
     final ZombieKillerTimerTask timerTask = new ZombieKillerTimerTask(scheduler, "240000");
     launchDirector =
-        new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask, "60000");
+        new LaunchDirector(flightRecorder, rocketFactory, flightPlanManager, timerTask, "60000", null);
     launchDirector.setScheduler(scheduler);
     final String actual = target.history();
     assertThat(actual, is(notNullValue()));

@@ -1,7 +1,9 @@
 package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
+import java.util.Deque;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -209,8 +211,8 @@ public class HyperCube extends NeutronGuiceModule {
    */
   protected void bindSystemProperties() {
     final Properties defaults = new Properties();
-    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // default to 1 minute
-    defaults.setProperty("zombie.killer.killAtMillis", "240000"); // default to 4 minutes
+    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // 1 minute
+    defaults.setProperty("zombie.killer.killAtMillis", "900000"); // 15 minutes
 
     final Properties props = new Properties(defaults);
     props.putAll(System.getProperties());
@@ -480,11 +482,9 @@ public class HyperCube extends NeutronGuiceModule {
 
   protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
       throws NeutronCheckedException {
-    TransportClient client = null;
     LOGGER.debug("HyperCube.buildElasticsearchClient");
     try {
-      client = gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
-      return client;
+      return gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e,
           "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
@@ -632,11 +632,12 @@ public class HyperCube extends NeutronGuiceModule {
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
       ZombieKillerTimerTask zombieKillerTimerTask,
-      @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
+      @Named("zombie.killer.killAtMillis") String strTimeToAbort,
+      @Named("rerun.deque.ids") Deque<String> dequeRerunIds) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        zombieKillerTimerTask, strTimeToAbort);
+        zombieKillerTimerTask, strTimeToAbort, dequeRerunIds);
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();
@@ -648,6 +649,18 @@ public class HyperCube extends NeutronGuiceModule {
             commonFlightPlan.isLoadPeopleIndex(), commonFlightPlan.getExcludedRockets())
         : new NeutronJobListener());
     return ret;
+  }
+
+  @Named("vox.listener.rocket.iterations")
+  @Provides
+  public Integer voxListenerIterations() {
+    return 3000;
+  }
+
+  @Named("rerun.deque.ids")
+  @Provides
+  public Deque<String> dequeRerunIds() {
+    return new ConcurrentLinkedDeque<>();
   }
 
   // =========================

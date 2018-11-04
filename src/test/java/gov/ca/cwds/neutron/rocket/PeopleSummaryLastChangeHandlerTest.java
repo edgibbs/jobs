@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -80,6 +81,50 @@ public class PeopleSummaryLastChangeHandlerTest extends Goddard<ReplicatedClient
 
     final Pair<String, String> range = pair;
     target.handleSecondaryJdbc(con, range);
+  }
+
+  @Test
+  public void readClientKeys_A$ResultSet() throws Exception {
+    target.readClientKeys(rs);
+  }
+
+  @Test
+  public void loadClientRange_A$Connection$PreparedStatement$Pair() throws Exception {
+    PreparedStatement stmtInsClient = preparedStatement;
+    Pair<String, String> range = pair;
+    target.loadClientRange(con, stmtInsClient, range);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void loadClientRange_A$Connection$PreparedStatement$Pair_T$SQLException()
+      throws Exception {
+    PreparedStatement stmtInsClient = preparedStatement;
+    Pair<String, String> range = pair;
+    when(stmtInsClient.executeBatch()).thenThrow(SQLException.class);
+
+    target.loadClientRange(con, stmtInsClient, range);
+  }
+
+  @Test
+  public void insertNextKeyBundle_A$Connection$int$int() throws Exception {
+    int start = 0;
+    int end = 0;
+    int actual = target.insertNextKeyBundle(con, start, end);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isInitialLoad_A$() throws Exception {
+    boolean actual = target.isInitialLoad();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void handleFinishRange_A$Pair() throws Exception {
+    Pair<String, String> range = pair;
+    target.handleFinishRange(range);
   }
 
 }

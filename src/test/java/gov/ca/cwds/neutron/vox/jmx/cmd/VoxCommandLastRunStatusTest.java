@@ -13,7 +13,7 @@ import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
 public class VoxCommandLastRunStatusTest {
 
-  static final class TestVoxCommandLastRunStatus extends VoxCommandLastRunStatus {
+  static final class TestVoxCommandLastRunStatus extends VoxCmdLastRunStatus {
 
     VoxLaunchPadMBean mbean;
 
@@ -30,18 +30,18 @@ public class VoxCommandLastRunStatusTest {
   }
 
   VoxLaunchPadMBean mbean;
-  VoxCommandLastRunStatus target;
+  VoxCmdLastRunStatus target;
 
   @Before
   public void setup() throws Exception {
     mbean = mock(VoxLaunchPadMBean.class);
-    target = new VoxCommandLastRunStatus();
+    target = new VoxCmdLastRunStatus();
     target.setMbean(mbean);
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(VoxCommandLastRunStatus.class, notNullValue());
+    assertThat(VoxCmdLastRunStatus.class, notNullValue());
   }
 
   @Test

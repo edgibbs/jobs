@@ -49,6 +49,7 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
     LOGGER.info("NeutronSystemCodeDao.findByForeignKeyMetaTable: meta: {}", foreignKeyMetaTable);
     SystemCode[] ret;
 
+    // Shares the thread's connection. Do NOT close!
     final String namedQueryName = SystemCode.class.getName() + ".findByForeignKeyMetaTable";
     final Session session = grabSession();
     final Transaction txn = joinTransaction(session);
@@ -78,18 +79,23 @@ public class NeutronSystemCodeDao extends SystemCodeDao {
   @SuppressWarnings("unchecked")
   public SystemCode findBySystemCodeId(Number systemCodeId) {
     LOGGER.info("NeutronSystemCodeDao.findBySystemCodeId: systemCodeId: {}", systemCodeId);
+
+    // Shares the thread's connection. Do NOT close!
     final String namedQueryName = SystemCode.class.getName() + ".findBySystemCodeId";
     final Session session = grabSession();
     final Transaction txn = joinTransaction(session);
     SystemCode ret;
 
     try {
+      if (!txn.isActive()) {
+        txn.begin();
+      }
+
       final Query<SystemCode> query = session.getNamedQuery(namedQueryName)
           .setParameter("systemId", systemCodeId.shortValue(), ShortType.INSTANCE).setReadOnly(true)
           .setCacheable(false);
       query.setHibernateFlushMode(FlushMode.MANUAL);
       ret = query.getSingleResult();
-      // Shares the thread's connection. Do NOT close!
     } catch (Exception h) {
       LOGGER.error("NeutronSystemCodeDao.findBySystemCodeId: ERROR! {}", h.getMessage(), h);
       throw new DaoException(h);

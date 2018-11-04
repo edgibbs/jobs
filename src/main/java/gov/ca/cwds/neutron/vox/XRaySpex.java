@@ -15,6 +15,8 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomLaunchPad;
+import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.vox.rest.NeutronRestServer;
 
@@ -52,7 +54,7 @@ public class XRaySpex implements AtomCommandCenterConsole {
   }
 
   @Override
-  public void initCommandControl() {
+  public void initCommandControl() throws NeutronCheckedException {
     if (LaunchCommand.getSettings().isExposeJmx()) {
       exposeJMX();
     }
@@ -70,17 +72,20 @@ public class XRaySpex implements AtomCommandCenterConsole {
     jettyServer.start();
   }
 
-  protected void exposeJMX() {
-    LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
-    final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
-    for (AtomLaunchPad pad : launchDirector.getLaunchPads().values()) {
-      exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getRocketName(), pad);
+  protected void exposeJMX() throws NeutronCheckedException {
+    try {
+      LOGGER.warn("\n>>>>>>> ENABLE JMX! <<<<<<<\n");
+      final MBeanExporter exporter = new MBeanExporter(ManagementFactory.getPlatformMBeanServer());
+      for (AtomLaunchPad pad : launchDirector.getLaunchPads().values()) {
+        exporter.export("Neutron:rocket=" + pad.getFlightSchedule().getRocketName(), pad);
+      }
+
+      exporter.export("Neutron:runner=Launch_Command", this);
+      LOGGER.info("MBeans: {}", exporter.getExportedObjects());
+      Manager.manage("Neutron_Guice", injector);
+    } catch (Exception e) {
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO CONNECT JMX! {}", e.getMessage());
     }
-
-    exporter.export("Neutron:runner=Launch_Command", this);
-    LOGGER.info("MBeans: {}", exporter.getExportedObjects());
-
-    Manager.manage("Neutron_Guice", injector);
   }
 
   public LaunchCommandSettings getSettings() {

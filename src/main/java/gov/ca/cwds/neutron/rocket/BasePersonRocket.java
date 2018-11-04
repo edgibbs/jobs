@@ -210,7 +210,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       queueIndex.add(norm); // unbounded
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "INTERRUPTED! {}", e.getMessage());
     }
   }
@@ -342,7 +341,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       LOGGER.info("PROGRESS TRACK: {}", () -> this.getFlightLog().toString());
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.checked(LOGGER, e, "JDBC EXCEPTION: {}", e);
     } finally {
       done();
@@ -456,7 +454,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "TRANSFORMER: FATAL ERROR: {}", e.getMessage());
     } finally {
       doneTransform();
@@ -489,7 +486,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       LOGGER.debug("Closed ES bulk processor");
     } catch (Exception e) {
       fail();
-      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "FATAL INDEXING ERROR: {}", e.getMessage());
     } finally {
       doneIndex();
@@ -626,10 +622,13 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     }
   }
 
+  /**
+   * Configure queue sizes for last run or initial load.
+   * 
+   * @param lastRun last successful run time
+   */
   protected void sizeQueues(final Date lastRun) {
-    // Configure queue sizes for last run or initial load.
-    // queueNormalize = new LinkedBlockingDeque<>();
-    // queueIndex = new LinkedBlockingDeque<>();
+    // Default implementation is no-op.
   }
 
   protected boolean determineInitialLoad(final Date lastRun) {
@@ -687,7 +686,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       if (determineInitialLoad(lastRun)) {
         // Initial mode:
         flightLog.setInitialLoad(true);
-        refreshMQT();
         if (isInitialLoadJdbc()) {
           doInitialLoadJdbc();
         } else {
@@ -713,7 +711,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
       // CHECKSTYLE:ON
       ret = new Date(flightLog.getStartTime());
-    } catch (NeutronCheckedException | RuntimeException e) {
+    } catch (Exception e) {
       fail();
       throw CheeseRay.checked(LOGGER, e, "ROCKET EXPLODED! {}", e.getMessage());
     } finally {

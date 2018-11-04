@@ -73,6 +73,7 @@ public class RawClientAddress extends ClientAddressReference
   @Override
   public RawClientAddress read(ResultSet rs) throws SQLException {
     super.read(rs);
+
     this.claLastUpdatedId = ifNull(rs.getString("CLA_LST_UPD_ID"));
     this.claLastUpdatedTime = rs.getTimestamp("CLA_LST_UPD_TS");
     this.claId = ifNull(rs.getString("CLA_IDENTIFIER"));
@@ -88,6 +89,7 @@ public class RawClientAddress extends ClientAddressReference
     this.setClaReplicationOperation(
         CmsReplicationOperation.strToRepOp(rs.getString("CLA_IBMSNAP_OPERATION")));
     this.setClaReplicationDate(rs.getDate("CLA_IBMSNAP_LOGMARKER"));
+
     return this;
   }
 

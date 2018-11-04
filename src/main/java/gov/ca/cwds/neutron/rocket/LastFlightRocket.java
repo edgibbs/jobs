@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -143,13 +145,13 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
     }
 
     try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
-      ret = new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
-          .parse(br.readLine().trim()); // NOSONAR
+      ret = new SimpleDateFormat(LAST_RUN_DATE_FORMAT.getFormat()).parse(br.readLine().trim()); // NOSONAR
     } catch (IOException | ParseException e) {
       fail();
       throw CheeseRay.checked(LOGGER, e, "ERROR READING LAST RUN TIME: {}", e.getMessage());
     }
 
+    LOGGER.info("last successful flight was at {}", ret);
     return ret;
   }
 
@@ -162,11 +164,13 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   public void writeLastSuccessfulRunTime(Date datetime) throws NeutronCheckedException {
     if (!isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
-        w.write(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().format(datetime));
+        w.write(LAST_RUN_DATE_FORMAT.formatter().format(datetime));
       } catch (IOException e) {
         fail();
         throw CheeseRay.checked(LOGGER, e, "ERROR WRITING TIMESTAMP FILE: {}", e.getMessage());
       }
+    } else {
+      LOGGER.warn("Flight failed. Not writing last successful run timestamp");
     }
   }
 

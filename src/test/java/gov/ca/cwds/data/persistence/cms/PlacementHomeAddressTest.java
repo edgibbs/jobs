@@ -15,11 +15,12 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClientAddress;
 import gov.ca.cwds.jobs.Goddard;
 
-public class PlacementHomeAddressTest extends Goddard<ReplicatedClient, EsClientAddress> {
+public class PlacementHomeAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   PlacementHomeAddress target;
 

@@ -10,7 +10,7 @@ import org.junit.Test;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandLastRunStatus;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdLastRunStatus;
 
 public class VoxCommandFactoryTest extends Goddard {
 
@@ -25,7 +25,7 @@ public class VoxCommandFactoryTest extends Goddard {
     final String[] args = new String[] {};
     final VoxCommandInstruction cmd = VoxCommandInstruction.parseCommandLine(args);
     final VoxJMXCommandClient actual = VoxCommandFactory.build(cmdType, cmd);
-    final VoxJMXCommandClient expected = new VoxCommandLastRunStatus();
+    final VoxJMXCommandClient expected = new VoxCmdLastRunStatus();
     assertThat(actual, is(equalTo(expected)));
   }
 

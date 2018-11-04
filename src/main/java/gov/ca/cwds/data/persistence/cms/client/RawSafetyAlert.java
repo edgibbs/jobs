@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -109,11 +111,11 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
   }
 
   public Date getSafetyAlertActivationDate() {
-    return safetyAlertActivationDate;
+    return freshDate(safetyAlertActivationDate);
   }
 
   public void setSafetyAlertActivationDate(Date safetyAlertActivationDate) {
-    this.safetyAlertActivationDate = safetyAlertActivationDate;
+    this.safetyAlertActivationDate = freshDate(safetyAlertActivationDate);
   }
 
   public Short getSafetyAlertActivationCountyCode() {
@@ -133,11 +135,11 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
   }
 
   public Date getSafetyAlertDeactivationDate() {
-    return safetyAlertDeactivationDate;
+    return freshDate(safetyAlertDeactivationDate);
   }
 
   public void setSafetyAlertDeactivationDate(Date safetyAlertDeactivationDate) {
-    this.safetyAlertDeactivationDate = safetyAlertDeactivationDate;
+    this.safetyAlertDeactivationDate = freshDate(safetyAlertDeactivationDate);
   }
 
   public Short getSafetyAlertDeactivationCountyCode() {
@@ -165,11 +167,11 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
   }
 
   public Date getSafetyAlertLastUpdatedTimestamp() {
-    return safetyAlertLastUpdatedTimestamp;
+    return freshDate(safetyAlertLastUpdatedTimestamp);
   }
 
   public void setSafetyAlertLastUpdatedTimestamp(Date safetyAlertLastUpdatedTimestamp) {
-    this.safetyAlertLastUpdatedTimestamp = safetyAlertLastUpdatedTimestamp;
+    this.safetyAlertLastUpdatedTimestamp = freshDate(safetyAlertLastUpdatedTimestamp);
   }
 
   public CmsReplicationOperation getSafetyAlertLastUpdatedOperation() {
@@ -182,11 +184,11 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
   }
 
   public Date getSafetyAlertReplicationTimestamp() {
-    return safetyAlertReplicationTimestamp;
+    return freshDate(safetyAlertReplicationTimestamp);
   }
 
   public void setSafetyAlertReplicationTimestamp(Date safetyAlertReplicationTimestamp) {
-    this.safetyAlertReplicationTimestamp = safetyAlertReplicationTimestamp;
+    this.safetyAlertReplicationTimestamp = freshDate(safetyAlertReplicationTimestamp);
   }
 
 }

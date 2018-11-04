@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
 
 import org.elasticsearch.client.Client;
@@ -430,6 +431,8 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test(expected = NullPointerException.class)
   public void configure_A$() throws Exception {
     final Binder binder = mock(Binder.class);
+    final AnnotatedBindingBuilder builder = mock(AnnotatedBindingBuilder.class);
+    when(binder.bind(any(Class.class))).thenReturn(builder);
     target.setTestBinder(binder);
     target.configure();
   }
@@ -580,8 +583,9 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     LaunchCommand.setStandardFlightPlan(flightPlan);
     final ZombieKillerTimerTask zombieKillerTimerTask = mock(ZombieKillerTimerTask.class);
     final String strTimeToAbort = "120000";
-    final AtomLaunchDirector actual = target.configureQuartz(injector, flightRecorder,
-        rocketFactory, flightPlanMgr, scheduler, zombieKillerTimerTask, strTimeToAbort);
+    final AtomLaunchDirector actual =
+        target.configureQuartz(injector, flightRecorder, rocketFactory, flightPlanMgr, scheduler,
+            zombieKillerTimerTask, strTimeToAbort, new ConcurrentLinkedDeque<>());
     assertThat(actual, is(notNullValue()));
   }
 
@@ -592,7 +596,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     final String strTimeToAbort = "120000";
     when(scheduler.getListenerManager()).thenThrow(SchedulerException.class);
     target.configureQuartz(injector, flightRecorder, rocketFactory, flightPlanMgr, scheduler,
-        zombieKillerTimerTask, strTimeToAbort);
+        zombieKillerTimerTask, strTimeToAbort, new ConcurrentLinkedDeque<>());
   }
 
   @Test

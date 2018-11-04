@@ -1,8 +1,10 @@
 package gov.ca.cwds.neutron.launch;
 
+import java.util.Deque;
 import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -63,6 +65,8 @@ public class LaunchDirector implements AtomLaunchDirector {
    */
   private final Map<Class<?>, AtomLaunchPad> launchPads = new ConcurrentHashMap<>();
 
+  private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
+
   /**
    * Might not be necessary. Listeners and running jobs should handle this, but we still need a
    * single place to track rockets in flight.
@@ -79,17 +83,23 @@ public class LaunchDirector implements AtomLaunchDirector {
   public LaunchDirector(final AtomFlightRecorder flightRecorder,
       final AtomRocketFactory rocketFactory, final AtomFlightPlanManager flightPlanManager,
       ZombieKillerTimerTask timerTask,
-      @Named("zombie.killer.checkEveryMillis") String zombieKillerMillis) {
+      @Named("zombie.killer.checkEveryMillis") String zombieKillerMillis,
+      @Named("rerun.deque.ids") Deque<String> rerunIds) {
     this.flightRecorder = flightRecorder;
     this.rocketFactory = rocketFactory;
     this.flightPlanManger = flightPlanManager;
 
+    // Schedule Zombie Killer in Last Change mode only.
     if (!LaunchCommand.isInitialMode()) {
       LOGGER.warn("Schedule Zombie Killer: zombieKillerMillis: {}", zombieKillerMillis);
       this.abortFlightTimer = new Timer("abort_rocket_timer", true);
       final int iZombieKillerMillis = Integer.parseInt(zombieKillerMillis);
       this.abortFlightTimer.scheduleAtFixedRate(timerTask, iZombieKillerMillis,
           iZombieKillerMillis);
+    }
+
+    if (rerunIds != null) {
+      dequeRerunIds = rerunIds;
     }
   }
 
@@ -131,6 +141,7 @@ public class LaunchDirector implements AtomLaunchDirector {
       throws NeutronCheckedException {
     try {
       LOGGER.info("LAUNCH SCHEDULED ROCKET! {}", klass.getName());
+      flightPlan.setDequeRerunIds(dequeRerunIds); // key re-runs
       final BasePersonRocket<?, ?> rocket = fuelRocket(klass, flightPlan);
       rocket.run();
       return rocket.getFlightLog();
@@ -148,7 +159,8 @@ public class LaunchDirector implements AtomLaunchDirector {
   @Override
   public AtomLaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
       throws NeutronCheckedException {
-    final LaunchPad pad = new LaunchPad(this, sched, flightPlan);
+    flightPlan.setDequeRerunIds(dequeRerunIds); // key re-runs
+    final LaunchPad pad = new LaunchPad(this, sched, flightPlan, dequeRerunIds);
     final Class<?> klass = sched.getRocketClass();
     launchPads.put(klass, pad);
     flightPlanManger.addFlightPlan(klass, flightPlan);

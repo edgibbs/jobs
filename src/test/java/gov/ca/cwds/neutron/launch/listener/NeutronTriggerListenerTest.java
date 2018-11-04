@@ -68,7 +68,7 @@ public class NeutronTriggerListenerTest extends Goddard {
     when(trigger.getKey()).thenReturn(triggerKey);
     when(jobDataMap.getString(any(String.class))).thenReturn(TestIndexerJob.class.getName());
 
-    neutronScheduler.scheduleLaunch(StandardFlightSchedule.CLIENT, flightPlan);
+    neutronScheduler.scheduleLaunch(StandardFlightSchedule.PEOPLE_SUMMARY, flightPlan);
     target = new NeutronTriggerListener(neutronScheduler);
   }
 
@@ -103,7 +103,8 @@ public class NeutronTriggerListenerTest extends Goddard {
 
   @Test(expected = NeutronRuntimeException.class)
   public void vetoJobExecution__boom() throws Exception {
-    when(neutronScheduler.isLaunchVetoed(any(String.class))).thenThrow(NeutronCheckedException.class);
+    when(neutronScheduler.isLaunchVetoed(any(String.class)))
+        .thenThrow(NeutronCheckedException.class);
 
     boolean actual = target.vetoJobExecution(trigger, context_);
     boolean expected = false;

@@ -20,6 +20,7 @@ import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -74,6 +75,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       done();
     } catch (Exception e) {
       fail();
+      Thread.currentThread().interrupt();
       throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET ERROR!! {}", e.getMessage());
     }
 
@@ -163,7 +165,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     }
 
     if (!isRunning()) {
-      throw new IllegalStateException("SCHEMA RESET: FLIGHT ABORTED!");
+      throw new NeutronRuntimeException("SCHEMA RESET: FLIGHT ABORTED!");
     }
 
     boolean completed = false;
@@ -172,7 +174,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     if ("S".equalsIgnoreCase(status)) { // success
       completed = true;
     } else if ("F".equalsIgnoreCase(status)) { // fail
-      throw new IllegalStateException("DB2 SCHEMA RESET OPERATION FAILED!");
+      throw new NeutronRuntimeException("DB2 SCHEMA RESET OPERATION FAILED!");
     }
 
     return completed;

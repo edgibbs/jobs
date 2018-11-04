@@ -16,14 +16,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
-import gov.ca.cwds.data.persistence.cms.EsClientAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 
-public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAddress> {
+public class ClientCountyRocketTest extends Goddard<ReplicatedClient, RawClient> {
 
   ReplicatedClientDao dao;
   ClientCountyRocket target;
@@ -75,7 +74,7 @@ public class ClientCountyRocketTest extends Goddard<ReplicatedClient, EsClientAd
   @Test
   public void getMQTName_Args__() throws Exception {
     String actual = target.getMQTName();
-    String expected = "REFRESH_ALL_MQTS";
+    String expected = "CLIENT_T";
     assertThat(actual, is(equalTo(expected)));
   }
 

@@ -31,7 +31,7 @@ public class FlightSummaryTest {
 
   @Before
   public void setup() throws Exception {
-    target = new FlightSummary(StandardFlightSchedule.CLIENT);
+    target = new FlightSummary(StandardFlightSchedule.PEOPLE_SUMMARY);
   }
 
   @Test
@@ -377,7 +377,7 @@ public class FlightSummaryTest {
   public void getLastEnd_A$() throws Exception {
     Date actual = target.getLastEnd();
     Date expected = new Date();
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(lessThanOrEqualTo(expected)));
   }
 
   @Test

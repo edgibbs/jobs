@@ -20,7 +20,9 @@ public class NeutronWorkConnectionStealer implements Work {
   /**
    * Constructor.
    */
-  public NeutronWorkConnectionStealer() {}
+  public NeutronWorkConnectionStealer() {
+    // default, no-op.
+  }
 
   /**
    * Call {@link AtomLoadStepHandler#handleSecondaryJdbc(Connection, Pair)}.

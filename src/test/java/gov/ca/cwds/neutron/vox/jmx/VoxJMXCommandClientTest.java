@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.vox.VoxCommandInstruction;
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandLastRunStatus;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdLastRunStatus;
 
 public class VoxJMXCommandClientTest {
 
@@ -42,7 +42,7 @@ public class VoxJMXCommandClientTest {
     jmxConnector = mock(JMXConnector.class);
     mbeanServerConnection = mock(MBeanServerConnection.class);
     when(jmxConnector.getMBeanServerConnection()).thenReturn(mbeanServerConnection);
-    target = new VoxCommandLastRunStatus(host, port);
+    target = new VoxCmdLastRunStatus(host, port);
     target.setHost(host);
     target.setPort(port);
     target.setRocket(rocket);

@@ -24,8 +24,8 @@ import gov.ca.cwds.data.es.ElasticSearchPersonAka;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.BaseOtherClientName;
 import gov.ca.cwds.data.persistence.cms.ReplicatedAkas;
+import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.jobs.util.jdbc.RowMapper;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -53,7 +53,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReplicatedOtherClientName extends BaseOtherClientName implements CmsReplicatedEntity,
-    ApiGroupNormalizer<ReplicatedAkas>, RowMapper<ReplicatedOtherClientName> {
+    ApiGroupNormalizer<ReplicatedAkas>, NeutronJdbcReader<ReplicatedOtherClientName> {
 
   /**
    * Default serialization.
@@ -89,11 +89,6 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
     ret.setLastUpdatedTime(rs.getDate("LST_UPD_TS"));
 
     return ret;
-  }
-
-  @Override
-  public ReplicatedOtherClientName mapRow(final ResultSet rs) throws SQLException {
-    return ReplicatedOtherClientName.mapRowToBean(rs);
   }
 
   // =======================
@@ -218,6 +213,11 @@ public class ReplicatedOtherClientName extends BaseOtherClientName implements Cm
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj, false);
+  }
+
+  @Override
+  public ReplicatedOtherClientName read(ResultSet rs) throws SQLException {
+    return ReplicatedOtherClientName.mapRowToBean(rs);
   }
 
 }

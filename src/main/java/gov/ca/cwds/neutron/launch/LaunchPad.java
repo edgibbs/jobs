@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
@@ -75,10 +78,11 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   private volatile JobDetail jd;
 
   private boolean vetoExecution;
+  private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
 
   @Inject
   public LaunchPad(final AtomLaunchDirector director, StandardFlightSchedule sched,
-      final FlightPlan flightPlan) {
+      final FlightPlan flightPlan, @Named("rerun.deque.ids") Deque<String> rerunIds) {
     this.launchDirector = director;
     this.scheduler = director.getScheduler();
     this.flightRecorder = director.getFlightRecorder();
@@ -96,6 +100,24 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
     // Seed the flight log history.
     flightRecorder.logFlight(sched.getRocketClass(), flightLog);
+
+    if (rerunIds != null) {
+      dequeRerunIds = rerunIds;
+      flightPlan.setDequeRerunIds(rerunIds);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @Managed(description = "Re-run primary key for given rocket")
+  public void rerunKey(String rawKeys) {
+    LOGGER.warn("LaunchPad: rocket: {}: RE-RUN KEYS: '{}'", rocketName, rawKeys);
+
+    for (String key : rawKeys.split(",")) {
+      dequeRerunIds.push(key.trim());
+    }
   }
 
   /**
@@ -110,6 +132,12 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       LOGGER.info("LAUNCH ONE-WAY TRIP! {}", flightSchedule.getRocketName());
       final FlightPlan plan =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+
+      // Any keys requested to be re-run?
+      if (!dequeRerunIds.isEmpty()) {
+        plan.setDequeRerunIds(dequeRerunIds);
+      }
+
       final FlightLog flightLog = this.launchDirector.launch(flightSchedule.getRocketClass(), plan);
       return flightLog.toJson();
     } catch (Exception e) {
@@ -177,7 +205,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       LOGGER.warn("UNSCHEDULE LAUNCH! {}", rocketName);
       scheduler.unscheduleJob(triggerKey);
     } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e, "UNSCHEDULED LAUNCH! rocket: {}", rocketName);
+      throw CheeseRay.checked(LOGGER, e, "FAILED UNSCHEDULED LAUNCH! rocket: {}", rocketName);
     }
   }
 
@@ -189,9 +217,9 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Override
   public String summary() {
     try {
-      return flightRecorder.getFlightSummary(this.flightSchedule).toJson();
+      return flightRecorder.getFlightSummary(flightSchedule).toJson();
     } catch (Exception e) {
-      LOGGER.error("UNABLE TO SHOW FLIGHT SUMMARY! {}", e.getMessage(), e);
+      LOGGER.error("FAILED TO SHOW FLIGHT SUMMARY! {}", e.getMessage(), e);
       return CheeseRay.stackToString(e);
     }
   }
@@ -203,7 +231,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Managed(description = "Show rocket's last flight status")
   public String status() {
     LOGGER.warn("SHOW ROCKET STATUS! {}", rocketName);
-    return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toJson();
+    return flightRecorder.getLastFlightLog(flightSchedule.getRocketClass()).toJson();
   }
 
   /**
@@ -214,7 +242,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   public String history() {
     LOGGER.warn("SHOW ROCKET FLIGHT HISTORY! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
-    buf.append("{[").append(flightRecorder.getFlightLogHistory(this.flightSchedule.getRocketClass())
+    buf.append("{[").append(flightRecorder.getFlightLogHistory(flightSchedule.getRocketClass())
         .stream().map(FlightLog::toJson).collect(Collectors.joining(","))).append("]}");
     return buf.toString();
   }

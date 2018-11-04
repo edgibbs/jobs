@@ -36,7 +36,7 @@ public class WorkDB2UserInfo implements Work {
   public void execute(Connection con) throws SQLException {
     con.setAutoCommit(false);
     con.setClientInfo("ApplicationName", "CARES Neutron");
-    con.setClientInfo("ClientUser", "Neutron");
+    con.setClientInfo("ClientUser", NAME);
 
     if (con instanceof DB2Connection || (con instanceof PooledConnection
         && ((PooledConnection) con).getConnection() instanceof DB2Connection)) {

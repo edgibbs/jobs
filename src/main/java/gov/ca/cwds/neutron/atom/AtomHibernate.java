@@ -225,8 +225,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    */
   default void runInsertRownumBundle(final Session session, int start, int end, String... sqls) {
     for (String sql : sqls) {
-      NeutronJdbcUtils.runStatementInsertRownumBundle(session, sql, start, end,
-          getPreparedStatementMaker(sql));
+      NeutronJdbcUtils.runStatementInsertRownumBundle(session, start, end, getPreparedStatementMaker(sql));
     }
   }
 

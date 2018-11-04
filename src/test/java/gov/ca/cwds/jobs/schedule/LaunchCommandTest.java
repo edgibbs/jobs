@@ -154,7 +154,7 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
       throws Exception {
     final DateFormat fmt = new SimpleDateFormat("yyyy-mm-dd");
     final Date now = new Date();
-    final StandardFlightSchedule sched = StandardFlightSchedule.CLIENT;
+    final StandardFlightSchedule sched = StandardFlightSchedule.PEOPLE_SUMMARY;
     target.handleSchedulerModeTimeFile(flightPlan, fmt, now, sched);
   }
 

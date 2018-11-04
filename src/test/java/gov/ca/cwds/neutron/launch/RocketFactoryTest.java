@@ -54,7 +54,7 @@ public class RocketFactoryTest extends Goddard {
     rocket = mach1Rocket;
     when(injector.getInstance(any(Class.class))).thenReturn(rocket);
 
-    target = new RocketFactory(injector, opts, flightPlanRegistry, flightRecorder);
+    target = new RocketFactory(injector, opts, flightPlanRegistry, flightRecorder, null);
   }
 
   @Test

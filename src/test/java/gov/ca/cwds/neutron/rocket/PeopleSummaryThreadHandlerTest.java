@@ -133,10 +133,10 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void pickPrepDml_A$String$String() throws Exception {
-    String sqlInitialLoad = null;
-    String sqlLastChange = null;
+    String sqlInitialLoad = "SELECT x.IDENTIFIER FROM GT_ID x";
+    String sqlLastChange = "SELECT x.IDENTIFIER FROM GT_ID x";
     String actual = target.pickPrepDml(sqlInitialLoad, sqlLastChange);
-    String expected = null;
+    String expected = "SELECT x.IDENTIFIER FROM GT_ID x";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -301,7 +301,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   public void loadClientRange_A$PreparedStatement$Pair() throws Exception {
     PreparedStatement stmtInsClient = mock(PreparedStatement.class);
     Pair<String, String> range = mock(Pair.class);
-    target.loadClientRange(stmtInsClient, range);
+    target.loadClientRange(con, stmtInsClient, range);
   }
 
   @Test(expected = SQLException.class)
@@ -312,7 +312,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
 
     Pair<String, String> range = mock(Pair.class);
-    target.loadClientRange(preparedStatement, range);
+    target.loadClientRange(con, preparedStatement, range);
   }
 
   @Test

@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 
@@ -66,8 +67,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
+import org.quartz.TriggerKey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Injector;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
@@ -81,11 +84,14 @@ import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
+import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -125,6 +131,11 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
+
+  public Injector injector;
+  public LaunchCommand lc;
+  public TriggerKey triggerKey;
+  public LaunchCommandSettings launchCommandSettings = new LaunchCommandSettings();
 
   public ElasticsearchConfiguration esConfig;
   public ElasticsearchDao esDao;
@@ -224,7 +235,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         new TestNormalizedEntityDao(sessionFactory);
     mach1Rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
-    flightSchedule = StandardFlightSchedule.CLIENT;
+    flightSchedule = StandardFlightSchedule.PEOPLE_SUMMARY;
 
     final Map<String, Object> sessionProperties = new HashMap<>();
     sessionProperties.put("hibernate.default_schema", "CWSRS1");
@@ -402,6 +413,30 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     when(scheduler.getListenerManager()).thenReturn(listenerManager);
     mbean = mock(VoxLaunchPadMBean.class);
+
+    // Prep Launch Command global calls.
+    // flightPlan = new FlightPlan();
+    flightPlan.setEsConfigLoc("config/local.yaml");
+
+    final File fakeBaseDir = tempFolder.newFolder();
+    flightPlan.setBaseDirectory(fakeBaseDir.getAbsolutePath());
+    flightPlan.setLastRunLoc(lastRunFile);
+
+    final AtomCommandCenterConsole ctrlMgr = mock(AtomCommandCenterConsole.class);
+    lc = new LaunchCommand(flightRecorder, launchDirector, ctrlMgr);
+    lc.setCommonFlightPlan(flightPlan);
+    lc.setLaunchDirector(launchDirector);
+
+    Function<FlightPlan, Injector> makeLaunchCommand = mock(Function.class);
+    injector = mock(Injector.class);
+    when(makeLaunchCommand.apply(any(FlightPlan.class))).thenReturn(injector);
+    when(injector.getInstance(LaunchCommand.class)).thenReturn(lc);
+    LaunchCommand.setInjectorMaker(makeLaunchCommand);
+    LaunchCommand.setStandardFlightPlan(flightPlan);
+
+    triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
+    LaunchCommand.setTestMode(true);
+    LaunchCommand.setInstance(lc);
 
     doAnswer(new Answer<Void>() {
       @Override
