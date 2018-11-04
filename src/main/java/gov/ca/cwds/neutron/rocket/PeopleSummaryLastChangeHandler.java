@@ -138,10 +138,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.debug("key bundle: start: {}, end: {}", start, end);
       con.commit();
 
-      final List<String> subset = keys.subList(start, Math.max(end, Math.min(keys.size() - 1, 0)));
-      LOGGER.debug("insertNextKeyBundle(): subset size: {}", subset.size());
+      final List<String> bundle = keys.subList(start, Math.max(end, Math.min(keys.size() - 1, 0)));
+      LOGGER.debug("insertNextKeyBundle(): bundle size: {}", bundle.size());
 
-      for (String key : subset) {
+      for (String key : bundle) {
         CheeseRay.logEvery(LOGGER, ++ret, "insert bundle keys", "keys");
         ps.setString(1, key);
         ps.addBatch();
