@@ -13,7 +13,7 @@ import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
  * Queue a primary key to be run again by the target rocket in Last Change mode.
  * 
  * @author CWDS API Team
- * @see LaunchPad#rerunKey(String)
+ * @see LaunchPad#rerunKey(String[])
  */
 public class VoxCmdRerunKey extends VoxJMXCommandClient {
 
@@ -29,17 +29,17 @@ public class VoxCmdRerunKey extends VoxJMXCommandClient {
 
   @Override
   public String run() {
-    final String key = getArgs().trim();
+    final String rawKeys = getArgs().trim();
 
     try {
-      if (StringUtils.isAllBlank(key)) {
+      if (StringUtils.isAllBlank(rawKeys)) {
         LOGGER.error("VOX RE-RUN: KEY CANNOT BE EMPTY!");
         throw new NeutronRuntimeException("RE-RUN: KEY CANNOT BE EMPTY!");
       }
 
-      LOGGER.warn("VOX RE-RUN KEY {}", key);
-      getMbean().rerunKey(key); // LaunchPad MBean.
-      return String.format("RE-RUN KEY! key: %s", key);
+      LOGGER.warn("VOX RE-RUN KEY {}", rawKeys);
+      getMbean().rerunKey(rawKeys.split(",")); // LaunchPad MBean.
+      return String.format("RE-RUN KEY! key: %s", rawKeys);
     } catch (Exception e) {
       LOGGER.error("VOX RE-RUN KEY: ERROR PARSING KEY! {}", getArgs(), e);
       return ExceptionUtils.getStackTrace(e);
