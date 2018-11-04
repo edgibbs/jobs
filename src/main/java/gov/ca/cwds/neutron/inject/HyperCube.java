@@ -658,7 +658,6 @@ public class HyperCube extends NeutronGuiceModule {
 
   @Named("rerun.deque.ids")
   @Provides
-  @Singleton
   public Deque<String> dequeRerunIds() {
     return new ConcurrentLinkedDeque<>();
   }
