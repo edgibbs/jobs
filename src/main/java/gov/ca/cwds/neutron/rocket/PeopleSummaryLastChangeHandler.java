@@ -139,8 +139,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.debug("key bundle: start: {}, end: {}", start, end);
       con.commit();
 
-      final List<String> bundle = keys.subList(start, Math.max(end, Math.min(keys.size() - 1, 0)));
-      LOGGER.debug("insertNextKeyBundle(): bundle size: {}", bundle.size());
+      final int newEnd = Math.min(end, Math.max(keys.size() - 1, 1));
+      final List<String> bundle = keys.subList(start, Math.min(end, Math.max(keys.size() - 1, 1)));
+      LOGGER.debug("insertNextKeyBundle(): bundle size: {}, end position: {}", bundle.size(),
+          newEnd);
 
       for (String key : bundle) {
         CheeseRay.logEvery(LOGGER, ++ret, "insert bundle keys", "keys");
@@ -193,6 +195,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
+      LOGGER.debug("Changed client SQL\n{}", sqlChangedClients);
       try (final PreparedStatement stmt = con.prepareStatement(sqlChangedClients, TFO, CRO)) {
         read(stmt, rs -> readClientKeys(rs));
       } finally {
@@ -219,7 +222,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // 0-999, 1000-1999, 2000-2999, etc.
       for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {
-        rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, totalKeys - 1); //
+        rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, Math.max(totalKeys - 1, 1)); //
         range = Pair.of(String.valueOf(rangeStart), String.valueOf(rangeEnd));
         LOGGER.debug("last change key subset range: {}", range);
         super.handleSecondaryJdbc(con, range);
