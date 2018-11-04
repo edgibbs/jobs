@@ -60,7 +60,7 @@ public class LaunchDirectorTest extends Goddard {
     timerTask = new ZombieKillerTimerTask(scheduler, "240000");
 
     key = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
-    target = new LaunchDirector(jobHistory, rocketFactory, rocketOptions, timerTask, "60000");
+    target = new LaunchDirector(jobHistory, rocketFactory, rocketOptions, timerTask, "60000", null);
     target.setScheduler(scheduler);
     target.setFlightPlan(flightPlan);
 

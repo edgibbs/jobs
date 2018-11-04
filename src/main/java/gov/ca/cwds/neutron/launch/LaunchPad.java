@@ -80,7 +80,6 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   private boolean vetoExecution;
   private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
 
-
   @Inject
   public LaunchPad(final AtomLaunchDirector director, StandardFlightSchedule sched,
       final FlightPlan flightPlan, @Named("rerun.deque.ids") Deque<String> rerunIds) {

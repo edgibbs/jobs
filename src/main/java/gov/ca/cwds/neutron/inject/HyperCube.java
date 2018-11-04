@@ -636,7 +636,7 @@ public class HyperCube extends NeutronGuiceModule {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        zombieKillerTimerTask, strTimeToAbort);
+        zombieKillerTimerTask, strTimeToAbort, null);
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();
@@ -656,8 +656,9 @@ public class HyperCube extends NeutronGuiceModule {
     return 3000;
   }
 
-  @Provides
   @Named("rerun.deque.ids")
+  @Provides
+  @Singleton
   public Deque<String> dequeRerunIds() {
     return new ConcurrentLinkedDeque<>();
   }
