@@ -18,9 +18,9 @@ public class VoxCommandFetchLogs extends VoxJMXCommandClient {
 
   @Override
   public String run() {
-    LOGGER.warn("PULL LOGS FOR ROCKET {}", getRocket());
+    LOGGER.warn("VOX: PULL LOGS FOR ROCKET {}", getRocket());
     final String logs = getMbean().logs();
-    LOGGER.warn("LOGS FOR ROCKET {}\n\n{}\n\n", getRocket(), logs);
+    LOGGER.warn("VOX: LOGS FOR ROCKET {}\n\n{}\n\n", getRocket(), logs);
     return logs;
   }
 

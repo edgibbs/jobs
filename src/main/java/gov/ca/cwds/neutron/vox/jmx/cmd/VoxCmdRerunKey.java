@@ -26,15 +26,15 @@ public class VoxCmdRerunKey extends VoxJMXCommandClient {
 
     try {
       if (StringUtils.isAllBlank(key)) {
-        LOGGER.error("RE-RUN: KEY CANNOT BE EMPTY!");
+        LOGGER.error("VOX RE-RUN: KEY CANNOT BE EMPTY!");
         throw new NeutronRuntimeException("RE-RUN: KEY CANNOT BE EMPTY!");
       }
 
-      LOGGER.warn("RE-RUN KEY {}", key);
-      getMbean().rerunKey(key);
+      LOGGER.warn("VOX RE-RUN KEY {}", key);
+      getMbean().rerunKey(key); // LaunchPad interface.
       return String.format("RE-RUN KEY! key: %s", key);
     } catch (Exception e) {
-      LOGGER.error("RE-RUN KEY: ERROR PARSING KEY! {}", getArgs(), e);
+      LOGGER.error("VOX RE-RUN KEY: ERROR PARSING KEY! {}", getArgs(), e);
       return ExceptionUtils.getStackTrace(e);
     }
   }
