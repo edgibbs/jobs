@@ -1,8 +1,10 @@
 package gov.ca.cwds.neutron.vox.jmx;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdRerunKey;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandFetchLogs;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandFlightHistory;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCommandLastRunStatus;
@@ -37,7 +39,9 @@ public enum VoxCommandType {
 
   PAUSE(VoxCommandPause.class, "pause"),
 
-  WAYBACK(VoxCommandWayBack.class, "wayback")
+  WAYBACK(VoxCommandWayBack.class, "wayback"),
+
+  RERUN(VoxCmdRerunKey.class, "rerun")
 
   ;
 
@@ -47,10 +51,13 @@ public enum VoxCommandType {
   private static final Map<String, VoxCommandType> typeMap;
 
   static {
-    typeMap = new HashMap<>();
+    final Map<String, VoxCommandType> types;
+    types = new HashMap<>();
     for (VoxCommandType e : VoxCommandType.values()) {
-      typeMap.put(e.key, e);
+      types.put(e.key, e);
     }
+
+    typeMap = Collections.unmodifiableMap(types);
   }
 
   private VoxCommandType(final Class<? extends VoxCommandAction> klass, String key) {
