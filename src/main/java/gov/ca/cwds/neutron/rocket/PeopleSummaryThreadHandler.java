@@ -441,7 +441,6 @@ public class PeopleSummaryThreadHandler
     try {
       sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACEMENT_ADDR,
           rocket.determineLastSuccessfulRunTime(), rocket.getFlightPlan().getOverrideLastEndTime());
-      LOGGER.trace("SQL for Placement Address:\n{}", sqlPlacementAddress);
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "INVALID PLACEMENT ADDRESS SQL! {}", e.getMessage(), e);
     }
@@ -500,7 +499,7 @@ public class PeopleSummaryThreadHandler
       prepPlacementClients(stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
-      LOGGER.info("Read placement home address");
+      LOGGER.info("Read placement home address: SQL: \n{}", sqlPlacementAddress);
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
     } catch (Exception e) {
