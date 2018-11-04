@@ -1,5 +1,8 @@
 package gov.ca.cwds.neutron.launch;
 
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -11,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomRocketFactory;
@@ -42,13 +46,20 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final AtomFlightRecorder flightRecorder;
 
+  private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
+
   @Inject
   public RocketFactory(final Injector injector, final FlightPlan baseFlightPlan,
-      final FlightPlanRegistry flightPlanRegistry, final FlightRecorder flightRecorder) {
+      final FlightPlanRegistry flightPlanRegistry, final FlightRecorder flightRecorder,
+      @Named("rerun.deque.ids") Deque<String> rerunIds) {
     this.injector = injector;
     this.baseFlightPlan = baseFlightPlan;
     this.flightPlanRegistry = flightPlanRegistry;
     this.flightRecorder = flightRecorder;
+
+    if (rerunIds != null) {
+      this.dequeRerunIds = rerunIds;
+    }
   }
 
   @SuppressWarnings("rawtypes")
@@ -57,6 +68,12 @@ public class RocketFactory implements AtomRocketFactory {
       throws NeutronCheckedException {
     try {
       LOGGER.info("READY SCHEDULED ROCKET: {}", klass.getName());
+
+      // Any keys requested to be re-run?
+      if (!dequeRerunIds.isEmpty()) {
+        flightPlan.setDequeRerunIds(dequeRerunIds);
+      }
+
       final BasePersonRocket ret = (BasePersonRocket<?, ?>) injector.getInstance(klass);
       ret.init(flightPlan.getLastRunLoc(), flightPlan);
       return ret;
@@ -120,6 +137,14 @@ public class RocketFactory implements AtomRocketFactory {
 
   public static Logger getLogger() {
     return LOGGER;
+  }
+
+  public Deque<String> getDequeRerunIds() {
+    return dequeRerunIds;
+  }
+
+  public void setDequeRerunIds(Deque<String> dequeRerunIds) {
+    this.dequeRerunIds = dequeRerunIds;
   }
 
 }

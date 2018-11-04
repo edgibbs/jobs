@@ -128,6 +128,12 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       LOGGER.info("LAUNCH ONE-WAY TRIP! {}", flightSchedule.getRocketName());
       final FlightPlan plan =
           FlightPlan.parseCommandLine(StringUtils.isBlank(cmdLine) ? null : cmdLine.split("\\s+"));
+
+      // Any keys requested to be re-run?
+      if (!dequeRerunIds.isEmpty()) {
+        plan.setDequeRerunIds(dequeRerunIds);
+      }
+
       final FlightLog flightLog = this.launchDirector.launch(flightSchedule.getRocketClass(), plan);
       return flightLog.toJson();
     } catch (Exception e) {
@@ -195,7 +201,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
       LOGGER.warn("UNSCHEDULE LAUNCH! {}", rocketName);
       scheduler.unscheduleJob(triggerKey);
     } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e, "UNSCHEDULED LAUNCH! rocket: {}", rocketName);
+      throw CheeseRay.checked(LOGGER, e, "FAILED UNSCHEDULED LAUNCH! rocket: {}", rocketName);
     }
   }
 
@@ -207,9 +213,9 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Override
   public String summary() {
     try {
-      return flightRecorder.getFlightSummary(this.flightSchedule).toJson();
+      return flightRecorder.getFlightSummary(flightSchedule).toJson();
     } catch (Exception e) {
-      LOGGER.error("UNABLE TO SHOW FLIGHT SUMMARY! {}", e.getMessage(), e);
+      LOGGER.error("FAILED TO SHOW FLIGHT SUMMARY! {}", e.getMessage(), e);
       return CheeseRay.stackToString(e);
     }
   }
@@ -221,7 +227,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Managed(description = "Show rocket's last flight status")
   public String status() {
     LOGGER.warn("SHOW ROCKET STATUS! {}", rocketName);
-    return flightRecorder.getLastFlightLog(this.flightSchedule.getRocketClass()).toJson();
+    return flightRecorder.getLastFlightLog(flightSchedule.getRocketClass()).toJson();
   }
 
   /**
@@ -232,7 +238,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   public String history() {
     LOGGER.warn("SHOW ROCKET FLIGHT HISTORY! {}", rocketName);
     final StringBuilder buf = new StringBuilder();
-    buf.append("{[").append(flightRecorder.getFlightLogHistory(this.flightSchedule.getRocketClass())
+    buf.append("{[").append(flightRecorder.getFlightLogHistory(flightSchedule.getRocketClass())
         .stream().map(FlightLog::toJson).collect(Collectors.joining(","))).append("]}");
     return buf.toString();
   }

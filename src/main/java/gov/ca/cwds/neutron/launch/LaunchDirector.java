@@ -114,7 +114,6 @@ public class LaunchDirector implements AtomLaunchDirector {
   @SuppressWarnings("rawtypes")
   public BasePersonRocket fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronCheckedException {
-    flightPlan.setDequeRerunIds(dequeRerunIds); // key re-runs
     return this.rocketFactory.fuelRocket(klass, flightPlan);
   }
 
@@ -142,6 +141,7 @@ public class LaunchDirector implements AtomLaunchDirector {
       throws NeutronCheckedException {
     try {
       LOGGER.info("LAUNCH SCHEDULED ROCKET! {}", klass.getName());
+      flightPlan.setDequeRerunIds(dequeRerunIds); // key re-runs
       final BasePersonRocket<?, ?> rocket = fuelRocket(klass, flightPlan);
       rocket.run();
       return rocket.getFlightLog();
@@ -159,6 +159,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   @Override
   public AtomLaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
       throws NeutronCheckedException {
+    flightPlan.setDequeRerunIds(dequeRerunIds); // key re-runs
     final LaunchPad pad = new LaunchPad(this, sched, flightPlan, dequeRerunIds);
     final Class<?> klass = sched.getRocketClass();
     launchPads.put(klass, pad);
