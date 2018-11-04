@@ -14,7 +14,7 @@ import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
 public class VoxCommandFetchLogsTest extends Goddard {
 
-  static final class TestVoxCommandFetchLogs extends VoxCommandFetchLogs {
+  static final class TestVoxCommandFetchLogs extends VoxCmdFetchLogs {
 
     VoxLaunchPadMBean mbean;
 
@@ -31,7 +31,7 @@ public class VoxCommandFetchLogsTest extends Goddard {
   }
 
   VoxLaunchPadMBean mbean;
-  VoxCommandFetchLogs target;
+  VoxCmdFetchLogs target;
 
   @Override
   @Before
@@ -43,7 +43,7 @@ public class VoxCommandFetchLogsTest extends Goddard {
 
   @Test
   public void type() throws Exception {
-    assertThat(VoxCommandFetchLogs.class, notNullValue());
+    assertThat(VoxCmdFetchLogs.class, notNullValue());
   }
 
   @Test

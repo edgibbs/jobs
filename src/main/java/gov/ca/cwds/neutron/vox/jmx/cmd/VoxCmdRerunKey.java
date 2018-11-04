@@ -6,8 +6,15 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
+/**
+ * Queue a primary key to be run again by the target rocket in Last Change mode.
+ * 
+ * @author CWDS API Team
+ * @see LaunchPad#rerunKey(String)
+ */
 public class VoxCmdRerunKey extends VoxJMXCommandClient {
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCmdRerunKey.class);
@@ -31,7 +38,7 @@ public class VoxCmdRerunKey extends VoxJMXCommandClient {
       }
 
       LOGGER.warn("VOX RE-RUN KEY {}", key);
-      getMbean().rerunKey(key); // LaunchPad interface.
+      getMbean().rerunKey(key); // LaunchPad MBean.
       return String.format("RE-RUN KEY! key: %s", key);
     } catch (Exception e) {
       LOGGER.error("VOX RE-RUN KEY: ERROR PARSING KEY! {}", getArgs(), e);

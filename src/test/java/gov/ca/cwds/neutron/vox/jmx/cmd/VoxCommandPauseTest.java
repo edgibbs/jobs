@@ -13,21 +13,21 @@ import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 public class VoxCommandPauseTest extends Goddard {
 
-  VoxCommandPause target;
+  VoxCmdPause target;
 
   @Before
   @Override
   public void setup() throws Exception {
     super.setup();
 
-    target = new VoxCommandPause();
+    target = new VoxCmdPause();
     target.setMbean(mbean);
     target.setRocket(StandardFlightSchedule.REFERRAL.getRocketName());
   }
 
   @Test
   public void type() throws Exception {
-    assertThat(VoxCommandPause.class, notNullValue());
+    assertThat(VoxCmdPause.class, notNullValue());
   }
 
   @Test

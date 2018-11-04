@@ -6,15 +6,15 @@ import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
-public class VoxCommandWayBack extends VoxJMXCommandClient {
+public class VoxCmdWayBack extends VoxJMXCommandClient {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandWayBack.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCmdWayBack.class);
 
-  public VoxCommandWayBack() {
+  public VoxCmdWayBack() {
     super();
   }
 
-  public VoxCommandWayBack(String host, String port) {
+  public VoxCmdWayBack(String host, String port) {
     super(host, port);
   }
 
@@ -24,7 +24,7 @@ public class VoxCommandWayBack extends VoxJMXCommandClient {
 
     try {
       final int hours = Integer.parseInt(input);
-      getMbean().waybackHours(hours);
+      getMbean().waybackHours(hours); // LaunchPad MBean.
       return String.format("WAY BACK MACHINE! %s hours in past", hours);
     } catch (Exception e) {
       LOGGER.error("WAY BACK MACHINE: ERROR PARSING! {}", input, e);

@@ -7,15 +7,15 @@ import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
-public class VoxCommandStop extends VoxJMXCommandClient {
+public class VoxCmdResume extends VoxJMXCommandClient {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandStop.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCmdResume.class);
 
-  public VoxCommandStop() {
+  public VoxCmdResume() {
     super();
   }
 
-  public VoxCommandStop(String host, String port) {
+  public VoxCmdResume(String host, String port) {
     super(host, port);
   }
 
@@ -23,10 +23,10 @@ public class VoxCommandStop extends VoxJMXCommandClient {
   public String run() {
     LOGGER.info("STOP {}!", getRocket());
     try {
-      getMbean().resume();
-      return String.format("STOP ROCKET %s!", getRocket());
+      getMbean().stop();
+      return String.format("STOPPED ROCKET %s!", getRocket());
     } catch (NeutronCheckedException e) {
-      LOGGER.error("ERROR RESUMING {}!", getRocket(), e);
+      LOGGER.error("ERROR STOPPING {}!", getRocket(), e);
       return ExceptionUtils.getStackTrace(e);
     }
   }

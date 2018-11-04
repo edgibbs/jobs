@@ -33,7 +33,7 @@ public abstract class VoxCommandBaseTest<T extends VoxJMXCommandClient> extends 
 
   @Test
   public void type() throws Exception {
-    assertThat(VoxCommandPause.class, notNullValue());
+    assertThat(VoxCmdPause.class, notNullValue());
   }
 
   @Test

@@ -13,7 +13,7 @@ import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
 public class VoxCommandFlightHistoryTest {
 
-  static final class TestVoxCommandFlightHistory extends VoxCommandFlightHistory {
+  static final class TestVoxCommandFlightHistory extends VoxCmdFlightHistory {
 
     VoxLaunchPadMBean mbean;
 
@@ -30,7 +30,7 @@ public class VoxCommandFlightHistoryTest {
   }
 
   VoxLaunchPadMBean mbean;
-  VoxCommandFlightHistory target;
+  VoxCmdFlightHistory target;
 
   @Before
   public void setup() throws Exception {
@@ -41,7 +41,7 @@ public class VoxCommandFlightHistoryTest {
 
   @Test
   public void type() throws Exception {
-    assertThat(VoxCommandFlightHistory.class, notNullValue());
+    assertThat(VoxCmdFlightHistory.class, notNullValue());
   }
 
   @Test

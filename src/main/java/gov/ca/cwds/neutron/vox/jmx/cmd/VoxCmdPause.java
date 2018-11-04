@@ -7,23 +7,23 @@ import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
-public class VoxCommandPause extends VoxJMXCommandClient {
+public class VoxCmdPause extends VoxJMXCommandClient {
 
-  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCommandPause.class);
+  private static final ConditionalLogger LOGGER = new JetPackLogger(VoxCmdPause.class);
 
-  public VoxCommandPause() {
+  public VoxCmdPause() {
     super();
   }
 
-  public VoxCommandPause(String host, String port) {
+  public VoxCmdPause(String host, String port) {
     super(host, port);
   }
 
   @Override
   public String run() {
-    LOGGER.info("PAUSE {}", getRocket());
+    LOGGER.warn("PAUSE {}", getRocket());
     try {
-      getMbean().pause();
+      getMbean().pause(); // LaunchPad MBean.
       return String.format("PAUSED ROCKET %s!", getRocket());
     } catch (NeutronCheckedException e) {
       LOGGER.error("ERROR PAUSING {}!", getRocket(), e);
