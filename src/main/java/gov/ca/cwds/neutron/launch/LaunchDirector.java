@@ -148,7 +148,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   @Override
   public AtomLaunchPad scheduleLaunch(StandardFlightSchedule sched, FlightPlan flightPlan)
       throws NeutronCheckedException {
-    final LaunchPad pad = new LaunchPad(this, sched, flightPlan);
+    final LaunchPad pad = new LaunchPad(this, sched, flightPlan, null);
     final Class<?> klass = sched.getRocketClass();
     launchPads.put(klass, pad);
     flightPlanManger.addFlightPlan(klass, flightPlan);

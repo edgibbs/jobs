@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.Managed;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
@@ -75,10 +78,12 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   private volatile JobDetail jd;
 
   private boolean vetoExecution;
+  private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
+
 
   @Inject
   public LaunchPad(final AtomLaunchDirector director, StandardFlightSchedule sched,
-      final FlightPlan flightPlan) {
+      final FlightPlan flightPlan, @Named("rerun.deque.ids") Deque<String> rerunIds) {
     this.launchDirector = director;
     this.scheduler = director.getScheduler();
     this.flightRecorder = director.getFlightRecorder();
@@ -96,6 +101,19 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
     // Seed the flight log history.
     flightRecorder.logFlight(sched.getRocketClass(), flightLog);
+
+    if (dequeRerunIds != null) {
+      this.dequeRerunIds = rerunIds;
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @Managed(description = "Re-run primary key for given rocket")
+  public void rerunKey(String key) {
+    // NEXT: call VoxCmdRerunKey.
   }
 
   /**
