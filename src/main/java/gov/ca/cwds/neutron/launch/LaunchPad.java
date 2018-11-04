@@ -102,7 +102,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
     flightRecorder.logFlight(sched.getRocketClass(), flightLog);
 
     if (rerunIds != null) {
-      this.dequeRerunIds = rerunIds;
+      dequeRerunIds = rerunIds;
     }
   }
 
