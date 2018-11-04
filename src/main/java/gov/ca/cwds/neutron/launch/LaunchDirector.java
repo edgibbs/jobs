@@ -114,6 +114,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   @SuppressWarnings("rawtypes")
   public BasePersonRocket fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronCheckedException {
+    flightPlan.setDequeRerunIds(dequeRerunIds); // key re-runs
     return this.rocketFactory.fuelRocket(klass, flightPlan);
   }
 

@@ -200,7 +200,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       // NEXT: Add re-run client keys.
-      final Deque<String> rerunIds = rocket.getRerunClients();
+      final Deque<String> rerunIds = rocket.getFlightPlan().getDequeRerunIds();
       if (rerunIds != null && !rerunIds.isEmpty()) {
         String id;
         while ((id = rerunIds.pollLast()) != null) {

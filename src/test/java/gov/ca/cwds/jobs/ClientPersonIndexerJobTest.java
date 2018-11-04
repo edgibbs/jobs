@@ -13,11 +13,9 @@ import static org.mockito.Mockito.when;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -44,8 +42,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
 
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
-    target =
-        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector, null);
+    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
     target.allocateThreadHandler();
   }
 
@@ -391,19 +388,6 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
   @Test
   public void doneRetrieve_A$() throws Exception {
     target.doneRetrieve();
-  }
-
-  @Test
-  public void getRerunClients_A$() throws Exception {
-    Deque<String> actual = target.getRerunClients();
-    Deque<String> expected = new ConcurrentLinkedDeque<>();
-    assertThat(actual.size(), is(equalTo(expected.size())));
-  }
-
-  @Test
-  public void addRerunClient_A$String() throws Exception {
-    String clientId = DEFAULT_CLIENT_ID;
-    target.addRerunClient(clientId);
   }
 
 }

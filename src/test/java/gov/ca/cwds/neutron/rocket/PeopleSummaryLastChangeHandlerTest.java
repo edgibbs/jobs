@@ -38,7 +38,7 @@ public class PeopleSummaryLastChangeHandlerTest extends Goddard<ReplicatedClient
     super.setup();
     dao = new ReplicatedClientDao(sessionFactory);
     rocket =
-        new ClientPersonIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector, null);
+        new ClientPersonIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
     target = new PeopleSummaryLastChangeHandler(rocket);
   }
 

@@ -9,8 +9,10 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
@@ -127,6 +129,8 @@ public class FlightPlan implements ApiMarker {
   private boolean validateAfterIndexing = false;
 
   private Set<StandardFlightSchedule> excludedRockets = new HashSet<>();
+
+  private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
 
   /**
    * Default constructor.
@@ -601,6 +605,14 @@ public class FlightPlan implements ApiMarker {
 
   public void setValidateAfterIndexing(boolean validateAfterIndexing) {
     this.validateAfterIndexing = validateAfterIndexing;
+  }
+
+  public Deque<String> getDequeRerunIds() {
+    return dequeRerunIds;
+  }
+
+  public void setDequeRerunIds(Deque<String> dequeRerunIds) {
+    this.dequeRerunIds = dequeRerunIds;
   }
 
   @Override

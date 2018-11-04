@@ -4,11 +4,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -79,8 +77,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   private boolean multiThreadRetrieveDone = false;
 
-  private Deque<String> rerunClients = new ConcurrentLinkedDeque<>();
-
   /**
    * Construct batch rocket instance with all required dependencies.
    * 
@@ -90,17 +86,13 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
    * @param launchDirector global Launch Director
-   * @param dequeRerunIds any client ids to re-run in last change mode
    */
   @Inject
   public ClientPersonIndexerJob(final ReplicatedClientDao dao,
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
-      AtomLaunchDirector launchDirector, @Named("rerun.deque.ids") Deque<String> dequeRerunIds) {
+      AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
-    if (dequeRerunIds != null) {
-      this.rerunClients = dequeRerunIds;
-    }
   }
 
   @Override
@@ -376,14 +368,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     if (!runMultiThread || (runMultiThread && multiThreadRetrieveDone)) {
       super.doneRetrieve();
     }
-  }
-
-  public Deque<String> getRerunClients() {
-    return rerunClients;
-  }
-
-  public void addRerunClient(String clientId) {
-    this.rerunClients.push(clientId);
   }
 
   /**
