@@ -140,7 +140,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       con.commit();
 
       final int newEnd = Math.min(end, Math.max(keys.size() - 1, 1));
-      final List<String> bundle = keys.subList(start, Math.min(end, Math.max(keys.size() - 1, 1)));
+      final List<String> bundle = keys.subList(start, newEnd);
       LOGGER.debug("insertNextKeyBundle(): bundle size: {}, end position: {}", bundle.size(),
           newEnd);
 
