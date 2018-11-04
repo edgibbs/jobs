@@ -632,11 +632,12 @@ public class HyperCube extends NeutronGuiceModule {
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
       ZombieKillerTimerTask zombieKillerTimerTask,
-      @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
+      @Named("zombie.killer.killAtMillis") String strTimeToAbort,
+      @Named("rerun.deque.ids") Deque<String> dequeRerunIds) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        zombieKillerTimerTask, strTimeToAbort, null);
+        zombieKillerTimerTask, strTimeToAbort, dequeRerunIds);
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();
