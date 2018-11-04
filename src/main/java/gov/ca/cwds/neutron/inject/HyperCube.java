@@ -590,13 +590,6 @@ public class HyperCube extends NeutronGuiceModule {
     return ret;
   }
 
-  @Provides
-  @Singleton
-  @Named("rerun.deque.ids")
-  public Deque<String> dequeRerunIds() {
-    return new ConcurrentLinkedDeque<>();
-  }
-
   // =========================
   // QUARTZ SCHEDULER:
   // =========================
@@ -661,6 +654,12 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   public Integer voxListenerIterations() {
     return 3000;
+  }
+
+  @Provides
+  @Named("rerun.deque.ids")
+  public Deque<String> dequeRerunIds() {
+    return new ConcurrentLinkedDeque<>();
   }
 
   // =========================
