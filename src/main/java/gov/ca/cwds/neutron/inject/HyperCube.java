@@ -1,7 +1,9 @@
 package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
+import java.util.Deque;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -586,6 +588,12 @@ public class HyperCube extends NeutronGuiceModule {
       ret = loadElasticSearchConfig(this.esConfigPeopleSummary);
     }
     return ret;
+  }
+
+  @Provides
+  @Named("rerun.deque.ids")
+  public Deque<String> dequeRerunIds() {
+    return new ConcurrentLinkedDeque<>();
   }
 
   // =========================

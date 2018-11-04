@@ -45,7 +45,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
     target =
-        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector, null);
     target.allocateThreadHandler();
   }
 

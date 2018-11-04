@@ -49,7 +49,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
     rocket =
-        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector, null);
     rocket.allocateThreadHandler();
     target = new PeopleSummaryThreadHandler(rocket);
   }

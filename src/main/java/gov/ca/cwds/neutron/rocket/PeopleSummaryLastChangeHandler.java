@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_SIZE = 10000;
+  private static final int BUNDLE_KEY_SIZE = 5000;
 
   private final List<String> keys = new ArrayList<>(BUNDLE_KEY_SIZE * 2);
 
@@ -196,6 +197,16 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         read(stmt, rs -> readClientKeys(rs));
       } finally {
         // Auto-close statement.
+      }
+
+      // NEXT: Add re-run client keys.
+      final Deque<String> rerunIds = rocket.getRerunClients();
+      if (rerunIds != null && !rerunIds.isEmpty()) {
+        String id;
+        while ((id = rerunIds.pollLast()) != null) {
+          LOGGER.warn("***** RE-RUN CLIENT ID {} *****", id);
+          keys.add(id);
+        }
       }
 
       final int totalKeys = keys.size();

@@ -90,13 +90,17 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * @param mapper Jackson ObjectMapper
    * @param flightPlan command line options
    * @param launchDirector global Launch Director
+   * @param dequeRerunIds any client ids to re-run in last change mode
    */
   @Inject
   public ClientPersonIndexerJob(final ReplicatedClientDao dao,
       @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
-      AtomLaunchDirector launchDirector) {
+      AtomLaunchDirector launchDirector, @Named("rerun.deque.ids") Deque<String> dequeRerunIds) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+    if (dequeRerunIds != null) {
+      this.rerunClients = dequeRerunIds;
+    }
   }
 
   @Override

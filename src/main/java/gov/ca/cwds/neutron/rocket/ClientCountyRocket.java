@@ -69,7 +69,7 @@ public class ClientCountyRocket extends ClientPersonIndexerJob
       @LastRunFile final String lastRunFile, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
-    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+    super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector, null);
   }
 
   /**
