@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.launch;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TimerTask;
 
 import org.quartz.JobExecutionContext;
@@ -14,6 +16,7 @@ import com.google.inject.name.Named;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
+import gov.ca.cwds.neutron.rocket.VoxListenerRocket;
 
 /**
  * Timer task to abort stalled or runaway rockets.
@@ -33,6 +36,8 @@ public class ZombieKillerTimerTask extends TimerTask {
 
   private final int timeToAbort;
 
+  private final Set<Class> untouchables = new HashSet<>();
+
   @Inject
   public ZombieKillerTimerTask(Scheduler scheduler,
       @Named("zombie.killer.killAtMillis") String strTimeToAbort) {
@@ -41,6 +46,8 @@ public class ZombieKillerTimerTask extends TimerTask {
     final int iTimeToAbort = Integer.parseInt(strTimeToAbort);
     LOGGER.info("Zombie Killer! iTimeToAbort: {}", iTimeToAbort);
     this.timeToAbort = iTimeToAbort > 0 ? iTimeToAbort : (15 * 60 * 1000); // fifteen minutes
+
+    untouchables.add(VoxListenerRocket.class);
   }
 
   protected void abortRunningJob(JobExecutionContext ctx) {
@@ -52,8 +59,14 @@ public class ZombieKillerTimerTask extends TimerTask {
     final FlightLog flightLog = job.getRocket().getFlightLog();
     final long elapsed = System.currentTimeMillis() - flightLog.getStartTime();
 
+    if (untouchables.contains(klass)) {
+      LOGGER.debug("Let rocket {} run", klass.getName());
+      return;
+    }
+
     LOGGER.info("Check flight. rocket: {}, elapsed millis: {}, failed: {}, max time to abort: {}",
         klass, elapsed, flightLog.isFailed(), timeToAbort);
+
     if (flightPlan.isLastRunMode() && (elapsed > timeToAbort || flightLog.isFailed())) {
       try {
         LOGGER.warn("ABORT FLIGHT! rocket: {}, elapsed millis: {}, failed: {}", klass, elapsed,
