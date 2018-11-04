@@ -648,6 +648,12 @@ public class HyperCube extends NeutronGuiceModule {
     return ret;
   }
 
+  @Named("vox.listener.rocket.iterations")
+  @Provides
+  public Integer voxListenerIterations() {
+    return 3000;
+  }
+
   // =========================
   // ACCESSORS:
   // =========================
