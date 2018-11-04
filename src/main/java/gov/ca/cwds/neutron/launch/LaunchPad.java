@@ -103,6 +103,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
     if (rerunIds != null) {
       dequeRerunIds = rerunIds;
+      flightPlan.setDequeRerunIds(rerunIds);
     }
   }
 
