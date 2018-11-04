@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdRerunKey;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdFetchLogs;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdFlightHistory;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdLastRunStatus;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdPause;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdRerunKey;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdResume;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdShutdown;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdStop;
@@ -52,7 +52,7 @@ public enum VoxCommandType {
 
   static {
     final Map<String, VoxCommandType> types;
-    types = new HashMap<>();
+    types = new HashMap<>(VoxCommandType.values().length);
     for (VoxCommandType e : VoxCommandType.values()) {
       types.put(e.key, e);
     }
