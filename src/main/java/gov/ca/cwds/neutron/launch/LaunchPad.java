@@ -112,10 +112,10 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
    */
   @Override
   @Managed(description = "Re-run primary key for given rocket")
-  public void rerunKey(String[] keys) {
-    LOGGER.warn("LaunchPad: rocket: {}: RE-RUN KEYS: '{}'", rocketName, keys);
+  public void rerunKey(String rawKeys) {
+    LOGGER.warn("LaunchPad: rocket: {}: RE-RUN KEYS: '{}'", rocketName, rawKeys);
 
-    for (String key : keys) {
+    for (String key : rawKeys.split(",")) {
       dequeRerunIds.push(key.trim());
     }
   }

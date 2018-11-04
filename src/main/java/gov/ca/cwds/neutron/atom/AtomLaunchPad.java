@@ -41,9 +41,9 @@ public interface AtomLaunchPad extends ApiMarker {
   /**
    * Re-run a primary key for a given rocket in last change mode.
    * 
-   * @param keys comma-delimited primary keys to re-run
+   * @param rawKeys comma-delimited primary keys to re-run
    */
-  void rerunKey(String[] keys);
+  void rerunKey(String rawKeys);
 
   /**
    * Show history of last N flights.
