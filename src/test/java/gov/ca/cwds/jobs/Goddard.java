@@ -78,6 +78,7 @@ import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Injector;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
@@ -138,6 +139,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
+  public Injector injector;
   public ElasticsearchConfiguration esConfig;
   public NeutronElasticSearchDao esDao;
   public RestHighLevelClient client;
@@ -203,6 +205,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     LaunchCommand.getSettings().setInitialMode(true);
     LaunchCommand.getSettings().setTestMode(true);
 
+
     // Last run time:
     tempFile = tempFolder.newFile("tempFile.txt");
     jobConfigFile = tempFolder.newFile("jobConfigFile.yml");
@@ -210,6 +213,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     FileUtils.writeStringToFile(tempFile, "2018-12-31 03:34:12");
 
+    injector = mock(Injector.class);
     mapper = MAPPER;
     pair = Pair.of("aaaaaaaaaa", "9999999999");
 
