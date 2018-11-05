@@ -112,38 +112,31 @@ public class RawToEsConverter {
     rc.setLastUpdatedTime(rawCli.getCltLastUpdatedTime());
 
     final Collection<RawClientAddress> coll = rawCli.getClientAddress().values();
-    LOGGER.trace("convert client address");
     for (RawClientAddress rca : coll) {
       convertClientAddress(rc, rca);
     }
 
-    LOGGER.trace("convert client county");
     for (RawClientCounty cc : rawCli.getClientCounty()) {
       convertClientCounty(rc, cc);
     }
 
-    LOGGER.trace("convert aka");
     for (RawAka aka : rawCli.getAka()) {
       convertAka(rc, aka);
     }
 
-    LOGGER.trace("convert ethnicity");
     for (RawEthnicity eth : rawCli.getEthnicity()) {
       convertEthnicity(rc, eth);
     }
 
-    LOGGER.trace("convert safety alert");
     for (RawSafetyAlert saf : rawCli.getSafetyAlert()) {
       convertSafetyAlert(rc, saf);
     }
 
-    LOGGER.trace("convert case");
     for (RawCase cas : rawCli.getCases()) {
       convertCase(rc, cas);
     }
 
     // SNAP-729: Neutron Initial Load: restore CSEC.
-    LOGGER.trace("convert CSEC");
     for (RawCsec csec : rawCli.getCsec()) {
       convertCsec(rc, csec);
     }
