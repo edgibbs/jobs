@@ -97,6 +97,7 @@ import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
+import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -178,6 +179,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public Scheduler scheduler;
   public LaunchDirector launchDirector;
   public ListenerManager listenerManager;
+  public LaunchCommandSettings launchCommandSettings;
 
   public RocketFactory rocketFactory;
   public Mach1TestRocket mach1Rocket;
@@ -235,7 +237,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
         new TestNormalizedEntityDao(sessionFactory);
     mach1Rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
-    flightSchedule = StandardFlightSchedule.CLIENT;
+    flightSchedule = StandardFlightSchedule.PEOPLE_SUMMARY;
 
     final Map<String, Object> sessionProperties = new HashMap<>();
     sessionProperties.put("hibernate.default_schema", "CWSRS1");

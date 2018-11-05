@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -45,11 +45,11 @@ public class VoxListenerRocket
    * @param launchDirector1 command launch director
    * @param flightPlan command line options
    * @param launchDirector launch director
-   * @param iterations TODO
+   * @param iterations number of iterations to wait for VOX commands
    */
   @Inject
   public VoxListenerRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people-summary") final NeutronElasticSearchDao esDao,
       final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector,
       @Named("vox.listener.rocket.iterations") Integer iterations) {

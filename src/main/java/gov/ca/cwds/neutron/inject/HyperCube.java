@@ -1,6 +1,7 @@
 package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
+import java.util.Deque;
 import java.util.Properties;
 import java.util.function.Function;
 
@@ -638,11 +639,12 @@ public class HyperCube extends NeutronGuiceModule {
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
       ZombieKillerTimerTask zombieKillerTimerTask,
-      @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
+      @Named("zombie.killer.killAtMillis") String strTimeToAbort,
+      @Named("rerun.deque.ids") Deque<String> rerunIds) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        zombieKillerTimerTask, strTimeToAbort);
+        zombieKillerTimerTask, strTimeToAbort, rerunIds);
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();
