@@ -666,6 +666,12 @@ public class HyperCube extends NeutronGuiceModule {
     return new ConcurrentLinkedDeque<>();
   }
 
+  @Provides
+  @Named("vox.listener.rocket.iterations")
+  protected Integer voxListenerIterations() {
+    return 3000;
+  }
+
   // =========================
   // ACCESSORS:
   // =========================
