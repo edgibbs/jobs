@@ -1,20 +1,25 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.io.IOException;
 import java.util.Date;
 
+import org.elasticsearch.action.search.MultiSearchRequest;
 import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -49,7 +54,7 @@ public class SanityCheckRocket
    */
   @Inject
   public SanityCheckRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      final ElasticsearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan,
+      final NeutronElasticSearchDao esDao, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector, @LastRunFile String lastRunFile) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }
@@ -57,32 +62,37 @@ public class SanityCheckRocket
   @Override
   public Date launch(Date lastSuccessfulRunTime) {
     LOGGER.info("SANITY CHECK!");
-    final Client client = this.esDao.getClient();
+    final RestHighLevelClient client = esDao.getClient();
+    final MultiSearchRequest multiSearchRequest =
+        new MultiSearchRequest().add(new SearchRequest().source(new SearchSourceBuilder()
+            .query(QueryBuilders.idsQuery().addIds("OpvBkr00ND", "Jw3ny5K00h", "EuCrckE04M"))));
 
-    final MultiSearchResponse sr = client.prepareMultiSearch()
-        .add(client.prepareSearch()
-            .setQuery(QueryBuilders.idsQuery().addIds("OpvBkr00ND", "Jw3ny5K00h", "EuCrckE04M")))
-        .get();
+    try {
+      final MultiSearchResponse sr = client.msearch(multiSearchRequest, RequestOptions.DEFAULT);
+      long totalHits = 0;
 
-    long totalHits = 0;
-    for (MultiSearchResponse.Item item : sr.getResponses()) {
-      final SearchResponse response = item.getResponse();
-      final SearchHits hits = response.getHits();
-      totalHits += hits.getTotalHits();
+      for (MultiSearchResponse.Item item : sr.getResponses()) {
+        final SearchResponse response = item.getResponse();
+        final SearchHits hits = response.getHits();
+        totalHits += hits.getTotalHits();
 
-      try {
-        for (SearchHit hit : hits.getHits()) {
-          final String json = hit.getSourceAsString();
-          LOGGER.info("json: {}", json);
-          final ElasticSearchPerson person = readPerson(json);
-          LOGGER.info("person: {}", person);
+        try {
+          for (SearchHit hit : hits.getHits()) {
+            final String json = hit.getSourceAsString();
+            LOGGER.info("json: {}", json);
+
+            final ElasticSearchPerson person = readPerson(json);
+            LOGGER.info("person: {}", person);
+          }
+        } catch (NeutronCheckedException e) {
+          LOGGER.warn("whatever", e);
         }
-      } catch (NeutronCheckedException e) {
-        LOGGER.warn("whatever", e);
       }
-    }
 
-    LOGGER.info("total hits: {}", totalHits);
+      LOGGER.info("total hits: {}", totalHits);
+    } catch (NullPointerException | IOException e) {
+      CheeseRay.runtime(LOGGER, e, "FAILED MULTISEARCH! {}", e.getMessage());
+    }
 
     try {
       launchDirector.stopScheduler(false);

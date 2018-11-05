@@ -1,14 +1,11 @@
 package gov.ca.cwds.neutron.inject;
 
 import java.io.File;
-import java.util.Deque;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.quartz.ListenerManager;
@@ -54,7 +51,7 @@ import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.data.persistence.cms.EsChildPersonCase;
 import gov.ca.cwds.data.persistence.cms.EsParentPersonCase;
@@ -104,6 +101,7 @@ import gov.ca.cwds.neutron.launch.listener.NeutronSchedulerListener;
 import gov.ca.cwds.neutron.launch.listener.NeutronTriggerListener;
 import gov.ca.cwds.neutron.rocket.BasePersonRocket;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
+import gov.ca.cwds.neutron.util.transform.Elasticsearch6ClientBuilder;
 import gov.ca.cwds.neutron.vox.XRaySpex;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
 import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
@@ -173,7 +171,7 @@ public class HyperCube extends NeutronGuiceModule {
     this.flightPlan = flightPlan;
 
     if (StringUtils.isNotBlank(flightPlan.getEsConfigPeopleSummaryLoc())) {
-      this.esConfigPeopleSummary = new File(flightPlan.getEsConfigPeopleSummaryLoc());
+      esConfigPeopleSummary = new File(flightPlan.getEsConfigPeopleSummaryLoc());
     }
   }
 
@@ -211,8 +209,8 @@ public class HyperCube extends NeutronGuiceModule {
    */
   protected void bindSystemProperties() {
     final Properties defaults = new Properties();
-    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // 1 minute
-    defaults.setProperty("zombie.killer.killAtMillis", "900000"); // 15 minutes
+    defaults.setProperty("zombie.killer.checkEveryMillis", "60000"); // default to 1 minute
+    defaults.setProperty("zombie.killer.killAtMillis", "240000"); // default to 4 minutes
 
     final Properties props = new Properties(defaults);
     props.putAll(System.getProperties());
@@ -480,11 +478,11 @@ public class HyperCube extends NeutronGuiceModule {
   // ELASTICSEARCH:
   // =========================
 
-  protected TransportClient buildElasticsearchClient(final ElasticsearchConfiguration config)
+  protected RestHighLevelClient buildElasticsearchClient(final ElasticsearchConfiguration config)
       throws NeutronCheckedException {
     LOGGER.debug("HyperCube.buildElasticsearchClient");
     try {
-      return gov.ca.cwds.rest.ElasticUtils.buildElasticsearchClient(config);
+      return new Elasticsearch6ClientBuilder().createAndConfigureESClient(config);
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e,
           "ERROR INITIALIZING ELASTICSEARCH CLIENT FOR PEOPLE INDEX: {}", e.getMessage(), e);
@@ -492,26 +490,29 @@ public class HyperCube extends NeutronGuiceModule {
   }
 
   /**
-   * Elasticsearch 5.x. Instantiate the singleton ElasticSearch client on demand. Initializes X-Pack
+   * Elasticsearch 6.x. Instantiate the singleton ElasticSearch client on demand. Initializes X-Pack
    * security.
    * 
-   * @return initialized singleton ElasticSearch client, people index
+   * @return initialized singleton ElasticSearch REST client, people index
    * @throws NeutronCheckedException on ES connection error
    */
   @Provides
   @Singleton
   @Named("elasticsearch.client.people")
-  public Client elasticsearchClientPeople() throws NeutronCheckedException {
+  public RestHighLevelClient elasticsearchClientPeople() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticsearchClientPeople");
-    TransportClient client = null;
+    RestHighLevelClient ret = null;
+
     if (esConfigPeople != null) {
-      client = buildElasticsearchClient(elasticSearchConfigPeople());
+      ret =
+          new Elasticsearch6ClientBuilder().createAndConfigureESClient(elasticSearchConfigPeople());
     }
-    return client;
+
+    return ret;
   }
 
   /**
-   * Instantiate the singleton Elasticsearch 5.x client on demand and initialize X-Pack security.
+   * Instantiate the singleton Elasticsearch client on demand and initialize X-Pack security.
    * 
    * @return initialized singleton ElasticSearch client, people summary index
    * @throws NeutronCheckedException on ES connection error
@@ -519,7 +520,7 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Singleton
   @Named("elasticsearch.client.people-summary")
-  public Client elasticsearchClientPeopleSummary() throws NeutronCheckedException {
+  public RestHighLevelClient elasticsearchClientPeopleSummary() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticsearchClientPeopleSummary");
     return buildElasticsearchClient(elasticSearchConfigPeopleSummary());
   }
@@ -527,19 +528,20 @@ public class HyperCube extends NeutronGuiceModule {
   @Provides
   @Singleton
   @Named("elasticsearch.dao.people")
-  public ElasticsearchDao makeElasticsearchDaoPeople() throws NeutronCheckedException {
+  public NeutronElasticSearchDao makeElasticsearchDaoPeople() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.makeElasticsearchDaoPeople");
-    return new ElasticsearchDao(elasticsearchClientPeople(), elasticSearchConfigPeople());
+    return new NeutronElasticSearchDao(elasticsearchClientPeople(), elasticSearchConfigPeople());
   }
 
   @Provides
   @Singleton
   @Named("elasticsearch.dao.people-summary")
-  public ElasticsearchDao makeElasticsearchDaoPeopleSummary(
-      @Named("elasticsearch.client.people-summary") Client client,
-      @Named("elasticsearch.config.people-summary") ElasticsearchConfiguration config) {
+  public NeutronElasticSearchDao makeElasticsearchDaoPeopleSummary(
+      @Named("elasticsearch.config.people-summary") ElasticsearchConfiguration config)
+      throws NeutronCheckedException {
     LOGGER.debug("HyperCube.makeElasticsearchDaoPeopleSummary");
-    return new ElasticsearchDao(client, config);
+    return new NeutronElasticSearchDao(elasticsearchClientPeopleSummary(),
+        elasticSearchConfigPeopleSummary());
   }
 
   protected ElasticsearchConfiguration loadElasticSearchConfig(File esConfig)
@@ -564,10 +566,12 @@ public class HyperCube extends NeutronGuiceModule {
   public ElasticsearchConfiguration elasticSearchConfigPeople() throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticSearchConfigPeople");
     ElasticsearchConfiguration ret = null;
+
     if (esConfigPeople != null) {
       LOGGER.debug("Create NEW ES configuration: people");
-      ret = loadElasticSearchConfig(this.esConfigPeople);
+      ret = loadElasticSearchConfig(esConfigPeople);
     }
+
     return ret;
   }
 
@@ -583,10 +587,12 @@ public class HyperCube extends NeutronGuiceModule {
       throws NeutronCheckedException {
     LOGGER.debug("HyperCube.elasticSearchConfigPeopleSummary");
     ElasticsearchConfiguration ret = null;
+
     if (esConfigPeopleSummary != null) {
       LOGGER.debug("Create NEW ES configuration: people summary");
-      ret = loadElasticSearchConfig(this.esConfigPeopleSummary);
+      ret = loadElasticSearchConfig(esConfigPeopleSummary);
     }
+
     return ret;
   }
 
@@ -623,7 +629,6 @@ public class HyperCube extends NeutronGuiceModule {
    * @param scheduler Quartz scheduler
    * @param zombieKillerTimerTask zombie killer
    * @param strTimeToAbort how long to wait before aborting a flight
-   * @param dequeRerunIds primary keys to re-run in Last Change mode, if any
    * @return configured launch scheduler
    * @throws SchedulerException if unable to configure Quartz
    */
@@ -633,12 +638,11 @@ public class HyperCube extends NeutronGuiceModule {
       final AtomFlightRecorder flightRecorder, final AtomRocketFactory rocketFactory,
       final AtomFlightPlanManager flightPlanMgr, Scheduler scheduler,
       ZombieKillerTimerTask zombieKillerTimerTask,
-      @Named("zombie.killer.killAtMillis") String strTimeToAbort,
-      @Named("rerun.deque.ids") Deque<String> dequeRerunIds) throws SchedulerException {
+      @Named("zombie.killer.killAtMillis") String strTimeToAbort) throws SchedulerException {
     LOGGER.debug("HyperCube.configureQuartz");
     final boolean initialMode = LaunchCommand.isInitialMode();
     final LaunchDirector ret = new LaunchDirector(flightRecorder, rocketFactory, flightPlanMgr,
-        zombieKillerTimerTask, strTimeToAbort, dequeRerunIds);
+        zombieKillerTimerTask, strTimeToAbort);
 
     ret.setScheduler(scheduler);
     final FlightPlan commonFlightPlan = LaunchCommand.getStandardFlightPlan();
@@ -650,18 +654,6 @@ public class HyperCube extends NeutronGuiceModule {
             commonFlightPlan.isLoadPeopleIndex(), commonFlightPlan.getExcludedRockets())
         : new NeutronJobListener());
     return ret;
-  }
-
-  @Named("vox.listener.rocket.iterations")
-  @Provides
-  public Integer voxListenerIterations() {
-    return 3000;
-  }
-
-  @Named("rerun.deque.ids")
-  @Provides
-  public Deque<String> dequeRerunIds() {
-    return new ConcurrentLinkedDeque<>();
   }
 
   // =========================
@@ -734,6 +726,18 @@ public class HyperCube extends NeutronGuiceModule {
 
   public void setEsConfigPeople(File esConfigPeople) {
     this.esConfigPeople = esConfigPeople;
+  }
+
+  public String getLastJobRunTimeFilename() {
+    return lastJobRunTimeFilename;
+  }
+
+  public void setLastJobRunTimeFilename(String lastJobRunTimeFilename) {
+    this.lastJobRunTimeFilename = lastJobRunTimeFilename;
+  }
+
+  public void setEsConfigPeopleSummary(File esConfigPeopleSummary) {
+    this.esConfigPeopleSummary = esConfigPeopleSummary;
   }
 
 }

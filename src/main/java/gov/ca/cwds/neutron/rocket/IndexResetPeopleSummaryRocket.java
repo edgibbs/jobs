@@ -5,13 +5,13 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 
 /**
- * Drops and creates a Elasticsearch People Summary index, if requested.
+ * Drops and creates the Elasticsearch People Summary index, if requested.
  * 
  * @author CWDS API Team
  */
@@ -30,7 +30,7 @@ public class IndexResetPeopleSummaryRocket extends IndexResetRocket {
    */
   @Inject
   public IndexResetPeopleSummaryRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people-summary") final NeutronElasticSearchDao esDao,
       final ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, mapper, flightPlan, launchDirector);
   }

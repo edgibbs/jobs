@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -75,7 +76,7 @@ public class OtherClientNameIndexerJob
   @Inject
   public OtherClientNameIndexerJob(final ReplicatedAkaDao dao,
       final ReplicatedOtherClientNameDao denormDao,
-      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao, final ObjectMapper mapper,
+      @Named("elasticsearch.dao.people") final NeutronElasticSearchDao esDao, final ObjectMapper mapper,
       FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
     this.denormDao = denormDao;

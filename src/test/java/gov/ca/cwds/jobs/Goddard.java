@@ -8,6 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -22,19 +24,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Function;
 
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.client.ElasticMockFactory;
+import org.elasticsearch.client.IndicesClient;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.CheckedConsumer;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.hibernate.CacheMode;
@@ -67,31 +76,27 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
-import org.quartz.TriggerKey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Injector;
 import com.ibm.db2.jcc.am.DatabaseMetaData;
 
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
 import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
-import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
-import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
+import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.launch.FlightPlanRegistry;
 import gov.ca.cwds.neutron.launch.FlightRecorder;
-import gov.ca.cwds.neutron.launch.LaunchCommandSettings;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.RocketFactory;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
@@ -132,14 +137,9 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   @Rule
   public TemporaryFolder tempFolder = new TemporaryFolder();
 
-  public Injector injector;
-  public LaunchCommand lc;
-  public TriggerKey triggerKey;
-  public LaunchCommandSettings launchCommandSettings = new LaunchCommandSettings();
-
   public ElasticsearchConfiguration esConfig;
-  public ElasticsearchDao esDao;
-  public Client client;
+  public NeutronElasticSearchDao esDao;
+  public RestHighLevelClient client;
   public ElasticSearchPerson esp;
 
   public File tempFile;
@@ -229,13 +229,13 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     listenerManager = mock(ListenerManager.class);
     flightPlanManager = mock(AtomFlightPlanManager.class);
     proc = mock(ProcedureCall.class);
-    client = mock(Client.class);
+    client = mock(RestHighLevelClient.class);
 
     final TestNormalizedEntityDao testNormalizedEntityDao =
         new TestNormalizedEntityDao(sessionFactory);
     mach1Rocket = new Mach1TestRocket(testNormalizedEntityDao, esDao, lastRunFile, MAPPER);
     flightPlanRegistry = new FlightPlanRegistry(flightPlan);
-    flightSchedule = StandardFlightSchedule.PEOPLE_SUMMARY;
+    flightSchedule = StandardFlightSchedule.CLIENT;
 
     final Map<String, Object> sessionProperties = new HashMap<>();
     sessionProperties.put("hibernate.default_schema", "CWSRS1");
@@ -296,24 +296,74 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(meta.getDatabaseProductName()).thenReturn("DB2");
     when(meta.getDatabaseProductVersion()).thenReturn("DSN11010");
 
-    // Elasticsearch basics:
+    // Elasticsearch: an enigmatic conundrum:
     esp = new ElasticSearchPerson();
-    esDao = mock(ElasticsearchDao.class);
+    esDao = mock(NeutronElasticSearchDao.class);
     esConfig = mock(ElasticsearchConfiguration.class);
 
     when(esDao.getConfig()).thenReturn(esConfig);
     when(esDao.getClient()).thenReturn(client);
 
-    final Settings settings = Settings.builder().put(new HashMap<String, String>()).build();
-    when(client.settings()).thenReturn(settings);
+    final RestClient restClient = mock(RestClient.class);
+    final ElasticMockFactory esMockFactory = new ElasticMockFactory(client);
+    final IndicesClient indicesClient = esMockFactory.makeIndicesClient();
+    final Response esResponse = mock(Response.class);
+    final StatusLine statusLine = mock(StatusLine.class);
+    final HttpEntity httpEntity = mock(HttpEntity.class);
+    final Header header = mock(Header.class);
+    final HeaderElement headerElement = mock(HeaderElement.class);
+    final HeaderElement[] headerElements = {headerElement};
+    final CheckedConsumer<RestClient, IOException> doClose = (rc) -> System.out.println("consume");
 
-    when(esConfig.getElasticsearchAlias()).thenReturn("people");
+    when(client.indices()).thenReturn(indicesClient);
+    when(client.getLowLevelClient()).thenReturn(restClient);
+    when(client.getClient()).thenReturn(restClient);
+    when(client.getDoClose()).thenReturn(doClose);
+
+    when(restClient.performRequest(any(Request.class))).thenReturn(esResponse);
+    when(statusLine.getStatusCode()).thenReturn(200);
+    when(httpEntity.getContentType()).thenReturn(header);
+
+    when(esResponse.getStatusLine()).thenReturn(statusLine);
+    when(esResponse.getEntity()).thenReturn(httpEntity);
+
+    when(header.getElements()).thenReturn(headerElements);
+    when(header.getName()).thenReturn("application");
+    when(header.getValue()).thenReturn("json");
+
+    // final Settings settings = Settings.builder().build();
+    // when(client.settings()).thenReturn(settings);
+
+    when(esConfig.getElasticsearchAlias()).thenReturn("people-summary");
     when(esConfig.getElasticsearchDocType()).thenReturn("person");
+    when(esConfig.getElasticsearchCluster()).thenReturn("elasticsearch");
+    when(esConfig.getElasticsearchHost()).thenReturn("localhost");
+    when(esConfig.getElasticsearchPort()).thenReturn("9200");
+    when(esConfig.getElasticsearchNodes()).thenReturn(
+        "es-inst-1.env.cwds.io:9200,es-inst-2.env.cwds.io:9200,es-inst-3.env.cwds.io:9200");
+    when(esConfig.getIndexSettingFile()).thenReturn(getClass()
+        .getResource(NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue()).getPath());
+    when(esConfig.getDocumentMappingFile()).thenReturn(getClass()
+        .getResource(NeutronElasticsearchDefaults.MAPPING_PEOPLE_SUMMARY.getValue()).getPath());
 
     // Flight options:
     esConfileFile = tempFolder.newFile("es.yml");
-    flightPlan = mock(FlightPlan.class);
 
+    try (FileWriter writer = new FileWriter(esConfileFile)) {
+      writer.write("elasticsearch.host: es-inst-1.env.cwds.io\n");
+      writer.write("elasticsearch.port: 9200\n");
+      writer.write("elasticsearch.cluster: es-int\n");
+      writer.write(
+          "elasticsearch.nodes: es-inst-1.env.cwds.io:9200,es-inst-2.env.cwds.io:9200,es-inst-3.env.cwds.io:9200\n");
+      writer.write("elasticsearch.alias: people\n");
+      writer.write("elasticsearch.doctype: person\n");
+      writer.write("elasticsearch.xpack.user: elastic\n");
+      writer.write("elasticsearch.xpack.password: changeme\n");
+    } finally {
+      // auto-close
+    }
+
+    flightPlan = mock(FlightPlan.class);
     when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
     when(flightPlan.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
     when(flightPlan.getThreadCount()).thenReturn(1L);
@@ -368,14 +418,16 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final MultiSearchResponse.Item[] items = new MultiSearchResponse.Item[1];
     items[0] = item;
 
-    hits = mock(SearchHits.class);
-    hit = mock(SearchHit.class);
+    // CANS-627: ES 6.x makes these classes final :-(
+    hits = SearchHits.empty();
+    hit = new SearchHit(12345);
     hitArray = new SearchHit[1];
     hitArray[0] = hit;
     sr = mock(SearchResponse.class);
 
-    when(client.prepareMultiSearch()).thenReturn(mBuilder);
-    when(client.prepareSearch()).thenReturn(sBuilder);
+    // Remember the Java concept of an INTERFACE?? Thanks, Elasticsearch.
+    // when(client.prepareMultiSearch()).thenReturn(mBuilder);
+    // when(client.prepareSearch()).thenReturn(sBuilder);
 
     when(mBuilder.add(any(SearchRequestBuilder.class))).thenReturn(mBuilder);
     when(mBuilder.get()).thenReturn(multiResponse);
@@ -383,13 +435,14 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(multiResponse.getResponses()).thenReturn(items);
     when(item.getResponse()).thenReturn(sr);
     when(sr.getHits()).thenReturn(hits);
-    when(hits.getHits()).thenReturn(hitArray);
 
-    when(hit.docId()).thenReturn(12345);
+    // CANS-627: ES 6.x makes these classes final :-(
+    // when(hits.getHits()).thenReturn(hitArray);
+    // when(hit.docId()).thenReturn(12345);
 
-    final String useDefaultCharSet = null;
-    when(hit.getSourceAsString()).thenReturn(IOUtils
-        .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
+    // final String useDefaultCharSet = null;
+    // when(hit.getSourceAsString()).thenReturn(IOUtils
+    // .toString(getClass().getResourceAsStream("/fixtures/es_person.json"), useDefaultCharSet));
 
     systemCodeDao = mock(SystemCodeDao.class);
     systemMetaDao = mock(SystemMetaDao.class);
@@ -413,30 +466,6 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     when(scheduler.getListenerManager()).thenReturn(listenerManager);
     mbean = mock(VoxLaunchPadMBean.class);
-
-    // Prep Launch Command global calls.
-    // flightPlan = new FlightPlan();
-    flightPlan.setEsConfigLoc("config/local.yaml");
-
-    final File fakeBaseDir = tempFolder.newFolder();
-    flightPlan.setBaseDirectory(fakeBaseDir.getAbsolutePath());
-    flightPlan.setLastRunLoc(lastRunFile);
-
-    final AtomCommandCenterConsole ctrlMgr = mock(AtomCommandCenterConsole.class);
-    lc = new LaunchCommand(flightRecorder, launchDirector, ctrlMgr);
-    lc.setCommonFlightPlan(flightPlan);
-    lc.setLaunchDirector(launchDirector);
-
-    Function<FlightPlan, Injector> makeLaunchCommand = mock(Function.class);
-    injector = mock(Injector.class);
-    when(makeLaunchCommand.apply(any(FlightPlan.class))).thenReturn(injector);
-    when(injector.getInstance(LaunchCommand.class)).thenReturn(lc);
-    LaunchCommand.setInjectorMaker(makeLaunchCommand);
-    LaunchCommand.setStandardFlightPlan(flightPlan);
-
-    triggerKey = new TriggerKey("el_trigger", NeutronSchedulerConstants.GRP_LST_CHG);
-    LaunchCommand.setTestMode(true);
-    LaunchCommand.setInstance(lc);
 
     doAnswer(new Answer<Void>() {
       @Override

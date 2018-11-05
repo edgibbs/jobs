@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -65,7 +66,7 @@ public class ClientCountyRocket extends ClientPersonIndexerJob
    * @param launchDirector launch director
    */
   @Inject
-  public ClientCountyRocket(final ReplicatedClientDao dao, final ElasticsearchDao esDao,
+  public ClientCountyRocket(final ReplicatedClientDao dao, final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper,
       @CmsSessionFactory SessionFactory sessionFactory, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {

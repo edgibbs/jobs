@@ -2,6 +2,7 @@ package gov.ca.cwds.jobs;
 
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,7 +54,7 @@ public class SafetyAlertIndexerJob
    */
   @Inject
   public SafetyAlertIndexerJob(ReplicatedSafetyAlertsDao dao,
-      @Named("elasticsearch.dao.people") ElasticsearchDao esDao, @LastRunFile String lastRunFile,
+      @Named("elasticsearch.dao.people") NeutronElasticSearchDao esDao, @LastRunFile String lastRunFile,
       ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);

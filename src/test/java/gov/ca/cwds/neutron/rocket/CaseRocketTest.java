@@ -35,7 +35,7 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.dao.cms.ReplicatedPersonCasesDao;
 import gov.ca.cwds.dao.cms.StaffPersonDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.EsCaseRelatedPerson;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
 import gov.ca.cwds.data.persistence.cms.ReplicatedPersonCases;
@@ -57,7 +57,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
     private boolean blowup = false;
 
-    public TestCaseRocket(ReplicatedPersonCasesDao dao, ElasticsearchDao esDao,
+    public TestCaseRocket(ReplicatedPersonCasesDao dao, NeutronElasticSearchDao esDao,
         ReplicatedClientDao clientDao, StaffPersonDao staffPersonDao, String lastRunFile,
         ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
       super(dao, esDao, clientDao, staffPersonDao, lastRunFile, mapper, flightPlan, launchDirector);

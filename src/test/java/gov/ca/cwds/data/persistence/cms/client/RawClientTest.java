@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
@@ -28,6 +29,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
 
   RawClient target;
 
+  @Before
   @Override
   public void setup() throws Exception {
     super.setup();

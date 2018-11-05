@@ -90,13 +90,13 @@ public abstract class VoxJMXCommandClient implements AutoCloseable, VoxCommandAc
   public final void launch(final VoxCommandInstruction cmd) throws NeutronCheckedException {
     try {
       LOGGER.info("VOX: CONNECTING JMX...");
-      this.setHost(cmd.getHost());
-      this.setPort(cmd.getPort());
-      this.setRocket(cmd.getRocket());
-      this.setArgs(cmd.getArgs());
+      setHost(cmd.getHost());
+      setPort(cmd.getPort());
+      setRocket(cmd.getRocket());
+      setArgs(cmd.getArgs());
 
-      this.connect();
-      this.run();
+      connect();
+      run();
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "JMX ERROR! host: {}, port: {}, rocket: {}", cmd.getHost(),
           cmd.getPort(), cmd.getRocket());

@@ -15,8 +15,7 @@ import java.lang.annotation.Annotation;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Function;
 
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Before;
@@ -32,7 +31,7 @@ import com.google.inject.binder.AnnotatedBindingBuilder;
 import gov.ca.cwds.data.CmsSystemCodeSerializer;
 import gov.ca.cwds.data.cms.SystemCodeDao;
 import gov.ca.cwds.data.cms.SystemMetaDao;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.jobs.test.Mach1TestRocket;
@@ -127,12 +126,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
     LaunchCommand.setStandardFlightPlan(null);
     flightPlan = new FlightPlan();
     flightPlan.setEsConfigLoc("config" + File.separator + "local.yaml");
-
     flightPlanMgr = mock(AtomFlightPlanManager.class);
 
     target = new TestHyperCube(flightPlan, new File(flightPlan.getEsConfigLoc()), lastRunFile);
     target.setHibernateConfigCms("test-h2-cms.xml");
     target.setHibernateConfigNs("test-h2-ns.xml");
+    target.setEsConfigPeople(esConfileFile);
+    target.setEsConfigPeopleSummary(esConfileFile);
 
     testBinder = mock(Binder.class);
     target.setTestBinder(testBinder);
@@ -188,7 +188,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
 
   @Test
   public void elasticsearchClient_Args__() throws Exception {
-    Client actual = target.elasticsearchClientPeople();
+    RestHighLevelClient actual = target.elasticsearchClientPeople();
     assertThat(actual, is(notNullValue()));
   }
 
@@ -496,66 +496,44 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   }
 
   @Test
-  public void buildElasticsearchClient_A$ElasticsearchConfiguration() throws Exception {
-    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    final TransportClient actual = target.buildElasticsearchClient(config);
-    assertThat(actual, is(notNullValue()));
-  }
-
-  @Test(expected = NeutronCheckedException.class)
-  public void buildElasticsearchClient_A$ElasticsearchConfiguration_T$NeutronCheckedException()
-      throws Exception {
-    target.buildElasticsearchClient(null);
-  }
-
-  @Test
   public void elasticsearchClientPeople_A$() throws Exception {
-    final Client actual = target.elasticsearchClientPeople();
+    final RestHighLevelClient actual = target.elasticsearchClientPeople();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void elasticsearchClientPeople_A$_T$NeutronCheckedException() throws Exception {
-    try {
-      target.setEsConfigPeople(esConfileFile);
-      target.elasticsearchClientPeople();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target.elasticsearchClientPeople();
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void elasticsearchClientPeopleSummary_A$() throws Exception {
-    Client actual = target.elasticsearchClientPeopleSummary();
-    Client expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    final RestHighLevelClient actual = target.elasticsearchClientPeopleSummary();
+    assertThat(actual, is(notNullValue()));
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void elasticsearchClientPeopleSummary_A$_T$NeutronCheckedException() throws Exception {
     target.elasticsearchClientPeopleSummary();
   }
 
   @Test
   public void makeElasticsearchDaoPeople_A$() throws Exception {
-    final ElasticsearchDao actual = target.makeElasticsearchDaoPeople();
+    final NeutronElasticSearchDao actual = target.makeElasticsearchDaoPeople();
     assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void makeElasticsearchDaoPeopleSummary_A$Client$ElasticsearchConfiguration()
       throws Exception {
-    final Client client = mock(Client.class);
-    final ElasticsearchConfiguration config = mock(ElasticsearchConfiguration.class);
-    final ElasticsearchDao actual = target.makeElasticsearchDaoPeopleSummary(client, config);
+    final NeutronElasticSearchDao actual = target.makeElasticsearchDaoPeopleSummary(esConfig);
     assertThat(actual, is(notNullValue()));
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void loadElasticSearchConfig_A$File() throws Exception {
     final ElasticsearchConfiguration actual = target.loadElasticSearchConfig(esConfileFile);
-    final ElasticsearchConfiguration expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -567,8 +545,7 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void elasticSearchConfigPeopleSummary_A$() throws Exception {
     final ElasticsearchConfiguration actual = target.elasticSearchConfigPeopleSummary();
-    final ElasticsearchConfiguration expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -675,15 +652,13 @@ public class HyperCubeTest extends Goddard<TestNormalizedEntity, TestDenormalize
   @Test
   public void getEsConfigPeopleSummary_A$() throws Exception {
     final File actual = target.getEsConfigPeopleSummary();
-    final File expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
   public void getEsConfigPeople_A$() throws Exception {
     final File actual = target.getEsConfigPeople();
-    final File expected = new File("config/local.yaml");
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test

@@ -23,7 +23,7 @@ import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAddress;
@@ -89,7 +89,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    */
   @Inject
   public ClientPersonIndexerJob(final ReplicatedClientDao dao,
-      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people-summary") final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
@@ -145,7 +145,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     final StringBuilder buf = new StringBuilder();
 
     // Return no records from the obsolete MQT.
-    // Real work in PeopleSummaryThreadHandler.
+    // Then real work is in PeopleSummaryThreadHandler.
     buf.append(
         "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId'")
         .append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");

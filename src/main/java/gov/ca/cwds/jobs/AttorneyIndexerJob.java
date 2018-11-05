@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.ReplicatedAttorneyDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedAttorney;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
@@ -37,7 +38,7 @@ public class AttorneyIndexerJob extends BasePersonRocket<ReplicatedAttorney, Rep
    * @param launchDirector launch director
    */
   @Inject
-  public AttorneyIndexerJob(final ReplicatedAttorneyDao dao, final ElasticsearchDao esDao,
+  public AttorneyIndexerJob(final ReplicatedAttorneyDao dao, final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);

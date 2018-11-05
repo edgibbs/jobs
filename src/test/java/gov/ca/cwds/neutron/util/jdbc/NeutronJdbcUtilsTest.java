@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestIndexerJob;
@@ -39,9 +39,9 @@ public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDeno
   private static final class TestAtomHibernate extends TestIndexerJob
       implements AtomHibernate<TestNormalizedEntity, TestDenormalizedEntity> {
 
-    public TestAtomHibernate(final TestNormalizedEntityDao mainDao, final ElasticsearchDao esDao,
-        @LastRunFile final String lastRunFile, final ObjectMapper mapper,
-        FlightRecorder flightRecorder) {
+    public TestAtomHibernate(final TestNormalizedEntityDao mainDao,
+        final NeutronElasticSearchDao esDao, @LastRunFile final String lastRunFile,
+        final ObjectMapper mapper, FlightRecorder flightRecorder) {
       super(mainDao, esDao, lastRunFile, mapper, mainDao.getSessionFactory(), flightRecorder);
     }
 
@@ -100,7 +100,8 @@ public class NeutronJdbcUtilsTest extends Goddard<TestNormalizedEntity, TestDeno
     Date lastRunTime = mock(Date.class);
     String sqlInsertLastChange = null;
     Function<Connection, PreparedStatement> func = mock(Function.class);
-    NeutronJdbcUtils.runStatementInsertLastChangeKeys(session, lastRunTime, sqlInsertLastChange, func);
+    NeutronJdbcUtils.runStatementInsertLastChangeKeys(session, lastRunTime, sqlInsertLastChange,
+        func);
   }
 
   @Test

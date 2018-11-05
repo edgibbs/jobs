@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.jobs.test.TestDenormalizedEntity;
 import gov.ca.cwds.jobs.test.TestNormalizedEntity;
@@ -33,13 +33,13 @@ public class LastFlightRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   private static class TestLastSuccessfulRunJob extends LastFlightRocket {
 
-    ElasticsearchDao esDao;
+    NeutronElasticSearchDao esDao;
 
     FlightLog track = new FlightLog();
 
     FlightPlan flightPlan;
 
-    public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, ElasticsearchDao esDao,
+    public TestLastSuccessfulRunJob(String lastJobRunTimeFilename, NeutronElasticSearchDao esDao,
         FlightRecorder jobHistory, final FlightPlan opts) {
       super(lastJobRunTimeFilename, opts);
     }
@@ -58,7 +58,7 @@ public class LastFlightRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     }
 
     @Override
-    public ElasticsearchDao getEsDao() {
+    public NeutronElasticSearchDao getEsDao() {
       return esDao;
     }
 

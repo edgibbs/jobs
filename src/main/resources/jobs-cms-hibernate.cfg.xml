@@ -46,7 +46,7 @@
 		<property name="hibernate.hikari.autoCommit">false</property>
 		<property name="hibernate.hikari.maxLifetime">300000</property>
 		<property name="hibernate.hikari.minimumIdle">4</property>
-		<property name="hibernate.hikari.maximumPoolSize">16</property>
+		<property name="hibernate.hikari.maximumPoolSize">12</property>
 		<property name="hibernate.hikari.registerMbeans">true</property>
 
 	</session-factory>

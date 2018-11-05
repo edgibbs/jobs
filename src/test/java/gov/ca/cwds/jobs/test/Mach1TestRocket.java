@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import gov.ca.cwds.data.BaseDaoImpl;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.Goddard;
@@ -55,7 +55,7 @@ public class Mach1TestRocket extends BasePersonRocket<TestNormalizedEntity, Test
 
   @Inject
   public Mach1TestRocket(final BaseDaoImpl<TestNormalizedEntity> jobDao,
-      @Named("elasticsearch.dao.people") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people") final NeutronElasticSearchDao esDao,
       @LastRunFile final String lastRunFile, final ObjectMapper mapper) {
     super(jobDao, esDao, lastRunFile, mapper, null, null);
   }

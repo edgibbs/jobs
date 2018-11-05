@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +49,7 @@ public class ExitInitialLoadRocket
    */
   @Inject
   public ExitInitialLoadRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
-      @Named("elasticsearch.dao.people-summary") final ElasticsearchDao esDao,
+      @Named("elasticsearch.dao.people-summary") final NeutronElasticSearchDao esDao,
       final ObjectMapper mapper, LaunchDirector launchDirector1, FlightPlan flightPlan,
       AtomLaunchDirector launchDirector) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);

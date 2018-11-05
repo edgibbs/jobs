@@ -1,10 +1,16 @@
 package gov.ca.cwds.neutron.component;
 
+import java.util.function.BiConsumer;
+
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
 
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.launch.listener.NeutronBulkProcessorListener;
@@ -34,7 +40,7 @@ public class HoverCar implements ApiMarker, NeutronBulkProcessorBuilder {
   /**
    * Elasticsearch client DAO.
    */
-  protected transient ElasticsearchDao esDao;
+  protected transient NeutronElasticSearchDao esDao;
 
   /**
    * Constructor.
@@ -42,7 +48,7 @@ public class HoverCar implements ApiMarker, NeutronBulkProcessorBuilder {
    * @param esDao ES DAO
    * @param flightLog progress tracker
    */
-  public HoverCar(final ElasticsearchDao esDao, final FlightLog flightLog) {
+  public HoverCar(final NeutronElasticSearchDao esDao, final FlightLog flightLog) {
     this.esDao = esDao;
     this.flightLog = flightLog;
   }
@@ -55,11 +61,11 @@ public class HoverCar implements ApiMarker, NeutronBulkProcessorBuilder {
    */
   @Override
   public BulkProcessor buildBulkProcessor() {
-    return BulkProcessor
-        .builder(esDao.getClient(), new NeutronBulkProcessorListener(this.flightLog))
+    final BiConsumer<BulkRequest, ActionListener<BulkResponse>> bulkConsumer = (request,
+        bulkListener) -> esDao.getClient().bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
+    return BulkProcessor.builder(bulkConsumer, new NeutronBulkProcessorListener(flightLog))
         .setBulkActions(ES_BULK_SIZE).setBulkSize(new ByteSizeValue(ES_BYTES_MB, ByteSizeUnit.MB))
-        .setConcurrentRequests(1).setName("jobs_bp") // WARNING: disappears in ES 5.6.3
-        .build();
+        .setConcurrentRequests(1).build();
   }
 
   public FlightLog getFlightLog() {

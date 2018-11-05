@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -220,7 +221,7 @@ public class ReferralHistoryIndexerJob
    */
   @Inject
   public ReferralHistoryIndexerJob(ReplicatedPersonReferralsDao dao,
-      @Named("elasticsearch.dao.people") ElasticsearchDao esDao, @LastRunFile String lastRunFile,
+      @Named("elasticsearch.dao.people") NeutronElasticSearchDao esDao, @LastRunFile String lastRunFile,
       ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
   }

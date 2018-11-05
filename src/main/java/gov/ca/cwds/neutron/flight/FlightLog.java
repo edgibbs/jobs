@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.flight;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +33,6 @@ import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.utils.JsonUtils;
 import io.dropwizard.jackson.JsonSnakeCase;
@@ -415,6 +416,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return ret;
   }
 
+  /**
+   * <strong>WARNING:</strong> Sorting the stream caused runtime errors on Java 8 181 but not on
+   * 151.
+   * 
+   * @param statuses list of statuses to keep
+   * @return ranges matching the requested statuses
+   */
   public List<Pair<String, String>> filterRanges(FlightStatus... statuses) {
     return initialLoadRangeStatus.entrySet().stream()
         .filter(x -> filterStatus(x.getValue(), statuses)).map(x -> x.getKey())
@@ -501,11 +509,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public Date getLastChangeSince() {
-    return NeutronDateUtils.freshDate(lastChangeSince);
+    return freshDate(lastChangeSince);
   }
 
   public void setLastChangeSince(Date lastChangeSince) {
-    this.lastChangeSince = NeutronDateUtils.freshDate(lastChangeSince);
+    this.lastChangeSince = freshDate(lastChangeSince);
   }
 
   public String getRocketName() {
@@ -568,13 +576,12 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t").append(rocketName);
 
     if (initialLoad) {
-      buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
-       // .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
-          .append("\n\tranges completed:")
-          .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
-       // .append("\n\tranges failed:")
-       // .append(pad(filterRanges(FlightStatus.FAILED).size()))
-          ;
+      buf.append("\n\n    INITIAL LOAD:")
+         .append(pad(filterRanges(FlightStatus.SUCCEEDED,FlightStatus.FAILED,FlightStatus.RUNNING).size()))
+         .append("\n\tranges completed:")
+         .append(pad(filterRanges(FlightStatus.SUCCEEDED).size()))
+         .append("\n\tranges failed:")
+         .append(pad(filterRanges(FlightStatus.FAILED).size()));
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
     }
