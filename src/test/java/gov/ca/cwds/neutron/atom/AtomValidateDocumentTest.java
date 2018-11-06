@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,7 +49,7 @@ public class AtomValidateDocumentTest
   public void readPerson_Args__String() throws Exception {
     final String json =
         IOUtils.toString(getClass().getResourceAsStream("/fixtures/es_person.json"));
-    ElasticSearchPerson actual = target.readPerson(json);
+    final ElasticSearchPerson actual = target.readPerson(json);
     assertThat(actual, is(notNullValue()));
   }
 
@@ -74,8 +73,8 @@ public class AtomValidateDocumentTest
   @Test
   public void validateDocument_Args__ElasticSearchPerson() throws Exception {
     final ElasticSearchPerson person = new ElasticSearchPerson();
-    boolean actual = target.validateDocument(person);
-    boolean expected = true;
+    final boolean actual = target.validateDocument(person);
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -84,16 +83,12 @@ public class AtomValidateDocumentTest
     target.validateDocuments();
   }
 
-  @Test
+  @Test(expected = NeutronCheckedException.class)
   public void validateDocuments_Args___T__NeutronException() throws Exception {
     final FlightLog flightLog = mock(FlightLog.class);
-    try {
-      target.setFlightLog(flightLog);
-      when(flightLog.getAffectedDocumentIds()).thenThrow(NeutronCheckedException.class);
-      target.validateDocuments();
-      fail("Expected exception was not thrown!");
-    } catch (NeutronCheckedException e) {
-    }
+    target.setFlightLog(flightLog);
+    when(flightLog.getAffectedDocumentIds()).thenThrow(NeutronCheckedException.class);
+    target.validateDocuments();
   }
 
 }

@@ -1,7 +1,14 @@
 package gov.ca.cwds.neutron.atom;
 
+import org.elasticsearch.action.search.MultiSearchRequest;
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 
 import gov.ca.cwds.data.es.ElasticSearchPerson;
@@ -22,34 +29,34 @@ public interface AtomValidateDocument extends AtomShared {
    * @throws NeutronCheckedException Elasticsearch error or JSON parse error
    */
   default void validateDocuments() throws NeutronCheckedException {
-    return;
-
     // TODO: multi-search not yet working with ES 6.4.x.
-    // final String[] docIds = getFlightLog().getAffectedDocumentIds();
-    // long totalHits = 0;
-    //
-    // if (docIds != null && docIds.length > 0) {
-    // final String[] affectedDocIds = getFlightLog().getAffectedDocumentIds();
-    // if (affectedDocIds != null && affectedDocIds.length > 0) {
-    // final RestHighLevelClient esClient = getEsDao().getClient();
-    // MultiSearchRequest multiSearchRequest =
-    // new MultiSearchRequest().add(new SearchRequest().source(
-    // new SearchSourceBuilder().query(QueryBuilders.idsQuery().addIds(affectedDocIds))));
-    // try {
-    // final MultiSearchResponse multiResponse =
-    // esClient.msearch(multiSearchRequest, RequestOptions.DEFAULT);
-    // for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
-    // final SearchHits hits = item.getResponse().getHits();
-    // totalHits += hits.getTotalHits();
-    // processDocumentHits(hits);
-    // }
-    // } catch (NullPointerException | IOException e) {
-    // CheeseRay.checked(getLogger(), e, "FAILED MULTISEARCH! {}", e.getMessage());
-    // }
-    // }
-    // }
-    //
-    // getLogger().info("total hits: {}", totalHits);
+    final Logger log = getLogger();
+    final String[] docIds = getFlightLog().getAffectedDocumentIds();
+    long totalHits = 0;
+
+    if (docIds != null && docIds.length > 0) {
+      final String[] affectedDocIds = getFlightLog().getAffectedDocumentIds();
+      if (affectedDocIds != null && affectedDocIds.length > 0) {
+        final RestHighLevelClient esClient = getEsDao().getClient();
+        final MultiSearchRequest multiSearchRequest =
+            new MultiSearchRequest().add(new SearchRequest().source(
+                new SearchSourceBuilder().query(QueryBuilders.idsQuery().addIds(affectedDocIds))));
+
+        try {
+          final MultiSearchResponse multiResponse =
+              esClient.msearch(multiSearchRequest, RequestOptions.DEFAULT);
+          for (MultiSearchResponse.Item item : multiResponse.getResponses()) {
+            final SearchHits hits = item.getResponse().getHits();
+            totalHits += hits.getTotalHits();
+            processDocumentHits(hits);
+          }
+        } catch (Exception e) {
+          CheeseRay.checked(log, e, "FAILED MULTISEARCH! {}", e.getMessage());
+        }
+      }
+    }
+
+    log.info("total hits: {}", totalHits);
   }
 
   /**
