@@ -29,7 +29,6 @@ public interface AtomValidateDocument extends AtomShared {
    * @throws NeutronCheckedException Elasticsearch error or JSON parse error
    */
   default void validateDocuments() throws NeutronCheckedException {
-    // TODO: multi-search not yet working with ES 6.4.x.
     final Logger log = getLogger();
     final String[] docIds = getFlightLog().getAffectedDocumentIds();
     long totalHits = 0;
@@ -70,7 +69,7 @@ public interface AtomValidateDocument extends AtomShared {
     int docId = 0;
     String json;
     ElasticSearchPerson person;
-    final Logger logger = getLogger();
+    final Logger log = getLogger();
     boolean ret = false;
 
     try {
@@ -78,11 +77,11 @@ public interface AtomValidateDocument extends AtomShared {
         docId = hit.docId();
         json = hit.getSourceAsString();
 
-        logger.debug("validate doc id: {}", docId);
-        logger.trace("json: {}", json);
+        log.debug("validate doc id: {}", docId);
+        log.trace("json: {}", json);
 
         person = readPerson(json);
-        logger.trace("person: {}", person);
+        log.trace("person: {}", person);
 
         validateDocument(person);
         ret = true;
@@ -90,7 +89,7 @@ public interface AtomValidateDocument extends AtomShared {
     } catch (Exception e) {
       // Do NOT re-throw and abort a flight over a validation issue.
       // Instead, note the validation error in the flight log.
-      logger.error("ERROR READING DOCUMENT! doc id: {}", docId, e);
+      log.error("ERROR READING DOCUMENT! doc id: {}", docId, e);
       failValidation();
     }
 
