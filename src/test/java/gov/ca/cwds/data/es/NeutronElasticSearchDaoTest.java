@@ -14,6 +14,7 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -119,6 +120,7 @@ public class NeutronElasticSearchDaoTest
   }
 
   @Test
+  @Ignore
   public void createOrSwapAlias_A$String$String() throws Exception {
     boolean actual = target.createOrSwapAlias(alias, index);
     boolean expected = false;

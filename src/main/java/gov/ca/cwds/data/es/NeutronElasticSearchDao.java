@@ -214,7 +214,7 @@ public class NeutronElasticSearchDao implements Closeable {
       throws NeutronCheckedException {
     String oldIndex = StringUtils.EMPTY;
 
-    if (doesIndexExist(alias)) {
+    if (doesIndexExist(alias) && !doesAliasExist(alias)) {
       LOGGER.warn("CAN'T CREATE ALIAS {}! Index with the same name already exists!", alias);
       return false;
     } else if (!doesIndexExist(index)) {
