@@ -4,7 +4,6 @@ import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
 import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
 
-import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,7 +40,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson.ElasticSearchPersonSocialWorker;
 import gov.ca.cwds.data.es.ElasticSearchPersonCase;
 import gov.ca.cwds.data.es.ElasticSearchPersonChild;
 import gov.ca.cwds.data.es.ElasticSearchPersonParent;
-import gov.ca.cwds.data.es.ElasticsearchDao;
+import gov.ca.cwds.data.es.NeutronElasticSearchDao;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.EsCaseRelatedPerson;
 import gov.ca.cwds.data.persistence.cms.EsPersonCase;
@@ -110,9 +109,9 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
    */
   @Inject
   public CaseRocket(ReplicatedPersonCasesDao dao,
-      @Named("elasticsearch.dao.people") NeutronElasticSearchDao esDao, ReplicatedClientDao clientDao,
-      StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile, ObjectMapper mapper,
-      FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
+      @Named("elasticsearch.dao.people") NeutronElasticSearchDao esDao,
+      ReplicatedClientDao clientDao, StaffPersonDao staffPersonDao, @LastRunFile String lastRunFile,
+      ObjectMapper mapper, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
 
     this.clientDao = clientDao;
@@ -237,7 +236,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       stmtInsClient.setString(1, p.getLeft());
       stmtInsClient.setString(2, p.getRight());
     } else {
-      LOGGER.debug("LAST RUN");
+      LOGGER.debug("CHANGE POLLING MODE");
     }
 
     final int countInsClient = stmtInsClient.executeUpdate();
@@ -786,7 +785,7 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
       pullNextRange(Pair.of("a", "b"));
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(LOGGER, e, "ERROR FETCHING LAST RUN RESULTS! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR FETCHING LAST CHANGE RESULTS! {}", e.getMessage());
     } finally {
       doneRetrieve();
     }

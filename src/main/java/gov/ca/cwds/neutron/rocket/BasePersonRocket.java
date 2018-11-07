@@ -582,7 +582,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * <strong>ENTRY POINT FOR LAST RUN.</strong>
+   * <strong>ENTRY POINT FOR CHANGE POLLING MODE.</strong>
    *
    * <p>
    * Fetch all records for the next batch run, either by bucket or last successful run date. Pulls
@@ -597,7 +597,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * @see gov.ca.cwds.neutron.rocket.LastFlightRocket#launch(java.util.Date)
    */
   protected Date doLastRun(Date lastRunDt) throws NeutronCheckedException {
-    LOGGER.info("LAST RUN MODE!");
+    LOGGER.info("CHANGE POLLING MODE!");
 
     try {
       final BulkProcessor bp = buildBulkProcessor();
