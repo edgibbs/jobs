@@ -20,6 +20,13 @@ public class ClientSQLResource implements ApiMarker {
       + "AND x.IBMSNAP_OPERATION IN ('I','U')";
   //@formatter:on
 
+  /**
+   * SNAP-754: Launch Command: remove deleted clients from index.
+   * 
+   * <p>
+   * Read deleted clients in order to remove them from the indexes.
+   * </p>
+   */
   //@formatter:off
   public static final String SELECT_CLIENT =
          "SELECT \n"
@@ -96,12 +103,11 @@ public class ClientSQLResource implements ApiMarker {
       + "    clt.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n"
       + "FROM  GT_ID      gt \n"
       + "JOIN  CLIENT_T  clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
-      + "WHERE clt.IBMSNAP_OPERATION IN ('I','U') \n"
+   // + "WHERE clt.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR " ;
   //@formatter:on
 
-  // SNAP-754: Launch Command: remove deleted clients from index
   public static final String SEL_CLIENT_ADDR =
   //@formatter:off
         "SELECT \n"
@@ -123,8 +129,8 @@ public class ClientSQLResource implements ApiMarker {
       + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T \n"
       + "JOIN ADDRS_T   adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
       + "WHERE cla.EFF_END_DT IS NULL \n"
-   // + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
-   // + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR ";
   //@formatter:on

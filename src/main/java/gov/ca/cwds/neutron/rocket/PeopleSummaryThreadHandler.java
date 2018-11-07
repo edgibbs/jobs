@@ -220,13 +220,16 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(adr.getCltId());
         if (c != null) {
           final Map<String, RawClientAddress> cla = c.getClientAddress();
-          final String addrKey = adr.getClaId();
-          if (cla != null && StringUtils.isNotEmpty(addrKey) && cla.containsKey(addrKey)) {
-            cla.get(addrKey).setAddress(adr);
+          final String claKey = adr.getClaId();
+          if (cla != null && StringUtils.isNotEmpty(claKey) && cla.containsKey(claKey)) {
+            cla.get(claKey).setAddress(adr);
+          } else {
+            LOGGER.warn("ORPHAN ADDRESS! client: {}, client address: {}, address: {}",
+                adr.getCltId(), claKey, adr.getAdrId());
           }
           CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "address");
         } else {
-          LOGGER.warn("ORPHAN ADDRESS! id: {}, client: {}", adr.getAdrId(), adr.getCltId());
+          LOGGER.warn("NO CLIENT FOR ADDRESS! client: {}, id: {}", adr.getCltId(), adr.getAdrId());
         }
       }
     } catch (Exception e) {
