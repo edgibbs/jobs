@@ -101,6 +101,7 @@ public class ClientSQLResource implements ApiMarker {
       + "FOR READ ONLY WITH UR " ;
   //@formatter:on
 
+  // SNAP-754: Launch Command: remove deleted clients from index
   public static final String SEL_CLIENT_ADDR =
   //@formatter:off
         "SELECT \n"
@@ -122,8 +123,8 @@ public class ClientSQLResource implements ApiMarker {
       + "JOIN CL_ADDRT  cla ON  gt.IDENTIFIER = cla.FKCLIENT_T \n"
       + "JOIN ADDRS_T   adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
       + "WHERE cla.EFF_END_DT IS NULL \n"
-      + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
-      + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
+   // + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
+   // + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR ";
   //@formatter:on

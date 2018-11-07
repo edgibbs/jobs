@@ -1,11 +1,12 @@
 package gov.ca.cwds.neutron.launch;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -272,15 +273,21 @@ public enum StandardFlightSchedule {
 
   private final String nestedElement;
 
-  private static final Map<String, StandardFlightSchedule> mapName = new ConcurrentHashMap<>();
+  private static final Map<String, StandardFlightSchedule> mapName;
 
-  private static final Map<Class<?>, StandardFlightSchedule> mapClass = new ConcurrentHashMap<>();
+  private static final Map<Class<?>, StandardFlightSchedule> mapClass;
 
   static {
+    final Map<String, StandardFlightSchedule> xMapName = new HashMap<>();
+    final Map<Class<?>, StandardFlightSchedule> xMapClass = new HashMap<>();
+
     for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
-      mapName.put(sched.rocketName, sched);
-      mapClass.put(sched.klazz, sched);
+      xMapName.put(sched.rocketName, sched);
+      xMapClass.put(sched.klazz, sched);
     }
+
+    mapName = Collections.unmodifiableMap(xMapName);
+    mapClass = Collections.unmodifiableMap(xMapClass);
   }
 
   private StandardFlightSchedule(Class<?> klazz, String rocketName, int startDelaySeconds,

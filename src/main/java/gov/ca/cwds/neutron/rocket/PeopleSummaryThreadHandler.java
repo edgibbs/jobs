@@ -299,7 +299,7 @@ public class PeopleSummaryThreadHandler
         }
       }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE RECORD! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE! {}", e.getMessage(), e);
     }
 
     LOGGER.info("Retrieved {} case records.", counter);
