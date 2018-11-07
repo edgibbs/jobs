@@ -401,7 +401,7 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("handleMainResults(): commit");
     con.commit(); // free database resources
 
-    final FlightLog flightLog = getRocket().getFlightLog();
+    final FlightLog flightLog = rocket.getFlightLog();
     flightLog.addToDenormalized(cntrRetrieved);
   }
 
@@ -531,7 +531,7 @@ public class PeopleSummaryThreadHandler
       rc.setActivePlacementHomeAddress(pha);
     } else {
       // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
-      LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
+      LOGGER.warn("Client id for placement home address NOT FOUND! client id: {}",
           pha.getClientId());
     }
   }
@@ -586,7 +586,7 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("After last run fetch: count: {}", normalized.size());
 
     // Handle additional JDBC statements, if any.
-    try (final Session session = getRocket().getJobDao().grabSession();
+    try (final Session session = rocket.getJobDao().grabSession();
         final Connection con = NeutronJdbcUtils.prepConnection(session);
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(ClientSQLResource.SEL_PLACEMENT_ADDR)) {
@@ -623,12 +623,10 @@ public class PeopleSummaryThreadHandler
    */
   protected String pickPrepDml(String sqlInitialLoad, String sqlLastChange)
       throws NeutronCheckedException {
-    final String sql =
-        getRocket().getFlightPlan().isLastRunMode()
-            ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange,
-                getRocket().determineLastSuccessfulRunTime(),
-                getRocket().getFlightPlan().getOverrideLastEndTime())
-            : sqlInitialLoad; // initial mode
+    final String sql = rocket.getFlightPlan().isLastRunMode()
+        ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange, rocket.determineLastSuccessfulRunTime(),
+            rocket.getFlightPlan().getOverrideLastEndTime())
+        : sqlInitialLoad; // initial mode
     LOGGER.trace("Prep SQL: \n{}", sql);
     return sql;
   }
@@ -662,8 +660,7 @@ public class PeopleSummaryThreadHandler
   protected void normalize(final List<RawClient> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
         .collect(Collectors.groupingBy(RawClient::getNormalizationGroupKey)).entrySet().stream()
-        .map(e -> getRocket().normalizeSingle(e.getValue()))
-        .forEach(n -> normalized.put(n.getId(), n));
+        .map(e -> rocket.normalizeSingle(e.getValue())).forEach(n -> normalized.put(n.getId(), n));
   }
 
   protected void prepPlacementClients(final PreparedStatement stmt, final Pair<String, String> p)
@@ -672,7 +669,7 @@ public class PeopleSummaryThreadHandler
     stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
     stmt.setFetchSize(FETCH_SIZE.getValue());
 
-    if (!getRocket().getFlightPlan().isLastRunMode()) {
+    if (!rocket.getFlightPlan().isLastRunMode()) {
       LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
       try {
         stmt.setString(1, p.getLeft());
@@ -695,7 +692,8 @@ public class PeopleSummaryThreadHandler
     PlacementHomeAddress pha;
 
     // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
-    // According to the JDBC specification, you don't
+    // According to the JDBC specification, you shouldn't close the ResultSet; closing its parent
+    // statement should close the result set.
     try (final ResultSet rs = stmt.executeQuery()) {
       while (rocket.isRunning() && rs.next()) {
         CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes fetched", "recs");

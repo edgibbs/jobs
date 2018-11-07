@@ -75,7 +75,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final ClientPersonIndexerJob rocket = getRocket();
 
     Connection con = null;
-    try (final Session session = getRocket().getJobDao().grabSession()) {
+    try (final Session session = rocket.getJobDao().grabSession()) {
       con = NeutronJdbcUtils.prepConnection(session);
       handleSecondaryJdbc(con, range);
 
