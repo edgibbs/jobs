@@ -238,6 +238,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   @Override
   public void fail() {
+    LOGGER.error("****** ROCKET FAILED! ******");
     final FlightLog flightLog = getFlightLog();
     flightLog.fail();
     flightLog.done();
