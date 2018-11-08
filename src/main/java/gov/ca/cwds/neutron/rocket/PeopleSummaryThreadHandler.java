@@ -170,7 +170,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClient(final ResultSet rs) {
-    LOGGER.debug("readClient(): begin");
+    LOGGER.trace("readClient(): begin");
     int counter = 0;
     RawClient c = null;
 
@@ -187,7 +187,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientAddress(final ResultSet rs) {
-    LOGGER.debug("readClientAddress(): begin");
+    LOGGER.trace("readClientAddress(): begin");
     int counter = 0;
     RawClient c = null;
     RawClientAddress cla = null;
@@ -210,7 +210,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readAddress(final ResultSet rs) {
-    LOGGER.debug("readAddress(): begin");
+    LOGGER.trace("readAddress(): begin");
     int counter = 0;
     RawAddress adr = null;
     RawClient c = null;
@@ -240,7 +240,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientCounty(final ResultSet rs) {
-    LOGGER.debug("readClientCounty(): begin");
+    LOGGER.trace("readClientCounty(): begin");
     int counter = 0;
     RawClient c = null;
     RawClientCounty cc = null;
@@ -263,7 +263,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readAka(final ResultSet rs) {
-    LOGGER.debug("readAka(): begin");
+    LOGGER.trace("readAka(): begin");
     int counter = 0;
     RawClient c = null;
     RawAka aka = null;
@@ -286,7 +286,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readCase(final ResultSet rs) {
-    LOGGER.debug("readCase(): begin");
+    LOGGER.trace("readCase(): begin");
     int counter = 0;
     RawClient c = null;
     RawCase cas = null;
@@ -309,7 +309,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readCsec(final ResultSet rs) {
-    LOGGER.debug("readCsec(): begin");
+    LOGGER.trace("readCsec(): begin");
     int counter = 0;
     RawClient c = null;
     RawCsec csec = null;
@@ -332,7 +332,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readEthnicity(final ResultSet rs) {
-    LOGGER.debug("readEthnicity(): begin");
+    LOGGER.trace("readEthnicity(): begin");
     int counter = 0;
     RawClient c = null;
     RawEthnicity eth = null;
@@ -356,7 +356,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readSafetyAlert(final ResultSet rs) {
-    LOGGER.debug("readSafetyAlert(): begin");
+    LOGGER.trace("readSafetyAlert(): begin");
     int counter = 0;
     RawClient c = null;
     RawSafetyAlert saf = null;

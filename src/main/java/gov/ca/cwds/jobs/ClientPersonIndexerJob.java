@@ -239,8 +239,12 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
-    handler.get().handleFinishRange(range);
-    deallocateThreadHandler();
+    try {
+      handler.get().handleFinishRange(range);
+    } finally {
+      // Deallocate the thread instance, no matter what.
+      deallocateThreadHandler();
+    }
   }
 
   @Override
