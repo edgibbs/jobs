@@ -150,7 +150,7 @@ public class PeopleSummaryThreadHandler
 
   protected <T extends ClientReference> void readAny(final ResultSet rs,
       NeutronJdbcReader<T> reader, BiConsumer<ClientReference, T> organizer, String msg) {
-    LOGGER.debug("readAny(): begin");
+    LOGGER.trace("readAny(): begin");
     int counter = 0;
     RawClient c = null;
     T t;
@@ -499,7 +499,7 @@ public class PeopleSummaryThreadHandler
       con.commit(); // free db resources again
 
       LOGGER.info("Insert placement home clients");
-      prepPlacementClients(stmtInsClient, range);
+      prepPlacementClients(stmtInsClient, range); // BUG! call loadClientRange() instead.
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
       LOGGER.info("Read placement home address: SQL: \n{}", sqlPlacementAddress);
