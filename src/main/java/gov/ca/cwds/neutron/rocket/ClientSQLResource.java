@@ -314,7 +314,7 @@ public class ClientSQLResource implements ApiMarker {
     + " ORDER BY FKCLIENT_T, START_DT \n"
     + ") X \n"
     + "WHERE X.RN = 1 \n"
-    + "ORDER BY CLIENT_ID, START_DT \n"
+ // + "ORDER BY CLIENT_ID, START_DT \n" // No longer needed.
     + "OPTIMIZE FOR 1000 ROWS \n"
     + "FOR READ ONLY WITH UR";
   //@formatter:on

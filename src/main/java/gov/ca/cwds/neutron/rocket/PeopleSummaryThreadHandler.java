@@ -499,7 +499,7 @@ public class PeopleSummaryThreadHandler
       con.commit(); // free db resources again
 
       LOGGER.info("Insert placement home clients");
-      prepPlacementClients(stmtInsClient, range); // BUG! call loadClientRange() instead.
+      loadClientRange(con, stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
       LOGGER.info("Read placement home address: SQL: \n{}", sqlPlacementAddress);
