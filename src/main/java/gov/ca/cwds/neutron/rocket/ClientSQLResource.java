@@ -103,7 +103,7 @@ public class ClientSQLResource implements ApiMarker {
       + "    clt.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n"
       + "FROM  GT_ID      gt \n"
       + "JOIN  CLIENT_T  clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
-   // + "WHERE clt.IBMSNAP_OPERATION IN ('I','U') \n"
+   // + "WHERE clt.IBMSNAP_OPERATION IN ('I','U') \n" // SNAP-754
       + "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR " ;
   //@formatter:on
@@ -288,41 +288,40 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String SEL_PLACEMENT_ADDR =
-        "SELECT \n"
-    +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_GVR_ENTC, \n"
-    +   " x.OHP_ID, x.START_DT, x.END_DT, \n"
-    +   " x.PH_ID, x.PH_GVR_ENTC, x.STREET_NO, x.STREET_NM, \n"
-    +   " x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO, x.PH_LST_UPD_TS, \n"
-    +   " x.PRM_TEL_NO, x.PRM_EXT_NO \n"
-    + "FROM ( \n"
-    + " SELECT \n"
-    + "     PE.FKCLIENT_T, PE.THIRD_ID, PE.GVR_ENTC PE_GVR_ENTC \n"
-    + "   , OHP.IDENTIFIER OHP_ID, ohp.START_DT, ohp.END_DT \n"
-    + "   , PH.IDENTIFIER PH_ID, PH.GVR_ENTC PH_GVR_ENTC \n"
-    + "   , TRIM(PH.STREET_NO) STREET_NO, TRIM(PH.STREET_NM) STREET_NM, TRIM(PH.CITY_NM) CITY_NM \n"
-    + "   , PH.F_STATE_C STATE_C, PH.ZIP_NO, PH.ZIP_SFX_NO, ph.LST_UPD_TS PH_LST_UPD_TS \n"
-    + "   , PH.PRM_TEL_NO, PH.PRM_EXT_NO \n"
-    + "   , DENSE_RANK() OVER (PARTITION BY PE.FKCLIENT_T ORDER BY OHP.START_DT, OHP.END_DT) RN \n"
-    + " FROM GT_ID GT \n"
-    + " JOIN PLC_EPST PE  ON GT.IDENTIFIER  = PE.FKCLIENT_T \n"
-    + " JOIN O_HM_PLT OHP ON OHP.FKPLC_EPS0 = PE.THIRD_ID AND OHP.FKPLC_EPST = PE.FKCLIENT_T \n"
-    + " JOIN PLC_HM_T PH  ON PH.IDENTIFIER  = OHP.FKPLC_HM_T \n"
-    + " WHERE DATE('LAST_RUN_END') BETWEEN OHP.START_DT AND NVL(OHP.END_DT, DATE('LAST_RUN_END')) \n"
-    + "   AND PE.IBMSNAP_OPERATION  IN ('I','U') \n"
-    + "   AND OHP.IBMSNAP_OPERATION IN ('I','U') \n"
-    + "   AND PH.IBMSNAP_OPERATION  IN ('I','U') \n"
-    + " ORDER BY FKCLIENT_T, START_DT \n"
-    + ") X \n"
-    + "WHERE X.RN = 1 \n"
- // + "ORDER BY CLIENT_ID, START_DT \n" // No longer needed.
-    + "OPTIMIZE FOR 1000 ROWS \n"
-    + "FOR READ ONLY WITH UR";
+          "SELECT \n"
+      +   " x.FKCLIENT_T CLIENT_ID, x.THIRD_ID PE_THIRD_ID, x.PE_GVR_ENTC, \n"
+      +   " x.OHP_ID, x.START_DT, x.END_DT, \n"
+      +   " x.PH_ID, x.PH_GVR_ENTC, x.STREET_NO, x.STREET_NM, \n"
+      +   " x.CITY_NM, x.STATE_C, x.ZIP_NO, x.ZIP_SFX_NO, x.PH_LST_UPD_TS, \n"
+      +   " x.PRM_TEL_NO, x.PRM_EXT_NO \n"
+      + "FROM ( \n"
+      + " SELECT \n"
+      + "     PE.FKCLIENT_T, PE.THIRD_ID, PE.GVR_ENTC PE_GVR_ENTC \n"
+      + "   , OHP.IDENTIFIER OHP_ID, ohp.START_DT, ohp.END_DT \n"
+      + "   , PH.IDENTIFIER PH_ID, PH.GVR_ENTC PH_GVR_ENTC \n"
+      + "   , TRIM(PH.STREET_NO) STREET_NO, TRIM(PH.STREET_NM) STREET_NM, TRIM(PH.CITY_NM) CITY_NM \n"
+      + "   , PH.F_STATE_C STATE_C, PH.ZIP_NO, PH.ZIP_SFX_NO, ph.LST_UPD_TS PH_LST_UPD_TS \n"
+      + "   , PH.PRM_TEL_NO, PH.PRM_EXT_NO \n"
+      + "   , DENSE_RANK() OVER (PARTITION BY PE.FKCLIENT_T ORDER BY OHP.START_DT, OHP.END_DT) RN \n"
+      + " FROM GT_ID GT \n"
+      + " JOIN PLC_EPST PE  ON GT.IDENTIFIER  = PE.FKCLIENT_T \n"
+      + " JOIN O_HM_PLT OHP ON OHP.FKPLC_EPS0 = PE.THIRD_ID AND OHP.FKPLC_EPST = PE.FKCLIENT_T \n"
+      + " JOIN PLC_HM_T PH  ON PH.IDENTIFIER  = OHP.FKPLC_HM_T \n"
+      + " WHERE DATE('LAST_RUN_END') BETWEEN OHP.START_DT AND NVL(OHP.END_DT, DATE('LAST_RUN_END')) \n"
+      + "   AND PE.IBMSNAP_OPERATION  IN ('I','U') \n"
+      + "   AND OHP.IBMSNAP_OPERATION IN ('I','U') \n"
+      + "   AND PH.IBMSNAP_OPERATION  IN ('I','U') \n"
+   // + " ORDER BY FKCLIENT_T, START_DT \n"
+      + ") X \n"
+      + "WHERE X.RN = 1 \n"
+      + "OPTIMIZE FOR 1000 ROWS \n"
+      + "FOR READ ONLY WITH UR";
   //@formatter:on
 
   //@formatter:off
   public static final String INSERT_CLIENT_DUMMY =
-      "INSERT INTO GT_ID (IDENTIFIER) \n" 
-    + "SELECT '1234567abc' FROM SYSIBM.SYSDUMMY1 X WHERE 1=2";
+        "INSERT INTO GT_ID (IDENTIFIER) \n" 
+      + "SELECT '1234567abc' FROM SYSIBM.SYSDUMMY1 X WHERE 1=2";
   //@formatter:on
 
   //@formatter:off
@@ -345,7 +344,7 @@ public class ClientSQLResource implements ApiMarker {
     + "      WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "  UNION ALL SELECT cla.FKCLIENT_T AS CLIENT_ID \n"
     + "      FROM CL_ADDRT cla \n"
-    + "      JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER  \n"
+    + "      JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER \n"
     + "      WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + "  UNION ALL SELECT eth.ESTBLSH_ID AS CLIENT_ID \n"
     + "      FROM CLSCP_ET eth \n"

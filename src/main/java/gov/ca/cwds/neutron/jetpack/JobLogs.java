@@ -13,6 +13,30 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 /**
  * Neutron logging utilities.
  * 
+ * <h4>Features</h4>
+ * <table summary="Featured Methods">
+ * <tr>
+ * <th align="justify">Method</th>
+ * <th align="justify">Purpose</th>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #checked(Logger, Throwable, String, Object...) checked}</td>
+ * <td align="justify">Wrap Throwable and in {@link NeutronCheckedException}</td>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #runtime(Logger, Throwable, String, Object...) runtime}</td>
+ * <td align="justify">Wrap Throwable and in {@link NeutronRuntimeException}</td>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #logEvery(Logger, int, int, String, Object...) logEvery}</td>
+ * <td align="justify">Log every N records</td>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #stackToString(Exception) stackToString}</td>
+ * <td align="justify">Print stack trace to a String</td>
+ * </tr>
+ * </table>
+ * 
  * @author CWDS API Team
  */
 public class JobLogs {

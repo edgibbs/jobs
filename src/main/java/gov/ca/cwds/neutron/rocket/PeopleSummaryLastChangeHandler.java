@@ -58,8 +58,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
    * Handle additional JDBC statements, if any.
    * 
    * <p>
-   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys into bundles and
-   * commit frequently.
+   * DB2 doesn't deal well with large sets of keys; buffers overflow and lock up. Split lists of
+   * changed keys into bundles and commit frequently.
    * </p>
    * 
    * <p>
@@ -125,20 +125,18 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   @Override
   protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
-    LOGGER.debug("loadClientRange(): begin");
+    LOGGER.trace("loadClientRange(): begin");
     con.commit();
     final int clientCount = insertNextKeyBundle(con, rangeStart, rangeEnd);
     LOGGER.info("loadClientRange(): client count: {}", clientCount);
   }
 
   protected int insertNextKeyBundle(Connection con, int start, int end) {
-    LOGGER.debug("insertNextKeyBundle(): begin");
+    LOGGER.trace("insertNextKeyBundle(): begin");
     int ret = 0;
 
     try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
-      LOGGER.debug("key bundle: start: {}, end: {}", start, end);
       con.commit();
-
       final List<String> bundle = keys.subList(start, end);
       LOGGER.debug("insertNextKeyBundle(): bundle size: {}, start: {}, end: {}", bundle.size(),
           start, end);
