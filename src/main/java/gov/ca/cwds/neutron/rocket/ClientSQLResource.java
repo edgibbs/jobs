@@ -311,7 +311,6 @@ public class ClientSQLResource implements ApiMarker {
       + "   AND PE.IBMSNAP_OPERATION  IN ('I','U') \n"
       + "   AND OHP.IBMSNAP_OPERATION IN ('I','U') \n"
       + "   AND PH.IBMSNAP_OPERATION  IN ('I','U') \n"
-   // + " ORDER BY FKCLIENT_T, START_DT \n"
       + ") X \n"
       + "WHERE X.RN = 1 \n"
       + "OPTIMIZE FOR 1000 ROWS \n"

@@ -54,7 +54,7 @@ public enum StandardFlightSchedule {
   // ===============================
 
   /**
-   * Dummy, just starts the Quartz schedule process.
+   * Dummy rocket. Just starts the Quartz scheduler process.
    */
   LIGHT_THIS_CANDLE(LightThisCandleRocket.class, // rocket class
       "light_this_candle", // rocket name
@@ -356,7 +356,7 @@ public enum StandardFlightSchedule {
   }
 
   /**
-   * Gets the default list of rockets for last run.
+   * Gets the default list of rockets for last run mode.
    * 
    * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
    * @param excludeRockets optionally exclude rockets
