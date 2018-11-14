@@ -89,8 +89,7 @@ public class PeopleSummaryThreadHandler
 
   public static final int LG_SZ = LOG_EVERY.getValue();
 
-  public static final int FULL_LOAD_SIZE =
-      NeutronIntegerDefaults.FULL_DENORMALIZED_SIZE.value();
+  public static final int FULL_LOAD_SIZE = NeutronIntegerDefaults.FULL_DENORMALIZED_SIZE.value();
 
   protected static final int TFO = TYPE_FORWARD_ONLY;
   protected static final int CRO = CONCUR_READ_ONLY;
@@ -115,8 +114,7 @@ public class PeopleSummaryThreadHandler
   /**
    * key = client id. Single thread, non-thread-safe containers OK.
    */
-  protected transient Map<String, ReplicatedClient> normalized =
-      new HashMap<>(FULL_LOAD_SIZE);
+  protected transient Map<String, ReplicatedClient> normalized = new HashMap<>(FULL_LOAD_SIZE);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
@@ -680,7 +678,7 @@ public class PeopleSummaryThreadHandler
     }
 
     final int countInsClient = stmt.executeUpdate();
-    LOGGER.info("Placement home clients: {}", countInsClient);
+    LOGGER.info("Prepped placement home clients: {}", countInsClient);
   }
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
