@@ -89,7 +89,7 @@ public class PeopleSummaryThreadHandler
 
   public static final int LG_SZ = LOG_EVERY.getValue();
 
-  public static final int FULL_DENORMALIZED_SIZE =
+  public static final int FULL_LOAD_SIZE =
       NeutronIntegerDefaults.FULL_DENORMALIZED_SIZE.value();
 
   protected static final int TFO = TYPE_FORWARD_ONLY;
@@ -102,21 +102,21 @@ public class PeopleSummaryThreadHandler
   protected transient Set<String> deletionResults = new HashSet<>();
 
   /**
-   * key = client id
+   * key = client id. Single thread, non-thread-safe containers OK.
    */
   protected transient Map<String, PlacementHomeAddress> placementHomeAddresses =
       new HashMap<>(5011);
 
   /**
-   * key = client id
+   * key = client id. Single thread, non-thread-safe containers OK.
    */
-  protected transient Map<String, RawClient> rawClients = new HashMap<>(FULL_DENORMALIZED_SIZE);
+  protected transient Map<String, RawClient> rawClients = new HashMap<>(FULL_LOAD_SIZE);
 
   /**
-   * key = client id
+   * key = client id. Single thread, non-thread-safe containers OK.
    */
   protected transient Map<String, ReplicatedClient> normalized =
-      new HashMap<>(FULL_DENORMALIZED_SIZE);
+      new HashMap<>(FULL_LOAD_SIZE);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
@@ -407,7 +407,7 @@ public class PeopleSummaryThreadHandler
 
   protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
-    LOGGER.debug("loadClientRange(): begin");
+    LOGGER.trace("loadClientRange(): begin");
     con.commit(); // free db resources
 
     // Initial Load client ranges.
@@ -439,7 +439,7 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    LOGGER.debug("handleSecondaryJdbc(): begin");
+    LOGGER.trace("handleSecondaryJdbc(): begin");
     String sqlPlacementAddress;
     try {
       sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACEMENT_ADDR,
@@ -542,7 +542,7 @@ public class PeopleSummaryThreadHandler
     this.rawClients.values().stream().map(r -> r.normalize(conv))
         .forEach(c -> normalized.put(c.getId(), c));
     rawClients.clear(); // free memory
-    LOGGER.debug("handleJdbcDone: normalized.size(): {}", normalized.size());
+    LOGGER.debug("handleJdbcDone: normalized: {}", normalized.size());
 
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
@@ -644,7 +644,7 @@ public class PeopleSummaryThreadHandler
    * Release unneeded heap memory early and often.
    */
   protected void clear() {
-    LOGGER.debug("clear containers");
+    LOGGER.trace("clear containers");
     normalized.clear();
     rawClients.clear();
     placementHomeAddresses.clear();
@@ -670,7 +670,7 @@ public class PeopleSummaryThreadHandler
     stmt.setFetchSize(FETCH_SIZE.getValue());
 
     if (!rocket.getFlightPlan().isLastRunMode()) {
-      LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
+      LOGGER.debug("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
       try {
         stmt.setString(1, p.getLeft());
         stmt.setString(2, p.getRight());

@@ -442,21 +442,6 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String INSERT_NEXT_BUNDLE =
-      "INSERT INTO GT_ID (IDENTIFIER) \n"
-    + "SELECT x.IDENTIFIER FROM ( \n"
-    + "   SELECT rc.FKCLIENT_T AS IDENTIFIER, ROW_NUMBER() OVER(ORDER BY rc.FKCLIENT_T) AS rn \n"
-    + "   FROM GT_REFR_CLT rc \n"
-    + ") x \n"
-    + "WHERE x.rn BETWEEN ? AND ?";
-  //@formatter:on
-
-  //@formatter:off
-  public static final String SEL_CLI_LAST_CHG =
-      "SELECT DISTINCT FKCLIENT_T FROM GT_REFR_CLT FOR READ ONLY WITH UR";
-  //@formatter:on
-
-  //@formatter:off
   public static final String INS_LAST_CHG_KEY_BUNDLE =
       "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
   //@formatter:on
