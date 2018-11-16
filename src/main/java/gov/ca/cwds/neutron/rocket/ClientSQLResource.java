@@ -311,8 +311,8 @@ public class ClientSQLResource implements ApiMarker {
       + "   WHERE s1.rn = 1 \n"
       + ") \n"
       + "SELECT \n"
-      + "    s2.FKCLIENT_T, \n"
-      + "    s2.THIRD_ID, \n"
+      + "    s2.FKCLIENT_T            AS CLIENT_ID, \n"
+      + "    s2.THIRD_ID              AS PE_THIRD_ID, \n"
       + "    s2.OHP_ID, \n"
       + "    s2.PH_ID, \n"
       + "    ohp.START_DT, \n"
@@ -333,7 +333,6 @@ public class ClientSQLResource implements ApiMarker {
       + "JOIN O_HM_PLT ohp ON ohp.IDENTIFIER = s2.OHP_ID \n"
       + "JOIN PLC_HM_T ph  ON  ph.IDENTIFIER = s2.PH_ID \n"
       + "OPTIMIZE FOR 1000 ROWS \n"
-      + "FETCH FIRST 15000 ROWS ONLY \n"
       + "FOR READ ONLY WITH UR ";
   //@formatter:on
 
