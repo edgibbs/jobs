@@ -45,9 +45,15 @@ public class JobLogs {
 
   public static final int DEFAULT_LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue();
 
+  /**
+   * Static methods only; do not instantiate.
+   * 
+   * <p>
+   * Evil singleton, blah, blah, blah ... I can't hear you ...
+   * </p>
+   */
   protected JobLogs() {
-    // Static methods only; do not instantiate.
-    // Evil singleton, blah, blah, blah ... I can't hear you ...
+    // Vy r zer more bosses' asses zan bosses??
   }
 
   /**
