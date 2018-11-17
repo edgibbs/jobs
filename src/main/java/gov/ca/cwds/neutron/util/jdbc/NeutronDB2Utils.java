@@ -43,7 +43,7 @@ public class NeutronDB2Utils {
     final String strEndDate = NeutronDateUtils.makeSimpleTimestampString(lastRunEndDate);
     return sql.replaceAll("XYZ", strStartDate).replaceAll("LAST_RUN_START", strStartDate)
         .replaceAll("LAST_RUN_END", strEndDate)
-        .replaceAll("'CURRENT TIMESTAMP'", "CURRENT TIMESTAMP")
+        .replaceAll("'CURRENT TIMESTAMP'", "CURRENT TIMESTAMP") // remove single quotes
         .replaceAll("LAST_RUN_DATE", strLastRunDate);
   }
 
