@@ -112,7 +112,7 @@ public class ClientSQLResource implements ApiMarker {
       + KEY_SOURCE
       + "JOIN  CLIENT_T  clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
    // + "WHERE clt.IBMSNAP_OPERATION IN ('I','U') \n" // SNAP-754
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   public static final String SEL_CLI_ADDR =
@@ -138,7 +138,7 @@ public class ClientSQLResource implements ApiMarker {
       + "WHERE cla.EFF_END_DT IS NULL \n"
       + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
       + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -178,7 +178,7 @@ public class ClientSQLResource implements ApiMarker {
       + "WHERE cla.EFF_END_DT IS NULL \n"
       + "  AND cla.IBMSNAP_OPERATION IN ('I','U') \n"
       + "  AND adr.IBMSNAP_OPERATION IN ('I','U') \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   public static final String SEL_CLI_COUNTY =
@@ -191,7 +191,7 @@ public class ClientSQLResource implements ApiMarker {
       + "    clc.CNTY_RULE         AS CLC_CNTY_RULE \n"
       + KEY_SOURCE
       + "JOIN CLIENT_CNTY clc ON gt.IDENTIFIER = clc.CLIENT_ID \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -206,7 +206,7 @@ public class ClientSQLResource implements ApiMarker {
       + "JOIN CASE_T cas ON cas.FKCHLD_CLT = gt.IDENTIFIER  \n"
       + "WHERE cas.END_DT IS NULL \n"
       + "  AND cas.IBMSNAP_OPERATION IN ('I','U') \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -224,7 +224,7 @@ public class ClientSQLResource implements ApiMarker {
       + KEY_SOURCE
       + "JOIN CSECHIST csh ON csh.FKCHLD_CLT = gt.IDENTIFIER  \n"
       + "WHERE csh.IBMSNAP_OPERATION IN ('I','U') \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -239,7 +239,7 @@ public class ClientSQLResource implements ApiMarker {
       + "JOIN CLSCP_ET eth ON gt.IDENTIFIER = eth.ESTBLSH_ID  \n"
       + "WHERE eth.ESTBLSH_CD = 'C' \n"
       + "  AND eth.IBMSNAP_OPERATION IN ('I','U') \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -260,7 +260,7 @@ public class ClientSQLResource implements ApiMarker {
       + KEY_SOURCE
       + "JOIN OCL_NM_T onm ON onm.FKCLIENT_T = gt.IDENTIFIER \n"
       + "WHERE onm.IBMSNAP_OPERATION IN ('I','U') \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -282,7 +282,7 @@ public class ClientSQLResource implements ApiMarker {
       + KEY_SOURCE
       + "JOIN SAF_ALRT sal ON sal.FKCLIENT_T = gt.IDENTIFIER \n"
       + "WHERE sal.IBMSNAP_OPERATION IN ('I','U') \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -331,7 +331,7 @@ public class ClientSQLResource implements ApiMarker {
       + "JOIN PLC_EPST pe  ON  pe.FKCLIENT_T = s2.FKCLIENT_T AND pe.THIRD_ID = s2.THIRD_ID \n"
       + "JOIN O_HM_PLT ohp ON ohp.IDENTIFIER = s2.OHP_ID \n"
       + "JOIN PLC_HM_T ph  ON  ph.IDENTIFIER = s2.PH_ID \n"
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off
@@ -405,7 +405,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:off
   public static final String SEL_CLI_IDS_LST_CHG =
         BASE_CLI_IDS_LST_CHG
-      + SEL_OPTIMIZE ;
+      + SEL_OPTIMIZE;
   //@formatter:on
 
   //@formatter:off

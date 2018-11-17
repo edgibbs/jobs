@@ -509,9 +509,9 @@ public class PeopleSummaryThreadHandler
 
       try {
         if (isInitialLoad()) {
-          rocket.getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
+          rocket.getFlightLog().markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
         } else {
-          rocket.fail();
+          rocket.fail(); // Last change: fail the whole job!
         }
 
         con.rollback();

@@ -268,7 +268,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         getFlightLog().incrementBulkPrepared();
       }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey()); // NOSONAR
+      throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
     }
 
     return ret;

@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -36,6 +37,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   private static final long serialVersionUID = 1L;
 
   private static final int BUNDLE_KEY_SIZE = 5000;
+
+  private static final int LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue() / 10;
 
   private final List<String> keys = new ArrayList<>(BUNDLE_KEY_SIZE * 2);
 
@@ -106,14 +109,15 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   }
 
   protected void readClientKeys(final ResultSet rs) {
+    LOGGER.trace("readClientKeys(): begin");
     int counter = 0;
-    String k = null;
+    String key = null;
     final ClientPersonIndexerJob rocket = getRocket();
 
     try {
-      while (rocket.isRunning() && rs.next() && (k = rs.getString(1)) != null) {
-        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client key");
-        keys.add(k);
+      while (rocket.isRunning() && rs.next() && (key = rs.getString(1)) != null) {
+        CheeseRay.logEvery(LOGGER, LOG_EVERY, ++counter, "Read", "client key");
+        keys.add(key);
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT KEY! {}", e.getMessage(), e);
@@ -228,7 +232,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("***** DONE retrieving data *****");
       con.commit(); // free db resources
     } catch (Exception e) {
-      rocket.fail();
+      rocket.fail(); // Last change: fail the WHOLE job.
       try {
         con.rollback();
       } catch (Exception e2) {
