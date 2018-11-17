@@ -399,7 +399,7 @@ public class ClientSQLResource implements ApiMarker {
       + "      FROM CSECHIST csh \n"
       + "      WHERE csh.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ) s2 \n"
-      + ") x ";
+      + ") x \n";
   //@formatter:on
 
   //@formatter:off
