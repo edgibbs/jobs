@@ -13,7 +13,7 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 /**
  * Neutron logging utilities.
  * 
- * <h4>Features</h4>
+ * <strong>Features</strong>
  * <table summary="Featured Methods">
  * <tr>
  * <th align="justify">Method</th>
