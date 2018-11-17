@@ -506,13 +506,13 @@ public class PeopleSummaryThreadHandler
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
 
-      if (isInitialLoad()) {
-        rocket.getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
-      } else {
-        rocket.fail();
-      }
-
       try {
+        if (isInitialLoad()) {
+          rocket.getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
+        } else {
+          rocket.fail();
+        }
+
         con.rollback();
       } catch (Exception e2) {
         LOGGER.trace("NESTED ROLLBACK EXCEPTION!", e2);

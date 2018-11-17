@@ -401,7 +401,9 @@ public class ClientSQLResource implements ApiMarker {
     + "      FROM CSECHIST csh \n"
     + "      WHERE csh.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
     + " ) s2 \n"
-    + ") x FOR READ ONLY WITH UR";
+    + ") x "
+    + "OPTIMIZE FOR 1000 ROWS \n"
+    + "FOR READ ONLY WITH UR";
   //@formatter:on
 
   //@formatter:off
