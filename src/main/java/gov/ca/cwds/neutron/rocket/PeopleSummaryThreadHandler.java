@@ -11,12 +11,12 @@ import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ADDR;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_AKA;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CASE;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CSEC;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ETHNIC;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_SAFETY;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_ADDR;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_COUNTY;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CSEC;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ETHNIC;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_PLACE_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_SAFETY;
 import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -500,7 +500,8 @@ public class PeopleSummaryThreadHandler
       loadClientRange(con, stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
-      LOGGER.info("Read placement home address: SQL: \n{}", sqlPlacementAddress);
+      LOGGER.trace("Read placement home address: SQL: \n{}", sqlPlacementAddress);
+      LOGGER.info("Read placement home address");
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
     } catch (Exception e) {
