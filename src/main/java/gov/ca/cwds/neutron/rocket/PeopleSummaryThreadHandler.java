@@ -3,20 +3,20 @@ package gov.ca.cwds.neutron.rocket;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.LOG_EVERY;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_DUMMY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLIENT_LAST_CHG;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLIENT_RANGE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_PLACEMENT_CLIENT_FULL;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ADDRESS;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_AKA;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CASE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CSEC;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ETHNICITY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_SAFETY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLIENT_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLI_DUMMY;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLI_LST_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLI_RNG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_PLACE_CLI_FULL;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_AKA;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CASE;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CSEC;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ETHNIC;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_SAFETY;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_ADDR;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_COUNTY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_PLACEMENT_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_PLACE_ADDR;
 import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -440,7 +440,7 @@ public class PeopleSummaryThreadHandler
     LOGGER.trace("handleSecondaryJdbc(): begin");
     String sqlPlacementAddress;
     try {
-      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACEMENT_ADDR,
+      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACE_ADDR,
           rocket.determineLastSuccessfulRunTime(), rocket.getFlightPlan().getOverrideLastEndTime());
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "INVALID PLACEMENT ADDRESS SQL! {}", e.getMessage(), e);
@@ -448,20 +448,20 @@ public class PeopleSummaryThreadHandler
 
     try (
         final PreparedStatement stmtInsClient =
-            con.prepareStatement(pickPrepDml(INS_CLIENT_RANGE, INS_CLIENT_LAST_CHG));
+            con.prepareStatement(pickPrepDml(INS_CLI_RNG, INS_CLI_LST_CHG));
         final PreparedStatement stmtInsClientPlaceHome =
-            con.prepareStatement(pickPrepDml(INS_PLACEMENT_CLIENT_FULL, INSERT_CLIENT_DUMMY));
+            con.prepareStatement(pickPrepDml(INS_PLACE_CLI_FULL, INS_CLI_DUMMY));
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(sqlPlacementAddress, TFO, CRO);
-        final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT, TFO, CRO);
-        final PreparedStatement stmtSelCliAddr = con.prepareStatement(SEL_CLIENT_ADDR, TFO, CRO);
+        final PreparedStatement stmtSelClient = con.prepareStatement(SEL_CLI, TFO, CRO);
+        final PreparedStatement stmtSelCliAddr = con.prepareStatement(SEL_CLI_ADDR, TFO, CRO);
         final PreparedStatement stmtSelCliCnty = con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
-        final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS, TFO, CRO);
-        final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA, TFO, CRO);
-        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CASE, TFO, CRO);
-        final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC, TFO, CRO);
-        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY, TFO, CRO);
-        final PreparedStatement stmtSelSafety = con.prepareStatement(SELECT_SAFETY, TFO, CRO)) {
+        final PreparedStatement stmtSelAddress = con.prepareStatement(SEL_ADDR, TFO, CRO);
+        final PreparedStatement stmtSelAka = con.prepareStatement(SEL_AKA, TFO, CRO);
+        final PreparedStatement stmtSelCase = con.prepareStatement(SEL_CASE, TFO, CRO);
+        final PreparedStatement stmtSelCsec = con.prepareStatement(SEL_CSEC, TFO, CRO);
+        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SEL_ETHNIC, TFO, CRO);
+        final PreparedStatement stmtSelSafety = con.prepareStatement(SEL_SAFETY, TFO, CRO)) {
 
       // Client keys for this bundle.
       loadClientRange(con, stmtInsClient, range);
@@ -587,7 +587,7 @@ public class PeopleSummaryThreadHandler
     try (final Session session = rocket.getJobDao().grabSession();
         final Connection con = NeutronJdbcUtils.prepConnection(session);
         final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.SEL_PLACEMENT_ADDR)) {
+            con.prepareStatement(ClientSQLResource.SEL_PLACE_ADDR)) {
       try {
         readPlacementAddress(stmtSelPlacementAddress);
       } catch (Exception e) {

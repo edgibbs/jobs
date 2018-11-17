@@ -1,7 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LAST_CHG_KEY_BUNDLE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ALL_CLIENT_LAST_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_KEY_BUNDLE;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_IDS_LST_CHG;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -135,7 +135,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     LOGGER.trace("insertNextKeyBundle(): begin");
     int ret = 0;
 
-    try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
+    try (final PreparedStatement ps = con.prepareStatement(INS_LST_CHG_KEY_BUNDLE, TFO, CRO)) {
       con.commit();
       final List<String> bundle = keys.subList(start, end);
       LOGGER.debug("insertNextKeyBundle(): bundle size: {}, start: {}, end: {}", bundle.size(),
@@ -186,7 +186,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(con);
 
       final Date overrideLastChgDate = rocket.getFlightPlan().getOverrideLastEndTime();
-      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_ALL_CLIENT_LAST_CHG,
+      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_CLI_IDS_LST_CHG,
           rocket.determineLastSuccessfulRunTime(),
           overrideLastChgDate != null ? overrideLastChgDate : new Date());
 
