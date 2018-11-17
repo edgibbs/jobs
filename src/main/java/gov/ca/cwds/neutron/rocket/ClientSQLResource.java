@@ -404,19 +404,16 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String SEL_CLI_IDS_LST_CHG =
-      BASE_CLI_IDS_LST_CHG
+        BASE_CLI_IDS_LST_CHG
       + SEL_OPTIMIZE ;
   //@formatter:on
 
   //@formatter:off
   public static final String INS_CLI_LST_CHG =
-      "INSERT INTO GT_ID (IDENTIFIER) \n"
-    + BASE_CLI_IDS_LST_CHG;
+        "INSERT INTO GT_ID (IDENTIFIER) \n"
+      + BASE_CLI_IDS_LST_CHG;
   //@formatter:on
 
-  //@formatter:off
-  public static final String INS_LST_CHG_KEY_BUNDLE =
-      "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
-  //@formatter:on
+  public static final String INS_LST_CHG_KEY_BUNDLE = "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
 
 }
