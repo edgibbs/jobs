@@ -1,7 +1,7 @@
 package gov.ca.cwds.neutron.rocket;
 
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LAST_CHG_KEY_BUNDLE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ALL_CLIENT_LAST_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_KEY_BUNDLE;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_IDS_LST_CHG;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,6 +19,7 @@ import org.hibernate.Session;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
+import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -36,6 +37,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   private static final long serialVersionUID = 1L;
 
   private static final int BUNDLE_KEY_SIZE = 5000;
+
+  private static final int LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue() / 10;
 
   private final List<String> keys = new ArrayList<>(BUNDLE_KEY_SIZE * 2);
 
@@ -58,8 +61,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
    * Handle additional JDBC statements, if any.
    * 
    * <p>
-   * DB2 doesn't deal well with large sets of keys. Split lists of changed keys into bundles and
-   * commit frequently.
+   * DB2 doesn't deal well with large sets of keys; buffers overflow and lock up. Split lists of
+   * changed keys into bundles and commit frequently.
    * </p>
    * 
    * <p>
@@ -75,7 +78,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final ClientPersonIndexerJob rocket = getRocket();
 
     Connection con = null;
-    try (final Session session = getRocket().getJobDao().grabSession()) {
+    try (final Session session = rocket.getJobDao().grabSession()) {
       con = NeutronJdbcUtils.prepConnection(session);
       handleSecondaryJdbc(con, range);
 
@@ -106,14 +109,15 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   }
 
   protected void readClientKeys(final ResultSet rs) {
+    LOGGER.trace("readClientKeys(): begin");
     int counter = 0;
-    String k = null;
+    String key = null;
     final ClientPersonIndexerJob rocket = getRocket();
 
     try {
-      while (rocket.isRunning() && rs.next() && (k = rs.getString(1)) != null) {
-        CheeseRay.logEvery(LOGGER, 5000, ++counter, "Read", "client key");
-        keys.add(k);
+      while (rocket.isRunning() && rs.next() && (key = rs.getString(1)) != null) {
+        CheeseRay.logEvery(LOGGER, LOG_EVERY, ++counter, "Read", "client key");
+        keys.add(key);
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT KEY! {}", e.getMessage(), e);
@@ -125,20 +129,18 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   @Override
   protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
-    LOGGER.debug("loadClientRange(): begin");
+    LOGGER.trace("loadClientRange(): begin");
     con.commit();
     final int clientCount = insertNextKeyBundle(con, rangeStart, rangeEnd);
     LOGGER.info("loadClientRange(): client count: {}", clientCount);
   }
 
   protected int insertNextKeyBundle(Connection con, int start, int end) {
-    LOGGER.debug("insertNextKeyBundle(): begin");
+    LOGGER.trace("insertNextKeyBundle(): begin");
     int ret = 0;
 
-    try (final PreparedStatement ps = con.prepareStatement(INS_LAST_CHG_KEY_BUNDLE, TFO, CRO)) {
-      LOGGER.debug("key bundle: start: {}, end: {}", start, end);
+    try (final PreparedStatement ps = con.prepareStatement(INS_LST_CHG_KEY_BUNDLE, TFO, CRO)) {
       con.commit();
-
       final List<String> bundle = keys.subList(start, end);
       LOGGER.debug("insertNextKeyBundle(): bundle size: {}, start: {}, end: {}", bundle.size(),
           start, end);
@@ -188,7 +190,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(con);
 
       final Date overrideLastChgDate = rocket.getFlightPlan().getOverrideLastEndTime();
-      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_ALL_CLIENT_LAST_CHG,
+      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_CLI_IDS_LST_CHG,
           rocket.determineLastSuccessfulRunTime(),
           overrideLastChgDate != null ? overrideLastChgDate : new Date());
 
@@ -201,7 +203,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         // Auto-close statement.
       }
 
-      // NEXT: Add re-run client keys.
+      // Add re-run client keys.
       final Deque<String> rerunIds = rocket.getFlightPlan().getDequeRerunIds();
       if (rerunIds != null && !rerunIds.isEmpty()) {
         String id;
@@ -221,7 +223,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // 0-999, 1000-1999, 2000-2999, etc.
       for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {
-        rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, Math.max(totalKeys - 1, 1)); //
+        rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, Math.max(totalKeys, 1)); //
         range = Pair.of(String.valueOf(rangeStart), String.valueOf(rangeEnd));
         LOGGER.debug("last change key subset range: {}", range);
         super.handleSecondaryJdbc(con, range);
@@ -230,7 +232,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       LOGGER.info("***** DONE retrieving data *****");
       con.commit(); // free db resources
     } catch (Exception e) {
-      rocket.fail();
+      rocket.fail(); // Last change: fail the WHOLE job.
       try {
         con.rollback();
       } catch (Exception e2) {

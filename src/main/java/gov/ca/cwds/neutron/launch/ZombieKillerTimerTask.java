@@ -36,7 +36,7 @@ public class ZombieKillerTimerTask extends TimerTask {
 
   private final int timeToAbort;
 
-  private final Set<Class> untouchables = new HashSet<>();
+  private final Set<Class<?>> untouchables = new HashSet<>();
 
   @Inject
   public ZombieKillerTimerTask(Scheduler scheduler,
@@ -71,13 +71,14 @@ public class ZombieKillerTimerTask extends TimerTask {
       try {
         LOGGER.warn("ABORT FLIGHT! rocket: {}, elapsed millis: {}, failed: {}", klass, elapsed,
             flightLog.isFailed());
+        flightLog.fail();
         scheduler.interrupt(ctx.getJobDetail().getKey());
         LOGGER.warn("FLIGHT ABORTED! rocket: {}", klass);
       } catch (SchedulerException e) {
         LOGGER.error("FAILED TO ABORT! {} : {}", klass, e.getMessage(), e);
       }
     } else {
-      LOGGER.info("Let her fly! rocket: {}, elapsed millis: {}, failed: {}, max time to abort: {}",
+      LOGGER.info("Let her fly!  rocket: {}, elapsed millis: {}, failed: {}, max time to abort: {}",
           klass, elapsed, flightLog.isFailed(), timeToAbort);
     }
   }
@@ -85,7 +86,7 @@ public class ZombieKillerTimerTask extends TimerTask {
   @Override
   public void run() {
     try {
-      LOGGER.info("Start zombie killer!");
+      LOGGER.info("Run zombie killer!");
       scheduler.getCurrentlyExecutingJobs().stream().sequential().forEach(this::abortRunningJob);
     } catch (SchedulerException e) {
       LOGGER.warn("SCHEDULER ERROR! {}", e.getMessage(), e);

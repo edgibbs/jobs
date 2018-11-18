@@ -164,7 +164,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
             // Close result set.
           }
         } finally {
-          // Close statement.
+          // Close statement, connection, and session.
         }
 
         // Handle additional JDBC statements, if any.

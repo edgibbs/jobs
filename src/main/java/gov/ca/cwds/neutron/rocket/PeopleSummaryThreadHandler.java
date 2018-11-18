@@ -3,20 +3,20 @@ package gov.ca.cwds.neutron.rocket;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.FETCH_SIZE;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.LOG_EVERY;
 import static gov.ca.cwds.neutron.enums.NeutronIntegerDefaults.QUERY_TIMEOUT_IN_SECONDS;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INSERT_CLIENT_DUMMY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLIENT_LAST_CHG;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLIENT_RANGE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_PLACEMENT_CLIENT_FULL;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ADDRESS;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_AKA;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CASE;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CLIENT;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_CSEC;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_ETHNICITY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SELECT_SAFETY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLIENT_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLI_DUMMY;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLI_LST_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_CLI_RNG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_PLACE_CLI_FULL;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_AKA;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CASE;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_ADDR;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_COUNTY;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_PLACEMENT_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CSEC;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_ETHNIC;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_PLACE_ADDR;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_SAFETY;
 import static gov.ca.cwds.neutron.util.NeutronThreadUtils.freeMemory;
 import static java.sql.ResultSet.CONCUR_READ_ONLY;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -89,8 +89,7 @@ public class PeopleSummaryThreadHandler
 
   public static final int LG_SZ = LOG_EVERY.getValue();
 
-  public static final int FULL_DENORMALIZED_SIZE =
-      NeutronIntegerDefaults.FULL_DENORMALIZED_SIZE.value();
+  public static final int FULL_LOAD_SIZE = NeutronIntegerDefaults.FULL_DENORMALIZED_SIZE.value();
 
   protected static final int TFO = TYPE_FORWARD_ONLY;
   protected static final int CRO = CONCUR_READ_ONLY;
@@ -102,21 +101,20 @@ public class PeopleSummaryThreadHandler
   protected transient Set<String> deletionResults = new HashSet<>();
 
   /**
-   * key = client id
+   * key = client id. Single thread, non-thread-safe containers OK.
    */
   protected transient Map<String, PlacementHomeAddress> placementHomeAddresses =
       new HashMap<>(5011);
 
   /**
-   * key = client id
+   * key = client id. Single thread, non-thread-safe containers OK.
    */
-  protected transient Map<String, RawClient> rawClients = new HashMap<>(FULL_DENORMALIZED_SIZE);
+  protected transient Map<String, RawClient> rawClients = new HashMap<>(FULL_LOAD_SIZE);
 
   /**
-   * key = client id
+   * key = client id. Single thread, non-thread-safe containers OK.
    */
-  protected transient Map<String, ReplicatedClient> normalized =
-      new HashMap<>(FULL_DENORMALIZED_SIZE);
+  protected transient Map<String, ReplicatedClient> normalized = new HashMap<>(FULL_LOAD_SIZE);
 
   public PeopleSummaryThreadHandler(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
@@ -150,7 +148,7 @@ public class PeopleSummaryThreadHandler
 
   protected <T extends ClientReference> void readAny(final ResultSet rs,
       NeutronJdbcReader<T> reader, BiConsumer<ClientReference, T> organizer, String msg) {
-    LOGGER.debug("readAny(): begin");
+    LOGGER.trace("readAny(): begin");
     int counter = 0;
     RawClient c = null;
     T t;
@@ -170,7 +168,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClient(final ResultSet rs) {
-    LOGGER.debug("readClient(): begin");
+    LOGGER.trace("readClient(): begin");
     int counter = 0;
     RawClient c = null;
 
@@ -187,7 +185,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientAddress(final ResultSet rs) {
-    LOGGER.debug("readClientAddress(): begin");
+    LOGGER.trace("readClientAddress(): begin");
     int counter = 0;
     RawClient c = null;
     RawClientAddress cla = null;
@@ -210,7 +208,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readAddress(final ResultSet rs) {
-    LOGGER.debug("readAddress(): begin");
+    LOGGER.trace("readAddress(): begin");
     int counter = 0;
     RawAddress adr = null;
     RawClient c = null;
@@ -220,13 +218,16 @@ public class PeopleSummaryThreadHandler
         c = rawClients.get(adr.getCltId());
         if (c != null) {
           final Map<String, RawClientAddress> cla = c.getClientAddress();
-          final String addrKey = adr.getClaId();
-          if (cla != null && StringUtils.isNotEmpty(addrKey) && cla.containsKey(addrKey)) {
-            cla.get(addrKey).setAddress(adr);
+          final String claKey = adr.getClaId();
+          if (cla != null && StringUtils.isNotEmpty(claKey) && cla.containsKey(claKey)) {
+            cla.get(claKey).setAddress(adr);
+          } else {
+            LOGGER.warn("ORPHAN ADDRESS! client: {}, client address: {}, address: {}",
+                adr.getCltId(), claKey, adr.getAdrId());
           }
           CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", "address");
         } else {
-          LOGGER.warn("ORPHAN ADDRESS! id: {}, client: {}", adr.getAdrId(), adr.getCltId());
+          LOGGER.warn("NO CLIENT FOR ADDRESS! client: {}, id: {}", adr.getCltId(), adr.getAdrId());
         }
       }
     } catch (Exception e) {
@@ -237,7 +238,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readClientCounty(final ResultSet rs) {
-    LOGGER.debug("readClientCounty(): begin");
+    LOGGER.trace("readClientCounty(): begin");
     int counter = 0;
     RawClient c = null;
     RawClientCounty cc = null;
@@ -260,7 +261,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readAka(final ResultSet rs) {
-    LOGGER.debug("readAka(): begin");
+    LOGGER.trace("readAka(): begin");
     int counter = 0;
     RawClient c = null;
     RawAka aka = null;
@@ -283,7 +284,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readCase(final ResultSet rs) {
-    LOGGER.debug("readCase(): begin");
+    LOGGER.trace("readCase(): begin");
     int counter = 0;
     RawClient c = null;
     RawCase cas = null;
@@ -299,14 +300,14 @@ public class PeopleSummaryThreadHandler
         }
       }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE RECORD! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CASE! {}", e.getMessage(), e);
     }
 
     LOGGER.info("Retrieved {} case records.", counter);
   }
 
   protected void readCsec(final ResultSet rs) {
-    LOGGER.debug("readCsec(): begin");
+    LOGGER.trace("readCsec(): begin");
     int counter = 0;
     RawClient c = null;
     RawCsec csec = null;
@@ -329,7 +330,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readEthnicity(final ResultSet rs) {
-    LOGGER.debug("readEthnicity(): begin");
+    LOGGER.trace("readEthnicity(): begin");
     int counter = 0;
     RawClient c = null;
     RawEthnicity eth = null;
@@ -353,7 +354,7 @@ public class PeopleSummaryThreadHandler
   }
 
   protected void readSafetyAlert(final ResultSet rs) {
-    LOGGER.debug("readSafetyAlert(): begin");
+    LOGGER.trace("readSafetyAlert(): begin");
     int counter = 0;
     RawClient c = null;
     RawSafetyAlert saf = null;
@@ -398,13 +399,13 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("handleMainResults(): commit");
     con.commit(); // free database resources
 
-    final FlightLog flightLog = getRocket().getFlightLog();
+    final FlightLog flightLog = rocket.getFlightLog();
     flightLog.addToDenormalized(cntrRetrieved);
   }
 
   protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
-    LOGGER.debug("loadClientRange(): begin");
+    LOGGER.trace("loadClientRange(): begin");
     con.commit(); // free db resources
 
     // Initial Load client ranges.
@@ -436,10 +437,10 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
-    LOGGER.debug("handleSecondaryJdbc(): begin");
+    LOGGER.trace("handleSecondaryJdbc(): begin");
     String sqlPlacementAddress;
     try {
-      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACEMENT_ADDR,
+      sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACE_ADDR,
           rocket.determineLastSuccessfulRunTime(), rocket.getFlightPlan().getOverrideLastEndTime());
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "INVALID PLACEMENT ADDRESS SQL! {}", e.getMessage(), e);
@@ -447,20 +448,20 @@ public class PeopleSummaryThreadHandler
 
     try (
         final PreparedStatement stmtInsClient =
-            con.prepareStatement(pickPrepDml(INS_CLIENT_RANGE, INS_CLIENT_LAST_CHG));
+            con.prepareStatement(pickPrepDml(INS_CLI_RNG, INS_CLI_LST_CHG));
         final PreparedStatement stmtInsClientPlaceHome =
-            con.prepareStatement(pickPrepDml(INS_PLACEMENT_CLIENT_FULL, INSERT_CLIENT_DUMMY));
+            con.prepareStatement(pickPrepDml(INS_PLACE_CLI_FULL, INS_CLI_DUMMY));
         final PreparedStatement stmtSelPlacementAddress =
             con.prepareStatement(sqlPlacementAddress, TFO, CRO);
-        final PreparedStatement stmtSelClient = con.prepareStatement(SELECT_CLIENT, TFO, CRO);
-        final PreparedStatement stmtSelCliAddr = con.prepareStatement(SEL_CLIENT_ADDR, TFO, CRO);
+        final PreparedStatement stmtSelClient = con.prepareStatement(SEL_CLI, TFO, CRO);
+        final PreparedStatement stmtSelCliAddr = con.prepareStatement(SEL_CLI_ADDR, TFO, CRO);
         final PreparedStatement stmtSelCliCnty = con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
-        final PreparedStatement stmtSelAddress = con.prepareStatement(SELECT_ADDRESS, TFO, CRO);
-        final PreparedStatement stmtSelAka = con.prepareStatement(SELECT_AKA, TFO, CRO);
-        final PreparedStatement stmtSelCase = con.prepareStatement(SELECT_CASE, TFO, CRO);
-        final PreparedStatement stmtSelCsec = con.prepareStatement(SELECT_CSEC, TFO, CRO);
-        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SELECT_ETHNICITY, TFO, CRO);
-        final PreparedStatement stmtSelSafety = con.prepareStatement(SELECT_SAFETY, TFO, CRO)) {
+        final PreparedStatement stmtSelAddress = con.prepareStatement(SEL_ADDR, TFO, CRO);
+        final PreparedStatement stmtSelAka = con.prepareStatement(SEL_AKA, TFO, CRO);
+        final PreparedStatement stmtSelCase = con.prepareStatement(SEL_CASE, TFO, CRO);
+        final PreparedStatement stmtSelCsec = con.prepareStatement(SEL_CSEC, TFO, CRO);
+        final PreparedStatement stmtSelEthnicity = con.prepareStatement(SEL_ETHNIC, TFO, CRO);
+        final PreparedStatement stmtSelSafety = con.prepareStatement(SEL_SAFETY, TFO, CRO)) {
 
       // Client keys for this bundle.
       loadClientRange(con, stmtInsClient, range);
@@ -496,22 +497,23 @@ public class PeopleSummaryThreadHandler
       con.commit(); // free db resources again
 
       LOGGER.info("Insert placement home clients");
-      prepPlacementClients(stmtInsClient, range);
+      loadClientRange(con, stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
-      LOGGER.info("Read placement home address: SQL: \n{}", sqlPlacementAddress);
+      LOGGER.trace("Read placement home address: SQL: \n{}", sqlPlacementAddress);
+      LOGGER.info("Read placement home address");
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
 
-      if (isInitialLoad()) {
-        rocket.getFlightLog().markRangeError(range); // Fail the BUCKET, NOT the WHOLE FLIGHT!
-      } else {
-        rocket.fail();
-      }
-
       try {
+        if (isInitialLoad()) {
+          rocket.getFlightLog().markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
+        } else {
+          rocket.fail(); // Last change: fail the whole job!
+        }
+
         con.rollback();
       } catch (Exception e2) {
         LOGGER.trace("NESTED ROLLBACK EXCEPTION!", e2);
@@ -528,7 +530,7 @@ public class PeopleSummaryThreadHandler
       rc.setActivePlacementHomeAddress(pha);
     } else {
       // WARNING: last chg: if the client wasn't picked up from the view, then it's not here.
-      LOGGER.warn("Client id for placement home address not in normalized map! client id: {}",
+      LOGGER.warn("Client id for placement home address NOT FOUND! client id: {}",
           pha.getClientId());
     }
   }
@@ -539,7 +541,7 @@ public class PeopleSummaryThreadHandler
     this.rawClients.values().stream().map(r -> r.normalize(conv))
         .forEach(c -> normalized.put(c.getId(), c));
     rawClients.clear(); // free memory
-    LOGGER.debug("handleJdbcDone: normalized.size(): {}", normalized.size());
+    LOGGER.debug("handleJdbcDone: normalized: {}", normalized.size());
 
     // Merge placement home addresses.
     placementHomeAddresses.values().stream().forEach(this::mapReplicatedClient);
@@ -583,10 +585,10 @@ public class PeopleSummaryThreadHandler
     LOGGER.info("After last run fetch: count: {}", normalized.size());
 
     // Handle additional JDBC statements, if any.
-    try (final Session session = getRocket().getJobDao().grabSession();
+    try (final Session session = rocket.getJobDao().grabSession();
         final Connection con = NeutronJdbcUtils.prepConnection(session);
         final PreparedStatement stmtSelPlacementAddress =
-            con.prepareStatement(ClientSQLResource.SEL_PLACEMENT_ADDR)) {
+            con.prepareStatement(ClientSQLResource.SEL_PLACE_ADDR)) {
       try {
         readPlacementAddress(stmtSelPlacementAddress);
       } catch (Exception e) {
@@ -620,12 +622,10 @@ public class PeopleSummaryThreadHandler
    */
   protected String pickPrepDml(String sqlInitialLoad, String sqlLastChange)
       throws NeutronCheckedException {
-    final String sql =
-        getRocket().getFlightPlan().isLastRunMode()
-            ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange,
-                getRocket().determineLastSuccessfulRunTime(),
-                getRocket().getFlightPlan().getOverrideLastEndTime())
-            : sqlInitialLoad; // initial mode
+    final String sql = rocket.getFlightPlan().isLastRunMode()
+        ? NeutronDB2Utils.prepLastChangeSQL(sqlLastChange, rocket.determineLastSuccessfulRunTime(),
+            rocket.getFlightPlan().getOverrideLastEndTime())
+        : sqlInitialLoad; // initial mode
     LOGGER.trace("Prep SQL: \n{}", sql);
     return sql;
   }
@@ -643,7 +643,7 @@ public class PeopleSummaryThreadHandler
    * Release unneeded heap memory early and often.
    */
   protected void clear() {
-    LOGGER.debug("clear containers");
+    LOGGER.trace("clear containers");
     normalized.clear();
     rawClients.clear();
     placementHomeAddresses.clear();
@@ -659,8 +659,7 @@ public class PeopleSummaryThreadHandler
   protected void normalize(final List<RawClient> grpRecs) {
     grpRecs.stream().sorted((e1, e2) -> e1.compare(e1, e2)).sequential().sorted()
         .collect(Collectors.groupingBy(RawClient::getNormalizationGroupKey)).entrySet().stream()
-        .map(e -> getRocket().normalizeSingle(e.getValue()))
-        .forEach(n -> normalized.put(n.getId(), n));
+        .map(e -> rocket.normalizeSingle(e.getValue())).forEach(n -> normalized.put(n.getId(), n));
   }
 
   protected void prepPlacementClients(final PreparedStatement stmt, final Pair<String, String> p)
@@ -669,8 +668,8 @@ public class PeopleSummaryThreadHandler
     stmt.setQueryTimeout(QUERY_TIMEOUT_IN_SECONDS.getValue()); // SNAP-709
     stmt.setFetchSize(FETCH_SIZE.getValue());
 
-    if (!getRocket().getFlightPlan().isLastRunMode()) {
-      LOGGER.info("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
+    if (!rocket.getFlightPlan().isLastRunMode()) {
+      LOGGER.debug("Prep Affected Clients: range: {} - {}", p.getLeft(), p.getRight());
       try {
         stmt.setString(1, p.getLeft());
         stmt.setString(2, p.getRight());
@@ -680,7 +679,7 @@ public class PeopleSummaryThreadHandler
     }
 
     final int countInsClient = stmt.executeUpdate();
-    LOGGER.info("Placement home clients: {}", countInsClient);
+    LOGGER.info("Prepped placement home clients: {}", countInsClient);
   }
 
   protected void readPlacementAddress(final PreparedStatement stmt) throws SQLException {
@@ -692,7 +691,8 @@ public class PeopleSummaryThreadHandler
     PlacementHomeAddress pha;
 
     // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
-    // According to the JDBC specification, you don't
+    // According to the JDBC specification, you shouldn't close the ResultSet; closing its parent
+    // statement should close the result set.
     try (final ResultSet rs = stmt.executeQuery()) {
       while (rocket.isRunning() && rs.next()) {
         CheeseRay.logEvery(LOGGER, ++cntr, "Placement homes fetched", "recs");

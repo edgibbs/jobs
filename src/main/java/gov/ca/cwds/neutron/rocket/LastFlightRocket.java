@@ -230,7 +230,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   @Override
   public void done() {
-    this.getFlightLog().done();
+    getFlightLog().done();
   }
 
   /**
@@ -238,10 +238,13 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   @Override
   public void fail() {
-    this.getFlightLog().fail();
-    this.getFlightLog().done();
-    this.doneIndex();
-    this.doneTransform();
+    LOGGER.error("****** ROCKET FAILED! ******");
+    final FlightLog flightLog = getFlightLog();
+    flightLog.fail();
+    flightLog.done();
+
+    doneIndex();
+    doneTransform();
     Thread.currentThread().interrupt();
   }
 

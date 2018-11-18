@@ -398,6 +398,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void markRangeError(final Pair<String, String> pair) {
+    LOGGER.error("FAIL RANGE! {}", pair);
     setRangeStatus(pair, FlightStatus.FAILED);
   }
 

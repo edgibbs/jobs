@@ -2,8 +2,6 @@ package gov.ca.cwds.neutron.util.transform;
 
 import static gov.ca.cwds.data.persistence.cms.CmsPersistentObject.CMS_ID_LEN;
 
-import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
-import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +38,7 @@ import gov.ca.cwds.data.es.ElasticSearchPerson;
 import gov.ca.cwds.data.es.ElasticSearchPerson.ESOptionalCollection;
 import gov.ca.cwds.data.es.ElasticSearchPersonAddress;
 import gov.ca.cwds.data.es.ElasticSearchPersonAka;
+import gov.ca.cwds.data.es.ElasticSearchPersonCsec;
 import gov.ca.cwds.data.es.ElasticSearchPersonLanguage;
 import gov.ca.cwds.data.es.ElasticSearchPersonPhone;
 import gov.ca.cwds.data.es.ElasticSearchPersonScreening;
@@ -49,6 +48,7 @@ import gov.ca.cwds.data.es.ElasticSearchSystemCode;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicatedEntity;
+import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiAddressAware;
 import gov.ca.cwds.data.std.ApiLanguageAware;
 import gov.ca.cwds.data.std.ApiMultipleLanguagesAware;
@@ -564,7 +564,7 @@ public final class ElasticTransformer {
     return ret;
   }
 
-  public static ObjectMapper getMapper() { // NOSONAR
+  public static ObjectMapper getMapper() {
     return mapper;
   }
 
