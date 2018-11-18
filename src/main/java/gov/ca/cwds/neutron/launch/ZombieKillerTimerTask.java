@@ -78,7 +78,7 @@ public class ZombieKillerTimerTask extends TimerTask {
         LOGGER.error("FAILED TO ABORT! {} : {}", klass, e.getMessage(), e);
       }
     } else {
-      LOGGER.info("Let her fly! rocket: {}, elapsed millis: {}, failed: {}, max time to abort: {}",
+      LOGGER.info("Let her fly!  rocket: {}, elapsed millis: {}, failed: {}, max time to abort: {}",
           klass, elapsed, flightLog.isFailed(), timeToAbort);
     }
   }
