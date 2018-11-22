@@ -23,7 +23,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
 
 project.ext {
-    coreApiVersion = "1.7.5_860-RC"
+    coreApiVersion = "1.10.2_884-RC"
     log4jVersion = "2.8"
     elasticsearchVersion = "5.5.0"
     personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
@@ -96,7 +96,10 @@ dependencies {
 	compile 'com.google.code.gson:gson:2.8.2'
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
-  
+
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
+//    compile group: 'org.apache.poi', name: 'poi', version: '3.17'
+
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
 	testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powerMockVersion
