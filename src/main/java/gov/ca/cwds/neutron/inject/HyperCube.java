@@ -623,6 +623,7 @@ public class HyperCube extends NeutronGuiceModule {
    * @param scheduler Quartz scheduler
    * @param zombieKillerTimerTask zombie killer
    * @param strTimeToAbort how long to wait before aborting a flight
+   * @param dequeRerunIds primary keys to re-run in Last Change mode, if any
    * @return configured launch scheduler
    * @throws SchedulerException if unable to configure Quartz
    */

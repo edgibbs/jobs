@@ -163,7 +163,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   public String getPrepLastChangeSQL() {
     String ret = null;
     try {
-      ret = NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INS_CLIENT_LAST_CHG,
+      ret = NeutronDB2Utils.prepLastChangeSQL(ClientSQLResource.INS_CLI_LST_CHG,
           determineLastSuccessfulRunTime(), getFlightPlan().getOverrideLastEndTime());
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING LAST CHANGE SQL! {}", e.getMessage());
@@ -239,8 +239,12 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
-    handler.get().handleFinishRange(range);
-    deallocateThreadHandler();
+    try {
+      handler.get().handleFinishRange(range);
+    } finally {
+      // Deallocate the thread instance, no matter what.
+      deallocateThreadHandler();
+    }
   }
 
   @Override

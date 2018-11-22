@@ -13,6 +13,30 @@ import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 /**
  * Neutron logging utilities.
  * 
+ * <strong>Features</strong>
+ * <table summary="Featured Methods">
+ * <tr>
+ * <th align="justify">Method</th>
+ * <th align="justify">Purpose</th>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #checked(Logger, Throwable, String, Object...) checked}</td>
+ * <td align="justify">Wrap Throwable and in {@link NeutronCheckedException}</td>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #runtime(Logger, Throwable, String, Object...) runtime}</td>
+ * <td align="justify">Wrap Throwable and in {@link NeutronRuntimeException}</td>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #logEvery(Logger, int, int, String, Object...) logEvery}</td>
+ * <td align="justify">Log every N records</td>
+ * </tr>
+ * <tr>
+ * <td align="justify">{@link #stackToString(Exception) stackToString}</td>
+ * <td align="justify">Print stack trace to a String</td>
+ * </tr>
+ * </table>
+ * 
  * @author CWDS API Team
  */
 public class JobLogs {
@@ -21,9 +45,15 @@ public class JobLogs {
 
   public static final int DEFAULT_LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue();
 
+  /**
+   * Static methods only; do not instantiate.
+   * 
+   * <p>
+   * Evil singleton, blah, blah, blah ... I can't hear you ...
+   * </p>
+   */
   protected JobLogs() {
-    // Static methods only; do not instantiate.
-    // Evil singleton, blah, blah, blah ... I can't hear you ...
+    // Vy r zer more bosses' asses zan bosses??
   }
 
   /**

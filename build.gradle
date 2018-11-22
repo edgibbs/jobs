@@ -96,9 +96,8 @@ dependencies {
 	compile 'com.google.code.gson:gson:2.8.2'
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
-
+    compile group: 'com.github.rholder', name: 'guava-retrying', version: '2.0.0'
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
-//    compile group: 'org.apache.poi', name: 'poi', version: '3.17'
 
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
