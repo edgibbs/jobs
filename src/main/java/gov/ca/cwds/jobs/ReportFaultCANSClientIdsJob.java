@@ -49,16 +49,17 @@ public class ReportFaultCANSClientIdsJob {
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
   private static final String NQ_CANS_CLIENTS_ALL =
       "SELECT p.id, p.external_id, p.first_name, p.middle_name, p.last_name, p.suffix, p.dob, p.gender,"
-          + " c.name AS county_name, a.status AS cans_status, a.event_date AS event_date"
+          + " c.name AS county_name, a.status AS cans_status, a.event_date AS event_date, u.external_id as user_id"
           + " FROM {h-schema}person p"
           + " LEFT JOIN {h-schema}county c ON p.county_id = c.id"
           + " LEFT JOIN ("
-          + "     SELECT DISTINCT ON (person_id) person_id, status, event_date "
+          + "     SELECT DISTINCT ON (person_id) person_id, status, event_date, created_by, updated_by "
           + "     FROM {h-schema}assessment"
           + "     ORDER BY person_id asc, "
           + "             event_date desc, " // Most recent
           + "             status desc"  // IN-PROCESS is more important then COMPLETED, DELETED
           + " ) a ON p.id = a.person_id"
+          + " LEFT JOIN person u ON (CASE WHEN a.updated_by IS NOT NULL THEN a.updated_by ELSE a.created_by END) = u.id"
           + " WHERE p.person_role = 'CLIENT'"
           + " ORDER BY county_name, last_name, first_name"
           + " FOR READ ONLY";
@@ -88,6 +89,7 @@ public class ReportFaultCANSClientIdsJob {
     cansSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_NS).buildSessionFactory();
   }
 
+
   /**
    * Job entry point.
    *
@@ -111,6 +113,7 @@ public class ReportFaultCANSClientIdsJob {
           job.reportFileName);
     } catch (Exception e) {
       LOGGER.error("\n\nEXECUTION FAILED !!!\n {}\n\n", e.getMessage(), e);
+
       System.exit(-1);
     }
     System.exit(0);
@@ -259,9 +262,8 @@ public class ReportFaultCANSClientIdsJob {
     for (int i = 0; i < columns.length; i++) {
       sheet.autoSizeColumn(i);
     }
-    try {
+    try (FileOutputStream fileOut = new FileOutputStream(reportFileName)) {
       // Write the output to a file
-      FileOutputStream fileOut = new FileOutputStream(reportFileName);
       workbook.write(fileOut);
       fileOut.close();
       // Closing the workbook
@@ -280,13 +282,13 @@ public class ReportFaultCANSClientIdsJob {
           .setCmsKey(CmsKeyIdGenerator.getKeyFromUIIdentifier(externalId));
 
     } catch (IllegalArgumentException e) {
-      LOGGER.info("Error getting CMS Key from UI Id: {}", e.getMessage(), e);
+      LOGGER.info("Client [id: {}] -> Error getting CMS Key from UI Id: {}", clientDto.id, e.getMessage(), e);
       //Let see if it matches base62 10 character pattern
       if (! externalId.matches("[0-9a-zA-Z]{10}")) {
         clientDto.setComment(e.getMessage());
         return false;
       } else {
-        LOGGER.info("External Id [{}] matches CMS Key format. Continue ...", externalId);
+        LOGGER.info("Client [id: {}] -> External Id [{}] matches CMS Key format. Continue ...",clientDto.id, externalId);
         clientDto.setCmsKey(externalId);
       }
     }
@@ -298,13 +300,13 @@ public class ReportFaultCANSClientIdsJob {
           .setParameter("cmsKey", clientDto.cmsKey, StringType.INSTANCE).setReadOnly(true)
           .getResultList().isEmpty()) {
 
-        LOGGER.info("Not found in CMS: Id {}", clientDto.id);
-        clientDto.setComment("Not found in CMS");
+        LOGGER.info("Client [id: {}] -> Not found in CMS.", clientDto.id);
+        clientDto.setComment("Client Not found in CMS");
         txn.rollback();
         return false;
       }
       txn.rollback();
-      LOGGER.info("Found in CMS: Id {}", clientDto.id);
+      LOGGER.info("Client [id: {}] -> Found in CMS.", clientDto.id);
       return true;
     } catch (Exception e) {
       txn.rollback();
@@ -385,6 +387,8 @@ public class ReportFaultCANSClientIdsJob {
     String cansStatus;
     @NativeQueryResultColumn(index = 10)
     Date eventDate;
+    @NativeQueryResultColumn(index = 11)
+    String userId;
 
     String cmsKey;
     String comment;
