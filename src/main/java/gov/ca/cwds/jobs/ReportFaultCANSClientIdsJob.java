@@ -1,5 +1,8 @@
 package gov.ca.cwds.jobs;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -84,6 +87,7 @@ public class ReportFaultCANSClientIdsJob {
   private CellStyle dateCellStyle;
   private Field[] columns = CansClient.class.getDeclaredFields();
   private int nextRowNum = 1; // headerRow is 0
+  private int[] columnsWidth = new int[columns.length];
 
 
   private ReportFaultCANSClientIdsJob() {
@@ -250,7 +254,9 @@ public class ReportFaultCANSClientIdsJob {
     // Create cells
     for (int index = 0; index < columns.length; index++) {
       Cell cell = headerRow.createCell(index);
-      cell.setCellValue(columns[index].getName());
+      String cellValue = columns[index].getName();
+      cell.setCellValue(cellValue);
+      columnsWidth[index] = max(columnsWidth[index], cellValue.length() + cellValue.length() / 2);
       cell.setCellStyle(headerCellStyle);
     }
 
@@ -262,7 +268,7 @@ public class ReportFaultCANSClientIdsJob {
   private void finalizeReport() {
     // Resize all columns to fit the content size
     for (int i = 0; i < columns.length; i++) {
-      sheet.autoSizeColumn(i);
+      sheet.setColumnWidth(i, min(columnsWidth[i]*256, 255*256));
     }
     try (FileOutputStream fileOut = new FileOutputStream(reportFileName)) {
       // Write the output to a file
@@ -333,16 +339,22 @@ public class ReportFaultCANSClientIdsJob {
     for (int index = 0; index < columns.length; index++) {
       Cell cell = row.createCell(index);
       Field field = columns[index];
+      int valueLength = 0;
       try {
         if (field.getType() == Long.class) {
           cell.setCellValue((Long) field.get(clientPojo));
+          valueLength = String.valueOf(cell.getNumericCellValue()).trim().length();
         } else if (field.getType() == Date.class) {
           cell.setCellValue((Date) field.get(clientPojo));
           cell.setCellStyle(dateCellStyle);
+          valueLength = 10;
         } else {
           //Rest is Strings
           cell.setCellValue((String) field.get(clientPojo));
+          valueLength = cell.getStringCellValue().trim().length();
+
         }
+        columnsWidth[index] = max(columnsWidth[index], valueLength + valueLength / 2);
       } catch (IllegalAccessException e) {
         //Skip the cell
         LOGGER.error("Error: {}", e);
