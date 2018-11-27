@@ -48,8 +48,9 @@ public class ReportFaultCANSClientIdsJob {
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
   private static final String NQ_CANS_CLIENTS_ALL =
-      "SELECT p.id, p.external_id, p.first_name, p.middle_name, p.last_name, p.suffix, p.dob, p.gender,"
-          + " c.name AS county_name, a.status AS cans_status, a.event_date AS event_date, u.external_id as user_id"
+      "SELECT p.id, p.external_id, p.first_name, p.middle_name, p.last_name, p.suffix, p.dob, p.gender"
+          + ", c.name AS county_name, a.status AS cans_status, a.event_date AS event_date"
+          + ", u.external_id AS user_id, u.first_name AS u_first_name, u.last_name AS u_last_name "
           + " FROM {h-schema}person p"
           + " LEFT JOIN {h-schema}county c ON p.county_id = c.id"
           + " LEFT JOIN ("
@@ -59,9 +60,10 @@ public class ReportFaultCANSClientIdsJob {
           + "             event_date desc, " // Most recent
           + "             status desc"  // IN-PROCESS is more important then COMPLETED, DELETED
           + " ) a ON p.id = a.person_id"
-          + " LEFT JOIN person u ON (CASE WHEN a.updated_by IS NOT NULL THEN a.updated_by ELSE a.created_by END) = u.id"
+          + " LEFT JOIN {h-schema}person u"
+          + "     ON (CASE WHEN a.updated_by IS NOT NULL THEN a.updated_by ELSE a.created_by END) = u.id"
           + " WHERE p.person_role = 'CLIENT'"
-          + " ORDER BY county_name, last_name, first_name"
+          + " ORDER BY user_id, county_name, last_name, first_name"
           + " FOR READ ONLY";
 
   private static final String NQ_CMS_CLIENT_FIND =
@@ -145,8 +147,8 @@ public class ReportFaultCANSClientIdsJob {
     Field[] fields = genericType.getDeclaredFields();
     List<Field> orderedFields = Arrays.asList(new Field[fields.length]);
     for (Field field : fields) {
-      if (field.isAnnotationPresent(NativeQueryResultColumn.class)) {
-        NativeQueryResultColumn nqrc = field.getAnnotation(NativeQueryResultColumn.class);
+      if (field.isAnnotationPresent(NQResultColumn.class)) {
+        NQResultColumn nqrc = field.getAnnotation(NQResultColumn.class);
         orderedFields.set(nqrc.index(), field);
       }
     }
@@ -351,44 +353,48 @@ public class ReportFaultCANSClientIdsJob {
   //-----------------------------------------------------------------------------------------------
   @Target(ElementType.TYPE)
   @Retention(RetentionPolicy.RUNTIME)
-  private @interface NativeQueryResultEntity {
+  private @interface NQResultEntity {
 
   }
 
   @Target(ElementType.FIELD)
   @Retention(RetentionPolicy.RUNTIME)
-  private @interface NativeQueryResultColumn {
+  private @interface NQResultColumn {
 
     int index();
   }
 
-  @NativeQueryResultEntity
+  @NQResultEntity
   static class CansClient {
 
-    @NativeQueryResultColumn(index = 0)
+    @NQResultColumn(index = 0)
     Long id;
-    @NativeQueryResultColumn(index = 1)
+    @NQResultColumn(index = 1)
     String externalId;
-    @NativeQueryResultColumn(index = 2)
+    @NQResultColumn(index = 2)
     String firstName;
-    @NativeQueryResultColumn(index = 3)
+    @NQResultColumn(index = 3)
     String middleName;
-    @NativeQueryResultColumn(index = 4)
+    @NQResultColumn(index = 4)
     String lastName;
-    @NativeQueryResultColumn(index = 5)
+    @NQResultColumn(index = 5)
     String suffix;
-    @NativeQueryResultColumn(index = 6)
+    @NQResultColumn(index = 6)
     Date dob;
-    @NativeQueryResultColumn(index = 7)
+    @NQResultColumn(index = 7)
     String gender;
-    @NativeQueryResultColumn(index = 8)
+    @NQResultColumn(index = 8)
     String countyName;
-    @NativeQueryResultColumn(index = 9)
+    @NQResultColumn(index = 9)
     String cansStatus;
-    @NativeQueryResultColumn(index = 10)
+    @NQResultColumn(index = 10)
     Date eventDate;
-    @NativeQueryResultColumn(index = 11)
+    @NQResultColumn(index = 11)
     String userId;
+    @NQResultColumn(index = 12)
+    String userFirstName;
+    @NQResultColumn(index = 13)
+    String userLastName;
 
     String cmsKey;
     String comment;
