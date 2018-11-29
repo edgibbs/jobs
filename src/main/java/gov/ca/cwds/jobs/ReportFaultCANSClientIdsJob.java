@@ -268,7 +268,7 @@ public class ReportFaultCANSClientIdsJob {
   private void finalizeReport() {
     // Resize all columns to fit the content size
     for (int i = 0; i < columns.length; i++) {
-      sheet.setColumnWidth(i, min(columnsWidth[i]*256, 255*256));
+      sheet.setColumnWidth(i, min(columnsWidth[i] * 256, 255 * 256));
     }
     try (FileOutputStream fileOut = new FileOutputStream(reportFileName)) {
       // Write the output to a file
@@ -290,38 +290,48 @@ public class ReportFaultCANSClientIdsJob {
           .setCmsKey(CmsKeyIdGenerator.getKeyFromUIIdentifier(externalId));
 
     } catch (IllegalArgumentException e) {
-      LOGGER.info("Client [id: {}] -> Error getting CMS Key from UI Id: {}", clientDto.id, e.getMessage(), e);
+      LOGGER.info("Client [id: {}] -> Error getting CMS Key from UI Id: {}", clientDto.id,
+          e.getMessage(), e);
       //Let see if it matches base62 10 character pattern
-      if (! externalId.matches("[0-9a-zA-Z]{10}")) {
+      if (!externalId.matches("[0-9a-zA-Z]{10}")) {
         clientDto.setComment(e.getMessage());
         return false;
       } else {
-        LOGGER.info("Client [id: {}] -> External Id [{}] matches CMS Key format. Continue ...",clientDto.id, externalId);
+        LOGGER.info("Client [id: {}] -> External Id [{}] matches CMS Key format. Continue ...",
+            clientDto.id, externalId);
         clientDto.setCmsKey(externalId);
       }
     }
 
-    Session session = grabCmsSession();
-    Transaction txn = session.beginTransaction();
-    try {
-      if (session.createNativeQuery(NQ_CMS_CLIENT_FIND)
-          .setParameter("cmsKey", clientDto.cmsKey, StringType.INSTANCE).setReadOnly(true)
-          .getResultList().isEmpty()) {
+    if (clientDto.cmsKey != null) {
+      Session session = grabCmsSession();
+      Transaction txn = session.beginTransaction();
+      try {
+        if (session.createNativeQuery(NQ_CMS_CLIENT_FIND)
+            .setParameter("cmsKey", clientDto.cmsKey, StringType.INSTANCE).setReadOnly(true)
+            .getResultList().isEmpty()) {
 
-        LOGGER.info("Client [id: {}] -> Not found in CMS.", clientDto.id);
-        clientDto.setComment("Client Not found in CMS");
+          LOGGER.info("Client [id: {}] -> Not found in CMS.", clientDto.id);
+          clientDto.setComment("Client Not found in CMS");
+          txn.rollback();
+          return false;
+        }
         txn.rollback();
-        return false;
+        LOGGER.info("Client [id: {}] -> Found in CMS.", clientDto.id);
+        return true;
+      } catch (Exception e) {
+        txn.rollback();
+        LOGGER.error("Client [id: {}] -> Error while working with CMS database: {}\n", clientDto.id,
+            e.getMessage(), e);
+        throw e;
+      } finally {
+        txn.rollback();
       }
-      txn.rollback();
-      LOGGER.info("Client [id: {}] -> Found in CMS.", clientDto.id);
-      return true;
-    } catch (Exception e) {
-      txn.rollback();
-      LOGGER.error("Error while working with CMS database: {}\n", e.getMessage(), e);
-      throw e;
-    } finally {
-      txn.rollback();
+    } else {
+      LOGGER.info("Client [id: {}] -> Client Id is [null].", clientDto.id);
+      clientDto.setComment("Client Id is [null]");
+      return false;
+
     }
   }
 
