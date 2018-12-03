@@ -36,7 +36,7 @@ public class RelationshipIndexerJobTest extends Goddard<ReplicatedRelationships,
     target =
         new RelationshipIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
     target.writeLastSuccessfulRunTime(
-        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+        new SimpleDateFormat(NeutronDateTimeFormat.FMT_LAST_RUN_DATE.getFormat())
             .parse("2018-01-22 10:53:20"));
   }
 

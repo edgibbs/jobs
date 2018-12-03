@@ -64,7 +64,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   /**
    * Completion flag for fatal errors.
    * <p>
-   * Volatile guarantees that changes to this flag become visible other threads immediately. In
+   * Volatile guarantees that changes to this flag are immediately made visible to other threads. In
    * other words, threads don't cache a copy of this variable in their local memory for performance.
    * </p>
    */
@@ -170,6 +170,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
    */
   private final Queue<String> affectedDocumentIds = new CircularFifoQueue<>();
 
+  private String failureCause;
+
   // =======================
   // CONSTRUCTORS:
   // =======================
@@ -235,6 +237,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       this.status = FlightStatus.RUNNING;
       startTime = System.currentTimeMillis();
     }
+  }
+
+  public void fail(String reason) {
+    if (StringUtils.isBlank(failureCause) && StringUtils.isNotBlank(reason)) {
+      setFailureCause(reason);
+    }
+    fail();
   }
 
   @Override
@@ -674,6 +683,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public void setStartTime(long startTime) {
     this.startTime = startTime;
+  }
+
+  public String getFailureCause() {
+    return failureCause;
+  }
+
+  public void setFailureCause(String failureCause) {
+    this.failureCause = failureCause;
   }
 
 }

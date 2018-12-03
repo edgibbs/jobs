@@ -1,6 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
-import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT;
+import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.FMT_LAST_RUN_DATE;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -145,7 +145,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
     }
 
     try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
-      ret = new SimpleDateFormat(LAST_RUN_DATE_FORMAT.getFormat()).parse(br.readLine().trim()); // NOSONAR
+      ret = new SimpleDateFormat(FMT_LAST_RUN_DATE.getFormat()).parse(br.readLine().trim()); // NOSONAR
     } catch (IOException | ParseException e) {
       fail();
       throw CheeseRay.checked(LOGGER, e, "ERROR READING LAST RUN TIME: {}", e.getMessage());
@@ -164,13 +164,13 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   public void writeLastSuccessfulRunTime(Date datetime) throws NeutronCheckedException {
     if (!isFailed()) {
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
-        w.write(LAST_RUN_DATE_FORMAT.formatter().format(datetime));
+        w.write(FMT_LAST_RUN_DATE.formatter().format(datetime));
       } catch (IOException e) {
         fail();
         throw CheeseRay.checked(LOGGER, e, "ERROR WRITING TIMESTAMP FILE: {}", e.getMessage());
       }
     } else {
-      LOGGER.warn("Flight failed. Not writing last successful run timestamp");
+      LOGGER.warn("Flight failed. NOT writing last successful run timestamp!");
     }
   }
 
@@ -194,7 +194,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    * Getter for last run time.
    * 
    * @return last time the rocket ran successfully, in format
-   *         {@link NeutronDateTimeFormat#LAST_RUN_DATE_FORMAT}
+   *         {@link NeutronDateTimeFormat#FMT_LAST_RUN_DATE}
    */
   public String getLastJobRunTimeFilename() {
     return lastRunTimeFilename;

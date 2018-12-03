@@ -202,10 +202,11 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   @Managed(description = "Unschedule rocket")
   public void unschedule() throws NeutronCheckedException {
     try {
-      LOGGER.warn("UNSCHEDULE LAUNCH! {}", rocketName);
+      LOGGER.warn("UNSCHEDULE ROCKET LAUNCH! {}", rocketName);
       scheduler.unscheduleJob(triggerKey);
     } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e, "FAILED UNSCHEDULED LAUNCH! rocket: {}", rocketName);
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO UNSCHEDULE ROCKET LAUNCH! rocket: {}",
+          rocketName);
     }
   }
 
@@ -213,7 +214,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
   // STATUS/HISTORY/LOG:
   // =======================
 
-  @Managed(description = "Show rocket flight statistics across flights")
+  @Managed(description = "Show flight statistics across flights for this rocket")
   @Override
   public String summary() {
     try {
@@ -275,7 +276,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
 
   protected void resetTimestamp(boolean initialMode, int hoursInPast) throws IOException {
     final DateFormat fmt =
-        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
+        new SimpleDateFormat(NeutronDateTimeFormat.FMT_LAST_RUN_DATE.getFormat());
     final Date now = new DateTime().minusHours(initialMode ? 876000 : hoursInPast).toDate();
 
     // Find the rocket's time file under the base directory:
