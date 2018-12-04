@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.flight;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
@@ -13,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.FlightStatus;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.utils.JsonUtils;
 
@@ -226,20 +227,20 @@ public class FlightSummary implements ApiMarker {
 
   @JsonIgnore
   public Date getFirstStart() {
-    return NeutronDateUtils.freshDate(firstStart);
+    return freshDate(firstStart);
   }
 
   public void setFirstStart(Date firstStart) {
-    this.firstStart = NeutronDateUtils.freshDate(firstStart);
+    this.firstStart = freshDate(firstStart);
   }
 
   @JsonIgnore
   public Date getLastEnd() {
-    return NeutronDateUtils.freshDate(lastEnd);
+    return freshDate(lastEnd);
   }
 
   public void setLastEnd(Date lastEnd) {
-    this.lastEnd = NeutronDateUtils.freshDate(lastEnd);
+    this.lastEnd = freshDate(lastEnd);
   }
 
   @Override
