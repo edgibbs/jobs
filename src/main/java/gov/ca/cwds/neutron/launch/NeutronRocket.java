@@ -42,7 +42,8 @@ public class NeutronRocket implements InterruptableJob {
 
   private final StandardFlightSchedule flightSchedule;
 
-  private volatile FlightLog flightLog; // "volatile" shows changes immediately across threads
+  private volatile FlightLog flightLog = new FlightLog(); // "volatile" shows changes immediately
+                                                          // across threads
 
   /**
    * Constructor.
