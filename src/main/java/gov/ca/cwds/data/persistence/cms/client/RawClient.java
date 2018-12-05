@@ -344,8 +344,8 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltPrevCaChildrenServIndicator = ifNull(rs.getString("CLT_PREVCA_IND"));
     this.cltPrevOtherDescription = ifNull(rs.getString("CLT_POTH_DESC"));
     this.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
-    this.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
 
+    this.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
     this.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
     this.cltSecondaryLanguageType = rs.getShort("CLT_S_LANG_TC");
 

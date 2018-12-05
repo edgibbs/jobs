@@ -11,7 +11,7 @@ import gov.ca.cwds.neutron.flight.FlightSummary;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 /**
- * Flight Recorder interface.
+ * Flight Recorder interface. A flight recorder records flights details across flights.
  * 
  * @author CWDS API Team
  */

@@ -105,7 +105,7 @@ public class LastFlightRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   public void determineLastSuccessfulRunTime_Args__() throws Exception {
     final Date actual = target.determineLastSuccessfulRunTime();
     final Date expected =
-        NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().parse(FIXED_DATETIME);
+        NeutronDateTimeFormat.FMT_LAST_RUN_DATE.formatter().parse(FIXED_DATETIME);
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -114,7 +114,7 @@ public class LastFlightRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     target.setLastRunTimeFilename("zugzug_oompa_loompa");
     final Date actual = target.determineLastSuccessfulRunTime();
     final Date expected =
-        NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.formatter().parse(FIXED_DATETIME);
+        NeutronDateTimeFormat.FMT_LAST_RUN_DATE.formatter().parse(FIXED_DATETIME);
     assertThat(actual, is(equalTo(expected)));
   }
 

@@ -111,7 +111,6 @@ public class ClientSQLResource implements ApiMarker {
       + "    clt.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION \n"
       + KEY_SOURCE
       + "JOIN  CLIENT_T  clt ON clt.IDENTIFIER = gt.IDENTIFIER \n"
-   // + "WHERE clt.IBMSNAP_OPERATION IN ('I','U') \n" // SNAP-754
       + SEL_OPTIMIZE;
   //@formatter:on
 
