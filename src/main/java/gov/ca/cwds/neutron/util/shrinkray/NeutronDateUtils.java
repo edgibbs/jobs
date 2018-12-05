@@ -1,7 +1,7 @@
 package gov.ca.cwds.neutron.util.shrinkray;
 
-import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_DATE_FORMAT;
-import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.LEGACY_TIMESTAMP_FORMAT;
+import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.FMT_LEGACY_DATE;
+import static gov.ca.cwds.neutron.enums.NeutronDateTimeFormat.FMT_LEGACY_TIMESTAMP;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -45,7 +45,7 @@ public class NeutronDateUtils {
     final String trimTimestamp = StringUtils.trim(timestamp);
     if (StringUtils.isNotEmpty(trimTimestamp)) {
       try {
-        return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).parse(trimTimestamp);
+        return new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat()).parse(trimTimestamp);
       } catch (Exception e) {
         throw new NeutronRuntimeException(e);
       }
@@ -56,7 +56,7 @@ public class NeutronDateUtils {
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();
     buf.append("TIMESTAMP('")
-        .append(new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(date))
+        .append(new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat()).format(date))
         .append("')");
     return buf.toString();
   }
@@ -70,16 +70,16 @@ public class NeutronDateUtils {
       useThisDate = cal.getTime();
     }
 
-    return new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat()).format(useThisDate);
+    return new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat()).format(useThisDate);
   }
 
   public static String makeSimpleDateString(final Date date) {
-    return new SimpleDateFormat(LEGACY_DATE_FORMAT.getFormat()).format(date);
+    return new SimpleDateFormat(FMT_LEGACY_DATE.getFormat()).format(date);
   }
 
   public static String makeTimestampStringLookBack(final Date date) {
     String ret;
-    final DateFormat fmt = new SimpleDateFormat(LEGACY_TIMESTAMP_FORMAT.getFormat());
+    final DateFormat fmt = new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat());
 
     if (date != null) {
       ret = fmt.format(lookBack(date));

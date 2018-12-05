@@ -706,7 +706,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       // CHECKSTYLE:OFF
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info("Updating last successful run time to {}",
-            new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat())
+            new SimpleDateFormat(NeutronDateTimeFormat.FMT_LAST_RUN_DATE.getFormat())
                 .format(flightLog.getStartTime()));
       }
       // CHECKSTYLE:ON

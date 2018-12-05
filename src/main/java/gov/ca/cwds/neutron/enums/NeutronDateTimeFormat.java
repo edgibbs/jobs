@@ -8,17 +8,17 @@ public enum NeutronDateTimeFormat {
   /**
    * Date time format for last run date file.
    */
-  LAST_RUN_DATE_FORMAT("yyyy-MM-dd HH:mm:ss"),
+  FMT_LAST_RUN_DATE("yyyy-MM-dd HH:mm:ss"),
 
   /**
-   * Date format for legacy DB2.
+   * Date format for legacy DB2 on z/OS (mainframe).
    */
-  LEGACY_DATE_FORMAT("yyyy-MM-dd"),
+  FMT_LEGACY_DATE("yyyy-MM-dd"),
 
   /**
-   * Timestamp format for legacy DB2.
+   * Timestamp format for legacy DB2 on z/OS (mainframe).
    */
-  LEGACY_TIMESTAMP_FORMAT("yyyy-MM-dd HH:mm:ss.SSS");
+  FMT_LEGACY_TIMESTAMP("yyyy-MM-dd HH:mm:ss.SSS");
 
   private final String format;
 

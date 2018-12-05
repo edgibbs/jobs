@@ -691,8 +691,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
-    target.runInsertAllLastChangeKeys(session, lastRunTime,
-        ClientSQLResource.INS_CLI_LST_CHG);
+    target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INS_CLI_LST_CHG);
   }
 
   @Test
@@ -945,7 +944,8 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     final String actual =
         ((UpdateRequest) request).upsertRequest().toString().replaceAll("\\s+", "");
     final String expected =
-        "index{[null][person][abc1234567],source[{\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"csec\":[],\"id\":\"abc1234567\"}]}";
+        "index{[null][person][abc1234567],source[{\"first_name\":null,\"middle_name\":null,\"last_name\":null,\"name_suffix\":null,\"date_of_birth\":null,\"ssn\":null,\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"csec\":[],\"id\":\"abc1234567\"}]}";
+
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -959,7 +959,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
     final String actual = request.upsertRequest().toString().replaceAll("\\s+", "");
     final String expected =
-        "index{[null][person][abc1234567],source[{\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"csec\":[],\"id\":\"abc1234567\"}]}";
+        "index{[null][person][abc1234567],source[{\"first_name\":null,\"middle_name\":null,\"last_name\":null,\"name_suffix\":null,\"date_of_birth\":null,\"ssn\":null,\"sensitivity_indicator\":\"N\",\"source\":\"\",\"legacy_descriptor\":{},\"legacy_source_table\":\"CRAP_T\",\"legacy_id\":\"abc1234567\",\"addresses\":[],\"phone_numbers\":[],\"languages\":[],\"csec\":[],\"id\":\"abc1234567\"}]}";
     assertThat(actual, is(equalTo(expected)));
   }
 

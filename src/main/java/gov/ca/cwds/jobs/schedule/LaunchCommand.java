@@ -108,7 +108,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
    */
   protected void resetTimestamps(boolean initialMode, int hoursInPast) throws IOException {
     final DateFormat fmt =
-        new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
+        new SimpleDateFormat(NeutronDateTimeFormat.FMT_LAST_RUN_DATE.getFormat());
     final Date now = new DateTime().minusHours(initialMode ? 876000 : hoursInPast).toDate();
 
     // OPTION: soft-code rockets to launch.
@@ -222,7 +222,7 @@ public class LaunchCommand implements AutoCloseable, AtomLaunchCommand {
     try {
       // NOTE: make last change window configurable.
       final DateFormat fmt =
-          new SimpleDateFormat(NeutronDateTimeFormat.LAST_RUN_DATE_FORMAT.getFormat());
+          new SimpleDateFormat(NeutronDateTimeFormat.FMT_LAST_RUN_DATE.getFormat());
       final Date now = settings.isInitialMode() ? fmt.parse("1917-10-31 10:11:12.000")
           : new DateTime().minusHours(NeutronSchedulerConstants.LAST_CHG_WINDOW_HOURS).toDate();
 
