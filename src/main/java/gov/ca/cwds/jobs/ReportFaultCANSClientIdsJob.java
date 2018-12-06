@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import static gov.ca.cwds.neutron.atom.AtomHibernate.CURRENT_SCHEMA;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -36,6 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +49,21 @@ import org.slf4j.LoggerFactory;
  */
 public class ReportFaultCANSClientIdsJob {
 
+  private static final String CMS_KEY = "cmsKey";
+  private static final String PARAM_EXTERNAL_ID = "externalId";
+  private static final String PARAM_ID = "id";
+  private static final String PARAM_NEW_EXTERNAL_ID = "newExternalId";
+  private static final List<String> DB_CMS_PROPERTY_LIST =
+      Arrays.asList("DB_CMS_USER", "DB_CMS_PASSWORD", "DB_CMS_JDBC_URL", CURRENT_SCHEMA);
+  private static final List<String> DB_RS_PROPERTY_LIST =
+      Arrays.asList("DB_RS_USER", "DB_RS_PASSWORD", "DB_RS_JDBC_URL", "DB_RS_SCHEMA");
   private static final Logger LOGGER = LoggerFactory.getLogger(ReportFaultCANSClientIdsJob.class);
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
+  private static final String CLIENT_NOT_FOUND_IN_CMS = "Client Not found in CMS.";
+  private static final String SUCCESS = "SUCCESS";
+  private static final String FAILED = "FAILED";
+  private static final String SESSION_INFO = "Can't get current session. Opening new one.";
   private static final String NQ_CANS_CLIENTS_ALL =
       "SELECT p.id, p.external_id, p.first_name, p.middle_name, p.last_name, p.suffix, p.dob, p.gender"
           + ", c.name AS county_name, a.status AS cans_status, a.event_date AS event_date"
@@ -68,31 +82,57 @@ public class ReportFaultCANSClientIdsJob {
           + " WHERE p.person_role = 'CLIENT'"
           + " ORDER BY user_id, county_name, last_name, first_name"
           + " FOR READ ONLY";
-
   private static final String NQ_CMS_CLIENT_FIND =
       "SELECT 1 FROM {h-schema}CLIENT_T"
           + " WHERE IDENTIFIER = :cmsKey"
           + " FOR READ ONLY WITH UR";
-
-  private SessionFactory cmsSessionFactory;
+  private static final String NQ_RS_MERGE_CLIENT_FIND =
+      "SELECT IDENTIFIER, IBMSNAP_OPERATION FROM {h-schema}CLIENT_T"
+          + " WHERE"
+          + "    IBMSNAP_COMMITSEQ IN (SELECT IBMSNAP_COMMITSEQ"
+          + "       FROM {h-schema}CLIENT_T"
+          + "       WHERE IBMSNAP_OPERATION = 'D' AND IDENTIFIER = :cmsKey)"
+          + "    AND IDENTIFIER != :cmsKey"   //Any other record linked to the (D)eleted one.
+          + " FOR READ ONLY WITH UR";
+  private static final String NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE =
+      "UPDATE {h-schema}person"
+          + " SET external_id = :newExternalId"
+          + " WHERE id = :id AND external_id = :externalId";
   private SessionFactory cansSessionFactory;
-
+  private SessionFactory cmsSessionFactory;
+  private SessionFactory rsSessionFactory;
   private String baseDir;
   private List<CansClient> clientList;
   private String reportFileName;
-
   //Excel related
   private Workbook workbook;
   private Sheet sheet;
+  private CellStyle detailsRowStyle;
+  private CellStyle detailsRowFixedStyle;
   private CellStyle dateCellStyle;
+  private CellStyle dateCellFixedStyle;
   private Field[] columns = CansClient.class.getDeclaredFields();
   private int nextRowNum = 1; // headerRow is 0
   private int[] columnsWidth = new int[columns.length];
 
 
   private ReportFaultCANSClientIdsJob() {
-    cmsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
     cansSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_NS).buildSessionFactory();
+    cmsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
+
+    //Temporary overwrite DB_CMS_<> properties with DB_RS_<> env vars values to reuse HIBERNATE_CONFIG_CMS
+    //for RS session factory
+    String[] cmsBackUp = new String[DB_RS_PROPERTY_LIST.size()];
+    for (int i = 0; i < DB_RS_PROPERTY_LIST.size(); i++) {
+      cmsBackUp[i] = System.getProperty(DB_CMS_PROPERTY_LIST.get(i));
+      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), System.getenv(DB_RS_PROPERTY_LIST.get(i)));
+    }
+    rsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
+    //Restore DB_CMS_<> properties from backup
+    for (int i = 0; i < cmsBackUp.length; i++) {
+      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), cmsBackUp[i]);
+    }
+
   }
 
 
@@ -173,21 +213,30 @@ public class ReportFaultCANSClientIdsJob {
     }
   }
 
-  private Session grabCmsSession() {
-    try {
-      return cmsSessionFactory.getCurrentSession();
-    } catch (HibernateException e) {
-      LOGGER.info("Can't get current session. Opening new one.", e);
-      return cmsSessionFactory.openSession();
-    }
-  }
-
   private Session grabCansSession() {
     try {
       return this.cansSessionFactory.getCurrentSession();
     } catch (HibernateException e) {
-      LOGGER.info("Can't get current session. Opening new one.", e);
+      LOGGER.info(SESSION_INFO, e);
       return this.cansSessionFactory.openSession();
+    }
+  }
+
+  private Session grabCmsSession() {
+    try {
+      return cmsSessionFactory.getCurrentSession();
+    } catch (HibernateException e) {
+      LOGGER.info(SESSION_INFO, e);
+      return cmsSessionFactory.openSession();
+    }
+  }
+
+  private Session grabRsCmsSession() {
+    try {
+      return rsSessionFactory.getCurrentSession();
+    } catch (HibernateException e) {
+      LOGGER.info(SESSION_INFO, e);
+      return rsSessionFactory.openSession();
     }
   }
 
@@ -202,7 +251,7 @@ public class ReportFaultCANSClientIdsJob {
           CansClient.class);
     } catch (Exception e) {
       txn.rollback();
-      LOGGER.error("Error while working with CANS database: {}\n", e.getMessage(), e);
+      LOGGER.error("Error while working with CANS database:\n {}", e.getMessage(), e);
       throw e;
     } finally {
       txn.rollback();
@@ -215,11 +264,12 @@ public class ReportFaultCANSClientIdsJob {
       initReport();
       for (CansClient clientDto : clientList) {
         if (!isValidClientId(clientDto)) {
+          attemptToFix(clientDto);
           reportClient(clientDto);
         }
       }
     } catch (Exception e) {
-      LOGGER.error("Error while validating CANS clients against CWS/CMS database: {}\n",
+      LOGGER.error("Error while validating CANS clients against CWS/CMS database:\n {}",
           e.getMessage(), e);
       throw e;
     } finally {
@@ -242,7 +292,7 @@ public class ReportFaultCANSClientIdsJob {
     Font headerFont = workbook.createFont();
     headerFont.setBold(true);
     headerFont.setFontHeightInPoints((short) 14);
-    headerFont.setColor(IndexedColors.RED.getIndex());
+    headerFont.setColor(IndexedColors.BLUE.getIndex());
 
     // Create a CellStyle with the font
     CellStyle headerCellStyle = workbook.createCellStyle();
@@ -260,9 +310,25 @@ public class ReportFaultCANSClientIdsJob {
       cell.setCellStyle(headerCellStyle);
     }
 
+    //Create data Format for Dates cells
+    Short dateCellDataFormat = createHelper.createDataFormat().getFormat("MM/dd/yyyy");
     // Create Cell Style for formatting Date
     dateCellStyle = workbook.createCellStyle();
-    dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("MM/dd/yyyy"));
+    dateCellStyle.setDataFormat(dateCellDataFormat);
+    dateCellFixedStyle = workbook.createCellStyle();
+    dateCellFixedStyle.setDataFormat(dateCellDataFormat);
+
+    // Create a Row Style for styling details rows with a font color
+    Font detailsFont = workbook.createFont();
+    detailsFont.setColor(IndexedColors.RED.getIndex());
+    detailsRowStyle = workbook.createCellStyle();
+    detailsRowStyle.setFont(detailsFont);
+    dateCellStyle.setFont(detailsFont);
+    Font detailsFontFixed = workbook.createFont();
+    detailsFontFixed.setColor(IndexedColors.GREEN.getIndex());
+    detailsRowFixedStyle = workbook.createCellStyle();
+    detailsRowFixedStyle.setFont(detailsFontFixed);
+    dateCellFixedStyle.setFont(detailsFontFixed);
   }
 
   private void finalizeReport() {
@@ -308,11 +374,11 @@ public class ReportFaultCANSClientIdsJob {
       Transaction txn = session.beginTransaction();
       try {
         if (session.createNativeQuery(NQ_CMS_CLIENT_FIND)
-            .setParameter("cmsKey", clientDto.cmsKey, StringType.INSTANCE).setReadOnly(true)
+            .setParameter(CMS_KEY, clientDto.cmsKey, StringType.INSTANCE).setReadOnly(true)
             .getResultList().isEmpty()) {
 
           LOGGER.info("Client [id: {}] -> Not found in CMS.", clientDto.id);
-          clientDto.setComment("Client Not found in CMS");
+          clientDto.setComment(CLIENT_NOT_FOUND_IN_CMS);
           txn.rollback();
           return false;
         }
@@ -321,7 +387,7 @@ public class ReportFaultCANSClientIdsJob {
         return true;
       } catch (Exception e) {
         txn.rollback();
-        LOGGER.error("Client [id: {}] -> Error while working with CMS database: {}\n", clientDto.id,
+        LOGGER.error("Client [id: {}] -> Error while working with CMS database:\n {}", clientDto.id,
             e.getMessage(), e);
         throw e;
       } finally {
@@ -329,10 +395,82 @@ public class ReportFaultCANSClientIdsJob {
       }
     } else {
       LOGGER.info("Client [id: {}] -> Client Id is [null].", clientDto.id);
-      clientDto.setComment("Client Id is [null]");
+      clientDto.setComment("Client Id is [null].");
       return false;
-
     }
+  }
+
+
+  private void attemptToFix(CansClient clientDto) {
+    //Attempt to fix automatically assuming it might be deleted as a result of merge.
+    if (!clientDto.comment.equals(CLIENT_NOT_FOUND_IN_CMS)) {
+      //But only those NOT_FOUND_IN_CMS
+      return;
+    }
+    LOGGER.info("Client [id: {}] -> Attempting to fix...", clientDto.id);
+    clientDto.setComment(clientDto.comment + " Attempting to fix... ");
+    String newKey = null;
+    Session rsSession = grabRsCmsSession();
+    Transaction rsTxn = rsSession.beginTransaction();
+    String sourceRowKey = clientDto.cmsKey;
+    //Finding Merge Target Row Key
+    try {
+      List<Object[]> objectArrayList;
+      do {
+        objectArrayList = rsSession.createNativeQuery(NQ_RS_MERGE_CLIENT_FIND)
+            .setParameter(CMS_KEY, sourceRowKey, StringType.INSTANCE).setReadOnly(true)
+            .getResultList();
+        if (objectArrayList.isEmpty()) {
+          newKey = null;
+        } else {
+          newKey = (String) objectArrayList.get(0)[0];
+        }
+        sourceRowKey = newKey;
+      } while (sourceRowKey != null && "D".equals(objectArrayList.get(0)[1])); //If found merge target also deleted continue with finding it's merge target
+    } catch (Exception e) {
+      rsTxn.rollback();
+      LOGGER.error("Client [id: {}] -> Error while working with RS database:\n {}", clientDto.id,
+          e.getMessage(), e);
+      throw e;
+    } finally {
+      rsTxn.rollback();
+    }
+    //Updating CANS Client Row ExternalId with found Merge Targer Row Key
+    if (newKey != null) {
+      LOGGER.info("Client [id: {}] -> Merge Target Id Found. Updating Client record...",
+          clientDto.id);
+      clientDto
+          .setComment(clientDto.comment + " Merge Target Id Found. Updating Client record...");
+      Session cansSession = grabCansSession();
+      Transaction cansTxn = cansSession.beginTransaction();
+      try {
+        //Store external_id in a format of original value CANS 1.0 or 1.1
+        final String newExternalId = clientDto.externalId.equals(clientDto.cmsKey) ? newKey
+            : CmsKeyIdGenerator.getUIIdentifierFromKey(newKey);
+
+        if (grabCansSession().createNativeQuery(NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE)
+            .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE)
+            .setParameter(PARAM_EXTERNAL_ID, clientDto.externalId, StringType.INSTANCE)
+            .setParameter(PARAM_NEW_EXTERNAL_ID, newExternalId, StringType.INSTANCE)
+            .executeUpdate() == 1) {
+          LOGGER.info("Client [id: {}] -> " + SUCCESS + ". New External Id: [{}].", clientDto.id,
+              newExternalId);
+          clientDto.setComment(
+              clientDto.comment + SUCCESS + ". New Client External Id: [" + newExternalId + "].");
+          return;
+        }
+      } catch (Exception e) {
+        cansTxn.rollback();
+        LOGGER
+            .error("Client [id: {}] -> Error while working with CANS database:\n {}", clientDto.id,
+                e.getMessage(), e);
+        throw e;
+      } finally {
+        cansTxn.commit();
+      }
+    }
+    LOGGER.info("Client [id: {}] ->  Merge Target Id NOT Found. {}", clientDto.id, FAILED);
+    clientDto.setComment(clientDto.comment + " Merge Target Id NOT Found. " + FAILED);
   }
 
   private void buildReportFileName() {
@@ -345,9 +483,14 @@ public class ReportFaultCANSClientIdsJob {
 
   private void reportClient(CansClient clientPojo) {
     Row row = sheet.createRow(nextRowNum++);
+    CellStyle cellStyle = clientPojo.comment.contains(SUCCESS) ? detailsRowFixedStyle
+        : detailsRowStyle;
+    CellStyle dateStyle = clientPojo.comment.contains(SUCCESS) ? dateCellFixedStyle
+        : dateCellStyle;
     // Create cells
     for (int index = 0; index < columns.length; index++) {
       Cell cell = row.createCell(index);
+      cell.setCellStyle(cellStyle);
       Field field = columns[index];
       int valueLength = 0;
       try {
@@ -356,7 +499,7 @@ public class ReportFaultCANSClientIdsJob {
           valueLength = String.valueOf(cell.getNumericCellValue()).trim().length();
         } else if (field.getType() == Date.class) {
           cell.setCellValue((Date) field.get(clientPojo));
-          cell.setCellStyle(dateCellStyle);
+          cell.setCellStyle(dateStyle);
           valueLength = 10;
         } else {
           //Rest is Strings
