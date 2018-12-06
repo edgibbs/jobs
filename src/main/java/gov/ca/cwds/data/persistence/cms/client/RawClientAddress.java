@@ -1,7 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
 import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
-import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -74,21 +74,21 @@ public class RawClientAddress extends ClientAddressReference
   public RawClientAddress read(ResultSet rs) throws SQLException {
     super.read(rs);
 
-    this.claLastUpdatedId = ifNull(rs.getString("CLA_LST_UPD_ID"));
-    this.claLastUpdatedTime = rs.getTimestamp("CLA_LST_UPD_TS");
-    this.claId = ifNull(rs.getString("CLA_IDENTIFIER"));
-    this.claFkAddress = ifNull(rs.getString("CLA_FKADDRS_T"));
-    this.claFkClient = ifNull(rs.getString("CLA_FKCLIENT_T"));
-    this.claFkReferral = ifNull(rs.getString("CLA_FKREFERL_T"));
-    this.claAddressType = rs.getShort("CLA_ADDR_TPC");
-    this.claHomelessInd = ifNull(rs.getString("CLA_HOMLES_IND"));
-    this.claBkInmtId = ifNull(rs.getString("CLA_BK_INMT_ID"));
-    this.claEffectiveEndDate = rs.getDate("CLA_EFF_END_DT");
-    this.claEffectiveStartDate = rs.getDate("CLA_EFF_STRTDT");
+    this.claLastUpdatedId = trimToNull(rs.getString(ColumnPosition.CLA_LST_UPD_ID.ordinal()));
+    this.claLastUpdatedTime = rs.getTimestamp(ColumnPosition.CLA_LST_UPD_TS.ordinal());
+    this.claId = trimToNull(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal()));
+    this.claFkAddress = trimToNull(rs.getString(ColumnPosition.CLA_FKADDRS_T.ordinal()));
+    this.claFkClient = trimToNull(rs.getString(ColumnPosition.CLA_FKCLIENT_T.ordinal()));
+    this.claFkReferral = trimToNull(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal()));
+    this.claAddressType = rs.getShort(ColumnPosition.CLA_ADDR_TPC.ordinal());
+    this.claHomelessInd = trimToNull(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal()));
+    this.claBkInmtId = trimToNull(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal()));
+    this.claEffectiveEndDate = rs.getDate(ColumnPosition.CLA_EFF_END_DT.ordinal());
+    this.claEffectiveStartDate = rs.getDate(ColumnPosition.CLA_EFF_STRTDT.ordinal());
 
-    this.setClaReplicationOperation(
-        CmsReplicationOperation.strToRepOp(rs.getString("CLA_IBMSNAP_OPERATION")));
-    this.setClaReplicationDate(rs.getDate("CLA_IBMSNAP_LOGMARKER"));
+    this.setClaReplicationOperation(CmsReplicationOperation
+        .strToRepOp(rs.getString(ColumnPosition.CLA_IBMSNAP_OPERATION.ordinal())));
+    this.setClaReplicationDate(rs.getDate(ColumnPosition.CLA_IBMSNAP_LOGMARKER.ordinal()));
 
     return this;
   }

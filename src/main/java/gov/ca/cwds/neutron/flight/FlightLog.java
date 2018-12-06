@@ -116,6 +116,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonIgnore
   private long timeEndPull;
 
+  private final Map<String, Long> timings = new ConcurrentHashMap<>();
+
   private boolean initialLoad;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DomainChef.DATE_FORMAT)
@@ -751,6 +753,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public void addWarning(String warning) {
     warnings.add(warning);
+  }
+
+  public void addTiming(String event) {
+    timings.putIfAbsent(event, System.currentTimeMillis());
+  }
+
+  public Map<String, Long> getTimings() {
+    return timings;
   }
 
 }

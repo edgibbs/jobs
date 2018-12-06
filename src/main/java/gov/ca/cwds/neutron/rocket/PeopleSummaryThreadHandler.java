@@ -438,6 +438,8 @@ public class PeopleSummaryThreadHandler
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     LOGGER.trace("handleSecondaryJdbc(): begin");
+    final FlightLog fl = rocket.getFlightLog();
+
     String sqlPlacementAddress;
     try {
       sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACE_ADDR,
@@ -509,7 +511,7 @@ public class PeopleSummaryThreadHandler
 
       try {
         if (isInitialLoad()) {
-          rocket.getFlightLog().markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
+          fl.markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
         } else {
           rocket.fail(); // Last change: fail the whole job!
         }
