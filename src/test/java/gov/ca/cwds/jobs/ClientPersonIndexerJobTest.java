@@ -42,7 +42,8 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
 
     when(rs.next()).thenReturn(true, true, false);
     dao = new ReplicatedClientDao(sessionFactory);
-    target = new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
+    target =
+        new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
     target.allocateThreadHandler();
   }
 
@@ -95,7 +96,7 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
 
   @Test(expected = SQLException.class)
   public void extract_A$ResultSet_T$SQLException() throws Exception {
-    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    bombResultSet();
     target.extract(rs);
   }
 
