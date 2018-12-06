@@ -37,6 +37,10 @@ public class PlacementHomeAddress extends ApiObjectIdentity
 
   private static final long serialVersionUID = 1L;
 
+  public enum ColumnPosition {
+    CLIENT_ID, PE_THIRD_ID, OHP_ID, PH_ID, START_DT, END_DT, PE_GVR_ENTC, PH_GVR_ENTC, STREET_NO, STREET_NM, CITY_NM, STATE_C, ZIP_NO, ZIP_SFX_NO, PH_LST_UPD_TS, PRM_TEL_NO, PRM_EXT_NO
+  }
+
   // System code cache is unhappy with this unknown value.
   // No code loader interface method to add custom, non-CMS codes.
   public static final short ADDRESS_TYPE_PLACEMENT_HOME = 32; // call it a residence
@@ -105,25 +109,24 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   protected Integer primaryExtension;
 
   public PlacementHomeAddress(ResultSet rs) throws SQLException {
-    this.clientId = ifNull(rs.getString("CLIENT_ID"));
-    this.peThirdId = ifNull(rs.getString("PE_THIRD_ID"));
-    this.otherHomePlacementId = ifNull(rs.getString("PH_ID"));
-    this.placementHomeId = ifNull(rs.getString("OHP_ID"));
+    this.clientId = ifNull(rs.getString(ColumnPosition.CLIENT_ID.ordinal()));
+    this.peThirdId = ifNull(rs.getString(ColumnPosition.PE_THIRD_ID.ordinal()));
+    this.otherHomePlacementId = ifNull(rs.getString(ColumnPosition.PH_ID.ordinal()));
+    this.placementHomeId = ifNull(rs.getString(ColumnPosition.OHP_ID.ordinal()));
 
-    this.placementHomeGovernmentEntityCd = rs.getShort("PH_GVR_ENTC");
-    this.placementEpisodeGovernmentEntityCd = rs.getShort("PE_GVR_ENTC");
+    this.placementHomeGovernmentEntityCd = rs.getShort(ColumnPosition.PH_GVR_ENTC.ordinal());
+    this.placementEpisodeGovernmentEntityCd = rs.getShort(ColumnPosition.PE_GVR_ENTC.ordinal());
 
-    this.city = ifNull(rs.getString("CITY_NM"));
-    this.state = rs.getShort("STATE_C");
-    this.streetName = ifNull(rs.getString("STREET_NM"));
-    this.streetNumber = ifNull(rs.getString("STREET_NO"));
-    this.zip = rs.getInt("ZIP_NO");
-    this.zip4 = rs.getShort("ZIP_SFX_NO");
+    this.city = ifNull(rs.getString(ColumnPosition.CITY_NM.ordinal()));
+    this.state = rs.getShort(ColumnPosition.STATE_C.ordinal());
+    this.streetName = ifNull(rs.getString(ColumnPosition.STREET_NM.ordinal()));
+    this.streetNumber = ifNull(rs.getString(ColumnPosition.STREET_NO.ordinal()));
+    this.zip = rs.getInt(ColumnPosition.ZIP_NO.ordinal());
+    this.zip4 = rs.getShort(ColumnPosition.ZIP_SFX_NO.ordinal());
 
-    this.primaryNumber = rs.getLong("PRM_TEL_NO");
-    this.primaryExtension = rs.getInt("PRM_EXT_NO");
-
-    this.lastUpdatedTime = rs.getTimestamp("PH_LST_UPD_TS");
+    this.primaryNumber = rs.getLong(ColumnPosition.PRM_TEL_NO.ordinal());
+    this.primaryExtension = rs.getInt(ColumnPosition.PRM_EXT_NO.ordinal());
+    this.lastUpdatedTime = rs.getTimestamp(ColumnPosition.PH_LST_UPD_TS.ordinal());
   }
 
   /**
