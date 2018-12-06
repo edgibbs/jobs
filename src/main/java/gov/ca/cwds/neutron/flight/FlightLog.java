@@ -612,9 +612,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
           ;
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince)
-         .append("\n\tstart change polling:").append(new Date(timeStartPoll))
-         .append("\n\tstart pulling data:").append(new Date(timeStartPull))
-         .append("\n\tdone  pulling data:").append(new Date(timeEndPull));
+         .append("\n\tstart change polling:   ").append(new Date(timeStartPoll))
+         .append("\n\tstart pulling data:     ").append(new Date(timeStartPull))
+         .append("\n\tdone  pulling data:     ").append(new Date(timeEndPull));
     }
 
     if (!warnings.isEmpty()) {
