@@ -4,12 +4,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
+import gov.ca.cwds.data.persistence.cms.client.ClientReference.ColPos;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -32,6 +34,52 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   public void setup() throws Exception {
     super.setup();
     target = new RawClient();
+  }
+
+  public static void prepResultSetGood(ResultSet rs) throws SQLException {
+    when(rs.getString(ColPos.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColPos.CLT_SENSTV_IND.ordinal())).thenReturn("R");
+    when(rs.getString(ColPos.CLT_SOC158_IND.ordinal())).thenReturn("Y");
+    when(rs.getString(ColPos.CLT_CL_INDX_NO.ordinal())).thenReturn("12345");
+    when(rs.getString(ColPos.CLT_COM_FST_NM.ordinal())).thenReturn("Baby");
+    when(rs.getString(ColPos.CLT_COM_LST_NM.ordinal())).thenReturn("Doe");
+    when(rs.getString(ColPos.CLT_COM_MID_NM.ordinal())).thenReturn("X");
+    when(rs.getString(ColPos.CLT_DTH_DT_IND.ordinal())).thenReturn("N");
+    when(rs.getString(ColPos.CLT_DRV_LIC_NO.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_EMAIL_ADDR.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_GENDER_CD.ordinal())).thenReturn("F");
+    when(rs.getString(ColPos.CLT_HISP_UD_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_HISP_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_LITRATE_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_MILT_STACD.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_NMPRFX_DSC.ordinal())).thenReturn("Ms");
+    when(rs.getString(ColPos.CLT_SNTV_HLIND.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_SOCPLC_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_SSN_CHG_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_SS_NO.ordinal())).thenReturn("111223333");
+    when(rs.getString(ColPos.CLT_SUFX_TLDSC.ordinal())).thenReturn("jr");
+    when(rs.getString(ColPos.CLT_TRBA_CLT_B.ordinal())).thenReturn("");
+    when(rs.getString(ColPos.CLT_ZIPPY_IND.ordinal())).thenReturn("N");
+    when(rs.getString(ColPos.CLT_LST_UPD_ID.ordinal())).thenReturn("0x5");
+
+    when(rs.getShort(ColPos.CLT_D_STATE_C.ordinal())).thenReturn((short) 0);
+    when(rs.getShort(ColPos.CLT_IMGT_STC.ordinal())).thenReturn((short) 0);
+    when(rs.getShort(ColPos.CLT_MRTL_STC.ordinal())).thenReturn((short) 1309);
+    when(rs.getShort(ColPos.CLT_NAME_TPC.ordinal())).thenReturn((short) 1312);
+    when(rs.getShort(ColPos.CLT_P_ETHNCTYC.ordinal())).thenReturn((short) 0);
+    when(rs.getShort(ColPos.CLT_P_LANG_TPC.ordinal())).thenReturn((short) 1253);
+    when(rs.getShort(ColPos.CLT_S_LANG_TC.ordinal())).thenReturn((short) 1261);
+    when(rs.getShort(ColPos.CLT_RLGN_TPC.ordinal())).thenReturn((short) 0);
+
+    Date date = new Date();
+    when(rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal()))
+        .thenReturn(new Timestamp(date.getTime()));
+
+    java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+    when(rs.getDate(ColPos.CLT_BIRTH_DT.ordinal())).thenReturn(sqlDate);
+    when(rs.getDate(ColPos.CLT_CREATN_DT.ordinal())).thenReturn(sqlDate);
+    when(rs.getDate(ColPos.CLT_DEATH_DT.ordinal())).thenReturn(sqlDate);
   }
 
   @Test
@@ -61,7 +109,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
 
   @Test(expected = SQLException.class)
   public void read_A$ResultSet_T$SQLException() throws Exception {
-    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    bombResultSet();
     target.read(rs);
   }
 

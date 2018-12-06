@@ -4,14 +4,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.persistence.cms.client.RawEthnicity.ColumnPosition;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
@@ -19,10 +20,17 @@ public class RawEthnicityTest extends Goddard<ReplicatedClient, RawClient> {
 
   RawEthnicity target;
 
+  public static void prepResultSetGood(ResultSet rs) throws SQLException {
+    when(rs.getString(ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.ETH_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getShort(ColumnPosition.ETHNICITY_CODE.ordinal())).thenReturn((short) 829);
+  }
+
   @Override
   public void setup() throws Exception {
     super.setup();
     target = new RawEthnicity();
+    target.setClientEthnicityId(DEFAULT_CLIENT_ID);
   }
 
   @Test
@@ -37,13 +45,14 @@ public class RawEthnicityTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void read_A$ResultSet() throws Exception {
+    prepResultSetGood(rs);
     RawEthnicity actual = target.read(rs);
     assertThat(actual, is(notNullValue()));
   }
 
   @Test(expected = SQLException.class)
   public void read_A$ResultSet_T$SQLException() throws Exception {
-    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    bombResultSet();
     target.read(rs);
   }
 
@@ -56,13 +65,13 @@ public class RawEthnicityTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClientEthnicityId_A$() throws Exception {
     String actual = target.getClientEthnicityId();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void setClientEthnicityId_A$String() throws Exception {
-    String clientEthnicityId = null;
+    String clientEthnicityId = DEFAULT_CLIENT_ID;
     target.setClientEthnicityId(clientEthnicityId);
   }
 
