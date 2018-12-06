@@ -196,6 +196,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
+      step(STEP.FIND_CHANGED_CLIENT);
       LOGGER.debug("Changed client SQL\n{}", sqlChangedClients);
       try (final PreparedStatement stmt = con.prepareStatement(sqlChangedClients, TFO, CRO)) {
         read(stmt, rs -> readClientKeys(rs));
@@ -250,6 +251,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   public void handleFinishRange(Pair<String, String> range) {
     keys.clear();
     super.handleFinishRange(range);
+  }
+
+  @Override
+  public String getEventType() {
+    return "launch_cmd_client";
   }
 
 }

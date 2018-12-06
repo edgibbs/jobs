@@ -98,6 +98,8 @@ public class PeopleSummaryThreadHandler
 
     START("Start client logic"),
 
+    FIND_CHANGED_CLIENT("Find changed clients"),
+
     SET_CLIENT_KEY("Set client keys"),
 
     SET_PLACEMENT_KEY("Set placement home keys"),
@@ -775,6 +777,10 @@ public class PeopleSummaryThreadHandler
 
   public ClientPersonIndexerJob getRocket() {
     return rocket;
+  }
+
+  public String getEventType() {
+    return "initial_load_client";
   }
 
 }
