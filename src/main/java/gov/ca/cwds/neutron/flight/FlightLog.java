@@ -107,6 +107,15 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonIgnore
   private long endTime;
 
+  @JsonIgnore
+  private long timeStartPoll;
+
+  @JsonIgnore
+  private long timeStartPull;
+
+  @JsonIgnore
+  private long timeEndPull;
+
   private boolean initialLoad;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DomainChef.DATE_FORMAT)
@@ -359,6 +368,22 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   // =======================
+  // LAST CHANGE TIMING:
+  // =======================
+
+  public void markStartChangePoll() {
+    this.timeStartPoll = new Date().getTime();
+  }
+
+  public void markStartDataPoll() {
+    this.timeStartPull = new Date().getTime();
+  }
+
+  public void markEndDataPoll() {
+    this.timeEndPull = new Date().getTime();
+  }
+
+  // =======================
   // INCREMENT:
   // =======================
 
@@ -586,9 +611,16 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
        // .append(pad(filterRanges(FlightStatus.FAILED).size()))
           ;
     } else {
-      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince)
+         .append("\n\tstart change polling:").append(new Date(timeStartPoll))
+         .append("\n\tstart pulling data:").append(new Date(timeStartPull))
+         .append("\n\tdone  pulling data:").append(new Date(timeEndPull));
     }
 
+    if (!warnings.isEmpty()) {
+      buf.append("\n\n  >>>>> WARNINGS:\n\t:          ").append(this.warnings.size());
+    }
+    
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
     if (endTime > 0L) {
       buf.append("\n\tend:                    ").append(new Date(endTime))
@@ -691,6 +723,34 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public void setFailureCause(String failureCause) {
     this.failureCause = failureCause;
+  }
+
+  public long getTimeStartPoll() {
+    return timeStartPoll;
+  }
+
+  public void setTimeStartPoll(long timeStartPoll) {
+    this.timeStartPoll = timeStartPoll;
+  }
+
+  public long getTimeStartPull() {
+    return timeStartPull;
+  }
+
+  public void setTimeStartPull(long timeStartPull) {
+    this.timeStartPull = timeStartPull;
+  }
+
+  public long getTimeEndPull() {
+    return timeEndPull;
+  }
+
+  public void setTimeEndPull(long timeEndPull) {
+    this.timeEndPull = timeEndPull;
+  }
+
+  public void addWarning(String warning) {
+    warnings.add(warning);
   }
 
 }

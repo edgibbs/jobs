@@ -22,11 +22,20 @@ public class FlightRecorder implements AtomFlightRecorder {
 
   private static final int KEEP_LAST_FLIGHTS = 100;
 
+  /**
+   * Keep the last N flight logs by rocket class.
+   */
   private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightLogHistory =
       new ConcurrentHashMap<>();
 
+  /**
+   * Keep the very last flight logs by rocket class.
+   */
   private final Map<Class<?>, FlightLog> lastFlightLogs = new ConcurrentHashMap<>();
 
+  /**
+   * Last flight summary by rocket.
+   */
   private final Map<StandardFlightSchedule, FlightSummary> flightSummaries =
       Collections.synchronizedMap(new EnumMap<>(StandardFlightSchedule.class));
 
