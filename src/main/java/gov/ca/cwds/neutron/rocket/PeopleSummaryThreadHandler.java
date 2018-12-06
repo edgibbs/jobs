@@ -468,33 +468,33 @@ public class PeopleSummaryThreadHandler
       // Client keys for this bundle.
       loadClientRange(con, stmtInsClient, range);
 
-      LOGGER.info("Read client");
+      LOGGER.debug("Read client");
       read(stmtSelClient, rs -> readClient(rs));
 
       // SNAP-735: missing addresses.
-      LOGGER.info("Read client address");
+      LOGGER.debug("Read client address");
       read(stmtSelCliAddr, rs -> readClientAddress(rs));
 
-      LOGGER.info("Read address");
+      LOGGER.debug("Read address");
       read(stmtSelAddress, rs -> readAddress(rs));
 
       loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
       LOGGER.info("Read client county");
       read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
-      LOGGER.info("Read aka");
+      LOGGER.debug("Read aka");
       read(stmtSelAka, rs -> readAka(rs));
 
-      LOGGER.info("Read case");
+      LOGGER.debug("Read case");
       read(stmtSelCase, rs -> readCase(rs));
 
-      LOGGER.info("Read csec");
+      LOGGER.debug("Read csec");
       read(stmtSelCsec, rs -> readCsec(rs));
 
-      LOGGER.info("Read ethnicity");
+      LOGGER.debug("Read ethnicity");
       read(stmtSelEthnicity, rs -> readEthnicity(rs));
 
-      LOGGER.info("Read safety alert");
+      LOGGER.debug("Read safety alert");
       read(stmtSelSafety, rs -> readSafetyAlert(rs));
       con.commit(); // free db resources again
 
@@ -503,7 +503,7 @@ public class PeopleSummaryThreadHandler
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
       LOGGER.trace("Read placement home address: SQL: \n{}", sqlPlacementAddress);
-      LOGGER.info("Read placement home address");
+      LOGGER.debug("Read placement home address");
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
     } catch (Exception e) {

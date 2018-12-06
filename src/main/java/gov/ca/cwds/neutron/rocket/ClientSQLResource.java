@@ -136,7 +136,7 @@ public class ClientSQLResource implements ApiMarker {
       + "  adr.UNT_DSGC          AS ADR_UNT_DSGC, \n"
       + "  TRIM(adr.UNIT_NO)     AS ADR_UNIT_NO, \n"
       + "  TRIM(adr.ZIP_NO)      AS ADR_ZIP_NO, \n"
-      + "  adr.ZIP_SFX_NO        AS ADR_ZIP_SFX_NO \n"
+      + "  adr.ZIP_SFX_NO        AS ADR_ZIP_SFX_NO, \n"
       + "  adr.IBMSNAP_LOGMARKER AS ADR_IBMSNAP_LOGMARKER, \n"
       + "  adr.IBMSNAP_OPERATION AS ADR_IBMSNAP_OPERATION \n"
       + KEY_SOURCE
