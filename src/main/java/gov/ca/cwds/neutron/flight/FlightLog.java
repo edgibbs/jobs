@@ -614,15 +614,21 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
           ;
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince)
-         .append("\n\tstart change polling:   ").append(new Date(timeStartPoll))
-         .append("\n\tstart pulling data:     ").append(new Date(timeStartPull))
-         .append("\n\tdone  pulling data:     ").append(new Date(timeEndPull));
+//         .append("\n\tstart change polling:   ").append(new Date(timeStartPoll))
+//         .append("\n\tstart pulling data:     ").append(new Date(timeStartPull))
+//         .append("\n\tdone  pulling data:     ").append(new Date(timeEndPull))
+         ;
     }
 
     if (!warnings.isEmpty()) {
       buf.append("\n\n  >>>>> WARNINGS:\n\t:          ").append(this.warnings.size());
     }
-    
+
+    if (!isInitialLoad() && !timings.isEmpty()) {
+      buf.append("\n\n        STEPS:");
+      timings.entrySet().stream().forEach(e -> buf.append("\n\t").append(StringUtils.rightPad(e.getKey(), 23)).append(':').append(new Date(e.getValue())));
+    }
+
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
     if (endTime > 0L) {
       buf.append("\n\tend:                    ").append(new Date(endTime))

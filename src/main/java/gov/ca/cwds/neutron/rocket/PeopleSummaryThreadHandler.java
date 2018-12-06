@@ -96,7 +96,7 @@ public class PeopleSummaryThreadHandler
 
   public static enum STEP {
 
-    START("Start client logic"),
+    START("Job start"),
 
     FIND_CHANGED_CLIENT("Find changed clients"),
 
@@ -116,7 +116,7 @@ public class PeopleSummaryThreadHandler
 
     SEL_CASE("Pull case"),
 
-    SEL_CSEC("Pull CSEC"),
+    SEL_CSEC("Pull csec"),
 
     SEL_ETHNIC("Pull ethnicity"),
 
@@ -124,7 +124,9 @@ public class PeopleSummaryThreadHandler
 
     SEL_PLACEMENT_HOME("Pull placement home"),
 
-    BEAN_TO_JSON("Convert bean to JSON"),
+    DONE_RETRIEVAL("Done pulling data"),
+
+    BEAN_TO_JSON("Convert data to JSON"),
 
     INDEX_TO_ES("Wait on Elasticsearch indexing"),
 
@@ -174,9 +176,8 @@ public class PeopleSummaryThreadHandler
   // =================================
 
   protected void step(STEP step) {
-    final String event = step.getMsg();
-    LOGGER.debug(event);
-    rocket.getFlightLog().addTimingEvent(event);
+    LOGGER.debug(step.getMsg());
+    rocket.getFlightLog().addTimingEvent(step.name());
   }
 
   protected void read(final PreparedStatement stmt, Consumer<ResultSet> consumer) {
@@ -578,6 +579,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
 
+    step(STEP.DONE_RETRIEVAL);
     LOGGER.debug("handleSecondaryJdbc(): DONE");
   }
 
