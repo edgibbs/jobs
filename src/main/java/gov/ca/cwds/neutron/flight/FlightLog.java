@@ -791,17 +791,23 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
       LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
           eventAttributes.size());
+
+      eventAttributes.putIfAbsent("changed_since",
+          Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
+      eventAttributes.putIfAbsent("warnings", warnings.size());
+      eventAttributes.putIfAbsent("changed_since", recsSentToIndexQueue.get());
+      eventAttributes.putIfAbsent("errors", isFatalError() ? "true" : "false");
+      eventAttributes.putIfAbsent("recs_pulled", rowsNormalized.get());
+      eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
+      eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
+      eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
+      eventAttributes.putIfAbsent("es_errors", recsBulkError.get());
+
+      eventAttributes.entrySet().stream()
+          .forEach(e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+
       NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
     }
-
-    // "changed_since": 1544143034,
-    // "warnings": 0,
-    // "errors": 0,
-    // "recs_pulled": 24,
-    // "es_deleted": 0,
-    // "es_before": 24,
-    // "es_after": 24,
-    // "es_errors": 0
   }
 
 }
