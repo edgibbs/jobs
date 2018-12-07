@@ -3,6 +3,7 @@ package gov.ca.cwds.data.persistence.cms.client;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,12 +29,16 @@ import gov.ca.cwds.jobs.Goddard;
 
 public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<ReplicatedClient>> {
 
+  static java.sql.Date sqlDate;
   RawClient target;
 
   @Override
   public void setup() throws Exception {
     super.setup();
     target = new RawClient();
+
+    prepResultSetGood(rs);
+    target.read(rs);
   }
 
   public static void prepResultSetGood(ResultSet rs) throws SQLException {
@@ -63,20 +68,20 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
     when(rs.getString(ColPos.CLT_ZIPPY_IND.ordinal())).thenReturn("N");
     when(rs.getString(ColPos.CLT_LST_UPD_ID.ordinal())).thenReturn("0x5");
 
-    when(rs.getShort(ColPos.CLT_D_STATE_C.ordinal())).thenReturn((short) 0);
-    when(rs.getShort(ColPos.CLT_IMGT_STC.ordinal())).thenReturn((short) 0);
+    when(rs.getShort(ColPos.CLT_D_STATE_C.ordinal())).thenReturn((short) 1828);
+    when(rs.getShort(ColPos.CLT_IMGT_STC.ordinal())).thenReturn((short) 1199);
     when(rs.getShort(ColPos.CLT_MRTL_STC.ordinal())).thenReturn((short) 1309);
     when(rs.getShort(ColPos.CLT_NAME_TPC.ordinal())).thenReturn((short) 1312);
-    when(rs.getShort(ColPos.CLT_P_ETHNCTYC.ordinal())).thenReturn((short) 0);
+    when(rs.getShort(ColPos.CLT_P_ETHNCTYC.ordinal())).thenReturn((short) 3163);
     when(rs.getShort(ColPos.CLT_P_LANG_TPC.ordinal())).thenReturn((short) 1253);
     when(rs.getShort(ColPos.CLT_S_LANG_TC.ordinal())).thenReturn((short) 1261);
-    when(rs.getShort(ColPos.CLT_RLGN_TPC.ordinal())).thenReturn((short) 0);
+    when(rs.getShort(ColPos.CLT_RLGN_TPC.ordinal())).thenReturn((short) 1566);
 
     Date date = new Date();
     when(rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal()))
         .thenReturn(new Timestamp(date.getTime()));
 
-    java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+    sqlDate = new java.sql.Date(date.getTime());
     when(rs.getDate(ColPos.CLT_BIRTH_DT.ordinal())).thenReturn(sqlDate);
     when(rs.getDate(ColPos.CLT_CREATN_DT.ordinal())).thenReturn(sqlDate);
     when(rs.getDate(ColPos.CLT_DEATH_DT.ordinal())).thenReturn(sqlDate);
@@ -95,7 +100,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getPrimaryKey_A$() throws Exception {
     Serializable actual = target.getPrimaryKey();
-    Serializable expected = null;
+    Serializable expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -123,7 +128,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getNormalizationGroupKey_A$() throws Exception {
     Serializable actual = target.getNormalizationGroupKey();
-    Serializable expected = null;
+    Serializable expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -182,7 +187,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltBirthDate_A$() throws Exception {
     Date actual = target.getCltBirthDate();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -223,7 +228,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltClientIndexNumber_A$() throws Exception {
     String actual = target.getCltClientIndexNumber();
-    String expected = null;
+    String expected = "12345";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -237,21 +242,21 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltCommonFirstName_A$() throws Exception {
     String actual = target.getCltCommonFirstName();
-    String expected = null;
+    String expected = "Baby";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltCommonLastName_A$() throws Exception {
     String actual = target.getCltCommonLastName();
-    String expected = null;
+    String expected = "Doe";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltCommonMiddleName_A$() throws Exception {
     String actual = target.getCltCommonMiddleName();
-    String expected = null;
+    String expected = "X";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -284,8 +289,9 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltCreationDate_A$() throws Exception {
     Date actual = target.getCltCreationDate();
-    Date expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    // Date expected = null;
+    // assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -324,14 +330,14 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltDeathDate_A$() throws Exception {
     Date actual = target.getCltDeathDate();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltDeathDateVerifiedIndicator_A$() throws Exception {
     String actual = target.getCltDeathDateVerifiedIndicator();
-    String expected = null;
+    String expected = "N";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -359,7 +365,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltDriverLicenseStateCodeType_A$() throws Exception {
     Short actual = target.getCltDriverLicenseStateCodeType();
-    Short expected = null;
+    Short expected = 1828;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -387,7 +393,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltGenderCode_A$() throws Exception {
     String actual = target.getCltGenderCode();
-    String expected = null;
+    String expected = "F";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -446,7 +452,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltImmigrationStatusType_A$() throws Exception {
     Short actual = target.getCltImmigrationStatusType();
-    Short expected = null;
+    Short expected = 1199;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -488,7 +494,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltMaritalStatusType_A$() throws Exception {
     Short actual = target.getCltMaritalStatusType();
-    Short expected = null;
+    Short expected = 1309;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -509,14 +515,14 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltNamePrefixDescription_A$() throws Exception {
     String actual = target.getCltNamePrefixDescription();
-    String expected = null;
+    String expected = "Ms";
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltNameType_A$() throws Exception {
     Short actual = target.getCltNameType();
-    Short expected = null;
+    Short expected = 1312;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -557,7 +563,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltPrimaryEthnicityType_A$() throws Exception {
     Short actual = target.getCltPrimaryEthnicityType();
-    Short expected = null;
+    Short expected = 3163;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -570,7 +576,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltPrimaryLanguageType_A$() throws Exception {
     Short actual = target.getCltPrimaryLanguageType();
-    Short expected = null;
+    Short expected = 1253;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -583,7 +589,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltReligionType_A$() throws Exception {
     Short actual = target.getCltReligionType();
-    Short expected = null;
+    Short expected = 1566;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -596,7 +602,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltSecondaryLanguageType_A$() throws Exception {
     Short actual = target.getCltSecondaryLanguageType();
-    Short expected = null;
+    Short expected = 1261;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -622,7 +628,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltSensitivityIndicator_A$() throws Exception {
     String actual = target.getCltSensitivityIndicator();
-    String expected = null;
+    String expected = "R";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -648,7 +654,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltSoc158SealedClientIndicator_A$() throws Exception {
     String actual = target.getCltSoc158SealedClientIndicator();
-    String expected = null;
+    String expected = "Y";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -674,7 +680,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltSocialSecurityNumber_A$() throws Exception {
     String actual = target.getCltSocialSecurityNumber();
-    String expected = null;
+    String expected = "111223333";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -687,7 +693,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltSuffixTitleDescription_A$() throws Exception {
     String actual = target.getCltSuffixTitleDescription();
-    String expected = null;
+    String expected = "jr";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -739,7 +745,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltZippyCreatedIndicator_A$() throws Exception {
     String actual = target.getCltZippyCreatedIndicator();
-    String expected = null;
+    String expected = "N";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -778,7 +784,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltLastUpdatedId_A$() throws Exception {
     String actual = target.getCltLastUpdatedId();
-    String expected = null;
+    String expected = "0x5";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -791,7 +797,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltLastUpdatedTime_A$() throws Exception {
     Date actual = target.getCltLastUpdatedTime();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -1173,7 +1179,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
     RawClient o = new RawClient();
     int actual = target.compareTo(o);
     int expected = 0;
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(not(equalTo(expected))));
   }
 
 }
