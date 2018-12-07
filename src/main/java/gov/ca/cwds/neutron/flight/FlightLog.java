@@ -3,6 +3,7 @@ package gov.ca.cwds.neutron.flight;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
+import com.newrelic.api.agent.NewRelic;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
@@ -605,6 +607,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   //@formatter:off
   @Override
   public String toString() {
+    final DateFormat fmt = new SimpleDateFormat(NeutronDateTimeFormat.FMT_LEGACY_TIMESTAMP.getFormat());
     final StringBuilder buf = new StringBuilder();
     buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t").append(rocketName);
 
@@ -629,20 +632,16 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     }
 
     if (!isInitialLoad() && !timings.isEmpty()) {
-      buf.append("\n\n        STEPS:");
-      final DateFormat fmt = new SimpleDateFormat(NeutronDateTimeFormat.FMT_LEGACY_TIMESTAMP.getFormat());
+      buf.append("\n\n    STEPS:");
       timings.entrySet().stream().forEach(e -> 
         buf.append("\n\t")
            .append(StringUtils.rightPad(e.getKey() + ":", 24))
-        // .append(" : ")
-        // .append(Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond())
-        // .append(" : ")
            .append(fmt.format(new Date(e.getValue()))));
     }
 
-    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
+    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(fmt.format(new Date(startTime)));
     if (endTime > 0L) {
-      buf.append("\n\tend:                    ").append(new Date(endTime))
+      buf.append("\n\tend:                    ").append(fmt.format(new Date(endTime)))
           .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
     }
 
@@ -780,8 +779,28 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return timings;
   }
 
-  public void notifyMonitor() {
+  public void notifyMonitor(String eventType) {
+    LOGGER.info("Notify New Relic");
+    final Map<String, Object> eventAttributes = new LinkedHashMap<>();
 
+    if (!isInitialLoad()) {
+      if (!timings.isEmpty()) {
+        timings.entrySet().stream().forEach(e -> eventAttributes.put(e.getKey(),
+            Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
+      }
+    }
+
+    // "changed_since": 1544143034,
+    // "warnings": 0,
+    // "errors": 0,
+    // "recs_pulled": 24,
+    // "es_deleted": 0,
+    // "es_before": 24,
+    // "es_after": 24,
+    // "es_errors": 0
+
+
+    NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
   }
 
 }
