@@ -1,7 +1,6 @@
 package gov.ca.cwds.neutron.flight;
 
 import java.text.DecimalFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -631,9 +630,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       timings.entrySet().stream().forEach(e -> 
         buf.append("\n\t")
            .append(StringUtils.rightPad(e.getKey() + ":", 24))
-           .append(" : ")
-           .append(Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond())
-           .append(" : ")
+//           .append(" : ")
+//           .append(Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond())
+//           .append(" : ")
            .append(new Date(e.getValue())));
     }
 
