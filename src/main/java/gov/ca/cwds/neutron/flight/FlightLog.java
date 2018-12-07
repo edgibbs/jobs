@@ -794,7 +794,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
         eventAttributes.putIfAbsent("warnings", warnings.size());
         eventAttributes.putIfAbsent("errors", isFatalError() ? "true" : "false");
-        eventAttributes.putIfAbsent("recs_pulled", rowsNormalized.get());
+        eventAttributes.putIfAbsent("recs_pulled", rowsDenormalized.get());
         eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
         eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
         eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
