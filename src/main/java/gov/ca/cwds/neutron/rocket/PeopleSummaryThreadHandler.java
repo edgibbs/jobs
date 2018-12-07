@@ -94,6 +94,57 @@ public class PeopleSummaryThreadHandler
   protected static final int TFO = TYPE_FORWARD_ONLY;
   protected static final int CRO = CONCUR_READ_ONLY;
 
+  public static enum STEP {
+
+    START("Job start"),
+
+    FIND_CHANGED_CLIENT("Find changed clients"),
+
+    SET_CLIENT_KEY("Set client keys"),
+
+    SET_PLACEMENT_KEY("Set placement home keys"),
+
+    SEL_CLIENT("Pull client"),
+
+    SEL_CLIENT_ADDRESS("Pull client address"),
+
+    SEL_ADDRESS("Pull address"),
+
+    SEL_CLIENT_COUNTY("Pull client county"),
+
+    SEL_AKA("Pull AKA"),
+
+    SEL_CASE("Pull case"),
+
+    SEL_CSEC("Pull csec"),
+
+    SEL_ETHNIC("Pull ethnicity"),
+
+    SEL_SAFETY("Pull safety"),
+
+    SEL_PLACEMENT_HOME("Pull placement home"),
+
+    DONE_RETRIEVAL("Done pulling data"),
+
+    BEAN_TO_JSON("Convert data to JSON"),
+
+    INDEX_TO_ES("Wait on Elasticsearch indexing"),
+
+    DONE("Job done")
+
+    ;
+
+    private final String msg;
+
+    private STEP(String msg) {
+      this.msg = msg;
+    }
+
+    public String getMsg() {
+      return msg;
+    }
+  }
+
   private final ClientPersonIndexerJob rocket;
 
   protected boolean doneHandlerRetrieve = false;
@@ -123,6 +174,11 @@ public class PeopleSummaryThreadHandler
   // =================================
   // Neutron, the next generation.
   // =================================
+
+  protected void step(STEP step) {
+    LOGGER.debug(step.getMsg());
+    rocket.getFlightLog().addTimingEvent(step.name().toLowerCase());
+  }
 
   protected void read(final PreparedStatement stmt, Consumer<ResultSet> consumer) {
     LOGGER.trace("read(): begin");
@@ -438,6 +494,8 @@ public class PeopleSummaryThreadHandler
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     LOGGER.trace("handleSecondaryJdbc(): begin");
+    final FlightLog fl = rocket.getFlightLog();
+
     String sqlPlacementAddress;
     try {
       sqlPlacementAddress = NeutronDB2Utils.prepLastChangeSQL(SEL_PLACE_ADDR,
@@ -464,44 +522,44 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelSafety = con.prepareStatement(SEL_SAFETY, TFO, CRO)) {
 
       // Client keys for this bundle.
+      step(STEP.SET_CLIENT_KEY);
       loadClientRange(con, stmtInsClient, range);
 
-      LOGGER.info("Read client");
+      step(STEP.SEL_CLIENT);
       read(stmtSelClient, rs -> readClient(rs));
 
       // SNAP-735: missing addresses.
-      LOGGER.info("Read client address");
+      step(STEP.SEL_CLIENT_ADDRESS);
       read(stmtSelCliAddr, rs -> readClientAddress(rs));
 
-      LOGGER.info("Read address");
+      step(STEP.SEL_ADDRESS);
       read(stmtSelAddress, rs -> readAddress(rs));
 
       loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
-      LOGGER.info("Read client county");
+      step(STEP.SEL_CLIENT_COUNTY);
       read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
-      LOGGER.info("Read aka");
+      step(STEP.SEL_AKA);
       read(stmtSelAka, rs -> readAka(rs));
 
-      LOGGER.info("Read case");
+      step(STEP.SEL_CASE);
       read(stmtSelCase, rs -> readCase(rs));
 
-      LOGGER.info("Read csec");
+      step(STEP.SEL_CSEC);
       read(stmtSelCsec, rs -> readCsec(rs));
 
-      LOGGER.info("Read ethnicity");
+      step(STEP.SEL_ETHNIC);
       read(stmtSelEthnicity, rs -> readEthnicity(rs));
 
-      LOGGER.info("Read safety alert");
+      step(STEP.SEL_SAFETY);
       read(stmtSelSafety, rs -> readSafetyAlert(rs));
       con.commit(); // free db resources again
 
-      LOGGER.info("Insert placement home clients");
+      step(STEP.SET_PLACEMENT_KEY);
       loadClientRange(con, stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
-      LOGGER.trace("Read placement home address: SQL: \n{}", sqlPlacementAddress);
-      LOGGER.info("Read placement home address");
+      step(STEP.SEL_PLACEMENT_HOME);
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
     } catch (Exception e) {
@@ -509,7 +567,7 @@ public class PeopleSummaryThreadHandler
 
       try {
         if (isInitialLoad()) {
-          rocket.getFlightLog().markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
+          fl.markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
         } else {
           rocket.fail(); // Last change: fail the whole job!
         }
@@ -521,6 +579,7 @@ public class PeopleSummaryThreadHandler
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     }
 
+    step(STEP.DONE_RETRIEVAL);
     LOGGER.debug("handleSecondaryJdbc(): DONE");
   }
 
@@ -720,6 +779,10 @@ public class PeopleSummaryThreadHandler
 
   public ClientPersonIndexerJob getRocket() {
     return rocket;
+  }
+
+  public String getEventType() {
+    return "initial_load_client";
   }
 
 }

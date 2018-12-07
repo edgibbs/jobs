@@ -1,0 +1,31 @@
+[
+	{
+		"eventType":           "neutron_lc_client",
+		"start":               1544143032,
+		"find_changed_client": 1544143032,
+		"set_client_key":      1544143032,
+		"set_placement_key":   1544143032,
+		"sel_client":          1544143032,
+		"sel_client_address":  1544143032,
+		"sel_address":         1544143032,
+		"sel_client_county":   1544143032,
+		"sel_aka":             1544143032,
+		"sel_case":            1544143033,
+		"sel_csec":            1544143033,
+		"sel_ethnic":          1544143033,
+		"sel_safety":          1544143033,
+		"sel_placement_home":  1544143034,
+		"done_retrieval":      1544143034,
+		"bean_to_json":        1544143034,
+		"index_to_es":         1544143034,
+		"done":                1544143034,
+		"changed_since":       1544143034,
+		"warnings":             0,
+		"errors":               0,
+		"recs_pulled":         24,
+		"es_deleted":           0,
+		"es_before":           24,
+		"es_after":            24,
+		"es_errors":            0
+	}
+]

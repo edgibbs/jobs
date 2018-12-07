@@ -1,7 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
 import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
-import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -291,80 +291,52 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
   public RawClient read(final ResultSet rs) throws SQLException {
     super.read(rs);
 
-    this.cltSensitivityIndicator = ifNull(rs.getString("CLT_SENSTV_IND"));
-    this.cltSoc158SealedClientIndicator = ifNull(rs.getString("CLT_SOC158_IND"));
-    this.cltAdjudicatedDelinquentIndicator = ifNull(rs.getString("CLT_ADJDEL_IND"));
-    this.cltAdoptionStatusCode = rs.getString("CLT_ADPTN_STCD");
-    this.cltAlienRegistrationNumber = ifNull(rs.getString("CLT_ALN_REG_NO"));
-    this.cltBirthCity = ifNull(rs.getString("CLT_BIRTH_CITY"));
-    this.cltBirthCountryCodeType = rs.getShort("CLT_B_CNTRY_C");
-    this.cltBirthDate = rs.getDate("CLT_BIRTH_DT");
-    this.cltBirthFacilityName = ifNull(rs.getString("CLT_BR_FAC_NM"));
-    this.cltBirthStateCodeType = rs.getShort("CLT_B_STATE_C");
-    this.cltBirthplaceVerifiedIndicator = ifNull(rs.getString("CLT_BP_VER_IND"));
-    this.cltChildClientIndicatorVar = ifNull(rs.getString("CLT_CHLD_CLT_B"));
-    this.cltClientIndexNumber = ifNull(rs.getString("CLT_CL_INDX_NO"));
-    this.cltCommentDescription = ifNull(rs.getString("CLT_COMMNT_DSC"));
-    this.cltCommonFirstName = (rs.getString("CLT_COM_FST_NM"));
-    this.cltCommonLastName = ifNull(rs.getString("CLT_COM_LST_NM"));
-    this.cltCommonMiddleName = ifNull(rs.getString("CLT_COM_MID_NM"));
-    this.cltConfidentialityActionDate = rs.getDate("CLT_CONF_ACTDT");
-    this.cltConfidentialityInEffectIndicator = ifNull(rs.getString("CLT_CONF_EFIND"));
-    this.cltCreationDate = rs.getDate("CLT_CREATN_DT");
-    this.cltCurrCaChildrenServIndicator = ifNull(rs.getString("CLT_CURRCA_IND"));
-    this.cltCurrentlyOtherDescription = rs.getString("CLT_COTH_DESC");
-    this.cltCurrentlyRegionalCenterIndicator = ifNull(rs.getString("CLT_CURREG_IND"));
-    this.cltDeathDate = rs.getDate("CLT_DEATH_DT");
-    this.cltDeathDateVerifiedIndicator = ifNull(rs.getString("CLT_DTH_DT_IND"));
-    this.cltDeathPlace = ifNull(rs.getString("CLT_DEATH_PLC"));
-    this.cltDeathReasonText = ifNull(rs.getString("CLT_DTH_RN_TXT"));
-    this.cltDriverLicenseNumber = ifNull(rs.getString("CLT_DRV_LIC_NO"));
-    this.cltDriverLicenseStateCodeType = rs.getShort("CLT_D_STATE_C");
-    this.cltEmailAddress = ifNull(rs.getString("CLT_EMAIL_ADDR"));
-    this.cltEstimatedDobCode = ifNull(rs.getString("CLT_EST_DOB_CD"));
-    this.cltEthUnableToDetReasonCode = ifNull(rs.getString("CLT_ETH_UD_CD"));
-    this.cltFatherParentalRightTermDate = rs.getDate("CLT_FTERM_DT");
-    this.cltGenderCode = ifNull(rs.getString("CLT_GENDER_CD"));
-    this.cltHealthSummaryText = ifNull(rs.getString("CLT_HEALTH_TXT"));
-    this.cltHispUnableToDetReasonCode = ifNull(rs.getString("CLT_HISP_UD_CD"));
-    this.cltHispanicOriginCode = ifNull(rs.getString("CLT_HISP_CD"));
-    this.cltImmigrationCountryCodeType = rs.getShort("CLT_I_CNTRY_C");
-    this.cltImmigrationStatusType = rs.getShort("CLT_IMGT_STC");
-    this.cltIncapacitatedParentCode = ifNull(rs.getString("CLT_INCAPC_CD"));
-    this.cltIndividualHealthCarePlanIndicator = ifNull(rs.getString("CLT_HCARE_IND"));
-    this.cltLimitationOnScpHealthIndicator = ifNull(rs.getString("CLT_LIMIT_IND"));
-    this.cltLiterateCode = ifNull(rs.getString("CLT_LITRATE_CD"));
-    this.cltMaritalCohabitatnHstryIndicatorVar = ifNull(rs.getString("CLT_MAR_HIST_B"));
-    this.cltMaritalStatusType = rs.getShort("CLT_MRTL_STC");
-    this.cltMilitaryStatusCode = ifNull(rs.getString("CLT_MILT_STACD"));
-    this.cltMotherParentalRightTermDate = rs.getDate("CLT_MTERM_DT");
-    this.cltNamePrefixDescription = ifNull(rs.getString("CLT_NMPRFX_DSC"));
-    this.cltNameType = rs.getShort("CLT_NAME_TPC");
-    this.cltOutstandingWarrantIndicator = ifNull(rs.getString("CLT_OUTWRT_IND"));
-    this.cltPrevCaChildrenServIndicator = ifNull(rs.getString("CLT_PREVCA_IND"));
-    this.cltPrevOtherDescription = ifNull(rs.getString("CLT_POTH_DESC"));
-    this.cltPrevRegionalCenterIndicator = ifNull(rs.getString("CLT_PREREG_IND"));
+    this.cltSensitivityIndicator = trimToNull(rs.getString(ColPos.CLT_SENSTV_IND.ordinal()));
+    this.cltSoc158SealedClientIndicator = trimToNull(rs.getString(ColPos.CLT_SOC158_IND.ordinal()));
+    this.cltBirthDate = rs.getDate(ColPos.CLT_BIRTH_DT.ordinal());
+    this.cltClientIndexNumber = trimToNull(rs.getString(ColPos.CLT_CL_INDX_NO.ordinal()));
+    this.cltCommonFirstName = (rs.getString(ColPos.CLT_COM_FST_NM.ordinal()));
+    this.cltCommonLastName = trimToNull(rs.getString(ColPos.CLT_COM_LST_NM.ordinal()));
+    this.cltCommonMiddleName = trimToNull(rs.getString(ColPos.CLT_COM_MID_NM.ordinal()));
+    this.cltCreationDate = rs.getDate(ColPos.CLT_CREATN_DT.ordinal());
+    this.cltDeathDate = rs.getDate(ColPos.CLT_DEATH_DT.ordinal());
+    this.cltDeathDateVerifiedIndicator = trimToNull(rs.getString(ColPos.CLT_DTH_DT_IND.ordinal()));
+    this.cltDriverLicenseNumber = trimToNull(rs.getString(ColPos.CLT_DRV_LIC_NO.ordinal()));
+    this.cltDriverLicenseStateCodeType = rs.getShort(ColPos.CLT_D_STATE_C.ordinal());
+    this.cltEmailAddress = trimToNull(rs.getString(ColPos.CLT_EMAIL_ADDR.ordinal()));
+    this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
+    this.cltGenderCode = trimToNull(rs.getString(ColPos.CLT_GENDER_CD.ordinal()));
+    this.cltHispUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_HISP_UD_CD.ordinal()));
+    this.cltHispanicOriginCode = trimToNull(rs.getString(ColPos.CLT_HISP_CD.ordinal()));
+    this.cltImmigrationStatusType = rs.getShort(ColPos.CLT_IMGT_STC.ordinal());
+    this.cltLiterateCode = trimToNull(rs.getString(ColPos.CLT_LITRATE_CD.ordinal()));
+    this.cltMaritalStatusType = rs.getShort(ColPos.CLT_MRTL_STC.ordinal());
+    this.cltMilitaryStatusCode = trimToNull(rs.getString(ColPos.CLT_MILT_STACD.ordinal()));
+    this.cltNamePrefixDescription = trimToNull(rs.getString(ColPos.CLT_NMPRFX_DSC.ordinal()));
+    this.cltNameType = rs.getShort(ColPos.CLT_NAME_TPC.ordinal());
 
-    this.cltPrimaryEthnicityType = rs.getShort("CLT_P_ETHNCTYC");
-    this.cltPrimaryLanguageType = rs.getShort("CLT_P_LANG_TPC");
-    this.cltSecondaryLanguageType = rs.getShort("CLT_S_LANG_TC");
+    this.cltPrimaryEthnicityType = rs.getShort(ColPos.CLT_P_ETHNCTYC.ordinal());
+    this.cltPrimaryLanguageType = rs.getShort(ColPos.CLT_P_LANG_TPC.ordinal());
+    this.cltSecondaryLanguageType = rs.getShort(ColPos.CLT_S_LANG_TC.ordinal());
+    this.cltReligionType = rs.getShort(ColPos.CLT_RLGN_TPC.ordinal());
 
-    this.cltReligionType = rs.getShort("CLT_RLGN_TPC");
-    this.cltSensitiveHlthInfoOnFileIndicator = ifNull(rs.getString("CLT_SNTV_HLIND"));
-    this.cltSoc158PlacementCode = ifNull(rs.getString("CLT_SOCPLC_CD"));
-    this.cltSocialSecurityNumChangedCode = ifNull(rs.getString("CLT_SSN_CHG_CD"));
-    this.cltSocialSecurityNumber = ifNull(rs.getString("CLT_SS_NO"));
-    this.cltSuffixTitleDescription = ifNull(rs.getString("CLT_SUFX_TLDSC"));
-    this.cltTribalAncestryClientIndicatorVar = ifNull(rs.getString("CLT_TRBA_CLT_B"));
-    this.cltTribalMembrshpVerifctnIndicatorVar = ifNull(rs.getString("CLT_TR_MBVRT_B"));
-    this.cltUnemployedParentCode = ifNull(rs.getString("CLT_UNEMPLY_CD"));
-    this.cltZippyCreatedIndicator = ifNull(rs.getString("CLT_ZIPPY_IND"));
-    this.cltLastUpdatedId = ifNull(rs.getString("CLT_LST_UPD_ID"));
-    this.cltLastUpdatedTime = rs.getTimestamp("CLT_LST_UPD_TS");
+    this.cltSensitiveHlthInfoOnFileIndicator =
+        trimToNull(rs.getString(ColPos.CLT_SNTV_HLIND.ordinal()));
+    this.cltSoc158PlacementCode = trimToNull(rs.getString(ColPos.CLT_SOCPLC_CD.ordinal()));
+    this.cltSocialSecurityNumChangedCode =
+        trimToNull(rs.getString(ColPos.CLT_SSN_CHG_CD.ordinal()));
+    this.cltSocialSecurityNumber = trimToNull(rs.getString(ColPos.CLT_SS_NO.ordinal()));
+    this.cltSuffixTitleDescription = trimToNull(rs.getString(ColPos.CLT_SUFX_TLDSC.ordinal()));
+    this.cltTribalAncestryClientIndicatorVar =
+        trimToNull(rs.getString(ColPos.CLT_TRBA_CLT_B.ordinal()));
+    this.cltZippyCreatedIndicator = trimToNull(rs.getString(ColPos.CLT_ZIPPY_IND.ordinal()));
+
+    this.cltLastUpdatedId = trimToNull(rs.getString(ColPos.CLT_LST_UPD_ID.ordinal()));
+    this.cltLastUpdatedTime = rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal());
 
     this.setCltReplicationOperation(
-        CmsReplicationOperation.strToRepOp(rs.getString("CLT_IBMSNAP_OPERATION")));
-    this.setCltReplicationDate(rs.getDate("CLT_IBMSNAP_LOGMARKER"));
+        CmsReplicationOperation.strToRepOp(rs.getString(ColPos.CLT_IBMSNAP_OPERATION.ordinal())));
+    this.setCltReplicationDate(rs.getDate(ColPos.CLT_IBMSNAP_LOGMARKER.ordinal()));
 
     return this;
   }

@@ -4,17 +4,19 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
+import gov.ca.cwds.data.persistence.cms.client.RawAddress.ColumnPosition;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
@@ -22,6 +24,39 @@ import gov.ca.cwds.jobs.Goddard;
 public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   RawAddress target;
+
+  public static void prepResultSetGood(ResultSet rs) throws SQLException {
+    when(rs.getString(ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal())).thenReturn("main");
+    when(rs.getString(ColumnPosition.ADR_FRG_ADRT_B.ordinal())).thenReturn("");
+    when(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal())).thenReturn("");
+    when(rs.getString(ColumnPosition.ADR_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal())).thenReturn("");
+    when(rs.getString(ColumnPosition.ADR_STREET_NO.ordinal())).thenReturn("2111");
+    when(rs.getString(ColumnPosition.ADR_STREET_NM.ordinal())).thenReturn("Via Roma");
+    when(rs.getString(ColumnPosition.ADR_UNIT_NO.ordinal())).thenReturn("");
+    when(rs.getString(ColumnPosition.ADR_CITY_NM.ordinal())).thenReturn("Campbell");
+    when(rs.getString(ColumnPosition.ADR_ZIP_NO.ordinal())).thenReturn("95008");
+
+    when(rs.getShort(ColumnPosition.ADR_GVR_ENTC.ordinal())).thenReturn((short) 1080);
+    when(rs.getShort(ColumnPosition.ADR_ST_SFX_C.ordinal())).thenReturn((short) 0);
+    when(rs.getShort(ColumnPosition.ADR_STATE_C.ordinal())).thenReturn((short) 1828);
+    when(rs.getShort(ColumnPosition.ADR_UNT_DSGC.ordinal())).thenReturn((short) 2067);
+    when(rs.getShort(ColumnPosition.ADR_ZIP_SFX_NO.ordinal())).thenReturn((short) 0);
+
+    final Timestamp ts = new Timestamp(new Date().getTime());
+    when(rs.getTimestamp(ColumnPosition.ADR_LST_UPD_TS.ordinal())).thenReturn(ts);
+
+    when(rs.getInt(ColumnPosition.ADR_EMRG_EXTNO.ordinal())).thenReturn(1234);
+    when(rs.getInt(ColumnPosition.ADR_MSG_EXT_NO.ordinal())).thenReturn(4567);
+    when(rs.getInt(ColumnPosition.ADR_PRM_EXT_NO.ordinal())).thenReturn(789);
+
+    when(rs.getLong(ColumnPosition.ADR_EMRG_TELNO.ordinal())).thenReturn(0L);
+    when(rs.getLong(ColumnPosition.ADR_MSG_TEL_NO.ordinal())).thenReturn(0L);
+    when(rs.getLong(ColumnPosition.ADR_PRM_TEL_NO.ordinal())).thenReturn(4083742790L);
+  }
 
   @Override
   public void setup() throws Exception {
@@ -41,7 +76,7 @@ public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void read_A$ResultSet() throws Exception {
-
+    RawAddressTest.prepResultSetGood(rs);
     RawAddress actual = target.read(rs);
     // RawAddress expected = null;
     // assertThat(actual, is(equalTo(expected)));
@@ -50,8 +85,7 @@ public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test(expected = SQLException.class)
   public void read_A$ResultSet_T$SQLException() throws Exception {
-    when(rs.next()).thenThrow(SQLException.class);
-    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    bombResultSet();
     target.read(rs);
   }
 

@@ -1,6 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
-import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -16,6 +16,10 @@ public class RawClientCounty extends ClientReference implements NeutronJdbcReade
 
   private static final long serialVersionUID = 1L;
 
+  protected enum ColumnPosition {
+    START, CLT_IDENTIFIER, CLC_GVR_ENTC, CLC_LST_UPD_TS, CLC_LST_UPD_OP, CLC_CNTY_RULE
+  }
+
   // ================================
   // CLIENT_CNTY: (client county)
   // ================================
@@ -30,8 +34,8 @@ public class RawClientCounty extends ClientReference implements NeutronJdbcReade
   @Override
   public RawClientCounty read(ResultSet rs) throws SQLException {
     super.read(rs);
-    this.clientCounty = rs.getShort("CLC_GVR_ENTC");
-    this.clientCountyRule = ifNull(rs.getString("CLC_CNTY_RULE"));
+    this.clientCounty = rs.getShort(ColumnPosition.CLC_GVR_ENTC.ordinal());
+    this.clientCountyRule = trimToNull(rs.getString(ColumnPosition.CLC_CNTY_RULE.ordinal()));
     return this;
   }
 

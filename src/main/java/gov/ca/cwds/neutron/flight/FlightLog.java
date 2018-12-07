@@ -1,9 +1,13 @@
 package gov.ca.cwds.neutron.flight;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -26,10 +30,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
+import com.newrelic.api.agent.NewRelic;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.enums.FlightStatus;
+import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -106,6 +112,17 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
    */
   @JsonIgnore
   private long endTime;
+
+  @JsonIgnore
+  private long timeStartPoll;
+
+  @JsonIgnore
+  private long timeStartPull;
+
+  @JsonIgnore
+  private long timeEndPull;
+
+  private final Map<String, Long> timings = new LinkedHashMap<>(31);
 
   private boolean initialLoad;
 
@@ -359,6 +376,22 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   // =======================
+  // LAST CHANGE TIMING:
+  // =======================
+
+  public void markStartChangePoll() {
+    this.timeStartPoll = new Date().getTime();
+  }
+
+  public void markStartDataPoll() {
+    this.timeStartPull = new Date().getTime();
+  }
+
+  public void markEndDataPoll() {
+    this.timeEndPull = new Date().getTime();
+  }
+
+  // =======================
   // INCREMENT:
   // =======================
 
@@ -574,6 +607,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   //@formatter:off
   @Override
   public String toString() {
+    final DateFormat fmt = new SimpleDateFormat(NeutronDateTimeFormat.FMT_LEGACY_TIMESTAMP.getFormat());
     final StringBuilder buf = new StringBuilder();
     buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t").append(rocketName);
 
@@ -586,12 +620,28 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
        // .append(pad(filterRanges(FlightStatus.FAILED).size()))
           ;
     } else {
-      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince);
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince)
+      // .append("\n\tstart change polling:   ").append(new Date(timeStartPoll))
+      // .append("\n\tstart pulling data:     ").append(new Date(timeStartPull))
+      // .append("\n\tdone  pulling data:     ").append(new Date(timeEndPull))
+         ;
     }
 
-    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
+    if (!warnings.isEmpty()) {
+      buf.append("\n\n  >>>>> WARNINGS:\n\t:          ").append(this.warnings.size());
+    }
+
+    if (!isInitialLoad() && !timings.isEmpty()) {
+      buf.append("\n\n    STEPS:");
+      timings.entrySet().stream().forEach(e -> 
+        buf.append("\n\t")
+           .append(StringUtils.rightPad(e.getKey() + ":", 24))
+           .append(fmt.format(new Date(e.getValue()))));
+    }
+
+    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(fmt.format(new Date(startTime)));
     if (endTime > 0L) {
-      buf.append("\n\tend:                    ").append(new Date(endTime))
+      buf.append("\n\tend:                    ").append(fmt.format(new Date(endTime)))
           .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
     }
 
@@ -691,6 +741,75 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public void setFailureCause(String failureCause) {
     this.failureCause = failureCause;
+  }
+
+  public long getTimeStartPoll() {
+    return timeStartPoll;
+  }
+
+  public void setTimeStartPoll(long timeStartPoll) {
+    this.timeStartPoll = timeStartPoll;
+  }
+
+  public long getTimeStartPull() {
+    return timeStartPull;
+  }
+
+  public void setTimeStartPull(long timeStartPull) {
+    this.timeStartPull = timeStartPull;
+  }
+
+  public long getTimeEndPull() {
+    return timeEndPull;
+  }
+
+  public void setTimeEndPull(long timeEndPull) {
+    this.timeEndPull = timeEndPull;
+  }
+
+  public void addWarning(String warning) {
+    warnings.add(warning);
+  }
+
+  public void addTimingEvent(String event) {
+    timings.putIfAbsent(event, System.currentTimeMillis());
+  }
+
+  public Map<String, Long> getTimings() {
+    return timings;
+  }
+
+  public void notifyMonitor(String eventType) {
+    LOGGER.info("Notify New Relic");
+    final Map<String, Object> eventAttributes = new LinkedHashMap<>();
+
+    if (!isInitialLoad()) {
+      if (!timings.isEmpty()) {
+        timings.entrySet().stream().forEach(e -> eventAttributes.put(e.getKey(),
+            Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
+      }
+
+      LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
+          eventAttributes.size());
+
+      if (lastChangeSince != null) {
+        eventAttributes.putIfAbsent("changed_since",
+            Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
+        eventAttributes.putIfAbsent("warnings", warnings.size());
+        eventAttributes.putIfAbsent("errors", isFatalError() ? "true" : "false");
+        eventAttributes.putIfAbsent("recs_pulled", rowsNormalized.get());
+        eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
+        eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
+        eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
+        eventAttributes.putIfAbsent("es_errors", recsBulkError.get());
+      }
+
+      if (!eventAttributes.isEmpty()) {
+        eventAttributes.entrySet().stream().forEach(
+            e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+        NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
+      }
+    }
   }
 
 }

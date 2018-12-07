@@ -21,6 +21,10 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
 
   private static final long serialVersionUID = 1L;
 
+  protected enum ColumnPosition {
+    START, CLT_IDENTIFIER, SAL_THIRD_ID, SAL_ACTV_RNC, SAL_ACTV_DT, SAL_ACTV_GEC, SAL_ACTV_TXT, SAL_DACT_DT, SAL_DACT_GEC, SAL_DACT_TXT, SAL_LST_UPD_ID, SAL_LST_UPD_TS, SAL_IBMSNAP_LOGMARKER, SAL_IBMSNAP_OPERATION
+  }
+
   // ================================
   // SAF_ALRT: (safety alerts)
   // ================================
@@ -73,19 +77,23 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
   @Override
   public RawSafetyAlert read(ResultSet rs) throws SQLException {
     super.read(rs);
-    safetyAlertId = rs.getString("SAL_THIRD_ID");
-    safetyAlertActivationCountyCode = rs.getShort("SAL_ACTV_GEC");
-    safetyAlertActivationDate = rs.getDate("SAL_ACTV_DT");
-    safetyAlertActivationExplanation = rs.getString("SAL_ACTV_TXT");
-    safetyAlertActivationReasonCode = rs.getShort("SAL_ACTV_RNC");
-    safetyAlertDeactivationCountyCode = rs.getShort("SAL_DACT_GEC");
-    safetyAlertDeactivationDate = rs.getDate("SAL_DACT_DT");
-    safetyAlertDeactivationExplanation = rs.getString("SAL_DACT_TXT");
-    safetyAlertLastUpdatedId = rs.getString("SAL_LST_UPD_ID");
-    safetyAlertLastUpdatedTimestamp = rs.getTimestamp("SAL_LST_UPD_TS");
-    safetyAlertLastUpdatedOperation =
-        CmsReplicationOperation.strToRepOp(rs.getString("SAL_IBMSNAP_OPERATION"));
-    safetyAlertReplicationTimestamp = rs.getTimestamp("SAL_IBMSNAP_LOGMARKER");
+
+    safetyAlertId = rs.getString(ColumnPosition.SAL_THIRD_ID.ordinal());
+    safetyAlertActivationCountyCode = rs.getShort(ColumnPosition.SAL_ACTV_GEC.ordinal());
+    safetyAlertActivationDate = rs.getDate(ColumnPosition.SAL_ACTV_DT.ordinal());
+    safetyAlertActivationExplanation = rs.getString(ColumnPosition.SAL_ACTV_TXT.ordinal());
+    safetyAlertActivationReasonCode = rs.getShort(ColumnPosition.SAL_ACTV_RNC.ordinal());
+    safetyAlertDeactivationCountyCode = rs.getShort(ColumnPosition.SAL_DACT_GEC.ordinal());
+    safetyAlertDeactivationDate = rs.getDate(ColumnPosition.SAL_DACT_DT.ordinal());
+    safetyAlertDeactivationExplanation = rs.getString(ColumnPosition.SAL_DACT_TXT.ordinal());
+    safetyAlertLastUpdatedId = rs.getString(ColumnPosition.SAL_LST_UPD_ID.ordinal());
+    safetyAlertLastUpdatedTimestamp = rs.getTimestamp(ColumnPosition.SAL_LST_UPD_TS.ordinal());
+
+    safetyAlertLastUpdatedOperation = CmsReplicationOperation
+        .strToRepOp(rs.getString(ColumnPosition.SAL_IBMSNAP_OPERATION.ordinal()));
+    safetyAlertReplicationTimestamp =
+        rs.getTimestamp(ColumnPosition.SAL_IBMSNAP_LOGMARKER.ordinal());
+
     return this;
   }
 

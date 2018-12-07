@@ -1,6 +1,6 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
-import static gov.ca.cwds.neutron.util.transform.JobTransformUtils.ifNull;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -17,6 +17,10 @@ public class RawEthnicity extends ClientReference implements NeutronJdbcReader<R
 
   private static final long serialVersionUID = 1L;
 
+  protected enum ColumnPosition {
+    START, CLT_IDENTIFIER, ETH_IDENTIFIER, ETHNICITY_CODE
+  }
+
   // ================================
   // CLSCP_ET: (race & ethnicity)
   // ================================
@@ -32,8 +36,10 @@ public class RawEthnicity extends ClientReference implements NeutronJdbcReader<R
   @Override
   public RawEthnicity read(ResultSet rs) throws SQLException {
     super.read(rs);
-    clientEthnicityId = ifNull(rs.getString("ETHNICITY_CODE"));
-    clientEthnicityCode = rs.getShort("ETHNICITY_CODE");
+
+    clientEthnicityId = trimToNull(rs.getString(ColumnPosition.ETH_IDENTIFIER.ordinal()));
+    clientEthnicityCode = rs.getShort(ColumnPosition.ETHNICITY_CODE.ordinal());
+
     return this;
   }
 

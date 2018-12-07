@@ -1,6 +1,7 @@
 package gov.ca.cwds.data.persistence.cms.client;
 
 import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -20,6 +21,10 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 public class RawAka extends ClientReference implements NeutronJdbcReader<RawAka> {
 
   private static final long serialVersionUID = 1L;
+
+  protected enum ColumnPosition {
+    START, CLT_IDENTIFIER, ONM_THIRD_ID, ONM_FIRST_NM, ONM_LAST_NM, ONM_MIDDLE_NM, ONM_NMPRFX_DSC, ONM_NAME_TPC, ONM_SUFX_TLDSC, ONM_LST_UPD_ID, ONM_LST_UPD_TS, ONM_IBMSNAP_OPERATION, ONM_IBMSNAP_LOGMARKER
+  }
 
   // =====================================
   // OCL_NM_T: (other client name / AKA)
@@ -66,18 +71,21 @@ public class RawAka extends ClientReference implements NeutronJdbcReader<RawAka>
   @Override
   public RawAka read(ResultSet rs) throws SQLException {
     super.read(rs);
-    akaId = rs.getString("ONM_THIRD_ID");
-    akaFirstName = rs.getString("ONM_FIRST_NM");
-    akaLastName = rs.getString("ONM_LAST_NM");
-    akaMiddleName = rs.getString("ONM_MIDDLE_NM");
-    akaNamePrefixDescription = rs.getString("ONM_NMPRFX_DSC");
-    akaNameType = rs.getShort("ONM_NAME_TPC");
-    akaSuffixTitleDescription = rs.getString("ONM_SUFX_TLDSC");
-    akaLastUpdatedId = rs.getString("ONM_LST_UPD_ID");
-    akaLastUpdatedTimestamp = rs.getTimestamp("ONM_LST_UPD_TS");
-    akaLastUpdatedOperation =
-        CmsReplicationOperation.strToRepOp(rs.getString("ONM_IBMSNAP_OPERATION"));
-    akaReplicationTimestamp = rs.getTimestamp("ONM_IBMSNAP_LOGMARKER");
+
+    akaId = rs.getString(ColumnPosition.ONM_THIRD_ID.ordinal());
+    akaFirstName = trimToNull(rs.getString(ColumnPosition.ONM_FIRST_NM.ordinal()));
+    akaLastName = trimToNull(rs.getString(ColumnPosition.ONM_LAST_NM.ordinal()));
+    akaMiddleName = trimToNull(rs.getString(ColumnPosition.ONM_MIDDLE_NM.ordinal()));
+    akaNamePrefixDescription = trimToNull(rs.getString(ColumnPosition.ONM_NMPRFX_DSC.ordinal()));
+    akaNameType = rs.getShort(ColumnPosition.ONM_NAME_TPC.ordinal());
+    akaSuffixTitleDescription = trimToNull(rs.getString(ColumnPosition.ONM_SUFX_TLDSC.ordinal()));
+    akaLastUpdatedId = rs.getString(ColumnPosition.ONM_LST_UPD_ID.ordinal());
+    akaLastUpdatedTimestamp = rs.getTimestamp(ColumnPosition.ONM_LST_UPD_TS.ordinal());
+
+    akaLastUpdatedOperation = CmsReplicationOperation
+        .strToRepOp(rs.getString(ColumnPosition.ONM_IBMSNAP_OPERATION.ordinal()));
+    akaReplicationTimestamp = rs.getTimestamp(ColumnPosition.ONM_IBMSNAP_LOGMARKER.ordinal());
+
     return this;
   }
 

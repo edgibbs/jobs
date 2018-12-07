@@ -4,6 +4,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -452,6 +453,15 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     }).when(session).doWork(any(Work.class));
 
     markTestDone(); // reset
+  }
+
+  protected void bombResultSet() throws SQLException {
+    doThrow(SQLException.class).when(con).commit();
+    when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
+    when(preparedStatement.executeQuery()).thenThrow(SQLException.class);
+    when(rs.next()).thenThrow(SQLException.class);
+    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    when(rs.getString(any(Integer.class))).thenThrow(SQLException.class);
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target, long sleepMillis) {

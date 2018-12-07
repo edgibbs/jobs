@@ -1,6 +1,7 @@
 package gov.ca.cwds.jobs.test;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -100,9 +101,12 @@ public class NeutronPlayground {
   }
 
   public static void main(String[] args) {
-    final NeutronPlayground playground = new NeutronPlayground();
-    playground.streamTest1();
-    playground.streamTest2();
+    // final NeutronPlayground playground = new NeutronPlayground();
+    // playground.streamTest1();
+    // playground.streamTest2();
+
+    final Instant inst = Instant.ofEpochSecond(1_280_512_800L);
+    LOGGER.info("instant: {}", inst);
   }
 
 }

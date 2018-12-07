@@ -4,9 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -48,8 +46,7 @@ public class RawSafetyAlertTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test(expected = SQLException.class)
   public void read_A$ResultSet_T$SQLException() throws Exception {
-    when(rs.next()).thenThrow(SQLException.class);
-    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    bombResultSet();
     target.read(rs);
   }
 

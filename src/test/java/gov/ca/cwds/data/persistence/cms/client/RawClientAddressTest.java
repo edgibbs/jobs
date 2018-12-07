@@ -4,29 +4,56 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.junit.Test;
 
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
+import gov.ca.cwds.data.persistence.cms.client.ClientAddressReference.ColumnPosition;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
 public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
+  static java.sql.Date sqlDate;
+  static Timestamp ts;
   RawClientAddress target;
 
   @Override
   public void setup() throws Exception {
     super.setup();
+    prepResultSetGood(rs);
     target = new RawClientAddress();
+    target.read(rs);
+  }
+
+  public static void prepResultSetGood(ResultSet rs) throws SQLException {
+    when(rs.getString(ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.CLA_LST_UPD_ID.ordinal())).thenReturn("0x5");
+    when(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.CLA_FKADDRS_T.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.CLA_FKCLIENT_T.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal())).thenReturn("");
+    when(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal())).thenReturn("N");
+    when(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal())).thenReturn("N");
+
+    when(rs.getShort(ColumnPosition.CLA_ADDR_TPC.ordinal())).thenReturn((short) 32);
+
+    Date date = new Date();
+    ts = new Timestamp(date.getTime());
+    when(rs.getTimestamp(ColumnPosition.CLA_LST_UPD_TS.ordinal())).thenReturn(ts);
+
+    sqlDate = new java.sql.Date(date.getTime());
+    when(rs.getDate(ColumnPosition.CLA_EFF_END_DT.ordinal())).thenReturn(sqlDate);
+    when(rs.getDate(ColumnPosition.CLA_EFF_STRTDT.ordinal())).thenReturn(sqlDate);
   }
 
   @Test
@@ -49,8 +76,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test(expected = SQLException.class)
   public void read_A$ResultSet_T$SQLException() throws Exception {
-    when(rs.next()).thenThrow(SQLException.class);
-    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    bombResultSet();
     target.read(rs);
   }
 
@@ -93,7 +119,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaLastUpdatedId_A$() throws Exception {
     String actual = target.getClaLastUpdatedId();
-    String expected = null;
+    String expected = "0x5";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -106,7 +132,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaLastUpdatedTime_A$() throws Exception {
     Date actual = target.getClaLastUpdatedTime();
-    Date expected = null;
+    Date expected = ts;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -119,7 +145,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaFkAddress_A$() throws Exception {
     String actual = target.getClaFkAddress();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -132,7 +158,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaFkClient_A$() throws Exception {
     String actual = target.getClaFkClient();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -158,7 +184,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaAddressType_A$() throws Exception {
     Short actual = target.getClaAddressType();
-    Short expected = null;
+    Short expected = 32;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -171,7 +197,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaHomelessInd_A$() throws Exception {
     String actual = target.getClaHomelessInd();
-    String expected = null;
+    String expected = "N";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -184,7 +210,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaBkInmtId_A$() throws Exception {
     String actual = target.getClaBkInmtId();
-    String expected = null;
+    String expected = "N";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -197,7 +223,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaEffectiveEndDate_A$() throws Exception {
     Date actual = target.getClaEffectiveEndDate();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -210,7 +236,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaEffectiveStartDate_A$() throws Exception {
     Date actual = target.getClaEffectiveStartDate();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 

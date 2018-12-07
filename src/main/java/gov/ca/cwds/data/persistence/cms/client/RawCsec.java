@@ -20,6 +20,10 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
 
   private static final long serialVersionUID = 1L;
 
+  protected enum ColumnPosition {
+    START, CLT_IDENTIFIER, CSH_THIRD_ID, CSH_CSEC_TPC, CSH_START_DT, CSH_END_DT, CSH_LST_UPD_ID, CSH_LST_UPD_TS, CSH_IBMSNAP_OPERATION, CSH_IBMSNAP_LOGMARKER
+  }
+
   // ====================================
   // CSECHIST: (CSEC history)
   // =====================================
@@ -57,15 +61,18 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
   @Override
   public RawCsec read(ResultSet rs) throws SQLException {
     super.read(rs);
-    csecId = rs.getString("CSH_THIRD_ID");
-    csecCodeId = rs.getShort("CSH_CSEC_TPC");
-    csecStartDate = rs.getDate("CSH_START_DT");
-    csecEndDate = rs.getDate("CSH_END_DT");
-    csecLastUpdatedId = rs.getString("CSH_LST_UPD_ID");
-    csecLastUpdatedTimestamp = rs.getTimestamp("CSH_LST_UPD_TS");
-    csecLastUpdatedOperation =
-        CmsReplicationOperation.strToRepOp(rs.getString("CSH_IBMSNAP_OPERATION"));
-    csecReplicationTimestamp = rs.getTimestamp("CSH_IBMSNAP_LOGMARKER");
+
+    csecId = rs.getString(ColumnPosition.CSH_THIRD_ID.ordinal());
+    csecCodeId = rs.getShort(ColumnPosition.CSH_CSEC_TPC.ordinal());
+    csecStartDate = rs.getDate(ColumnPosition.CSH_START_DT.ordinal());
+    csecEndDate = rs.getDate(ColumnPosition.CSH_END_DT.ordinal());
+    csecLastUpdatedId = rs.getString(ColumnPosition.CSH_LST_UPD_ID.ordinal());
+    csecLastUpdatedTimestamp = rs.getTimestamp(ColumnPosition.CSH_LST_UPD_TS.ordinal());
+
+    csecLastUpdatedOperation = CmsReplicationOperation
+        .strToRepOp(rs.getString(ColumnPosition.CSH_IBMSNAP_OPERATION.ordinal()));
+    csecReplicationTimestamp = rs.getTimestamp(ColumnPosition.CSH_IBMSNAP_LOGMARKER.ordinal());
+
     return this;
   }
 
