@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -116,7 +117,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonIgnore
   private long timeEndPull;
 
-  private final Map<String, Long> timings = new ConcurrentHashMap<>();
+  private final Map<String, Long> timings = new LinkedHashMap<>(31);
 
   private boolean initialLoad;
 
@@ -614,9 +615,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
           ;
     } else {
       buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince)
-//         .append("\n\tstart change polling:   ").append(new Date(timeStartPoll))
-//         .append("\n\tstart pulling data:     ").append(new Date(timeStartPull))
-//         .append("\n\tdone  pulling data:     ").append(new Date(timeEndPull))
+      // .append("\n\tstart change polling:   ").append(new Date(timeStartPoll))
+      // .append("\n\tstart pulling data:     ").append(new Date(timeStartPull))
+      // .append("\n\tdone  pulling data:     ").append(new Date(timeEndPull))
          ;
     }
 
@@ -626,7 +627,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     if (!isInitialLoad() && !timings.isEmpty()) {
       buf.append("\n\n        STEPS:");
-      timings.entrySet().stream().forEach(e -> buf.append("\n\t").append(StringUtils.rightPad(e.getKey(), 23)).append(':').append(new Date(e.getValue())));
+      timings.entrySet().stream().forEach(e -> 
+        buf.append("\n\t")
+           .append(StringUtils.rightPad(e.getKey() + ":", 24))
+           .append(new Date(e.getValue())));
     }
 
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));

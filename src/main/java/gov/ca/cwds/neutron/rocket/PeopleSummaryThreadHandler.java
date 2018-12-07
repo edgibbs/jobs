@@ -177,7 +177,7 @@ public class PeopleSummaryThreadHandler
 
   protected void step(STEP step) {
     LOGGER.debug(step.getMsg());
-    rocket.getFlightLog().addTimingEvent(step.name());
+    rocket.getFlightLog().addTimingEvent(step.name().toLowerCase());
   }
 
   protected void read(final PreparedStatement stmt, Consumer<ResultSet> consumer) {

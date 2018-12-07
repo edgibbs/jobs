@@ -255,7 +255,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   @Override
   public String getEventType() {
-    return "launch_cmd_client";
+    return "neutron_lc_client";
   }
 
 }
