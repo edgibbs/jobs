@@ -1,6 +1,8 @@
 package gov.ca.cwds.neutron.flight;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -31,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
 import gov.ca.cwds.neutron.enums.FlightStatus;
+import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
@@ -627,13 +630,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     if (!isInitialLoad() && !timings.isEmpty()) {
       buf.append("\n\n        STEPS:");
+      final DateFormat fmt = new SimpleDateFormat(NeutronDateTimeFormat.FMT_LEGACY_TIMESTAMP.getFormat());
       timings.entrySet().stream().forEach(e -> 
         buf.append("\n\t")
            .append(StringUtils.rightPad(e.getKey() + ":", 24))
-//           .append(" : ")
-//           .append(Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond())
-//           .append(" : ")
-           .append(new Date(e.getValue())));
+        // .append(" : ")
+        // .append(Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond())
+        // .append(" : ")
+           .append(fmt.format(new Date(e.getValue()))));
     }
 
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(new Date(startTime));
@@ -774,6 +778,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public Map<String, Long> getTimings() {
     return timings;
+  }
+
+  public void notifyMonitor() {
+
   }
 
 }
