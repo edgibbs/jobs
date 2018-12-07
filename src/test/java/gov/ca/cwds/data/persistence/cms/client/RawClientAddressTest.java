@@ -24,6 +24,7 @@ import gov.ca.cwds.jobs.Goddard;
 public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
   static java.sql.Date sqlDate;
+  static Timestamp ts;
   RawClientAddress target;
 
   @Override
@@ -31,6 +32,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
     super.setup();
     prepResultSetGood(rs);
     target = new RawClientAddress();
+    target.read(rs);
   }
 
   public static void prepResultSetGood(ResultSet rs) throws SQLException {
@@ -46,8 +48,8 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
     when(rs.getShort(ColumnPosition.CLA_ADDR_TPC.ordinal())).thenReturn((short) 32);
 
     Date date = new Date();
-    when(rs.getTimestamp(ColumnPosition.CLA_LST_UPD_TS.ordinal()))
-        .thenReturn(new Timestamp(date.getTime()));
+    ts = new Timestamp(date.getTime());
+    when(rs.getTimestamp(ColumnPosition.CLA_LST_UPD_TS.ordinal())).thenReturn(ts);
 
     sqlDate = new java.sql.Date(date.getTime());
     when(rs.getDate(ColumnPosition.CLA_EFF_END_DT.ordinal())).thenReturn(sqlDate);
@@ -117,7 +119,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaLastUpdatedId_A$() throws Exception {
     String actual = target.getClaLastUpdatedId();
-    String expected = null;
+    String expected = "0x5";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -130,7 +132,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaLastUpdatedTime_A$() throws Exception {
     Date actual = target.getClaLastUpdatedTime();
-    Date expected = sqlDate;
+    Date expected = ts;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -143,7 +145,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaFkAddress_A$() throws Exception {
     String actual = target.getClaFkAddress();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -156,7 +158,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaFkClient_A$() throws Exception {
     String actual = target.getClaFkClient();
-    String expected = null;
+    String expected = DEFAULT_CLIENT_ID;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -182,7 +184,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaAddressType_A$() throws Exception {
     Short actual = target.getClaAddressType();
-    Short expected = null;
+    Short expected = 32;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -195,7 +197,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaHomelessInd_A$() throws Exception {
     String actual = target.getClaHomelessInd();
-    String expected = null;
+    String expected = "N";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -208,7 +210,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaBkInmtId_A$() throws Exception {
     String actual = target.getClaBkInmtId();
-    String expected = null;
+    String expected = "N";
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -221,7 +223,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaEffectiveEndDate_A$() throws Exception {
     Date actual = target.getClaEffectiveEndDate();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -234,7 +236,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaEffectiveStartDate_A$() throws Exception {
     Date actual = target.getClaEffectiveStartDate();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 
