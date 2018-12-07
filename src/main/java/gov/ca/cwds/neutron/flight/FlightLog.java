@@ -789,9 +789,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
             Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
       }
 
-      LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
-          eventAttributes.size());
-
       if (lastChangeSince != null) {
         eventAttributes.putIfAbsent("changed_since",
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
@@ -805,6 +802,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       }
 
       if (!eventAttributes.isEmpty()) {
+        LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
+            eventAttributes.size());
+
         eventAttributes.entrySet().stream().forEach(
             e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
         NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
