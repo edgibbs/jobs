@@ -29,6 +29,7 @@ import gov.ca.cwds.jobs.Goddard;
 
 public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<ReplicatedClient>> {
 
+  static Timestamp ts;
   static java.sql.Date sqlDate;
   RawClient target;
 
@@ -78,13 +79,16 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
     when(rs.getShort(ColPos.CLT_RLGN_TPC.ordinal())).thenReturn((short) 1566);
 
     Date date = new Date();
-    when(rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal()))
-        .thenReturn(new Timestamp(date.getTime()));
+    ts = new Timestamp(date.getTime());
+    when(rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal())).thenReturn(ts);
 
     sqlDate = new java.sql.Date(date.getTime());
     when(rs.getDate(ColPos.CLT_BIRTH_DT.ordinal())).thenReturn(sqlDate);
     when(rs.getDate(ColPos.CLT_CREATN_DT.ordinal())).thenReturn(sqlDate);
     when(rs.getDate(ColPos.CLT_DEATH_DT.ordinal())).thenReturn(sqlDate);
+
+    when(rs.getString(ColPos.CLT_IBMSNAP_LOGMARKER.ordinal())).thenReturn("U");
+    when(rs.getTimestamp(ColPos.CLT_IBMSNAP_OPERATION.ordinal())).thenReturn(ts);
   }
 
   @Test

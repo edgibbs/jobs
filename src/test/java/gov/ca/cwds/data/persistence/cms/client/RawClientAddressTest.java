@@ -23,6 +23,7 @@ import gov.ca.cwds.jobs.Goddard;
 
 public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
 
+  static java.sql.Date sqlDate;
   RawClientAddress target;
 
   @Override
@@ -48,7 +49,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
     when(rs.getTimestamp(ColumnPosition.CLA_LST_UPD_TS.ordinal()))
         .thenReturn(new Timestamp(date.getTime()));
 
-    java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+    sqlDate = new java.sql.Date(date.getTime());
     when(rs.getDate(ColumnPosition.CLA_EFF_END_DT.ordinal())).thenReturn(sqlDate);
     when(rs.getDate(ColumnPosition.CLA_EFF_STRTDT.ordinal())).thenReturn(sqlDate);
   }
@@ -129,7 +130,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaLastUpdatedTime_A$() throws Exception {
     Date actual = target.getClaLastUpdatedTime();
-    Date expected = null;
+    Date expected = sqlDate;
     assertThat(actual, is(equalTo(expected)));
   }
 
