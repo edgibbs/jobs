@@ -20,6 +20,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -251,6 +252,11 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   public void handleFinishRange(Pair<String, String> range) {
     keys.clear();
     super.handleFinishRange(range);
+
+    final FlightLog fl = getRocket().getFlightLog();
+    if (!fl.isInitialLoad()) {
+      fl.notifyMonitor(getEventType());
+    }
   }
 
   @Override

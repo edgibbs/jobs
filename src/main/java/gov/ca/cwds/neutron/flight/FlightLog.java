@@ -788,6 +788,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
         timings.entrySet().stream().forEach(e -> eventAttributes.put(e.getKey(),
             Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
       }
+
+      NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
     }
 
     // "changed_since": 1544143034,
@@ -798,9 +800,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     // "es_before": 24,
     // "es_after": 24,
     // "es_errors": 0
-
-
-    NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
   }
 
 }

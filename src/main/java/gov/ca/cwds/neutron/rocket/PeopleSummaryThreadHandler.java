@@ -622,11 +622,6 @@ public class PeopleSummaryThreadHandler
     doneThreadRetrieve();
     clear();
     freeMemory();
-
-    final FlightLog fl = rocket.getFlightLog();
-    if (!fl.isInitialLoad()) {
-      fl.notifyMonitor(getEventType());
-    }
   }
 
   @Override
