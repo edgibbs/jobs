@@ -91,6 +91,8 @@ public class ExitInitialLoadRocket
           if (esDao.createOrSwapAlias(alias, index)) {
             LOGGER.info("Applied Alias {} to Index {} ", alias, index);
 
+            // ******** ES 5.5.x ONLY! ********
+            // For ES 6.x call the ES REST API admin functions.
             final UpdateSettingsResponse updateResponse = esDao.getClient().admin().indices()
                 .prepareUpdateSettings(index).setSettings(Settings.builder()
                     .put("index.refresh_interval", "3s").put("index.number_of_replicas", 2))
