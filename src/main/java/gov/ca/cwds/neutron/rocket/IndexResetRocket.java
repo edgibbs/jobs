@@ -16,6 +16,7 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 /**
  * Drops and creates an Elasticsearch index, if requested.
@@ -44,8 +45,18 @@ public abstract class IndexResetRocket
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
   }
 
+  /**
+   * Where are the index's settings file?
+   * 
+   * @return path to index settings file
+   */
   protected abstract String getIndexSettingsLocation();
 
+  /**
+   * Where are the index's mapping file?
+   * 
+   * @return path to index mapping file
+   */
   protected abstract String getDocumentMappingLocation();
 
   @Override
@@ -57,48 +68,51 @@ public abstract class IndexResetRocket
       return lastRunDate;
     }
 
+    final FlightPlan plan = getFlightPlan();
+
     try {
       // If index name is provided, use it, else take alias from ES config.
-      final String indexNameOverride = getFlightPlan().getIndexName();
+      final String indexNameOverride = plan.getIndexName();
       String effectiveIndexName =
           StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
               : indexNameOverride;
 
-      if (!getFlightPlan().isLastRunMode()) {
-        // Force new index name for Initial Load when Index name not provided
+      if (!plan.isLastRunMode()) {
+        // Force new index name for Initial Load when index name not provided.
         if (StringUtils.isBlank(indexNameOverride)) {
           effectiveIndexName = effectiveIndexName.concat("_")
               .concat(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
         }
 
         // Initial Load no longer drops indexes. Intentionally a manual step.
-        if (getFlightPlan().isDropIndex() && !StringUtils.isBlank(indexNameOverride)) {
+        if (plan.isDropIndex() && !StringUtils.isBlank(indexNameOverride)) {
           esDao.deleteIndex(effectiveIndexName);
         }
       } else {
-        // Drop index first, if requested
-        if (getFlightPlan().isDropIndex()) {
+        // Drop index first, if requested.
+        if (plan.isDropIndex()) {
           esDao.deleteIndex(effectiveIndexName);
         }
       }
 
-      getFlightPlan().setIndexName(effectiveIndexName);
+      plan.setIndexName(effectiveIndexName);
       LaunchCommand.getInstance().getCommonFlightPlan().setIndexName(effectiveIndexName);
 
       // If the index is missing, create it.
-      final String documentType = esDao.getConfig().getElasticsearchDocType();
+      final ElasticsearchConfiguration config = esDao.getConfig();
+      final String documentType = config.getElasticsearchDocType();
 
-      final String settingFile = StringUtils.isNotBlank(esDao.getConfig().getIndexSettingFile())
-          ? esDao.getConfig().getIndexSettingFile()
-          : getIndexSettingsLocation();
+      final String settingFile =
+          StringUtils.isNotBlank(config.getIndexSettingFile()) ? config.getIndexSettingFile()
+              : getIndexSettingsLocation();
 
-      final String mappingFile = StringUtils.isNotBlank(esDao.getConfig().getDocumentMappingFile())
-          ? esDao.getConfig().getDocumentMappingFile()
-          : getDocumentMappingLocation();
+      final String mappingFile =
+          StringUtils.isNotBlank(config.getDocumentMappingFile()) ? config.getDocumentMappingFile()
+              : getDocumentMappingLocation();
 
       LOGGER.warn(
           "\nCreate index if missing: \neffective index name: {}, \nalias: {}, \nsetting file: {}, \nmapping file: {}",
-          effectiveIndexName, esDao.getConfig().getElasticsearchAlias(), settingFile, mappingFile);
+          effectiveIndexName, config.getElasticsearchAlias(), settingFile, mappingFile);
 
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, settingFile, mappingFile);
     } catch (Exception e) {
