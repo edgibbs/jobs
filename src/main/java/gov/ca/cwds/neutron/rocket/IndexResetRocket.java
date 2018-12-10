@@ -62,13 +62,12 @@ public abstract class IndexResetRocket
   @Override
   public Date launch(Date lastRunDate) {
     LOGGER.info("INDEX CHECK!");
+    final FlightPlan plan = getFlightPlan();
 
     // If a range was requested, then don't create a new index or swap aliases.
-    if (flightPlan.isRangeGiven()) {
+    if (plan.isRangeGiven()) {
       return lastRunDate;
     }
-
-    final FlightPlan plan = getFlightPlan();
 
     try {
       // If index name is provided, use it, else take alias from ES config.
