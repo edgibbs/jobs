@@ -87,6 +87,7 @@ public class ExitInitialLoadRocket
           // Swap Alias to new index
           final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
           final String alias = esDao.getConfig().getElasticsearchAlias();
+
           if (esDao.createOrSwapAlias(alias, index)) {
             LOGGER.info("Applied Alias {} to Index {} ", alias, index);
 
@@ -96,7 +97,7 @@ public class ExitInitialLoadRocket
                 .get();
 
             if (updateResponse.isAcknowledged()) {
-              LOGGER.info("Reset replicas and refresh interval on index {} ", index);
+              LOGGER.info("Successfully reset replicas and refresh interval on index {} ", index);
             }
           }
 
