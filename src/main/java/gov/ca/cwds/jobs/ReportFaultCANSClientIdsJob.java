@@ -122,10 +122,8 @@ public class ReportFaultCANSClientIdsJob {
 
     //Temporary overwrite DB_CMS_<> properties with DB_RS_<> env vars values to reuse HIBERNATE_CONFIG_CMS
     //for RS session factory
-    String[] cmsBackUp = new String[DB_RS_PROPERTY_LIST.size()];
     String envValue = null;
     for (int i = 0; i < DB_RS_PROPERTY_LIST.size(); i++) {
-      cmsBackUp[i] = System.getProperty(DB_CMS_PROPERTY_LIST.get(i));
       envValue = System.getenv(DB_RS_PROPERTY_LIST.get(i));
       // When RS env vars are not provided - run in report mode only.
       if (envValue == null) {
@@ -137,9 +135,9 @@ public class ReportFaultCANSClientIdsJob {
     if (envValue != null) {
       rsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
     }
-    //Restore DB_CMS_<> properties from backup
-    for (int i = 0; i < cmsBackUp.length; i++) {
-      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), cmsBackUp[i]);
+    //Restore DB_CMS_<> properties from env. vars
+    for (int i = 0; i < DB_CMS_PROPERTY_LIST.size(); i++) {
+      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), System.getenv(DB_CMS_PROPERTY_LIST.get(i)));
     }
 
   }
