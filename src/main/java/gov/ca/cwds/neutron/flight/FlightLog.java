@@ -792,14 +792,15 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       if (lastChangeSince != null) {
         eventAttributes.putIfAbsent("changed_since",
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
-        eventAttributes.putIfAbsent("warnings", warnings.size());
-        eventAttributes.putIfAbsent("errors", isFatalError());
-        eventAttributes.putIfAbsent("recs_pulled", rowsDenormalized.get());
-        eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
-        eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
-        eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
-        eventAttributes.putIfAbsent("es_errors", recsBulkError.get());
       }
+
+      eventAttributes.putIfAbsent("warnings", warnings.size());
+      eventAttributes.putIfAbsent("errors", isFatalError());
+      eventAttributes.putIfAbsent("recs_pulled", rowsDenormalized.get());
+      eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
+      eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
+      eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
+      eventAttributes.putIfAbsent("es_errors", recsBulkError.get());
 
       if (!eventAttributes.isEmpty()) {
         LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
