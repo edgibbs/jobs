@@ -116,7 +116,7 @@ public enum StandardFlightSchedule {
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 20, 1000, null, true, true,
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 5, 1000, null, true, true,
       false),
 
   /**

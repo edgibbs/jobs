@@ -804,13 +804,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       if (!eventAttributes.isEmpty()) {
         LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
             eventAttributes.size());
-
         eventAttributes.entrySet().stream().forEach(
             e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+
         try {
           NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
-        } catch (Exception e2) {
-          // TODO: handle exception
+        } catch (Exception e) {
+          CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
         }
       }
     }
