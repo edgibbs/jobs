@@ -90,7 +90,9 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
 
     try {
       finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
-    } catch (NeutronCheckedException e) {
+    } catch (NeutronRuntimeException e) {
+      throw e;
+    } catch (Throwable e) {
       throw new NeutronRuntimeException("ABORT FLIGHT!", e);
     }
 
@@ -133,7 +135,8 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   }
 
   /**
-   * Reads the last run file and returns the last run date.
+   * Reads the last run file and returns the last run date. Only reads once per rocket flight and
+   * stores in {@link FlightLog#setLastChangeSince(Date)} to reduce file system I/O.
    * 
    * @return last successful run date/time as a Java Date.
    * @throws NeutronCheckedException I/O or parse error
@@ -141,14 +144,17 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   public Date determineLastSuccessfulRunTime() throws NeutronCheckedException {
     Date ret = getFlightPlan().getOverrideLastRunStartTime();
     if (ret != null) {
-      return ret;
-    }
-
-    try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
-      ret = new SimpleDateFormat(FMT_LAST_RUN_DATE.getFormat()).parse(br.readLine().trim()); // NOSONAR
-    } catch (IOException | ParseException e) {
-      fail();
-      throw CheeseRay.checked(LOGGER, e, "ERROR READING LAST RUN TIME: {}", e.getMessage());
+      LOGGER.warn("******* OVERRIDE LAST RUN TIME: {} *******", ret);
+    } else if (getFlightLog().getLastChangeSince() != null) {
+      ret = getFlightLog().getLastChangeSince();
+      LOGGER.trace("Cached last change date: {}", ret);
+    } else {
+      try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
+        ret = new SimpleDateFormat(FMT_LAST_RUN_DATE.getFormat()).parse(br.readLine().trim()); // NOSONAR
+      } catch (IOException | ParseException e) {
+        fail();
+        throw CheeseRay.checked(LOGGER, e, "ERROR READING LAST RUN TIME: {}", e.getMessage());
+      }
     }
 
     LOGGER.info("last successful flight was at {}", ret);
@@ -163,6 +169,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
    */
   public void writeLastSuccessfulRunTime(Date datetime) throws NeutronCheckedException {
     if (!isFailed()) {
+      LOGGER.info("Write timestamp '{}' to file {}", datetime, lastRunTimeFilename);
       try (BufferedWriter w = new BufferedWriter(new FileWriter(lastRunTimeFilename))) { // NOSONAR
         w.write(FMT_LAST_RUN_DATE.formatter().format(datetime));
       } catch (IOException e) {

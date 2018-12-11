@@ -174,7 +174,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
   @JsonIgnore
-  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>(512));
+  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>(128));
 
   /**
    * Initial load only.
@@ -807,7 +807,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
         eventAttributes.entrySet().stream().forEach(
             e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
-        NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
+        try {
+          NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
+        } catch (Exception e2) {
+          // TODO: handle exception
+        }
       }
     }
   }
