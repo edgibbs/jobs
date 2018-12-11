@@ -250,13 +250,13 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   @Override
   public void handleFinishRange(Pair<String, String> range) {
-    keys.clear();
-    super.handleFinishRange(range);
-
     final FlightLog fl = getRocket().getFlightLog();
     if (!fl.isInitialLoad()) {
       fl.notifyMonitor(getEventType());
     }
+
+    keys.clear();
+    super.handleFinishRange(range);
   }
 
   @Override
