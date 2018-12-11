@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs.test;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
@@ -12,6 +13,11 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 
@@ -78,7 +84,7 @@ public class NeutronPlayground {
 
   public void streamTest2() {
     // 3 apple, 2 banana, others 1
-    List<Item> items = Arrays.asList(new Item("apple", 10, new BigDecimal("9.99")),
+    final List<Item> items = Arrays.asList(new Item("apple", 10, new BigDecimal("9.99")),
         new Item("banana", 20, new BigDecimal("19.99")),
         new Item("orang", 10, new BigDecimal("29.99")),
         new Item("watermelon", 10, new BigDecimal("29.99")),
@@ -88,20 +94,40 @@ public class NeutronPlayground {
         new Item("apple", 20, new BigDecimal("9.99")));
 
     // group by price
-    Map<BigDecimal, List<Item>> groupByPriceMap =
+    final Map<BigDecimal, List<Item>> groupByPriceMap =
         items.stream().collect(Collectors.groupingBy(Item::getPrice));
-
     System.out.println(groupByPriceMap);
 
     // group by price, uses 'mapping' to convert List<Item> to Set<String>
-    Map<BigDecimal, Set<String>> result = items.stream().collect(Collectors
+    final Map<BigDecimal, Set<String>> result = items.stream().collect(Collectors
         .groupingBy(Item::getPrice, Collectors.mapping(Item::getName, Collectors.toSet())));
 
     LOGGER.info("streamTest2(): result: {}", result);
   }
 
+  public void jsonToMap(String json) {
+    try {
+      final ObjectMapper mapper = new ObjectMapper();
+
+      // convert JSON string to Map
+      final Map<String, Object> map =
+          mapper.readValue(json, new TypeReference<Map<String, String>>() {});
+      System.out.println(map);
+
+    } catch (JsonGenerationException e) {
+      e.printStackTrace();
+    } catch (JsonMappingException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   public static void main(String[] args) {
-    // final NeutronPlayground playground = new NeutronPlayground();
+    final NeutronPlayground playground = new NeutronPlayground();
+    final String json = "{\"name\":\"dork\", \"age\":97}";
+    playground.jsonToMap(json);
+
     // playground.streamTest1();
     // playground.streamTest2();
 

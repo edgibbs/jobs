@@ -174,7 +174,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   private final AtomicInteger recsBulkError = new AtomicInteger(0);
 
   @JsonIgnore
-  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>(512));
+  private final List<String> warnings = Collections.synchronizedList(new ArrayList<>(128));
 
   /**
    * Initial load only.
@@ -789,15 +789,12 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
             Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
       }
 
-      LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
-          eventAttributes.size());
-
       if (lastChangeSince != null) {
         eventAttributes.putIfAbsent("changed_since",
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
         eventAttributes.putIfAbsent("warnings", warnings.size());
-        eventAttributes.putIfAbsent("errors", isFatalError() ? "true" : "false");
-        eventAttributes.putIfAbsent("recs_pulled", rowsNormalized.get());
+        eventAttributes.putIfAbsent("errors", isFatalError());
+        eventAttributes.putIfAbsent("recs_pulled", rowsDenormalized.get());
         eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
         eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
         eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
@@ -805,9 +802,16 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       }
 
       if (!eventAttributes.isEmpty()) {
+        LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
+            eventAttributes.size());
         eventAttributes.entrySet().stream().forEach(
             e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
-        NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
+
+        try {
+          NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
+        } catch (Exception e) {
+          CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
+        }
       }
     }
   }

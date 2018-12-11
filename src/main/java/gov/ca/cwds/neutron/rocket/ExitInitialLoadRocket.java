@@ -2,6 +2,9 @@ package gov.ca.cwds.neutron.rocket;
 
 import java.util.Date;
 
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
+import org.elasticsearch.common.settings.Settings;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -84,9 +87,22 @@ public class ExitInitialLoadRocket
           // Swap Alias to new index
           final String index = LaunchCommand.getInstance().getCommonFlightPlan().getIndexName();
           final String alias = esDao.getConfig().getElasticsearchAlias();
+
           if (esDao.createOrSwapAlias(alias, index)) {
             LOGGER.info("Applied Alias {} to Index {} ", alias, index);
+
+            // ******** ES 5.5.x ONLY! ********
+            // For ES 6.x call the ES REST API admin functions.
+            final UpdateSettingsResponse updateResponse = esDao.getClient().admin().indices()
+                .prepareUpdateSettings(index).setSettings(Settings.builder()
+                    .put("index.refresh_interval", "3s").put("index.number_of_replicas", 2))
+                .get();
+
+            if (updateResponse.isAcknowledged()) {
+              LOGGER.info("Successfully reset replicas and refresh interval on index {} ", index);
+            }
           }
+
         } else {
           LOGGER.warn("PREVIOUS ERROR! DON'T SWAP ALIASES!");
         }
