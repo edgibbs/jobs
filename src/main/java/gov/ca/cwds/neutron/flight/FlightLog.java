@@ -642,15 +642,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(fmt.format(new Date(startTime)));
     if (endTime > 0L) {
       buf.append("\n\tend:                    ").append(fmt.format(new Date(endTime)))
-          .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
+         .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
     }
 
-    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tdenormalized:    ")
+    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tprocessed:       ")
         .append(pad(recsSentToIndexQueue.get()))
         .append("\n\tnormalized:      ").append(pad(rowsNormalized.get()))
         .append("\n\tde-normalized:   ").append(pad(rowsDenormalized.get()))
         .append("\n\n    ELASTICSEARCH:")
-        .append("\n\tto bulk:         ").append(pad(recsSentToBulkProcessor.get()))
         .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
         .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
         .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
@@ -794,9 +793,20 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
       }
 
+      // buf.append("\n\n RECORDS RETRIEVED:").append("\n\tprocessed: ")
+      // .append(pad(.get()))
+      // .append("\n\tnormalized: ").append(pad(rowsNormalized.get()))
+      // .append("\n\tde-normalized: ").append(pad(rowsDenormalized.get()))
+      // .append("\n\n ELASTICSEARCH:")
+      // .append("\n\tbulk prepared: ").append(pad(recsBulkPrepared.get()))
+      // .append("\n\tbulk deleted: ").append(pad(recsBulkDeleted.get()))
+      // .append("\n\tbulk before: ").append(pad(recsBulkBefore.get()))
+      // .append("\n\tbulk after: ").append(pad(recsBulkAfter.get()))
+      // .append("\n\tbulk errors: ").append(pad(recsBulkError.get()));
+
       eventAttributes.putIfAbsent("warnings", warnings.size());
       eventAttributes.putIfAbsent("errors", isFatalError());
-      eventAttributes.putIfAbsent("recs_pulled", rowsDenormalized.get());
+      eventAttributes.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
       eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
       eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
       eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
