@@ -14,12 +14,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 
 public class NeutronPlayground {
 
@@ -105,28 +104,27 @@ public class NeutronPlayground {
     LOGGER.info("streamTest2(): result: {}", result);
   }
 
-  public void jsonToMap(String json) {
+  /**
+   * Convert JSON string to Map.
+   * 
+   * @param json JSON string to convert
+   * @return Map of keys and values
+   */
+  public Map<String, Object> jsonToMap(String json) {
+    Map<String, Object> map = null;
     try {
       final ObjectMapper mapper = new ObjectMapper();
-
-      // convert JSON string to Map
-      final Map<String, Object> map =
-          mapper.readValue(json, new TypeReference<Map<String, String>>() {});
-      System.out.println(map);
-
-    } catch (JsonGenerationException e) {
-      e.printStackTrace();
-    } catch (JsonMappingException e) {
-      e.printStackTrace();
+      map = mapper.readValue(json, new TypeReference<Map<String, String>>() {});
     } catch (IOException e) {
-      e.printStackTrace();
+      CheeseRay.runtime(LOGGER, e, "ELASTICSEARCH INDEX MANAGEMENT ERROR! {}", e.getMessage());
     }
+
+    return map;
   }
 
   public static void main(String[] args) {
     final NeutronPlayground playground = new NeutronPlayground();
-    final String json = "{\"name\":\"dork\", \"age\":97}";
-    playground.jsonToMap(json);
+    System.out.println(playground.jsonToMap("{\"name\":\"dork\", \"age\":97}"));
 
     // playground.streamTest1();
     // playground.streamTest2();
