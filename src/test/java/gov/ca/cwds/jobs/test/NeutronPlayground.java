@@ -105,10 +105,9 @@ public class NeutronPlayground {
     LOGGER.info("streamTest2(): result: {}", result);
   }
 
-  public void jsonToMap() {
+  public void jsonToMap(String json) {
     try {
       final ObjectMapper mapper = new ObjectMapper();
-      final String json = "{\"name\":\"mkyong\", \"age\":29}";
 
       // convert JSON string to Map
       final Map<String, Object> map =
@@ -126,7 +125,8 @@ public class NeutronPlayground {
 
   public static void main(String[] args) {
     final NeutronPlayground playground = new NeutronPlayground();
-    playground.jsonToMap();
+    final String json = "{\"name\":\"dork\", \"age\":97}";
+    playground.jsonToMap(json);
 
     // playground.streamTest1();
     // playground.streamTest2();
