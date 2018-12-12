@@ -98,9 +98,10 @@ public class ExitInitialLoadRocket
 
             // ******** ES 5.5.x ONLY! ********
             // For ES 6.x call the ES REST API admin functions.
-            final Map<String, Object> map = NeutronStringUtils.jsonToMap(IOUtils.resourceToString(
+            final String json = IOUtils.resourceToString(
                 NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue(),
-                Charset.defaultCharset()));
+                Charset.defaultCharset());
+            final Map<String, Object> map = NeutronStringUtils.jsonToMap(json);
             final Integer replicas = (Integer) map.get("number_of_replicas");
             final String refreshInterval = (String) map.get("refresh_interval");
 

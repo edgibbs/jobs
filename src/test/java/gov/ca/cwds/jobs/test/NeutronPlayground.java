@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.test;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -11,14 +11,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.ca.cwds.data.std.ApiObjectIdentity;
-import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
 
 public class NeutronPlayground {
 
@@ -104,27 +103,17 @@ public class NeutronPlayground {
     LOGGER.info("streamTest2(): result: {}", result);
   }
 
-  /**
-   * Convert JSON string to Map.
-   * 
-   * @param json JSON string to convert
-   * @return Map of keys and values
-   */
-  public Map<String, Object> jsonToMap(String json) {
-    Map<String, Object> map = null;
-    try {
-      final ObjectMapper mapper = new ObjectMapper();
-      map = mapper.readValue(json, new TypeReference<Map<String, String>>() {});
-    } catch (IOException e) {
-      CheeseRay.runtime(LOGGER, e, "ELASTICSEARCH INDEX MANAGEMENT ERROR! {}", e.getMessage());
-    }
-
-    return map;
-  }
-
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     final NeutronPlayground playground = new NeutronPlayground();
-    System.out.println(playground.jsonToMap("{\"name\":\"dork\", \"age\":97}"));
+
+    final String json = IOUtils.resourceToString(
+        NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue(), Charset.defaultCharset());
+    System.out.println(json);
+
+    final Map<String, Object> map = NeutronStringUtils.jsonToMap(json);
+    final Integer replicas = (Integer) map.get("number_of_replicas");
+    final String refreshInterval = (String) map.get("refresh_interval");
+    System.out.println(map);
 
     // playground.streamTest1();
     // playground.streamTest2();

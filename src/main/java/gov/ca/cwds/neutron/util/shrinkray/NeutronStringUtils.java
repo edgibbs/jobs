@@ -1,6 +1,5 @@
 package gov.ca.cwds.neutron.util.shrinkray;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.launch.NeutronRocket;
 
@@ -24,6 +24,8 @@ import gov.ca.cwds.neutron.launch.NeutronRocket;
 public class NeutronStringUtils {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NeutronRocket.class);
+
+  public static final ObjectMapper MAPPER = ObjectMapperUtils.createObjectMapper();
 
   private NeutronStringUtils() {
     // static methods only
@@ -38,9 +40,8 @@ public class NeutronStringUtils {
   public static Map<String, Object> jsonToMap(String json) {
     Map<String, Object> ret = null;
     try {
-      final ObjectMapper mapper = new ObjectMapper();
-      ret = mapper.readValue(json, new TypeReference<Map<String, String>>() {});
-    } catch (IOException e) {
+      ret = MAPPER.readValue(json, new TypeReference<Map<String, Object>>() {});
+    } catch (Exception e) {
       CheeseRay.runtime(LOGGER, e, "ERROR STREAMING JSON TO MAP! {}: json: {}", e.getMessage(),
           json);
     }
