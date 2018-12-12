@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
 import org.elasticsearch.common.settings.Settings;
 
@@ -29,7 +28,6 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
-import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 /**
  * Exit the initial load cycle.
@@ -100,13 +98,9 @@ public class ExitInitialLoadRocket
 
             // ******** ES 5.5.x ONLY! ********
             // For ES 6.x call the ES REST API admin functions.
-            final ElasticsearchConfiguration config = esDao.getConfig();
-            final String settingFile =
-                StringUtils.isNotBlank(config.getIndexSettingFile()) ? config.getIndexSettingFile()
-                    : NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue();
-
-            final Map<String, Object> map = NeutronStringUtils
-                .jsonToMap(IOUtils.resourceToString(settingFile, Charset.defaultCharset()));
+            final Map<String, Object> map = NeutronStringUtils.jsonToMap(IOUtils.resourceToString(
+                NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue(),
+                Charset.defaultCharset()));
             final Integer replicas = (Integer) map.get("number_of_replicas");
             final String refreshInterval = (String) map.get("refresh_interval");
 
