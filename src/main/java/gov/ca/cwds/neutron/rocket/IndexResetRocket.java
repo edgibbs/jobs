@@ -128,11 +128,11 @@ public abstract class IndexResetRocket
       LOGGER.debug("Initial Load index settings: {}", json);
       final File tempSettingsFile = File.createTempFile("idx", "set");
       FileUtils.writeStringToFile(tempSettingsFile, json, Charset.defaultCharset());
+      settingFile = tempSettingsFile.getPath();
 
       LOGGER.warn(
           "\nCreate index if missing: \neffective index name: {}, \nalias: {}, \nsetting file: {}, \nmapping file: {}",
-          effectiveIndexName, config.getElasticsearchAlias(), tempSettingsFile.getPath(),
-          mappingFile);
+          effectiveIndexName, config.getElasticsearchAlias(), settingFile, mappingFile);
 
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, settingFile, mappingFile);
     } catch (Exception e) {
