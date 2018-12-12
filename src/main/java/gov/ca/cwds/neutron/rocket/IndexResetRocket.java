@@ -135,7 +135,9 @@ public abstract class IndexResetRocket
           effectiveIndexName, config.getElasticsearchAlias(), settingFile, mappingFile);
 
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, settingFile, mappingFile);
+      LOGGER.debug("Created index {}", effectiveIndexName);
     } catch (Exception e) {
+      LOGGER.error("FAILED TO CREATE INDEX! {}", e.getMessage(), e);
       throw CheeseRay.runtime(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
     }
 
