@@ -396,15 +396,15 @@ public class ReportFaultCANSClientIdsJob {
         txn.rollback();
         LOGGER.error("Client [id: {}] -> Error while working with CMS database:\n {}", clientDto.id,
             e.getMessage(), e);
-        throw e;
+        clientDto.setComment(clientDto.comment.concat(" Error while working with CMS database: ").concat(e.getMessage()));
       } finally {
         txn.rollback();
       }
     } else {
       LOGGER.info("Client [id: {}] -> Client Id is [null].", clientDto.id);
       clientDto.setComment("Client Id is [null].");
-      return false;
     }
+    return false;
   }
 
 
@@ -438,7 +438,7 @@ public class ReportFaultCANSClientIdsJob {
       rsTxn.rollback();
       LOGGER.error("Client [id: {}] -> Error while working with RS database:\n {}", clientDto.id,
           e.getMessage(), e);
-      throw e;
+      clientDto.setComment(clientDto.comment.concat(" Error while working with RS database: ").concat(e.getMessage()));
     } finally {
       rsTxn.rollback();
     }
@@ -471,7 +471,7 @@ public class ReportFaultCANSClientIdsJob {
         LOGGER
             .error("Client [id: {}] -> Error while working with CANS database:\n {}", clientDto.id,
                 e.getMessage(), e);
-        throw e;
+        clientDto.setComment(clientDto.comment.concat(" Error while working with CANS database: ").concat(e.getMessage()));
       } finally {
         cansTxn.commit();
       }
