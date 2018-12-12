@@ -104,7 +104,7 @@ public class NeutronPlayground {
   }
 
   public static void main(String[] args) throws Exception {
-    final NeutronPlayground playground = new NeutronPlayground();
+    // final NeutronPlayground playground = new NeutronPlayground();
 
     final String json = IOUtils.resourceToString(
         NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue(), Charset.defaultCharset());
@@ -113,7 +113,8 @@ public class NeutronPlayground {
     final Map<String, Object> map = NeutronStringUtils.jsonToMap(json);
     final Integer replicas = (Integer) map.get("number_of_replicas");
     final String refreshInterval = (String) map.get("refresh_interval");
-    System.out.println(map);
+    LOGGER.info("number_of_replicas: {}, refresh_interval: {}\nmap: {}", replicas, refreshInterval,
+        map);
 
     // playground.streamTest1();
     // playground.streamTest2();
