@@ -374,6 +374,11 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     }
   }
 
+  @Override
+  public String getEventType() {
+    return "neutron_lc_client";
+  }
+
   /**
    * Rocket entry point.
    * 
