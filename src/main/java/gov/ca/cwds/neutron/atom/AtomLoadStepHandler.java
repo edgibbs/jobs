@@ -97,4 +97,8 @@ public interface AtomLoadStepHandler<N extends PersistentObject> {
     return new ArrayList<>();
   }
 
+  default String getEventType() {
+    return "neutron_lc_client";
+  }
+
 }

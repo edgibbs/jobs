@@ -86,14 +86,17 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
     } catch (Exception e) {
       fail();
       LOGGER.error("FLIGHT ABORTED!", e);
-    }
-
-    try {
-      finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
-    } catch (NeutronRuntimeException e) {
-      throw e;
-    } catch (Throwable e) {
-      throw new NeutronRuntimeException("ABORT FLIGHT!", e);
+    } finally {
+      try {
+        finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
+      } catch (NeutronCheckedException e) {
+        CheeseRay.runtime(LOGGER, e, "ERROR FINISHING! {}", e.getMessage());
+      } catch (Throwable e) {
+        if (e instanceof NeutronRuntimeException) {
+          throw e;
+        }
+        throw new NeutronRuntimeException("ABORT FLIGHT!", e);
+      }
     }
 
     // Sorry, SonarQube. SLF4J does not yet support conditional invocation.
@@ -230,7 +233,6 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
   public Logger getLogger() {
     return LOGGER;
   }
-
 
   /**
    * {@inheritDoc}

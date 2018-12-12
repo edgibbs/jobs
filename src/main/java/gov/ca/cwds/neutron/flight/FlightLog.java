@@ -793,17 +793,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
       }
 
-      // buf.append("\n\n RECORDS RETRIEVED:").append("\n\tprocessed: ")
-      // .append(pad(.get()))
-      // .append("\n\tnormalized: ").append(pad(rowsNormalized.get()))
-      // .append("\n\tde-normalized: ").append(pad(rowsDenormalized.get()))
-      // .append("\n\n ELASTICSEARCH:")
-      // .append("\n\tbulk prepared: ").append(pad(recsBulkPrepared.get()))
-      // .append("\n\tbulk deleted: ").append(pad(recsBulkDeleted.get()))
-      // .append("\n\tbulk before: ").append(pad(recsBulkBefore.get()))
-      // .append("\n\tbulk after: ").append(pad(recsBulkAfter.get()))
-      // .append("\n\tbulk errors: ").append(pad(recsBulkError.get()));
-
       eventAttributes.putIfAbsent("warnings", warnings.size());
       eventAttributes.putIfAbsent("errors", isFatalError());
       eventAttributes.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
