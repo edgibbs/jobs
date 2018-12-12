@@ -121,9 +121,11 @@ public abstract class IndexResetRocket
           .jsonToMap(IOUtils.resourceToString(settingFile, Charset.defaultCharset()));
       map.put("number_of_replicas", 0);
       map.put("refresh_interval", "60s");
+      LOGGER.debug("Initial Load: number_of_replicas: {}, refresh_interval: {}",
+          map.get("number_of_replicas"), map.get("refresh_interval"));
 
       final String json = JsonUtils.to(map);
-      LOGGER.warn("Initial Load index settings: {}", json);
+      LOGGER.debug("Initial Load index settings: {}", json);
       final File tempSettingsFile = File.createTempFile("idx", "set");
       FileUtils.writeStringToFile(tempSettingsFile, json, Charset.defaultCharset());
 
