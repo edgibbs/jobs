@@ -12,7 +12,7 @@ import gov.ca.cwds.neutron.launch.NeutronRocket;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 
 /**
- * Manager scheduled rockets.
+ * Manager for scheduled rocket flights.
  * 
  * @author CWDS API Team
  */

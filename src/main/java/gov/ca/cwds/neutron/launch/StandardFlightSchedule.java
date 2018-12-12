@@ -116,24 +116,24 @@ public enum StandardFlightSchedule {
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 5, 1000, null, true, true,
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 8, 1000, null, true, true,
       false),
 
   /**
    * Document root: Reporter.
    */
-  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 14, 30, 950, null, true, true, false),
+  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 30, 30, 950, null, true, true, false),
 
   /**
    * Document root: Collateral Individual.
    */
-  COLLATERAL_INDIVIDUAL_S(CollateralIndividualSIndexerJob.class, "ps_collateral_individual", 20, 30,
+  COLLATERAL_INDIVIDUAL_S(CollateralIndividualSIndexerJob.class, "ps_collateral_individual", 40, 30,
       90, null, true, true, false),
 
   /**
    * Document root: Service Provider.
    */
-  SERVICE_PROVIDER_S(ServiceProviderSIndexerJob.class, "ps_service_provider", 25, 120, 85, null,
+  SERVICE_PROVIDER_S(ServiceProviderSIndexerJob.class, "ps_service_provider", 65, 120, 85, null,
       true, true, false),
 
   /**
@@ -291,12 +291,12 @@ public enum StandardFlightSchedule {
   }
 
   private StandardFlightSchedule(Class<?> klazz, String rocketName, int startDelaySeconds,
-      int periodSeconds, int lastRunPriority, String nestedElement, boolean runLastChange,
+      int waitPeriodSeconds, int lastRunPriority, String nestedElement, boolean runLastChange,
       boolean runInitialLoad, boolean forPeopleIndex) {
     this.klazz = klazz;
     this.rocketName = rocketName;
     this.startDelaySeconds = startDelaySeconds;
-    this.waitPeriodSeconds = periodSeconds;
+    this.waitPeriodSeconds = waitPeriodSeconds;
     this.lastRunPriority = lastRunPriority;
     this.nestedElement = nestedElement;
     this.runLastChange = runLastChange;
@@ -356,7 +356,7 @@ public enum StandardFlightSchedule {
   }
 
   /**
-   * Gets the default list of rockets for last run mode.
+   * Builds rocket flight schedule for on-going polling mode (last change).
    * 
    * @param loadPeopleIndex launch People index rockets (Snapshot version less than 1.1)
    * @param excludeRockets optionally exclude rockets

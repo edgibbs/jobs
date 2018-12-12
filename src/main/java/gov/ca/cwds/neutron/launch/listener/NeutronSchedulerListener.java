@@ -80,7 +80,7 @@ public class NeutronSchedulerListener implements SchedulerListener {
 
   @Override
   public void schedulerError(String msg, SchedulerException cause) {
-    LOGGER.debug("scheduler error");
+    LOGGER.warn("scheduler error: {}", msg, cause);
   }
 
   @Override

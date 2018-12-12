@@ -1,7 +1,11 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
 import org.elasticsearch.common.settings.Settings;
 
@@ -15,6 +19,7 @@ import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomFlightRecorder;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.flight.FlightSummary;
@@ -23,6 +28,8 @@ import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
+import gov.ca.cwds.rest.ElasticsearchConfiguration;
 
 /**
  * Exit the initial load cycle.
@@ -93,10 +100,21 @@ public class ExitInitialLoadRocket
 
             // ******** ES 5.5.x ONLY! ********
             // For ES 6.x call the ES REST API admin functions.
-            final UpdateSettingsResponse updateResponse = esDao.getClient().admin().indices()
-                .prepareUpdateSettings(index).setSettings(Settings.builder()
-                    .put("index.refresh_interval", "3s").put("index.number_of_replicas", 2))
-                .get();
+            final ElasticsearchConfiguration config = esDao.getConfig();
+            final String settingFile =
+                StringUtils.isNotBlank(config.getIndexSettingFile()) ? config.getIndexSettingFile()
+                    : NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue();
+
+            final Map<String, Object> map = NeutronStringUtils
+                .jsonToMap(IOUtils.resourceToString(settingFile, Charset.defaultCharset()));
+            final Integer replicas = (Integer) map.get("number_of_replicas");
+            final String refreshInterval = (String) map.get("refresh_interval");
+
+            final UpdateSettingsResponse updateResponse =
+                esDao.getClient().admin().indices().prepareUpdateSettings(index)
+                    .setSettings(Settings.builder().put("index.refresh_interval", refreshInterval)
+                        .put("index.number_of_replicas", replicas))
+                    .get();
 
             if (updateResponse.isAcknowledged()) {
               LOGGER.info("Successfully reset replicas and refresh interval on index {} ", index);
