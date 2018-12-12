@@ -46,6 +46,9 @@ public class RocketFactory implements AtomRocketFactory {
 
   private final AtomFlightRecorder flightRecorder;
 
+  /**
+   * Allows for runtime re-processing of identifiers without stopping Launch Command.
+   */
   private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
 
   @Inject

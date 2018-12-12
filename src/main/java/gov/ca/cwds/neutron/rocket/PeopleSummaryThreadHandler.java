@@ -781,8 +781,9 @@ public class PeopleSummaryThreadHandler
     return rocket;
   }
 
+  @Override
   public String getEventType() {
-    return "initial_load_client";
+    return "neutron_initial_load_client";
   }
 
 }

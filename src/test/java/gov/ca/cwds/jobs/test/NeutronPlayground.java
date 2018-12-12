@@ -1,7 +1,7 @@
 package gov.ca.cwds.jobs.test;
 
-import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -11,15 +11,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.ca.cwds.data.std.ApiObjectIdentity;
+import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
 
 public class NeutronPlayground {
 
@@ -105,28 +103,18 @@ public class NeutronPlayground {
     LOGGER.info("streamTest2(): result: {}", result);
   }
 
-  public void jsonToMap(String json) {
-    try {
-      final ObjectMapper mapper = new ObjectMapper();
+  public static void main(String[] args) throws Exception {
+    // final NeutronPlayground playground = new NeutronPlayground();
 
-      // convert JSON string to Map
-      final Map<String, Object> map =
-          mapper.readValue(json, new TypeReference<Map<String, String>>() {});
-      System.out.println(map);
+    final String json = IOUtils.resourceToString(
+        NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue(), Charset.defaultCharset());
+    System.out.println(json);
 
-    } catch (JsonGenerationException e) {
-      e.printStackTrace();
-    } catch (JsonMappingException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void main(String[] args) {
-    final NeutronPlayground playground = new NeutronPlayground();
-    final String json = "{\"name\":\"dork\", \"age\":97}";
-    playground.jsonToMap(json);
+    final Map<String, Object> map = NeutronStringUtils.jsonToMap(json);
+    final Integer replicas = (Integer) map.get("number_of_replicas");
+    final String refreshInterval = (String) map.get("refresh_interval");
+    LOGGER.info("number_of_replicas: {}, refresh_interval: {}\nmap: {}", replicas, refreshInterval,
+        map);
 
     // playground.streamTest1();
     // playground.streamTest2();

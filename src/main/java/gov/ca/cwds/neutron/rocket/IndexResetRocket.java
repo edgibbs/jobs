@@ -1,8 +1,13 @@
 package gov.ca.cwds.neutron.rocket;
 
+import java.io.File;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +21,9 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
+import gov.ca.cwds.utils.JsonUtils;
 
 /**
  * Drops and creates an Elasticsearch index, if requested.
@@ -101,7 +108,7 @@ public abstract class IndexResetRocket
       final ElasticsearchConfiguration config = esDao.getConfig();
       final String documentType = config.getElasticsearchDocType();
 
-      final String settingFile =
+      String settingFile =
           StringUtils.isNotBlank(config.getIndexSettingFile()) ? config.getIndexSettingFile()
               : getIndexSettingsLocation();
 
@@ -109,12 +116,28 @@ public abstract class IndexResetRocket
           StringUtils.isNotBlank(config.getDocumentMappingFile()) ? config.getDocumentMappingFile()
               : getDocumentMappingLocation();
 
+      // SNAP-784: temporarily override ES refresh interval and replicas during Initial Load.
+      final Map<String, Object> map = NeutronStringUtils
+          .jsonToMap(IOUtils.resourceToString(settingFile, Charset.defaultCharset()));
+      map.put("number_of_replicas", 0);
+      map.put("refresh_interval", "60s");
+      LOGGER.debug("Initial Load: number_of_replicas: {}, refresh_interval: {}",
+          map.get("number_of_replicas"), map.get("refresh_interval"));
+
+      final String json = JsonUtils.to(map);
+      LOGGER.debug("Initial Load index settings: {}", json);
+      final File tempSettingsFile = File.createTempFile("idx_", ".set");
+      FileUtils.writeStringToFile(tempSettingsFile, json, Charset.defaultCharset());
+      settingFile = tempSettingsFile.getPath();
+
       LOGGER.warn(
           "\nCreate index if missing: \neffective index name: {}, \nalias: {}, \nsetting file: {}, \nmapping file: {}",
           effectiveIndexName, config.getElasticsearchAlias(), settingFile, mappingFile);
 
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, settingFile, mappingFile);
+      LOGGER.debug("Created index {}", effectiveIndexName);
     } catch (Exception e) {
+      LOGGER.error("FAILED TO CREATE INDEX! {}", e.getMessage(), e);
       throw CheeseRay.runtime(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
     }
 
