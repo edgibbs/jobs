@@ -126,7 +126,7 @@ public abstract class IndexResetRocket
 
       final String json = JsonUtils.to(map);
       LOGGER.debug("Initial Load index settings: {}", json);
-      final File tempSettingsFile = File.createTempFile("idx", "set");
+      final File tempSettingsFile = File.createTempFile("idx_", ".set");
       FileUtils.writeStringToFile(tempSettingsFile, json, Charset.defaultCharset());
       settingFile = tempSettingsFile.getPath();
 
