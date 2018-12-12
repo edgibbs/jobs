@@ -1,17 +1,8 @@
 package gov.ca.cwds.neutron.rocket;
 
-import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
-import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
-import org.elasticsearch.common.settings.Settings;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
@@ -28,10 +19,16 @@ import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.launch.LaunchDirector;
 import gov.ca.cwds.neutron.launch.StandardFlightSchedule;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
+import java.nio.charset.Charset;
+import java.util.Date;
+import java.util.Map;
+import org.apache.commons.io.IOUtils;
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
+import org.elasticsearch.common.settings.Settings;
 
 /**
  * Exit the initial load cycle.
- * 
+ *
  * @author CWDS API Team
  */
 public class ExitInitialLoadRocket
@@ -45,7 +42,7 @@ public class ExitInitialLoadRocket
 
   /**
    * Construct rocket with all required dependencies.
-   * 
+   *
    * @param dao random DAO for parent class
    * @param esDao ElasticSearch DAO
    * @param mapper Jackson ObjectMapper
@@ -112,7 +109,9 @@ public class ExitInitialLoadRocket
                     .get();
 
             if (updateResponse.isAcknowledged()) {
-              LOGGER.info("Successfully reset replicas and refresh interval on index {} ", index);
+              LOGGER.info(
+                  "Successfully reset replicas [ {} ] and refresh interval [ {} ] on index {}",
+                  replicas, refreshInterval, index);
             }
           }
 

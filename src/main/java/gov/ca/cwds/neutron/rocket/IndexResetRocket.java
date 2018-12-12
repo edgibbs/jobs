@@ -1,17 +1,6 @@
 package gov.ca.cwds.neutron.rocket;
 
-import java.io.File;
-import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.ca.cwds.dao.cms.ReplicatedOtherAdultInPlacemtHomeDao;
 import gov.ca.cwds.data.es.ElasticsearchDao;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedOtherAdultInPlacemtHome;
@@ -21,13 +10,16 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
 import gov.ca.cwds.rest.ElasticsearchConfiguration;
-import gov.ca.cwds.utils.JsonUtils;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
+import org.elasticsearch.common.settings.Settings;
 
 /**
  * Drops and creates an Elasticsearch index, if requested.
- * 
+ *
  * @author CWDS API Team
  */
 public abstract class IndexResetRocket
@@ -39,7 +31,7 @@ public abstract class IndexResetRocket
 
   /**
    * Construct rocket with all required dependencies.
-   * 
+   *
    * @param dao arbitrary DAO to fulfill interface
    * @param esDao ElasticSearch DAO for the target index
    * @param mapper Jackson ObjectMapper
@@ -54,14 +46,14 @@ public abstract class IndexResetRocket
 
   /**
    * Where are the index's settings file?
-   * 
+   *
    * @return path to index settings file
    */
   protected abstract String getIndexSettingsLocation();
 
   /**
    * Where are the index's mapping file?
-   * 
+   *
    * @return path to index mapping file
    */
   protected abstract String getDocumentMappingLocation();
@@ -116,26 +108,32 @@ public abstract class IndexResetRocket
           StringUtils.isNotBlank(config.getDocumentMappingFile()) ? config.getDocumentMappingFile()
               : getDocumentMappingLocation();
 
-      // SNAP-784: temporarily override ES refresh interval and replicas during Initial Load.
-      final Map<String, Object> map = NeutronStringUtils
-          .jsonToMap(IOUtils.resourceToString(settingFile, Charset.defaultCharset()));
-      map.put("number_of_replicas", 0);
-      map.put("refresh_interval", "60s");
-      LOGGER.debug("Initial Load: number_of_replicas: {}, refresh_interval: {}",
-          map.get("number_of_replicas"), map.get("refresh_interval"));
-
-      final String json = JsonUtils.to(map);
-      LOGGER.debug("Initial Load index settings: {}", json);
-      final File tempSettingsFile = File.createTempFile("idx_", ".set");
-      FileUtils.writeStringToFile(tempSettingsFile, json, Charset.defaultCharset());
-      settingFile = tempSettingsFile.getPath();
-
       LOGGER.warn(
           "\nCreate index if missing: \neffective index name: {}, \nalias: {}, \nsetting file: {}, \nmapping file: {}",
           effectiveIndexName, config.getElasticsearchAlias(), settingFile, mappingFile);
 
       esDao.createIndexIfNeeded(effectiveIndexName, documentType, settingFile, mappingFile);
       LOGGER.debug("Created index {}", effectiveIndexName);
+
+      // SNAP-784: temporarily override ES refresh interval and replicas during Initial Load.
+      Integer replicas = 0;
+      String refreshInterval = "60s";
+      LOGGER.debug("Initial Load: number_of_replicas: {}, refresh_interval: {}",
+          replicas, refreshInterval);
+
+      // ******** ES 5.5.x ONLY! ********
+      // For ES 6.x call the ES REST API admin functions.
+
+      final UpdateSettingsResponse updateResponse =
+          esDao.getClient().admin().indices().prepareUpdateSettings(effectiveIndexName)
+              .setSettings(Settings.builder().put("index.refresh_interval", refreshInterval)
+                  .put("index.number_of_replicas", replicas))
+              .get();
+
+      if (updateResponse.isAcknowledged()) {
+        LOGGER.info("Successfully set replicas [ {} ] and refresh interval [ {} ] on index {} ",
+            replicas, refreshInterval, effectiveIndexName);
+      }
     } catch (Exception e) {
       LOGGER.error("FAILED TO CREATE INDEX! {}", e.getMessage(), e);
       throw CheeseRay.runtime(LOGGER, e, "ES INDEX MANAGEMENT ERROR! {}", e.getMessage());
