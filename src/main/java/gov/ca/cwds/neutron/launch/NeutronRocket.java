@@ -1,7 +1,5 @@
 package gov.ca.cwds.neutron.launch;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -15,9 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import com.github.rholder.retry.RetryListener;
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -84,17 +79,6 @@ public class NeutronRocket implements InterruptableJob {
 
     NeutronThreadUtils.nameThread(rocketName, this);
     LOGGER.info("\n\t>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
-
-    final Callable<Boolean> callable = new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        return true; // do something useful here
-      }
-    };
-
-    final Retryer<Boolean> retryer =
-        RetryerBuilder.<Boolean>newBuilder().withRetryListener(listener)
-            .withStopStrategy(StopStrategies.stopAfterDelay(420L, TimeUnit.SECONDS)).build();
 
     try (final BasePersonRocket flight = rocket) {
       MDC.put("rocketLog", rocketName);

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -17,11 +16,11 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
@@ -112,35 +111,7 @@ public class NeutronPlayground {
     LOGGER.info("streamTest2(): result: {}", result);
   }
 
-  public void retry() {
-    final Callable<Boolean> callable = new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        LOGGER.info("callable: start");
-        Thread.sleep(1000L);
-        LOGGER.info("callable: end");
-        return true; // do something useful here
-      }
-    };
-
-    final RetryListener listener = new NeutronRetryListener();
-    final Retryer<Boolean> retryer =
-        RetryerBuilder.<Boolean>newBuilder().withRetryListener(listener)
-            .withStopStrategy(StopStrategies.stopAfterDelay(2L, TimeUnit.SECONDS)).build();
-
-    try {
-      retryer.call(callable);
-    } catch (RetryException e) {
-      e.printStackTrace();
-    } catch (ExecutionException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void main(String[] args) throws Exception {
-    final NeutronPlayground playground = new NeutronPlayground();
-    playground.retry();
-
+  public void junk() throws Exception {
     final String json = IOUtils.resourceToString(
         NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue(), Charset.defaultCharset());
     System.out.println(json);
@@ -151,12 +122,40 @@ public class NeutronPlayground {
     LOGGER.info("number_of_replicas: {}, refresh_interval: {}\nmap: {}", replicas, refreshInterval,
         map);
 
-
     // playground.streamTest1();
     // playground.streamTest2();
 
     // final Instant inst = Instant.ofEpochSecond(1_280_512_800L);
     // LOGGER.info("instant: {}", inst);
+  }
+
+  public void retry() {
+    final Callable<Boolean> callable = new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        LOGGER.info("callable: start");
+        Thread.sleep(4000L);
+        LOGGER.info("callable: end");
+        return true; // do something useful here
+      }
+    };
+
+    final RetryListener listener = new NeutronRetryListener();
+    final Retryer<Boolean> retryer =
+        RetryerBuilder.<Boolean>newBuilder().withRetryListener(listener)
+            .withWaitStrategy(WaitStrategies.exponentialWait(100, 1, TimeUnit.SECONDS))
+            .withStopStrategy(StopStrategies.stopAfterDelay(1L, TimeUnit.SECONDS)).build();
+
+    try {
+      retryer.call(callable);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    final NeutronPlayground playground = new NeutronPlayground();
+    playground.retry();
   }
 
 }
