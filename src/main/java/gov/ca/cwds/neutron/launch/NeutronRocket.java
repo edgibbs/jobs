@@ -1,5 +1,7 @@
 package gov.ca.cwds.neutron.launch;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -11,6 +13,11 @@ import org.quartz.UnableToInterruptJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import com.github.rholder.retry.RetryListener;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
@@ -45,6 +52,8 @@ public class NeutronRocket implements InterruptableJob {
   private volatile FlightLog flightLog = new FlightLog(); // "volatile" shows changes immediately
                                                           // across threads
 
+  private final RetryListener listener = new NeutronRetryListener();
+
   /**
    * Constructor.
    * 
@@ -62,6 +71,10 @@ public class NeutronRocket implements InterruptableJob {
     this.flightRecorder = flightRecorder;
   }
 
+  protected void launch() {
+
+  }
+
   @SuppressWarnings("rawtypes")
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -72,11 +85,22 @@ public class NeutronRocket implements InterruptableJob {
     NeutronThreadUtils.nameThread(rocketName, this);
     LOGGER.info("\n\t>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
 
+    final Callable<Boolean> callable = new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        return true; // do something useful here
+      }
+    };
+
+    final Retryer<Boolean> retryer =
+        RetryerBuilder.<Boolean>newBuilder().withRetryListener(listener)
+            .withStopStrategy(StopStrategies.stopAfterDelay(420L, TimeUnit.SECONDS)).build();
+
     try (final BasePersonRocket flight = rocket) {
+      MDC.put("rocketLog", rocketName);
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
       flightLog.start();
-      MDC.put("rocketLog", rocketName);
 
       // Job parameter data:
       map.put("opts", flight.getFlightPlan());
