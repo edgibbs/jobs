@@ -20,7 +20,6 @@ import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
@@ -143,7 +142,7 @@ public class NeutronPlayground {
     final RetryListener listener = new NeutronRetryListener();
     final Retryer<Boolean> retryer =
         RetryerBuilder.<Boolean>newBuilder().withRetryListener(listener)
-            .withWaitStrategy(WaitStrategies.exponentialWait(100, 1, TimeUnit.SECONDS))
+            // .withWaitStrategy(WaitStrategies.exponentialWait(100, 1, TimeUnit.SECONDS))
             .withStopStrategy(StopStrategies.stopAfterDelay(1L, TimeUnit.SECONDS)).build();
 
     try {
