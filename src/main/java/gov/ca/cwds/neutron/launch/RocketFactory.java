@@ -70,7 +70,7 @@ public class RocketFactory implements AtomRocketFactory {
   public BasePersonRocket fuelRocket(Class<?> klass, final FlightPlan flightPlan)
       throws NeutronCheckedException {
     try {
-      LOGGER.info("READY SCHEDULED ROCKET: {}", klass.getName());
+      LOGGER.info("FUEL SCHEDULED ROCKET: {}", klass.getName());
 
       // Any keys requested to be re-run?
       if (!dequeRerunIds.isEmpty()) {
@@ -81,7 +81,7 @@ public class RocketFactory implements AtomRocketFactory {
       ret.init(flightPlan.getLastRunLoc(), flightPlan);
       return ret;
     } catch (Exception e) {
-      throw CheeseRay.checked(LOGGER, e, "FAILED TO PREPARE ROCKET!: {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "FAILED TO FUEL ROCKET!: {}", e.getMessage());
     }
   }
 
@@ -105,13 +105,13 @@ public class RocketFactory implements AtomRocketFactory {
       throw new SchedulerException("NO SUCH ROCKET CLASS!", e);
     }
 
-    LOGGER.info("LAUNCH! rocket class: {}", klazz);
+    LOGGER.info("LAUNCH! rocket: {}", klazz);
     NeutronRocket ret;
     try {
-      final FlightPlan flightPlan = flightPlanRegistry.getFlightPlan(klazz);
-      ret = new NeutronRocket(fuelRocket(klazz, flightPlan),
+      ret = new NeutronRocket(fuelRocket(klazz, flightPlanRegistry.getFlightPlan(klazz)),
           StandardFlightSchedule.lookupByRocketClass(klazz), flightRecorder);
     } catch (NeutronCheckedException e) {
+      LOGGER.error("FAILURE TO LAUNCH! NO ROCKET SETTINGS! rocket: {}", klazz);
       throw new SchedulerException("NO ROCKET SETTINGS! klazz=" + klazz, e);
     }
 

@@ -94,13 +94,15 @@ public class NeutronRocket implements InterruptableJob {
       flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
 
-      if (!flightLog.isInitialLoad()) {
-        flightLog.notifyMonitor(rocket.getEventType());
+      try {
+        if (!flightLog.isInitialLoad()) {
+          flightLog.notifyMonitor(rocket.getEventType());
+        }
+      } finally {
+        LOGGER.info("FLIGHT SUMMARY: rocket: {}\n{}", rocketName, flightLog);
+        MDC.remove("rocketLog"); // remove the logging context, no matter what happens
+        NeutronThreadUtils.nameThread(origThreadName, this);
       }
-
-      LOGGER.info("FLIGHT SUMMARY: rocket: {}\n{}", rocketName, flightLog);
-      MDC.remove("rocketLog"); // remove the logging context, no matter what happens
-      NeutronThreadUtils.nameThread(origThreadName, this);
     }
   }
 
