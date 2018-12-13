@@ -888,7 +888,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   @Override
-  public synchronized void close() throws IOException {
+  public void close() throws IOException {
     if (isRunning() && !LaunchCommand.isSchedulerMode()) {
       LOGGER.warn("CLOSING CONNECTIONS!!");
 
@@ -907,7 +907,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   @Override
-  protected synchronized void finish() throws NeutronCheckedException {
+  protected void finish() throws NeutronCheckedException {
     final String rocketName = this.getClass().getName();
     LOGGER.info("FINISH FLIGHT! {}", rocketName);
     try {

@@ -568,7 +568,7 @@ public final class ElasticTransformer {
     return mapper;
   }
 
-  public static synchronized void setMapper(final ObjectMapper mapper) {
+  public static void setMapper(final ObjectMapper mapper) {
     if (ElasticTransformer.mapper == null) {
       ElasticTransformer.mapper = mapper;
     }
