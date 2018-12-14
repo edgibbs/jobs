@@ -383,4 +383,10 @@ public class ClientSQLResource implements ApiMarker {
 
   public static final String INS_LST_CHG_KEY_BUNDLE = "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
 
+  //@formatter:off
+  public static final String SEL_REPL_TIME =
+        "INSERT INTO GT_ID (IDENTIFIER) \n"
+      + BASE_CLI_IDS_LST_CHG;
+  //@formatter:on
+
 }

@@ -779,7 +779,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void notifyMonitor(String eventType) {
-    LOGGER.info("Notify New Relic");
+    LOGGER.debug("Prepare to notify New Relic");
     final Map<String, Object> attribs = new LinkedHashMap<>();
 
     if (!isInitialLoad()) {
