@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,15 +18,11 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.rholder.retry.RetryListener;
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
-import gov.ca.cwds.neutron.launch.NeutronRetryListener;
 import gov.ca.cwds.neutron.util.shrinkray.NeutronStringUtils;
 
 public class NeutronPlayground {
@@ -128,35 +126,69 @@ public class NeutronPlayground {
     // LOGGER.info("instant: {}", inst);
   }
 
+  public static interface Lame extends Callable<Boolean> {
+
+  }
+
+  public static class Foo implements Lame {
+
+    @Override
+    public Boolean call() throws Exception {
+      LOGGER.info("callable: start");
+      Thread.currentThread().yield();
+      Thread.sleep(4000L);
+
+      // for (int i = 0; i < 10000000; i++) {
+      // Thread.currentThread().yield();
+      // }
+
+      LOGGER.info("callable: end");
+      return true; // do something useful here
+    }
+
+  };
+
   public void testRetry() {
-    final Callable<Boolean> callable = new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        LOGGER.info("callable: start");
-        Thread.sleep(4000L);
+    // final Callable<Boolean> callable = new Callable<Boolean>() {
+    // @Override
+    // public Boolean call() throws Exception {
+    // LOGGER.info("callable: start");
+    // Thread.currentThread().yield();
+    // Thread.sleep(4000L);
+    //
+    // // for (int i = 0; i < 10000000; i++) {
+    // // Thread.currentThread().yield();
+    // // }
+    //
+    // LOGGER.info("callable: end");
+    // return true; // do something useful here
+    // }
+    // };
 
-        // for (int i = 0; i < 10000000; i++) {
-        // Thread.currentThread().yield();
-        // }
+    // final RetryListener listener = new NeutronRetryListener();
+    // final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+    // .withRetryListener(listener)
+    // .withAttemptTimeLimiter(AttemptTimeLimiters.fixedTimeLimit(1L, TimeUnit.SECONDS, executor))
+    // .withStopStrategy(StopStrategies.stopAfterAttempt(1))
+    // .build();
+    //
+    // try {
+    // retryer.call(callable);
+    // } catch (Exception e) {
+    // LOGGER.error("DIED", e);
+    // }
 
-        LOGGER.info("callable: end");
-        return true; // do something useful here
-      }
-    };
-
-    final RetryListener listener = new NeutronRetryListener();
-    final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
-        // .withRetryListener(listener)
-        .withWaitStrategy(WaitStrategies.fixedWait(1L, TimeUnit.SECONDS))
-        .withStopStrategy(StopStrategies.stopAfterAttempt(1))
-        // .withStopStrategy(StopStrategies.stopAfterDelay(1L, TimeUnit.SECONDS))
-        .build();
+    final ExecutorService executor = Executors.newFixedThreadPool(1);
+    final TimeLimiter limiter = SimpleTimeLimiter.create(executor);
+    final Foo target = new Foo();
+    final Lame proxy = limiter.newProxy(target, Lame.class, 500, TimeUnit.MILLISECONDS);
 
     try {
-      retryer.call(callable);
+      proxy.call();
     } catch (Exception e) {
-      e.printStackTrace();
+      LOGGER.error("DIED", e);
     }
+
   }
 
   public static void main(String[] args) throws Exception {
