@@ -385,8 +385,34 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String SEL_REPL_TIME =
-        "INSERT INTO GT_ID (IDENTIFIER) \n"
-      + BASE_CLI_IDS_LST_CHG;
+        "WITH STEP1 AS (\n"
+      + " SELECT \n"
+      + "    m.SOURCE_TABLE, \n"
+      + "    t.LASTRUN, \n"
+      + "    ((t.endtime - t.lastrun) + (t.source_conn_time - t.synchtime))         AS RUN_LATENCY_SECS\n"
+      + "  , DENSE_RANK() OVER(PARTITION BY m.SOURCE_TABLE ORDER BY t.LASTRUN DESC) AS PRIOR_RUN\n"
+      + " FROM ASN.IBMSNAP_APPLYTRAIL t\n"
+      + " JOIN ASN.IBMSNAP_SUBS_SET   s ON s.SET_NAME = t.SET_NAME\n"
+      + " JOIN ASN.IBMSNAP_SUBS_MEMBR m ON m.SET_NAME = s.SET_NAME\n"
+      + " WHERE m.SOURCE_OWNER = 'CWSNS1'\n"
+      + "   AND t.lastrun > '2018-12-14-04.17.00.000000' \n"
+      + "   AND m.SOURCE_TABLE IN ('ADDRS_T', 'CLIENT_T', 'CL_ADDRT')\n"
+      + "), LAST_RUN AS (\n"
+      + " SELECT s.* FROM STEP1 s WHERE s.prior_run = 1\n"
+      + "), PRIOR_RUN AS (\n"
+      + " SELECT s.* FROM STEP1 s WHERE s.prior_run = 2\n"
+      + ")\n"
+      + "SELECT \n"
+      + " l.SOURCE_TABLE, \n"
+      + " l.LASTRUN               AS LAST_LASTRUN, \n"
+      + " r.LASTRUN               AS RIGHT_LASTRUN, \n"
+      + " l.RUN_LATENCY_SECS,\n"
+      + " TIMESTAMPDIFF(2, CAST((l.LASTRUN - r.LASTRUN) AS CHAR(22))) AS RUN_DELAY_SECS\n"
+      + "FROM LAST_RUN  l\n"
+      + "LEFT JOIN PRIOR_RUN r ON l.SOURCE_TABLE = r.SOURCE_TABLE\n"
+      + "ORDER BY 1, 2 DESC\n"
+      + "FETCH FIRST 10 ROWS ONLY\n"
+      + "FOR READ ONLY WITH UR";
   //@formatter:on
 
 }
