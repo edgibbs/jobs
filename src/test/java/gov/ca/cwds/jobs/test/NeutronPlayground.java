@@ -152,7 +152,7 @@ public class NeutronPlayground {
     final ExecutorService executor = Executors.newWorkStealingPool(2);
     final TimeLimiter limiter = SimpleTimeLimiter.create(executor);
     final Foo target = new Foo();
-    final Lame proxy = limiter.newProxy(target, Lame.class, 5000, TimeUnit.MILLISECONDS);
+    final Lame proxy = limiter.newProxy(target, Lame.class, 500, TimeUnit.MILLISECONDS);
 
     try {
       proxy.call();
