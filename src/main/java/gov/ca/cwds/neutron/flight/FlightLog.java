@@ -780,35 +780,40 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public void notifyMonitor(String eventType) {
     LOGGER.info("Notify New Relic");
-    final Map<String, Object> eventAttributes = new LinkedHashMap<>();
+    final Map<String, Object> attribs = new LinkedHashMap<>();
 
     if (!isInitialLoad()) {
       if (!timings.isEmpty()) {
-        timings.entrySet().stream().forEach(e -> eventAttributes.put(e.getKey(),
+        timings.entrySet().stream().forEach(e -> attribs.put(e.getKey(),
             Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
       }
 
       if (lastChangeSince != null) {
-        eventAttributes.putIfAbsent("changed_since",
+        attribs.putIfAbsent("changed_since",
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
       }
 
-      eventAttributes.putIfAbsent("warnings", warnings.size());
-      eventAttributes.putIfAbsent("errors", isFatalError());
-      eventAttributes.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
-      eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
-      eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
-      eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
-      eventAttributes.putIfAbsent("es_errors", recsBulkError.get());
+      attribs.putIfAbsent("warnings", warnings.size());
+      attribs.putIfAbsent("errors", isFatalError());
+      attribs.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
+      attribs.putIfAbsent("es_deleted", recsBulkDeleted.get());
+      attribs.putIfAbsent("es_before", recsBulkBefore.get());
+      attribs.putIfAbsent("es_after", recsBulkAfter.get());
+      attribs.putIfAbsent("es_errors", recsBulkError.get());
 
-      if (!eventAttributes.isEmpty()) {
-        LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
-            eventAttributes.size());
-        eventAttributes.entrySet().stream().forEach(
-            e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+      attribs.putIfAbsent("start", startTime);
+      attribs.putIfAbsent("done", endTime);
 
+      final long totalSeconds = (endTime - startTime) / 1000;
+      attribs.putIfAbsent("total_seconds", totalSeconds);
+
+      if (!attribs.isEmpty()) {
         try {
-          NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
+          LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
+              attribs.size());
+          attribs.entrySet().stream().forEach(
+              e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+          NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
           CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
         }
