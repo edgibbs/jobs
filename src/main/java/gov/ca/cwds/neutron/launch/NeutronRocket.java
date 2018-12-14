@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.github.rholder.retry.RetryListener;
-
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
@@ -46,8 +44,6 @@ public class NeutronRocket implements InterruptableJob {
 
   private volatile FlightLog flightLog = new FlightLog(); // "volatile" shows changes immediately
                                                           // across threads
-
-  private final RetryListener listener = new NeutronRetryListener();
 
   /**
    * Constructor.

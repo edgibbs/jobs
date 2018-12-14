@@ -149,35 +149,6 @@ public class NeutronPlayground {
   };
 
   public void testRetry() {
-    // final Callable<Boolean> callable = new Callable<Boolean>() {
-    // @Override
-    // public Boolean call() throws Exception {
-    // LOGGER.info("callable: start");
-    // Thread.currentThread().yield();
-    // Thread.sleep(4000L);
-    //
-    // // for (int i = 0; i < 10000000; i++) {
-    // // Thread.currentThread().yield();
-    // // }
-    //
-    // LOGGER.info("callable: end");
-    // return true; // do something useful here
-    // }
-    // };
-
-    // final RetryListener listener = new NeutronRetryListener();
-    // final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
-    // .withRetryListener(listener)
-    // .withAttemptTimeLimiter(AttemptTimeLimiters.fixedTimeLimit(1L, TimeUnit.SECONDS, executor))
-    // .withStopStrategy(StopStrategies.stopAfterAttempt(1))
-    // .build();
-    //
-    // try {
-    // retryer.call(callable);
-    // } catch (Exception e) {
-    // LOGGER.error("DIED", e);
-    // }
-
     final ExecutorService executor = Executors.newFixedThreadPool(1);
     final TimeLimiter limiter = SimpleTimeLimiter.create(executor);
     final Foo target = new Foo();
