@@ -20,6 +20,7 @@ import com.github.rholder.retry.RetryListener;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
@@ -123,27 +124,33 @@ public class NeutronPlayground {
 
     // playground.streamTest1();
     // playground.streamTest2();
-
     // final Instant inst = Instant.ofEpochSecond(1_280_512_800L);
     // LOGGER.info("instant: {}", inst);
   }
 
-  public void retry() {
+  public void testRetry() {
     final Callable<Boolean> callable = new Callable<Boolean>() {
       @Override
       public Boolean call() throws Exception {
         LOGGER.info("callable: start");
         Thread.sleep(4000L);
+
+        // for (int i = 0; i < 10000000; i++) {
+        // Thread.currentThread().yield();
+        // }
+
         LOGGER.info("callable: end");
         return true; // do something useful here
       }
     };
 
     final RetryListener listener = new NeutronRetryListener();
-    final Retryer<Boolean> retryer =
-        RetryerBuilder.<Boolean>newBuilder().withRetryListener(listener)
-            // .withWaitStrategy(WaitStrategies.exponentialWait(100, 1, TimeUnit.SECONDS))
-            .withStopStrategy(StopStrategies.stopAfterDelay(1L, TimeUnit.SECONDS)).build();
+    final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+        // .withRetryListener(listener)
+        .withWaitStrategy(WaitStrategies.fixedWait(1L, TimeUnit.SECONDS))
+        .withStopStrategy(StopStrategies.stopAfterAttempt(1))
+        // .withStopStrategy(StopStrategies.stopAfterDelay(1L, TimeUnit.SECONDS))
+        .build();
 
     try {
       retryer.call(callable);
@@ -154,7 +161,7 @@ public class NeutronPlayground {
 
   public static void main(String[] args) throws Exception {
     final NeutronPlayground playground = new NeutronPlayground();
-    playground.retry();
+    playground.testRetry();
   }
 
 }
