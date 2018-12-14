@@ -136,7 +136,7 @@ public class NeutronPlayground {
     public Boolean call() throws Exception {
       LOGGER.info("callable: start");
       Thread.currentThread().yield();
-      Thread.sleep(4000L);
+      Thread.sleep(1000L);
 
       // for (int i = 0; i < 10000000; i++) {
       // Thread.currentThread().yield();
@@ -149,10 +149,10 @@ public class NeutronPlayground {
   };
 
   public void testRetry() {
-    final ExecutorService executor = Executors.newFixedThreadPool(1);
+    final ExecutorService executor = Executors.newWorkStealingPool(2);
     final TimeLimiter limiter = SimpleTimeLimiter.create(executor);
     final Foo target = new Foo();
-    final Lame proxy = limiter.newProxy(target, Lame.class, 500, TimeUnit.MILLISECONDS);
+    final Lame proxy = limiter.newProxy(target, Lame.class, 5000, TimeUnit.MILLISECONDS);
 
     try {
       proxy.call();
