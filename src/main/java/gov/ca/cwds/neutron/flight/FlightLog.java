@@ -805,6 +805,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       attribs.putIfAbsent("done", endTime);
 
       final long totalSeconds = (endTime - startTime) / 1000;
+      LOGGER.debug("total seconds: {}", totalSeconds);
       attribs.putIfAbsent("total_seconds", totalSeconds);
 
       if (!attribs.isEmpty()) {

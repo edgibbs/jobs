@@ -137,11 +137,6 @@ public class NeutronPlayground {
       LOGGER.info("callable: start");
       Thread.currentThread().yield();
       Thread.sleep(1000L);
-
-      // for (int i = 0; i < 10000000; i++) {
-      // Thread.currentThread().yield();
-      // }
-
       LOGGER.info("callable: end");
       return true; // do something useful here
     }
