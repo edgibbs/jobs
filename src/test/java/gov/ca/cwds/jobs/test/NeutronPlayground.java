@@ -148,11 +148,11 @@ public class NeutronPlayground {
 
   };
 
-  public void testRetry() {
+  public void testRetry(long delayBeforeKill) {
     final ExecutorService executor = Executors.newWorkStealingPool(2);
     final TimeLimiter limiter = SimpleTimeLimiter.create(executor);
     final Foo target = new Foo();
-    final Lame proxy = limiter.newProxy(target, Lame.class, 500, TimeUnit.MILLISECONDS);
+    final Lame proxy = limiter.newProxy(target, Lame.class, delayBeforeKill, TimeUnit.MILLISECONDS);
 
     try {
       proxy.call();
@@ -164,7 +164,8 @@ public class NeutronPlayground {
 
   public static void main(String[] args) throws Exception {
     final NeutronPlayground playground = new NeutronPlayground();
-    playground.testRetry();
+    playground.testRetry(500);
+    playground.testRetry(2000);
   }
 
 }
