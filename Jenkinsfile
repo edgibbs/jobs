@@ -49,7 +49,7 @@ node('dora-slave') {
       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
     }
     stage('Tests and Coverage') {
-      buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoMergeTest'
+      buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'test jacocoTestReport'
     }
     stage('SonarQube analysis'){
       lint(rtGradle)
@@ -70,8 +70,8 @@ node('dora-slave') {
     }
   } catch(Exception e) {
     publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '**/build/reports/tests/', reportFiles: 'index.html', reportName: 'JUnitReports', reportTitles: ''])
-    emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-    subject: "Jobs failed with ${e.message}", to: "Prasad.Mysore@osi.ca.gov, tom.parker@osi.ca.gov, david.smith@osi.ca.gov, james.lebeau@osi.ca.gov, mariam.ghori@osi.ca.gov, adarsh.vandana@osi.ca.gov"
+    //emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+    //subject: "Jobs failed with ${e.message}", to: "Prasad.Mysore@osi.ca.gov, tom.parker@osi.ca.gov, david.smith@osi.ca.gov, james.lebeau@osi.ca.gov, mariam.ghori@osi.ca.gov, adarsh.vandana@osi.ca.gov"
     currentBuild.result = "FAILURE"
     throw e
   } finally {
