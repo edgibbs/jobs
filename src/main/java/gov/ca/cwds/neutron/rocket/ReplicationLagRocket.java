@@ -26,7 +26,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
  * Rocket samples replication lag by updating records in the transactional schema and polls for
- * changes in its companion, replicated schema.
+ * changes in its companion, replicated schema. See SNAP-796.
  * 
  * @author CWDS API Team
  */
@@ -107,6 +107,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
           ret = verify(stmtSel.executeQuery());
           con.rollback();
           if (ret) {
+            LaunchCommand.getInstance().getCommonFlightPlan();
             LOGGER.info("Replication caught up in {} milliseconds", i * delayBetweenChecks);
             break;
           }

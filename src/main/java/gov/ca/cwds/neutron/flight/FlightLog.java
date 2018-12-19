@@ -771,7 +771,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void addTimingEvent(String event) {
-    timings.putIfAbsent(event, System.currentTimeMillis());
+    timings.put(event, System.currentTimeMillis());
   }
 
   public Map<String, Long> getTimings() {
