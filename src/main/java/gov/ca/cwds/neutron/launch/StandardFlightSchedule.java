@@ -39,6 +39,7 @@ import gov.ca.cwds.neutron.rocket.ExitInitialLoadRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.LightThisCandleRocket;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket;
 import gov.ca.cwds.neutron.rocket.SchemaResetRocket;
 import gov.ca.cwds.neutron.rocket.VoxListenerRocket;
 
@@ -101,6 +102,20 @@ public enum StandardFlightSchedule {
   VOX_ROCKET(VoxListenerRocket.class, // rocket class
       "vox", // rocket name
       5, // initial load order
+      60000, // start delay seconds. N/A.
+      60000, // execute every N seconds. N/A.
+      null, // last run priority. N/A.
+      true, // run in Last Change mode
+      false, // run in Initial Load
+      false // People index
+  ),
+
+  /**
+   * Health check periodically measures replication lag.
+   */
+  REPLICATION_TIME(ReplicationLagRocket.class, // rocket class
+      "replication_time", // rocket name
+      6, // initial load order
       60000, // start delay seconds. N/A.
       60000, // execute every N seconds. N/A.
       null, // last run priority. N/A.

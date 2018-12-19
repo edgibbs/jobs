@@ -36,8 +36,6 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ReplicationLagRocket.class);
 
-  private transient DbResetStatusDao dao;
-
   protected String replSchema;
   protected String txnlSchema;
 
@@ -54,7 +52,6 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
   public ReplicationLagRocket(final DbResetStatusDao dao, final ObjectMapper mapper,
       @LastRunFile String lastRunFile, FlightPlan flightPlan, AtomLaunchDirector launchDirector) {
     super(dao, null, lastRunFile, mapper, flightPlan, launchDirector);
-    this.dao = dao;
   }
 
   @Override
@@ -140,7 +137,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
   }
 
   /**
-   * Rocket entry point.
+   * Rocket launch point.
    * 
    * @param args command line arguments
    * @throws Exception on launch error
