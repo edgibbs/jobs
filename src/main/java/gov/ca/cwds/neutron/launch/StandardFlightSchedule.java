@@ -116,8 +116,8 @@ public enum StandardFlightSchedule {
   REPLICATION_TIME(ReplicationLagRocket.class, // rocket class
       "replication_time", // rocket name
       6, // initial load order
-      60000, // start delay seconds. N/A.
-      60000, // execute every N seconds. N/A.
+      20000, // start delay seconds. N/A.
+      10000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
       true, // run in Last Change mode
       false, // run in Initial Load
@@ -131,7 +131,7 @@ public enum StandardFlightSchedule {
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 5, 1000, null, true, true,
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 5, 5000, null, true, true,
       false),
 
   /**
