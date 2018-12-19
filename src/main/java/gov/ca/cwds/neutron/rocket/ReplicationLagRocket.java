@@ -94,8 +94,11 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
       txnlSchema = schemas.getRight();
 
       final Connection con = NeutronJdbcUtils.prepConnection(session);
-      try (final PreparedStatement stmtUpd = con.prepareStatement(ClientSQLResource.UPD_TIMESTAMP);
-          final PreparedStatement stmtSel = con.prepareStatement(ClientSQLResource.SEL_TIMESTAMP)) {
+      try (
+          final PreparedStatement stmtUpd = con.prepareStatement(
+              ClientSQLResource.UPD_TIMESTAMP.replaceAll("TX_SCHEMA", txnlSchema));
+          final PreparedStatement stmtSel = con.prepareStatement(
+              ClientSQLResource.SEL_TIMESTAMP.replaceAll("TX_SCHEMA", txnlSchema))) {
         stmtUpd.executeUpdate();
         con.commit();
 

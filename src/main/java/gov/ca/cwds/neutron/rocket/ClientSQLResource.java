@@ -30,10 +30,10 @@ public class ClientSQLResource implements ApiMarker {
         "SELECT t.LST_UPD_TS AS T_LST_UPD_TS, r.LST_UPD_TS AS R_LST_UPD_TS\n"
       + "FROM (\n"
       + " SELECT x.IDENTIFIER, x.LST_UPD_TS\n"
-      + " FROM CWSNS1.CLIENT_T x\n"
+      + " FROM TX_SCHEMA.CLIENT_T x\n"
       + " FETCH FIRST 1 ROWS ONLY\n"
       + ") t \n"
-      + "JOIN CWSRS1.CLIENT_T r ON r.IDENTIFIER = t.IDENTIFIER \n"
+      + "JOIN CLIENT_T r ON r.IDENTIFIER = t.IDENTIFIER \n"
       + "FOR READ ONLY WITH UR";
   //@formatter:on
 
