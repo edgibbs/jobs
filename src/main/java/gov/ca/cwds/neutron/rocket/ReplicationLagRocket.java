@@ -36,10 +36,6 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
 
   private transient DbResetStatusDao dao;
 
-  private int timeoutSeconds = 90 * 60;
-
-  private int pollPeriodInSeconds = 60;
-
   protected String replSchema;
   protected String txnlSchema;
 
@@ -88,7 +84,6 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
   protected boolean measureReplicationLag() {
     boolean ret = false;
     try (final Session session = getJobDao().grabSession()) {
-      grabTransaction();
       final Pair<String, String> schemas = findSchemas(session);
       replSchema = schemas.getLeft();
       txnlSchema = schemas.getRight();
@@ -99,11 +94,11 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
               ClientSQLResource.UPD_TIMESTAMP.replaceAll("TX_SCHEMA", txnlSchema));
           final PreparedStatement stmtSel = con.prepareStatement(
               ClientSQLResource.SEL_TIMESTAMP.replaceAll("TX_SCHEMA", txnlSchema))) {
+        grabTransaction();
         stmtUpd.executeUpdate();
         con.commit();
 
-        for (int i = 1; !ret && i < 120; i++) {
-          LOGGER.info("Iteration {}", i);
+        for (int i = 1; !ret && i < 240; i++) {
           Thread.sleep(500L);
           ret = verify(stmtSel.executeQuery());
         }
@@ -126,30 +121,15 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
       while (isRunning() && rs.next()) {
         final Date one = rs.getTimestamp(1);
         final Date two = rs.getTimestamp(2);
+        LOGGER.info("txn 1: {}, rep 2: {}", one, two);
         ret = one.equals(two);
         break;
       }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READING RESULT! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ RESULT! {}", e.getMessage(), e);
     }
 
     return ret;
-  }
-
-  public int getPollPeriodInSeconds() {
-    return pollPeriodInSeconds;
-  }
-
-  public void setPollPeriodInSeconds(int pollPeriodInSeconds) {
-    this.pollPeriodInSeconds = pollPeriodInSeconds;
-  }
-
-  public int getTimeoutSeconds() {
-    return timeoutSeconds;
-  }
-
-  public void setTimeoutSeconds(int timeoutSeconds) {
-    this.timeoutSeconds = timeoutSeconds;
   }
 
   /**
