@@ -17,6 +17,27 @@ public class ClientSQLResource implements ApiMarker {
   public static final String KEY_SOURCE = "FROM GT_ID   gt \n";
 
   //@formatter:off
+  public static final String UPD_TIMESTAMP =
+        "UPDATE TX_SCHEMA.CLIENT_T c\n"
+      + "SET c.LST_UPD_TS = CURRENT TIMESTAMP\n"
+      + "WHERE c.IDENTIFIER IN (\n"
+      + "  SELECT x.IDENTIFIER FROM TX_SCHEMA.CLIENT_T x FETCH FIRST 1 ROWS ONLY\n"
+      + ")";
+  //@formatter:on
+
+  //@formatter:off
+  public static final String SEL_TIMESTAMP =
+        "SELECT t.LST_UPD_TS AS T_LST_UPD_TS, r.LST_UPD_TS AS R_LST_UPD_TS\n"
+      + "FROM (\n"
+      + " SELECT x.IDENTIFIER, x.LST_UPD_TS\n"
+      + " FROM CWSNS1.CLIENT_T x\n"
+      + " FETCH FIRST 1 ROWS ONLY\n"
+      + ") t \n"
+      + "JOIN CWSRS1.CLIENT_T r ON r.IDENTIFIER = t.IDENTIFIER \n"
+      + "FOR READ ONLY WITH UR";
+  //@formatter:on
+
+  //@formatter:off
   public static final String SEL_OPTIMIZE =
         "OPTIMIZE FOR 1000 ROWS \n"
       + "FOR READ ONLY WITH UR ";
@@ -40,7 +61,7 @@ public class ClientSQLResource implements ApiMarker {
    */
   //@formatter:off
   public static final String SEL_CLI =
-  "SELECT \n"
+        "SELECT \n"
       + "  clt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
       + "  clt.LST_UPD_ID        AS CLT_LST_UPD_ID, \n"
       + "  clt.LST_UPD_TS        AS CLT_LST_UPD_TS, \n"
