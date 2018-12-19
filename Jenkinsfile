@@ -7,7 +7,7 @@ node('dora-slave') {
   def rtGradle = Artifactory.newGradleBuild()
   def newTag
   if (env.BUILD_JOB_TYPE == 'master') {
-    triggerProperties = pullRequestMergedTriggerProperties('neutron-jobs-master')
+    triggerProperties = pullRequestMergedTriggerProperties('jobs-master')
     properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '15')),
     pipelineTriggers([triggerProperties]), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
