@@ -53,7 +53,7 @@ public class JobLogs {
    * </p>
    */
   protected JobLogs() {
-    // Vy r zer more bosses' asses zan bosses??
+    // usual fun
   }
 
   /**

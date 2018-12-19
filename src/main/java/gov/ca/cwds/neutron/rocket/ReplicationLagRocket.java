@@ -3,6 +3,7 @@ package gov.ca.cwds.neutron.rocket;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -20,6 +21,7 @@ import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
+import gov.ca.cwds.neutron.jetpack.JobLogs;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
@@ -100,10 +102,13 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
 
         final long delayBetweenChecks = 500L;
         final int maxChecks = 240;
+        final Object[] args = {};
 
         for (int i = 1; i < maxChecks; i++) {
+          JobLogs.logEvery(LOGGER, 10, i, "time replication", args);
           Thread.sleep(delayBetweenChecks);
           ret = verify(stmtSel.executeQuery());
+          con.rollback();
           if (ret) {
             LOGGER.info("Replication caught up in {} milliseconds", i * delayBetweenChecks);
             break;
@@ -122,18 +127,13 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
     return ret;
   }
 
-  protected boolean verify(final ResultSet rs) {
+  protected boolean verify(final ResultSet rs) throws SQLException {
     boolean ret = false;
-    try {
-      while (isRunning() && rs.next()) {
-        final Date one = rs.getTimestamp(1);
-        final Date two = rs.getTimestamp(2);
-        LOGGER.info("last update: txn: {}, rep: {}", one, two);
-        ret = one.equals(two);
-        break;
-      }
-    } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ RESULT! {}", e.getMessage(), e);
+    while (isRunning() && rs.next()) {
+      final Date one = rs.getTimestamp(1);
+      final Date two = rs.getTimestamp(2);
+      ret = one.equals(two);
+      break;
     }
 
     return ret;
