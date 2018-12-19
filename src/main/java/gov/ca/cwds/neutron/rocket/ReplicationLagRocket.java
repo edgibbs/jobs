@@ -98,9 +98,16 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
         stmtUpd.executeUpdate();
         con.commit();
 
-        for (int i = 1; !ret && i < 240; i++) {
-          Thread.sleep(500L);
+        final long delayBetweenChecks = 500L;
+        final int maxChecks = 240;
+
+        for (int i = 1; i < maxChecks; i++) {
+          Thread.sleep(delayBetweenChecks);
           ret = verify(stmtSel.executeQuery());
+          if (ret) {
+            LOGGER.info("Replication caught up in {} milliseconds", i * delayBetweenChecks);
+            break;
+          }
         }
 
       } finally {
@@ -121,7 +128,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
       while (isRunning() && rs.next()) {
         final Date one = rs.getTimestamp(1);
         final Date two = rs.getTimestamp(2);
-        LOGGER.info("txn 1: {}, rep 2: {}", one, two);
+        LOGGER.info("last update: txn: {}, rep: {}", one, two);
         ret = one.equals(two);
         break;
       }
