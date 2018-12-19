@@ -65,7 +65,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
       throw CheeseRay.runtime(LOGGER, e, "ERROR CHECKING REPLICATION LAG! {}", e.getMessage());
     }
 
-    return lastRunDate;
+    return new Date();
   }
 
   public Pair<String, String> findSchemas(final Session session) {
