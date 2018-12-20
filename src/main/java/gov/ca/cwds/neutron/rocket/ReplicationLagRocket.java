@@ -103,6 +103,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
 
         final long delay = 500L; // shorter delay = more accurate but pressures DB more
         final int maxChecks = 240;
+        final long start = System.currentTimeMillis();
 
         for (int i = 1; i < maxChecks; i++) {
           JobLogs.logEvery(LOGGER, 10, i, "time replication: delay (millis): {}", delay);
@@ -110,9 +111,10 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
           ret = verify(stmtSel.executeQuery());
           con.rollback();
           if (ret) {
-            final long replicationLagMillis = i * delay;
+            final long replicationLagMillis = System.currentTimeMillis() - start;
             LOGGER.info("Replication caught up in {} milliseconds", replicationLagMillis);
-            getFlightLog().addTimingEvent(STEP.REPLICATION_TIME.name().toLowerCase());
+            getFlightLog().addTimingEvent(STEP.REPLICATION_TIME.name().toLowerCase(),
+                replicationLagMillis);
             break;
           }
         }
