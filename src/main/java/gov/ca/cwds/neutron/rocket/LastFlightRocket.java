@@ -92,9 +92,6 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
         CheeseRay.runtime(LOGGER, e, "ERROR FINISHING! {}", e.getMessage());
       } catch (Exception e) {
         CheeseRay.runtime(LOGGER, e, "ABORT FLIGHT! {}", e.getMessage());
-      } catch (Error t) {
-        LOGGER.error("FLIGHT ABORTED!", t);
-        throw t;
       }
     }
 
