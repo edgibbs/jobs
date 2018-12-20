@@ -111,7 +111,6 @@ public class FlightSummary implements ApiMarker {
     this.bulkPrepared += flightLog.getCurrentBulkPrepared();
     this.bulkError += flightLog.getCurrentBulkError();
     this.bulkAfter += flightLog.getCurrentBulkAfter();
-
     this.rowsNormalized += flightLog.getCurrentNormalized();
 
     if (flightLog.isValidationErrors()) {

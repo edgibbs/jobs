@@ -130,6 +130,8 @@ public class PeopleSummaryThreadHandler
 
     INDEX_TO_ES("Wait on Elasticsearch indexing"),
 
+    REPLICATION_TIME("Millis to replicate records"),
+
     DONE("Job done")
 
     ;
@@ -481,6 +483,18 @@ public class PeopleSummaryThreadHandler
   }
 
   /**
+   * SNAP-796: measure replication lag.
+   */
+  protected void addOtherTimings() {
+    LOGGER.debug("Add replication timings");
+    final FlightLog lastReplicationCheck =
+        rocket.launchDirector.getFlightRecorder().getLastFlightLog(ReplicationLagRocket.class);
+    if (lastReplicationCheck != null) {
+      rocket.getFlightLog().addOtherMetrics(lastReplicationCheck);
+    }
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * <p>
@@ -562,6 +576,7 @@ public class PeopleSummaryThreadHandler
       step(STEP.SEL_PLACEMENT_HOME);
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
+
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
 
@@ -577,6 +592,8 @@ public class PeopleSummaryThreadHandler
         LOGGER.trace("NESTED ROLLBACK EXCEPTION!", e2);
       }
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
+    } finally {
+      addOtherTimings();
     }
 
     step(STEP.DONE_RETRIEVAL);

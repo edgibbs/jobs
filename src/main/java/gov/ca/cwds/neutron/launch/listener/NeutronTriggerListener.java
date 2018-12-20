@@ -60,7 +60,7 @@ public class NeutronTriggerListener implements TriggerListener {
     try {
       answer = launchDirector.isLaunchVetoed(className);
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "NO LAUNCH PAD! rocket: {}", className, e);
+      throw CheeseRay.runtime(LOGGER, e, "VETO LAUNCH! rocket: {}", className, e);
     }
 
     LOGGER.debug("Veto job execution: {}", answer);
@@ -70,7 +70,7 @@ public class NeutronTriggerListener implements TriggerListener {
   @Override
   public void triggerMisfired(Trigger trigger) {
     final TriggerKey key = trigger.getKey();
-    LOGGER.debug("TRIGGER MISFIRED! key: {}", key);
+    LOGGER.info("TRIGGER MISFIRED! key: {}", key);
     launchDirector.removeExecutingJob(key);
   }
 

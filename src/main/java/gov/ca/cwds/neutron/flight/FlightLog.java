@@ -124,6 +124,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private final Map<String, Long> timings = new LinkedHashMap<>(31);
 
+  private final Map<String, String> otherMetrics = new LinkedHashMap<>(11);
+
   private boolean initialLoad;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DomainChef.DATE_FORMAT)
@@ -639,6 +641,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
            .append(fmt.format(new Date(e.getValue()))));
     }
 
+    if (!isInitialLoad() && !otherMetrics.isEmpty()) {
+      buf.append("\n\n    OTHER METRICS:");
+      otherMetrics.entrySet().stream().forEach(e -> 
+        buf.append("\n\t")
+           .append(StringUtils.rightPad(e.getKey() + ":", 24))
+           .append(e.getValue()));
+    }
+
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(fmt.format(new Date(startTime)));
     if (endTime > 0L) {
       buf.append("\n\tend:                    ").append(fmt.format(new Date(endTime)))
@@ -770,8 +780,30 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     warnings.add(warning);
   }
 
+  public void addTimingEvents(FlightLog fl) {
+    final Map<String, Long> otherTimings = fl.getTimings();
+    if (otherTimings != null && !otherTimings.isEmpty()) {
+      timings.putAll(otherTimings);
+    }
+  }
+
+  public void addOtherMetrics(FlightLog fl) {
+    final Map<String, String> otherTimings = fl.getOtherMetrics();
+    if (otherTimings != null && !otherTimings.isEmpty()) {
+      otherMetrics.putAll(otherTimings);
+    }
+  }
+
   public void addTimingEvent(String event) {
-    timings.putIfAbsent(event, System.currentTimeMillis());
+    addTimingEvent(event, System.currentTimeMillis());
+  }
+
+  public void addTimingEvent(String event, long val) {
+    timings.put(event, val);
+  }
+
+  public void addOtherMetric(String event, String val) {
+    otherMetrics.put(event, val);
   }
 
   public Map<String, Long> getTimings() {
@@ -779,41 +811,58 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void notifyMonitor(String eventType) {
-    LOGGER.info("Notify New Relic");
-    final Map<String, Object> eventAttributes = new LinkedHashMap<>();
+    LOGGER.debug("Prepare to notify New Relic");
+    final Map<String, Object> attribs = new LinkedHashMap<>();
 
     if (!isInitialLoad()) {
       if (!timings.isEmpty()) {
-        timings.entrySet().stream().forEach(e -> eventAttributes.put(e.getKey(),
+        // Convert long timestamp to UNIX timestamp (aka "seconds since epoch").
+        timings.entrySet().stream().forEach(e -> attribs.put(e.getKey(),
             Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
       }
 
+      // SNAP-796: replication metrics.
+      if (!otherMetrics.isEmpty()) {
+        otherMetrics.entrySet().stream().forEach(e -> attribs.put(e.getKey(), e.getValue()));
+      }
+
       if (lastChangeSince != null) {
-        eventAttributes.putIfAbsent("changed_since",
+        attribs.putIfAbsent("changed_since",
             Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
       }
 
-      eventAttributes.putIfAbsent("warnings", warnings.size());
-      eventAttributes.putIfAbsent("errors", isFatalError());
-      eventAttributes.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
-      eventAttributes.putIfAbsent("es_deleted", recsBulkDeleted.get());
-      eventAttributes.putIfAbsent("es_before", recsBulkBefore.get());
-      eventAttributes.putIfAbsent("es_after", recsBulkAfter.get());
-      eventAttributes.putIfAbsent("es_errors", recsBulkError.get());
+      attribs.putIfAbsent("warnings", warnings.size());
+      attribs.putIfAbsent("errors", isFatalError());
+      attribs.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
+      attribs.putIfAbsent("es_deleted", recsBulkDeleted.get());
+      attribs.putIfAbsent("es_before", recsBulkBefore.get());
+      attribs.putIfAbsent("es_after", recsBulkAfter.get());
+      attribs.putIfAbsent("es_errors", recsBulkError.get());
 
-      if (!eventAttributes.isEmpty()) {
-        LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
-            eventAttributes.size());
-        eventAttributes.entrySet().stream().forEach(
-            e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+      attribs.putIfAbsent("start", startTime);
+      attribs.putIfAbsent("done", endTime);
 
+      final long totalSeconds = (endTime - startTime) / 1000;
+      LOGGER.debug("total seconds: {}", totalSeconds);
+      attribs.putIfAbsent("total_seconds", totalSeconds);
+
+      if (!attribs.isEmpty()) {
         try {
-          NewRelic.getAgent().getInsights().recordCustomEvent(eventType, eventAttributes);
+          LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
+              attribs.size());
+          attribs.entrySet().stream().forEach(
+              e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+          NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
-          CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
+          LOGGER.error("FAILED TO SEND TO NEW RELIC!", e);
+          // CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
         }
       }
     }
+  }
+
+  public Map<String, String> getOtherMetrics() {
+    return otherMetrics;
   }
 
 }

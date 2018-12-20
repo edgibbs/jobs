@@ -62,21 +62,25 @@ public class NeutronRocket implements InterruptableJob {
     this.flightRecorder = flightRecorder;
   }
 
+  protected void launch() {
+
+  }
+
   @SuppressWarnings("rawtypes")
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
     final JobDataMap map = context.getJobDetail().getJobDataMap();
     final String rocketName = context.getTrigger().getJobKey().getName();
-    final String origThreadName = Thread.currentThread().getName();
+    final String origThreadName = "" + Thread.currentThread().getName();
 
     NeutronThreadUtils.nameThread(rocketName, this);
     LOGGER.info("\n\t>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
 
     try (final BasePersonRocket flight = rocket) {
+      MDC.put("rocketLog", rocketName);
       flightLog = rocket.getFlightLog();
       flightLog.setRocketName(rocketName);
       flightLog.start();
-      MDC.put("rocketLog", rocketName);
 
       // Job parameter data:
       map.put("opts", flight.getFlightPlan());
@@ -94,13 +98,15 @@ public class NeutronRocket implements InterruptableJob {
       flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
 
-      if (!flightLog.isInitialLoad()) {
-        flightLog.notifyMonitor(rocket.getEventType());
+      try {
+        if (!flightLog.isInitialLoad()) {
+          flightLog.notifyMonitor(rocket.getEventType());
+        }
+      } finally {
+        LOGGER.info("FLIGHT SUMMARY: rocket: {}\n{}", rocketName, flightLog);
+        MDC.remove("rocketLog"); // remove the logging context, no matter what happens
+        NeutronThreadUtils.nameThread(origThreadName);
       }
-
-      LOGGER.info("FLIGHT SUMMARY: rocket: {}\n{}", rocketName, flightLog);
-      MDC.remove("rocketLog"); // remove the logging context, no matter what happens
-      NeutronThreadUtils.nameThread(origThreadName, this);
     }
   }
 

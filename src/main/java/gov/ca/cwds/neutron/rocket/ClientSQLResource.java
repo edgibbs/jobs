@@ -11,7 +11,31 @@ public class ClientSQLResource implements ApiMarker {
   // Neutron, the next generation.
   // =================================
 
+  public static final String[] POLLED_TABLES = {"ADDRS_T", "CASE_T", "CL_ADDRT", "CLIENT_T",
+      "CLSCP_ET", "CSECHIST", "O_HM_PLT", "OCL_NM_T", "PLC_EPST", "PLC_HM_T", "SAF_ALRT"};
+
   public static final String KEY_SOURCE = "FROM GT_ID   gt \n";
+
+  //@formatter:off
+  public static final String UPD_TIMESTAMP =
+        "UPDATE TX_SCHEMA.ADDRS_T c\n"
+      + "SET c.LST_UPD_TS = CURRENT TIMESTAMP\n"
+      + "WHERE c.IDENTIFIER IN (\n"
+      + "  SELECT x.IDENTIFIER FROM TX_SCHEMA.ADDRS_T x FETCH FIRST 1 ROWS ONLY\n"
+      + ")";
+  //@formatter:on
+
+  //@formatter:off
+  public static final String SEL_TIMESTAMP =
+        "SELECT t.LST_UPD_TS AS T_LST_UPD_TS, r.LST_UPD_TS AS R_LST_UPD_TS\n"
+      + "FROM (\n"
+      + " SELECT x.IDENTIFIER, x.LST_UPD_TS\n"
+      + " FROM TX_SCHEMA.ADDRS_T x\n"
+      + " FETCH FIRST 1 ROWS ONLY\n"
+      + ") t \n"
+      + "JOIN ADDRS_T r ON r.IDENTIFIER = t.IDENTIFIER \n"
+      + "FOR READ ONLY WITH UR";
+  //@formatter:on
 
   //@formatter:off
   public static final String SEL_OPTIMIZE =
@@ -37,7 +61,7 @@ public class ClientSQLResource implements ApiMarker {
    */
   //@formatter:off
   public static final String SEL_CLI =
-  "SELECT \n"
+        "SELECT \n"
       + "  clt.IDENTIFIER        AS CLT_IDENTIFIER, \n"
       + "  clt.LST_UPD_ID        AS CLT_LST_UPD_ID, \n"
       + "  clt.LST_UPD_TS        AS CLT_LST_UPD_TS, \n"
@@ -382,5 +406,40 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   public static final String INS_LST_CHG_KEY_BUNDLE = "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
+
+  /**
+   * Unreliable query results from IBM's replication tracking tables. Keep for records.
+   */
+  //@formatter:off
+  public static final String SEL_REPL_TIME =
+        "WITH STEP1 AS (\n"
+      + " SELECT \n"
+      + "    m.SOURCE_TABLE, \n"
+      + "    t.LASTRUN, \n"
+      + "    ((t.endtime - t.lastrun) + (t.source_conn_time - t.synchtime))         AS RUN_LATENCY_SECS\n"
+      + "  , DENSE_RANK() OVER(PARTITION BY m.SOURCE_TABLE ORDER BY t.LASTRUN DESC) AS PRIOR_RUN\n"
+      + " FROM ASN.IBMSNAP_APPLYTRAIL t\n"
+      + " JOIN ASN.IBMSNAP_SUBS_SET   s ON s.SET_NAME = t.SET_NAME\n"
+      + " JOIN ASN.IBMSNAP_SUBS_MEMBR m ON m.SET_NAME = s.SET_NAME\n"
+      + " WHERE m.SOURCE_OWNER = 'CWSNS1'\n"
+      + "   AND t.lastrun > '2018-12-14-04.17.00.000000' \n"
+      + "   AND m.SOURCE_TABLE IN ('ADDRS_T', 'CLIENT_T', 'CL_ADDRT')\n"
+      + "), LAST_RUN AS (\n"
+      + " SELECT s.* FROM STEP1 s WHERE s.prior_run = 1\n"
+      + "), PRIOR_RUN AS (\n"
+      + " SELECT s.* FROM STEP1 s WHERE s.prior_run = 2\n"
+      + ")\n"
+      + "SELECT \n"
+      + " l.SOURCE_TABLE, \n"
+      + " l.LASTRUN               AS LAST_LASTRUN, \n"
+      + " r.LASTRUN               AS RIGHT_LASTRUN, \n"
+      + " l.RUN_LATENCY_SECS,\n"
+      + " TIMESTAMPDIFF(2, CAST((l.LASTRUN - r.LASTRUN) AS CHAR(22))) AS RUN_DELAY_SECS\n"
+      + "FROM LAST_RUN  l\n"
+      + "LEFT JOIN PRIOR_RUN r ON l.SOURCE_TABLE = r.SOURCE_TABLE\n"
+      + "ORDER BY 1, 2 DESC\n"
+      + "FETCH FIRST 10 ROWS ONLY\n"
+      + "FOR READ ONLY WITH UR";
+  //@formatter:on
 
 }

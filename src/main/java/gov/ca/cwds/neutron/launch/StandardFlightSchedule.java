@@ -39,6 +39,7 @@ import gov.ca.cwds.neutron.rocket.ExitInitialLoadRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleRocket;
 import gov.ca.cwds.neutron.rocket.IndexResetPeopleSummaryRocket;
 import gov.ca.cwds.neutron.rocket.LightThisCandleRocket;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket;
 import gov.ca.cwds.neutron.rocket.SchemaResetRocket;
 import gov.ca.cwds.neutron.rocket.VoxListenerRocket;
 
@@ -46,6 +47,7 @@ import gov.ca.cwds.neutron.rocket.VoxListenerRocket;
  * Standard rocket settings for both modes, Initial Load and Last Change (on-going, continuous).
  * 
  * @author CWDS API Team
+ * @see LaunchPad#schedule()
  */
 public enum StandardFlightSchedule {
 
@@ -101,7 +103,21 @@ public enum StandardFlightSchedule {
   VOX_ROCKET(VoxListenerRocket.class, // rocket class
       "vox", // rocket name
       5, // initial load order
-      60000, // start delay seconds. N/A.
+      20, // start delay seconds. N/A.
+      60000, // execute every N seconds. N/A.
+      null, // last run priority. N/A.
+      true, // run in Last Change mode
+      false, // run in Initial Load
+      false // People index
+  ),
+
+  /**
+   * Periodically measure replication lag.
+   */
+  REPLICATION_TIME(ReplicationLagRocket.class, // rocket class
+      "replication_time", // rocket name
+      6, // initial load order
+      5, // start delay seconds. N/A.
       60000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
       true, // run in Last Change mode
@@ -116,13 +132,13 @@ public enum StandardFlightSchedule {
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 10, 5, 1000, null, true, true,
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 20, 5, 1000, null, true, true,
       false),
 
   /**
    * Document root: Reporter.
    */
-  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 30, 30, 950, null, true, true, false),
+  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 30, 25, 950, null, true, true, false),
 
   /**
    * Document root: Collateral Individual.
@@ -278,8 +294,8 @@ public enum StandardFlightSchedule {
   private static final Map<Class<?>, StandardFlightSchedule> mapClass;
 
   static {
-    final Map<String, StandardFlightSchedule> xMapName = new HashMap<>();
-    final Map<Class<?>, StandardFlightSchedule> xMapClass = new HashMap<>();
+    final Map<String, StandardFlightSchedule> xMapName = new HashMap<>(31);
+    final Map<Class<?>, StandardFlightSchedule> xMapClass = new HashMap<>(31);
 
     for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
       xMapName.put(sched.rocketName, sched);

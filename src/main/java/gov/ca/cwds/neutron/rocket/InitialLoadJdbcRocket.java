@@ -58,7 +58,7 @@ public abstract class InitialLoadJdbcRocket<T extends PersistentObject, M extend
   }
 
   /**
-   * Synchronize to prevent deadlocks when grabbing connections from the C3P0 connection pool.
+   * Synchronize to prevent deadlocks when grabbing database connections from the connection pool.
    * 
    * @return a connection.
    * @throws SQLException on database error
