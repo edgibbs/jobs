@@ -130,6 +130,8 @@ public class PeopleSummaryThreadHandler
 
     INDEX_TO_ES("Wait on Elasticsearch indexing"),
 
+    REPLICATION_TIME("Millis to replicate records"),
+
     DONE("Job done")
 
     ;

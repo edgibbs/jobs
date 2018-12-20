@@ -34,6 +34,7 @@ import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -41,6 +42,7 @@ import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryLastChangeHandler;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
@@ -250,6 +252,14 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     handler.get().handleSecondaryJdbc(con, range);
+
+    // SNAP-796: measure replication lag.
+    LOGGER.debug("Add replication timings");
+    final FlightLog lastReplicationCheck =
+        launchDirector.getFlightRecorder().getLastFlightLog(ReplicationLagRocket.class);
+    if (lastReplicationCheck != null) {
+      getFlightLog().addTimingEvents(lastReplicationCheck);
+    }
   }
 
   /**

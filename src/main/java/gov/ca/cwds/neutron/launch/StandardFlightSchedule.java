@@ -137,7 +137,7 @@ public enum StandardFlightSchedule {
   /**
    * Document root: Reporter.
    */
-  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 30, 30, 950, null, true, true, false),
+  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 30, 25, 950, null, true, true, false),
 
   /**
    * Document root: Collateral Individual.

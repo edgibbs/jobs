@@ -1,5 +1,8 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_TIMESTAMP;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.UPD_TIMESTAMP;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,6 +25,7 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 import gov.ca.cwds.neutron.jetpack.JobLogs;
+import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler.STEP;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
 /**
@@ -36,8 +40,8 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ReplicationLagRocket.class);
 
-  protected String replSchema;
-  protected String txnlSchema;
+  protected String repSchema;
+  protected String txnSchema;
 
   /**
    * Construct rocket with all required dependencies.
@@ -84,31 +88,31 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
     boolean ret = false;
     try (final Session session = getJobDao().grabSession()) {
       final Pair<String, String> schemas = findSchemas(session);
-      replSchema = schemas.getLeft();
-      txnlSchema = schemas.getRight();
+      repSchema = schemas.getLeft();
+      txnSchema = schemas.getRight();
 
       final Connection con = NeutronJdbcUtils.prepConnection(session);
       try (
-          final PreparedStatement stmtUpd = con.prepareStatement(
-              ClientSQLResource.UPD_TIMESTAMP.replaceAll("TX_SCHEMA", txnlSchema));
-          final PreparedStatement stmtSel = con.prepareStatement(
-              ClientSQLResource.SEL_TIMESTAMP.replaceAll("TX_SCHEMA", txnlSchema))) {
+          final PreparedStatement stmtUpd =
+              con.prepareStatement(UPD_TIMESTAMP.replaceAll("TX_SCHEMA", txnSchema));
+          final PreparedStatement stmtSel =
+              con.prepareStatement(SEL_TIMESTAMP.replaceAll("TX_SCHEMA", txnSchema))) {
         grabTransaction();
         stmtUpd.executeUpdate();
         con.commit();
 
-        final long delayBetweenChecks = 500L;
+        final long delay = 500L; // shorter delay = more accurate but pressures DB more
         final int maxChecks = 240;
-        final Object[] args = {};
 
         for (int i = 1; i < maxChecks; i++) {
-          JobLogs.logEvery(LOGGER, 10, i, "time replication", args);
-          Thread.sleep(delayBetweenChecks);
+          JobLogs.logEvery(LOGGER, 10, i, "time replication: delay (millis): {}", delay);
+          Thread.sleep(delay);
           ret = verify(stmtSel.executeQuery());
           con.rollback();
           if (ret) {
-            LaunchCommand.getInstance().getCommonFlightPlan();
-            LOGGER.info("Replication caught up in {} milliseconds", i * delayBetweenChecks);
+            final long replicationLagMillis = i * delay;
+            LOGGER.info("Replication caught up in {} milliseconds", replicationLagMillis);
+            getFlightLog().addTimingEvent(STEP.REPLICATION_TIME.name().toLowerCase());
             break;
           }
         }
