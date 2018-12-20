@@ -18,10 +18,10 @@ public class ClientSQLResource implements ApiMarker {
 
   //@formatter:off
   public static final String UPD_TIMESTAMP =
-        "UPDATE TX_SCHEMA.CLIENT_T c\n"
+        "UPDATE TX_SCHEMA.ADDRS_T c\n"
       + "SET c.LST_UPD_TS = CURRENT TIMESTAMP\n"
       + "WHERE c.IDENTIFIER IN (\n"
-      + "  SELECT x.IDENTIFIER FROM TX_SCHEMA.CLIENT_T x FETCH FIRST 1 ROWS ONLY\n"
+      + "  SELECT x.IDENTIFIER FROM TX_SCHEMA.ADDRS_T x FETCH FIRST 1 ROWS ONLY\n"
       + ")";
   //@formatter:on
 
@@ -30,10 +30,10 @@ public class ClientSQLResource implements ApiMarker {
         "SELECT t.LST_UPD_TS AS T_LST_UPD_TS, r.LST_UPD_TS AS R_LST_UPD_TS\n"
       + "FROM (\n"
       + " SELECT x.IDENTIFIER, x.LST_UPD_TS\n"
-      + " FROM TX_SCHEMA.CLIENT_T x\n"
+      + " FROM TX_SCHEMA.ADDRS_T x\n"
       + " FETCH FIRST 1 ROWS ONLY\n"
       + ") t \n"
-      + "JOIN CLIENT_T r ON r.IDENTIFIER = t.IDENTIFIER \n"
+      + "JOIN ADDRS_T r ON r.IDENTIFIER = t.IDENTIFIER \n"
       + "FOR READ ONLY WITH UR";
   //@formatter:on
 
@@ -407,6 +407,9 @@ public class ClientSQLResource implements ApiMarker {
 
   public static final String INS_LST_CHG_KEY_BUNDLE = "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
 
+  /**
+   * Unreliable query results from IBM's replication tracking tables. Keep for records.
+   */
   //@formatter:off
   public static final String SEL_REPL_TIME =
         "WITH STEP1 AS (\n"
