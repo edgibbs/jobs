@@ -118,7 +118,7 @@ public enum StandardFlightSchedule {
       "replication_time", // rocket name
       6, // initial load order
       5, // start delay seconds. N/A.
-      10000, // execute every N seconds. N/A.
+      60000, // execute every N seconds. N/A.
       null, // last run priority. N/A.
       true, // run in Last Change mode
       false, // run in Initial Load
@@ -294,8 +294,8 @@ public enum StandardFlightSchedule {
   private static final Map<Class<?>, StandardFlightSchedule> mapClass;
 
   static {
-    final Map<String, StandardFlightSchedule> xMapName = new HashMap<>();
-    final Map<Class<?>, StandardFlightSchedule> xMapClass = new HashMap<>();
+    final Map<String, StandardFlightSchedule> xMapName = new HashMap<>(31);
+    final Map<Class<?>, StandardFlightSchedule> xMapClass = new HashMap<>(31);
 
     for (StandardFlightSchedule sched : StandardFlightSchedule.values()) {
       xMapName.put(sched.rocketName, sched);
