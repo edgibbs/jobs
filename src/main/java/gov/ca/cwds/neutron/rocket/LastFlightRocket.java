@@ -21,7 +21,6 @@ import gov.ca.cwds.neutron.component.Rocket;
 import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
-import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -91,11 +90,11 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
         finish(); // Close resources, notify listeners, or even close JVM in standalone mode.
       } catch (NeutronCheckedException e) {
         CheeseRay.runtime(LOGGER, e, "ERROR FINISHING! {}", e.getMessage());
-      } catch (Throwable e) {
-        if (e instanceof NeutronRuntimeException) {
-          throw e;
-        }
-        throw new NeutronRuntimeException("ABORT FLIGHT!", e);
+      } catch (Exception e) {
+        CheeseRay.runtime(LOGGER, e, "ABORT FLIGHT! {}", e.getMessage());
+      } catch (Error t) {
+        LOGGER.error("FLIGHT ABORTED!", t);
+        throw t;
       }
     }
 
