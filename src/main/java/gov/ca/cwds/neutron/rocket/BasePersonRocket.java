@@ -1087,4 +1087,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     this.mapper = mapper;
   }
 
+  public AtomLaunchDirector getLaunchDirector() {
+    return launchDirector;
+  }
+
 }

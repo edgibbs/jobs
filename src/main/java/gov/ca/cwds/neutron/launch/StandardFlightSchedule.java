@@ -47,6 +47,7 @@ import gov.ca.cwds.neutron.rocket.VoxListenerRocket;
  * Standard rocket settings for both modes, Initial Load and Last Change (on-going, continuous).
  * 
  * @author CWDS API Team
+ * @see LaunchPad#schedule()
  */
 public enum StandardFlightSchedule {
 
