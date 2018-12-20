@@ -83,6 +83,8 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
 
   /**
    * Update records.
+   * 
+   * @return true if record replicated before timeout
    */
   protected boolean measureReplicationLag() {
     boolean ret = false;
