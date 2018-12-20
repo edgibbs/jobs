@@ -101,7 +101,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
         stmtUpd.executeUpdate();
         con.commit();
 
-        final long delay = 500L; // shorter delay = more accurate but pressures DB more
+        final long delay = 500L; // shorter delay is more accurate but pressures DB more
         final int maxChecks = 240;
         final long start = System.currentTimeMillis();
 
