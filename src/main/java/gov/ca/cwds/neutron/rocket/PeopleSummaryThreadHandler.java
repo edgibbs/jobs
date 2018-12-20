@@ -490,7 +490,7 @@ public class PeopleSummaryThreadHandler
     final FlightLog lastReplicationCheck =
         rocket.launchDirector.getFlightRecorder().getLastFlightLog(ReplicationLagRocket.class);
     if (lastReplicationCheck != null) {
-      rocket.getFlightLog().addTimingEvents(lastReplicationCheck);
+      rocket.getFlightLog().addOtherMetrics(lastReplicationCheck);
     }
   }
 

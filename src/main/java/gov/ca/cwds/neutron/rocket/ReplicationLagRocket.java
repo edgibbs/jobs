@@ -112,8 +112,8 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
           con.rollback();
           if (ret) {
             final String lag = "" + (System.currentTimeMillis() - start);
-            LOGGER.info("Replication took {} milliseconds", lag);
-            getFlightLog().addOtherEvent(STEP.REPLICATION_TIME.name().toLowerCase(), lag);
+            LOGGER.info("Replication took {} millis", lag);
+            getFlightLog().addOtherMetric(STEP.REPLICATION_TIME.name().toLowerCase(), lag);
             break;
           }
         }
@@ -135,7 +135,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
     while (isRunning() && rs.next()) {
       final Date one = rs.getTimestamp(1);
       final Date two = rs.getTimestamp(2);
-      ret = one.equals(two);
+      ret = one != null && two != null && one.equals(two);
       break;
     }
 

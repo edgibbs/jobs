@@ -779,6 +779,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     }
   }
 
+  public void addOtherMetrics(FlightLog fl) {
+    final Map<String, String> otherTimings = fl.getOtherMetrics();
+    if (otherTimings != null && !otherTimings.isEmpty()) {
+      otherMetrics.putAll(otherTimings);
+    }
+  }
+
   public void addTimingEvent(String event) {
     addTimingEvent(event, System.currentTimeMillis());
   }
@@ -787,7 +794,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     timings.put(event, val);
   }
 
-  public void addOtherEvent(String event, String val) {
+  public void addOtherMetric(String event, String val) {
     otherMetrics.put(event, val);
   }
 
@@ -806,6 +813,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
             Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
       }
 
+      // SNAP-796: replication metrics.
       if (!otherMetrics.isEmpty()) {
         otherMetrics.entrySet().stream().forEach(e -> attribs.put(e.getKey(), e.getValue()));
       }
@@ -838,10 +846,15 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
               e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
           NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
-          CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
+          LOGGER.error("FAILED TO SEND TO NEW RELIC!", e);
+          // CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
         }
       }
     }
+  }
+
+  public Map<String, String> getOtherMetrics() {
+    return otherMetrics;
   }
 
 }
