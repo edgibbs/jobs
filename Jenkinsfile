@@ -12,7 +12,6 @@ node('tpt4-slave') {
     pipelineTriggers([triggerProperties]), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
       booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
-      string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
       string(defaultValue: 'master', description: '', name: 'branch'),
       booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
       string(defaultValue: '', description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
@@ -39,6 +38,9 @@ node('tpt4-slave') {
     if (env.BUILD_JOB_TYPE == 'master') {
       stage('Increment Tag') {
         newTag = newSemVer()
+
+        echo "newTag: $newTag"
+
       }
     } else {
       stage('Check for Label') {
@@ -55,6 +57,7 @@ node('tpt4-slave') {
       lint(rtGradle)
     }
     if (env.BUILD_JOB_TYPE == 'master') {
+    /*
       stage('Tag Repo') {
         tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
       }
@@ -63,6 +66,7 @@ node('tpt4-slave') {
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
         rtGradle.deployer.deployArtifacts = false
       }
+      */
       stage('Clean WorkSpace') {
         archiveArtifacts artifacts: '**/LaunchCommand-*.jar', fingerprint: true
       }
