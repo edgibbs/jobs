@@ -117,8 +117,9 @@ public abstract class IndexResetRocket
               : getDocumentMappingLocation();
 
       // SNAP-784: temporarily override ES refresh interval and replicas during Initial Load.
-      final Map<String, Object> map = NeutronStringUtils
-          .jsonToMap(IOUtils.resourceToString(settingFile, Charset.defaultCharset()));
+      final Charset charset = Charset.defaultCharset();
+      final Map<String, Object> map =
+          NeutronStringUtils.jsonToMap(IOUtils.resourceToString(settingFile, charset));
       map.put("number_of_replicas", 0);
       map.put("refresh_interval", "60s");
       LOGGER.debug("Initial Load: number_of_replicas: {}, refresh_interval: {}",
@@ -127,7 +128,7 @@ public abstract class IndexResetRocket
       final String json = JsonUtils.to(map);
       LOGGER.debug("Initial Load index settings: {}", json);
       final File tempSettingsFile = File.createTempFile("idx_", ".set");
-      FileUtils.writeStringToFile(tempSettingsFile, json, Charset.defaultCharset());
+      FileUtils.writeStringToFile(tempSettingsFile, json, charset);
       settingFile = tempSettingsFile.getPath();
 
       LOGGER.warn(
