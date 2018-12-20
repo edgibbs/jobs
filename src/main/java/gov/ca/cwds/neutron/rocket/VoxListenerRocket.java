@@ -45,7 +45,7 @@ public class VoxListenerRocket
    * @param launchDirector1 command launch director
    * @param flightPlan command line options
    * @param launchDirector launch director
-   * @param iterations TODO
+   * @param iterations number of times to wait for instructions
    */
   @Inject
   public VoxListenerRocket(final ReplicatedOtherAdultInPlacemtHomeDao dao,
@@ -54,7 +54,7 @@ public class VoxListenerRocket
       AtomLaunchDirector launchDirector,
       @Named("vox.listener.rocket.iterations") Integer iterations) {
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
-    this.iterations = iterations != null && iterations > 0 ? iterations : 3000;
+    this.iterations = iterations != null && iterations > 0 ? iterations : 10000;
   }
 
   @Override

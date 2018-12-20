@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.ca.cwds.ObjectMapperUtils;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
-import gov.ca.cwds.neutron.launch.NeutronRocket;
 
 /**
  * Dumping ground for common String utility methods. Can be safely moved to api-core.
@@ -23,7 +22,7 @@ import gov.ca.cwds.neutron.launch.NeutronRocket;
  */
 public class NeutronStringUtils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronRocket.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NeutronStringUtils.class);
 
   public static final ObjectMapper MAPPER = ObjectMapperUtils.createObjectMapper();
 

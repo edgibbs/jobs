@@ -184,7 +184,7 @@ public class LaunchDirector implements AtomLaunchDirector {
     LOGGER.warn("START SCHEDULER!");
     try {
       this.getScheduler().start();
-    } catch (SchedulerException e) {
+    } catch (Exception e) {
       LOGGER.error("FAILED TO START SCHEDULER! {}", e.getMessage(), e);
       throw CheeseRay.checked(LOGGER, e, "FAILED TO START SCHEDULER! {}", e.getMessage());
     }

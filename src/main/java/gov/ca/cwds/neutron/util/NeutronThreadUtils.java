@@ -49,6 +49,10 @@ public class NeutronThreadUtils {
     Thread.currentThread().setName(obj.getClass().getSimpleName() + "_" + title);
   }
 
+  public static void nameThread(final String title) {
+    Thread.currentThread().setName(title);
+  }
+
   /**
    * Super lame but sometimes effective approach to thread management, especially when
    * thread/connection pools warm up or other resources initialize.

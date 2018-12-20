@@ -76,6 +76,7 @@ public class StandardFlightScheduleTest extends Goddard {
 
     final List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.VOX_ROCKET);
+    expected.add(StandardFlightSchedule.REPLICATION_TIME);
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);
     expected.add(StandardFlightSchedule.REPORTER_S);
     expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL_S);
@@ -124,7 +125,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getStartDelaySeconds_Args__() throws Exception {
     final int actual = target.getStartDelaySeconds();
-    final int expected = 10;
+    final int expected = 20;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -169,7 +170,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getInitialLoadOrder_Args__() throws Exception {
     final int actual = target.getInitialLoadOrder();
-    final int expected = 4;
+    final int expected = 5;
     assertThat(actual, is(equalTo(expected)));
   }
 

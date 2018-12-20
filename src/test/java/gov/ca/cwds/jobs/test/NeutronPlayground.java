@@ -2,18 +2,24 @@ package gov.ca.cwds.jobs.test;
 
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
 
 import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.neutron.enums.NeutronElasticsearchDefaults;
@@ -103,9 +109,7 @@ public class NeutronPlayground {
     LOGGER.info("streamTest2(): result: {}", result);
   }
 
-  public static void main(String[] args) throws Exception {
-    // final NeutronPlayground playground = new NeutronPlayground();
-
+  public void junk() throws Exception {
     final String json = IOUtils.resourceToString(
         NeutronElasticsearchDefaults.SETTINGS_PEOPLE_SUMMARY.getValue(), Charset.defaultCharset());
     System.out.println(json);
@@ -118,9 +122,45 @@ public class NeutronPlayground {
 
     // playground.streamTest1();
     // playground.streamTest2();
+    // final Instant inst = Instant.ofEpochSecond(1_280_512_800L);
+    // LOGGER.info("instant: {}", inst);
+  }
 
-    final Instant inst = Instant.ofEpochSecond(1_280_512_800L);
-    LOGGER.info("instant: {}", inst);
+  public static interface Lame extends Callable<Boolean> {
+
+  }
+
+  public static class Foo implements Lame {
+
+    @Override
+    public Boolean call() throws Exception {
+      LOGGER.info("callable: start");
+      Thread.currentThread().yield();
+      Thread.sleep(1000L);
+      LOGGER.info("callable: end");
+      return true; // do something useful here
+    }
+
+  };
+
+  public void testRetry(long delayBeforeKill) {
+    final ExecutorService executor = Executors.newWorkStealingPool(2);
+    final TimeLimiter limiter = SimpleTimeLimiter.create(executor);
+    final Foo target = new Foo();
+    final Lame proxy = limiter.newProxy(target, Lame.class, delayBeforeKill, TimeUnit.MILLISECONDS);
+
+    try {
+      proxy.call();
+    } catch (Exception e) {
+      LOGGER.error("DIED", e);
+    }
+
+  }
+
+  public static void main(String[] args) throws Exception {
+    final NeutronPlayground playground = new NeutronPlayground();
+    playground.testRetry(500);
+    playground.testRetry(2000);
   }
 
 }

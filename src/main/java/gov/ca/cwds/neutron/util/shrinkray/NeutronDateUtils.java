@@ -56,8 +56,7 @@ public class NeutronDateUtils {
   public static String makeTimestampString(final Date date) {
     final StringBuilder buf = new StringBuilder();
     buf.append("TIMESTAMP('")
-        .append(new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat()).format(date))
-        .append("')");
+        .append(new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat()).format(date)).append("')");
     return buf.toString();
   }
 
@@ -71,6 +70,10 @@ public class NeutronDateUtils {
     }
 
     return new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat()).format(useThisDate);
+  }
+
+  public static String makeBasicTimestampString(final Date date) {
+    return new SimpleDateFormat(FMT_LEGACY_TIMESTAMP.getFormat()).format(date);
   }
 
   public static String makeSimpleDateString(final Date date) {

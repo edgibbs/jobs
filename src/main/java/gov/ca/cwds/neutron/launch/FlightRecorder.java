@@ -71,8 +71,7 @@ public class FlightRecorder implements AtomFlightRecorder {
   }
 
   @Override
-  public synchronized FlightSummary summarizeFlight(StandardFlightSchedule flightSchedule,
-      FlightLog flightLog) {
+  public FlightSummary summarizeFlight(StandardFlightSchedule flightSchedule, FlightLog flightLog) {
     FlightSummary summary = flightSummaries.get(flightSchedule);
     if (summary == null) {
       summary = new FlightSummary(flightSchedule);
