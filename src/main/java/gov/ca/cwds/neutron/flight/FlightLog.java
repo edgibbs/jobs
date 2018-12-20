@@ -124,6 +124,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private final Map<String, Long> timings = new LinkedHashMap<>(31);
 
+  private final Map<String, String> otherMetrics = new LinkedHashMap<>(11);
+
   private boolean initialLoad;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DomainChef.DATE_FORMAT)
@@ -785,6 +787,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     timings.put(event, val);
   }
 
+  public void addOtherEvent(String event, String val) {
+    otherMetrics.put(event, val);
+  }
+
   public Map<String, Long> getTimings() {
     return timings;
   }
@@ -795,8 +801,13 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
     if (!isInitialLoad()) {
       if (!timings.isEmpty()) {
+        // Convert long timestamp to UNIX timestamp (aka "seconds since epoch").
         timings.entrySet().stream().forEach(e -> attribs.put(e.getKey(),
             Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
+      }
+
+      if (!otherMetrics.isEmpty()) {
+        otherMetrics.entrySet().stream().forEach(e -> attribs.put(e.getKey(), e.getValue()));
       }
 
       if (lastChangeSince != null) {
