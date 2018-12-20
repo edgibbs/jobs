@@ -641,6 +641,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
            .append(fmt.format(new Date(e.getValue()))));
     }
 
+    if (!isInitialLoad() && !otherMetrics.isEmpty()) {
+      buf.append("\n\n    OTHER METRICS:");
+      otherMetrics.entrySet().stream().forEach(e -> 
+        buf.append("\n\t")
+           .append(StringUtils.rightPad(e.getKey() + ":", 24))
+           .append(e.getValue()));
+    }
+
     buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(fmt.format(new Date(startTime)));
     if (endTime > 0L) {
       buf.append("\n\tend:                    ").append(fmt.format(new Date(endTime)))
