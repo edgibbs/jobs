@@ -8,7 +8,7 @@ node('tpt4-slave') {
   def newTag
   if (env.BUILD_JOB_TYPE == 'master') {
     triggerProperties = pullRequestMergedTriggerProperties('jobs-master')
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '15')),
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '25')),
     pipelineTriggers([triggerProperties]), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
       booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
