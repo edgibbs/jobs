@@ -66,6 +66,7 @@ node('tpt4-slave') {
         rtGradle.deployer.deployArtifacts = false
       }
       stage('Clean WorkSpace') {
+        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index.html', reportName: 'Javadoc', reportTitles: 'Javadoc'])
         archiveArtifacts artifacts: '**/LaunchCommand-*.jar', fingerprint: true
       }
     }
