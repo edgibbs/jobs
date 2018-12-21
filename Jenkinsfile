@@ -66,7 +66,7 @@ node('tpt4-slave') {
         rtGradle.deployer.deployArtifacts = false
       }
       stage ('Deploy to Rundeck@Dev') {
-        build job: 'tpt4-api-deploy-jobs', parameters: [[$class: 'StringParameterValue', name: 'playbook', value: 'deploy-jobs-to-rundeck.yml'], [$class: 'StringParameterValue', name: 'version', value: newTag]]
+        build job: 'tpt4-api-deploy-jobs', parameters: [[$class: 'StringParameterValue', name: 'playbook', value: 'deploy-jobs-to-rundeck.yml'], [$class: 'StringParameterValue', name: 'version', value: 'LATEST']]
       }
       stage('Clean WorkSpace') {
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index.html', reportName: 'Javadoc', reportTitles: 'Javadoc'])
