@@ -23,12 +23,22 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
  
 project.ext {
-    coreApiVersion = "1.10.3_896-RC"
-    log4jVersion = "2.8"
-    elasticsearchVersion = "5.5.0"
-    personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
-    dropwizardVersion = "1.1.0"
-    powerMockVersion = "1.7.3"
+  coreApiVersion = "1.10.3_896-RC"
+  log4jVersion = "2.8"
+  elasticsearchVersion = "5.5.0"
+  personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
+  dropwizardVersion = "1.1.0"
+  powerMockVersion = "1.7.3"
+
+  projectMajorVersion = "0.58"
+
+  isRelease = System.getProperty("Release") == "true"
+  buildNumber = System.getProperty('BuildNumber')
+  customVersion = System.getProperty('CustomVersion')
+
+  projectSnapshotVersion = projectMajorVersion + "-SNAPSHOT"
+  projectReleaseVersion = (customVersion == null || customVersion == "" || customVersion.startsWith('$') ? projectMajorVersion + '_' + buildNumber + '-RC' : customVersion )
+  projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
 }
 
 jacoco {
@@ -36,7 +46,14 @@ jacoco {
     reportsDir = file("$buildDir/customJacocoReportDir")
 }
 
-version = 0.58
+if (System.getProperty('newVersion')) {
+  // if the version is passed from Jenkinsfile after it is evaluated based on a PR label and the latest tag on GitHub
+  def newVersion = "${System.getProperty('newVersion')}"
+  version = newVersion
+  projectVersion = newVersion
+} else {
+  version = projectVersion
+}
 
 repositories {
     mavenLocal()
