@@ -57,7 +57,6 @@ node('tpt4-slave') {
       lint(rtGradle)
     }
     if (env.BUILD_JOB_TYPE == 'master') {
-    /*
       stage('Tag Repo') {
         tagGithubRepo(newTag, GITHUB_CREDENTIALS_ID)
       }
@@ -66,14 +65,13 @@ node('tpt4-slave') {
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
         rtGradle.deployer.deployArtifacts = false
       }
-      */
       stage('Clean WorkSpace') {
         archiveArtifacts artifacts: '**/LaunchCommand-*.jar', fingerprint: true
       }
     }
   } catch(Exception e) {
-    //emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-    //subject: "Jobs failed with ${e.message}", to: "Prasad.Mysore@osi.ca.gov, tom.parker@osi.ca.gov, david.smith@osi.ca.gov, james.lebeau@osi.ca.gov, mariam.ghori@osi.ca.gov, adarsh.vandana@osi.ca.gov"
+    emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+    subject: "Jobs failed with ${e.message}", to: "Prasad.Mysore@osi.ca.gov, tom.parker@osi.ca.gov, david.smith@osi.ca.gov, james.lebeau@osi.ca.gov, mariam.ghori@osi.ca.gov, adarsh.vandana@osi.ca.gov"
     currentBuild.result = "FAILURE"
     throw e
   } finally {
