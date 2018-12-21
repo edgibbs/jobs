@@ -36,11 +36,11 @@ node('tpt4-slave') {
       rtGradle.useWrapper = true
     }
     if (env.BUILD_JOB_TYPE == 'master') {
+      stage('Javadoc') {
+        rtGradle.run buildFile: 'build.gradle', tasks: 'javadoc'
+      }
       stage('Increment Tag') {
         newTag = newSemVer()
-
-        echo "newTag: $newTag"
-
       }
     } else {
       stage('Check for Label') {
@@ -65,6 +65,9 @@ node('tpt4-slave') {
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
         rtGradle.deployer.deployArtifacts = false
       }
+      stage ('Deploy to Dev Rundeck') {
+        build job: 'tpt4-api-deploy-jobs', parameters: [[$class: 'StringParameterValue', name: 'playbook', value: 'deploy-jobs-to-rundeck.yml'], [$class: 'StringParameterValue', name: 'version', value: newTag]]
+      }
       stage('Clean WorkSpace') {
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index.html', reportName: 'Javadoc', reportTitles: 'Javadoc'])
         archiveArtifacts artifacts: '**/LaunchCommand-*.jar', fingerprint: true
@@ -72,7 +75,7 @@ node('tpt4-slave') {
     }
   } catch(Exception e) {
     emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-    subject: "Jobs failed with ${e.message}", to: "Prasad.Mysore@osi.ca.gov, tom.parker@osi.ca.gov, david.smith@osi.ca.gov, james.lebeau@osi.ca.gov, mariam.ghori@osi.ca.gov, adarsh.vandana@osi.ca.gov"
+    subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
     currentBuild.result = "FAILURE"
     throw e
   } finally {
