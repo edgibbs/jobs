@@ -65,7 +65,7 @@ node('tpt4-slave') {
         buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
         rtGradle.deployer.deployArtifacts = false
       }
-      stage ('Deploy to Dev Rundeck') {
+      stage ('Deploy to Rundeck@Dev') {
         build job: 'tpt4-api-deploy-jobs', parameters: [[$class: 'StringParameterValue', name: 'playbook', value: 'deploy-jobs-to-rundeck.yml'], [$class: 'StringParameterValue', name: 'version', value: newTag]]
       }
       stage('Clean WorkSpace') {
