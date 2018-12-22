@@ -69,7 +69,7 @@ node('tpt4-slave') {
         build job: 'tpt4-api-deploy-jobs', parameters: [[$class: 'StringParameterValue', name: 'playbook', value: 'deploy-jobs-to-rundeck.yml'], [$class: 'StringParameterValue', name: 'version', value: 'LATEST']]
       }
       stage('Clean WorkSpace') {
-        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index.html', reportName: 'Javadoc', reportTitles: 'Javadoc'])
+        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index-all.html', reportName: 'javadoc', reportTitles: 'javadoc'])
         archiveArtifacts artifacts: '**/LaunchCommand-*.jar', fingerprint: true
       }
     }
