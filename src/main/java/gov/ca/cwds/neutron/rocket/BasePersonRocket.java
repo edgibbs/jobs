@@ -606,13 +606,22 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
           getFlightLog().addAffectedDocumentId(p.getPrimaryKey().toString());
           prepareDocumentTrapException(bp, p);
         });
+        LOGGER.info("Indexed {} persons", results.size());
       } else {
         LOGGER.info("NO PERSON CHANGES FOUND");
       }
 
+      LOGGER.info("Delete restricted, if any");
       deleteRestricted(deletionResults, bp); // last run only
+
+      LOGGER.info("Awaiting bulk processor ...");
       awaitBulkProcessorClose(bp);
+      LOGGER.info("Bulk processor done");
+
+      LOGGER.info("Validate documents");
       validateDocuments();
+      LOGGER.info("Validated documents");
+
       return new Date(getFlightLog().getStartTime());
     } catch (Exception e) {
       fail();
