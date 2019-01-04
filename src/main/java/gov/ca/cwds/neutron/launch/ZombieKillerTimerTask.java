@@ -45,7 +45,7 @@ public class ZombieKillerTimerTask extends TimerTask {
 
     final int iTimeToAbort = Integer.parseInt(strTimeToAbort);
     LOGGER.info("Zombie Killer! iTimeToAbort: {}", iTimeToAbort);
-    this.timeToAbort = iTimeToAbort > 0 ? iTimeToAbort : (15 * 60 * 1000); // fifteen minutes
+    this.timeToAbort = iTimeToAbort > 0 ? iTimeToAbort : (5 * 60 * 1000); // 5 minutes
 
     untouchables.add(VoxListenerRocket.class);
   }

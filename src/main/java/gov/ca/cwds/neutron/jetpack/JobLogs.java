@@ -68,6 +68,9 @@ public class JobLogs {
   public static void logEvery(Logger log, int logEvery, int cntr, String action, Object... args) {
     if (cntr > 0 && (cntr % logEvery) == 0) {
       log.info("{} {} {}", action, cntr, args);
+      // if (flush) {
+      // HUH? SLF4J can't flush logs??
+      // }
     }
   }
 

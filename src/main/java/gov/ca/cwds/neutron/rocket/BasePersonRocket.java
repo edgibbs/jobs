@@ -611,8 +611,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
         results.stream().forEach(p -> {
           final String id = p.getPrimaryKey().toString();
-          CheeseRay.logEvery(LOGGER, nLogEvery, cntr1.incrementAndGet(), "track doc id", "prep",
-              id);
+          CheeseRay.logEvery(LOGGER, nLogEvery, cntr1.incrementAndGet(), "track doc", "prep", id);
           fl.addAffectedDocumentId(id);
 
           CheeseRay.logEvery(LOGGER, nLogEvery, cntr2.incrementAndGet(), "prep doc", "prep doc");
