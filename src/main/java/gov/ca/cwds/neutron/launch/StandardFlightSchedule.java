@@ -140,7 +140,7 @@ public enum StandardFlightSchedule {
       "people_summary", // rocket name
       12, // start delay in seconds.
       3, // execute every N seconds.
-      1000, // last run priority. Highest wins.
+      10000, // last run priority. Highest wins.
       null, // nested element: N/A
       true, // run in Last Change mode
       true, // run in Initial Load
