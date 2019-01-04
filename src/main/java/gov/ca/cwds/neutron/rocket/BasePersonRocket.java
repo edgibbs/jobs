@@ -259,13 +259,14 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   @SuppressWarnings("rawtypes")
   protected DocWriteRequest prepareUpsertRequestNoChecked(ElasticSearchPerson esp, N t) {
     DocWriteRequest<?> ret;
+    final FlightLog fl = getFlightLog();
     try {
       if (isDelete(t)) {
         ret = bulkDelete(t.getPrimaryKey().toString());
-        getFlightLog().incrementBulkDeleted();
+        fl.incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        getFlightLog().incrementBulkPrepared();
+        fl.incrementBulkPrepared();
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
@@ -549,7 +550,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       prepareDocument(bp, p);
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR PREPARING DOCUMENT! {}", e.getMessage());
     }
   }
 
@@ -602,11 +603,20 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final List<N> results = fetchLastRunResults(lastRunDt, deletionResults);
 
       if (results != null && !results.isEmpty()) {
+        // SNAP-820: Launch Command stalls/hangs here under heavy CPU load.
         LOGGER.info("Found {} persons to index", results.size());
-        results.stream().forEach(p -> { // NOSONAR
+        final NeutronCounter cntr = new NeutronCounter();
+        final boolean lastRunMode = flightPlan.isLastRunMode();
+
+        results.stream().forEach(p -> {
+          if (lastRunMode) {
+            CheeseRay.logEvery(LOGGER, 10, cntr.increment(), "prep doc", "prep doc");
+          }
           fl.addAffectedDocumentId(p.getPrimaryKey().toString());
           prepareDocumentTrapException(bp, p);
         });
+
+        // SNAP-820: People Summary job never reaches this line after stall.
         LOGGER.info("Indexed {} persons", results.size());
       } else {
         LOGGER.info("NO PERSON CHANGES FOUND");
