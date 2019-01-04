@@ -146,7 +146,7 @@ public abstract class LastFlightRocket implements Rocket, AtomShared, AtomRocket
       LOGGER.warn("******* OVERRIDE LAST RUN TIME: {} *******", ret);
     } else if (getFlightLog().getLastChangeSince() != null) {
       ret = getFlightLog().getLastChangeSince();
-      LOGGER.trace("Cached last change date: {}", ret);
+      LOGGER.debug("Cached last change date: {}", ret);
     } else {
       try (BufferedReader br = new BufferedReader(new FileReader(lastRunTimeFilename))) { // NOSONAR
         ret = new SimpleDateFormat(FMT_LAST_RUN_DATE.getFormat()).parse(br.readLine().trim()); // NOSONAR

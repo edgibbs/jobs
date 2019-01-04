@@ -594,6 +594,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected Date doLastRun(Date lastRunDt) throws NeutronCheckedException {
     LOGGER.info("LAST RUN MODE!");
+    final FlightLog fl = getFlightLog();
 
     try {
       final BulkProcessor bp = buildBulkProcessor();
@@ -603,7 +604,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       if (results != null && !results.isEmpty()) {
         LOGGER.info("Found {} persons to index", results.size());
         results.stream().forEach(p -> { // NOSONAR
-          getFlightLog().addAffectedDocumentId(p.getPrimaryKey().toString());
+          fl.addAffectedDocumentId(p.getPrimaryKey().toString());
           prepareDocumentTrapException(bp, p);
         });
         LOGGER.info("Indexed {} persons", results.size());
@@ -611,21 +612,21 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         LOGGER.info("NO PERSON CHANGES FOUND");
       }
 
-      LOGGER.info("Delete restricted, if any");
+      LOGGER.debug("Delete restricted, if any");
       deleteRestricted(deletionResults, bp); // last run only
 
-      LOGGER.info("Awaiting bulk processor ...");
+      LOGGER.debug("Awaiting bulk processor ...");
       awaitBulkProcessorClose(bp);
-      LOGGER.info("Bulk processor done");
+      LOGGER.debug("Bulk processor done");
 
-      LOGGER.info("Validate documents");
+      LOGGER.debug("Validate documents");
       validateDocuments();
-      LOGGER.info("Validated documents");
+      LOGGER.debug("Validated documents");
 
-      return new Date(getFlightLog().getStartTime());
+      return new Date(fl.getStartTime());
     } catch (Exception e) {
       fail();
-      throw CheeseRay.checked(LOGGER, e, "General Exception: {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
       done();
     }
