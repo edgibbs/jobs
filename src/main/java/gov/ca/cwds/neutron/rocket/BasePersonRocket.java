@@ -500,8 +500,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * thread/connection pools warm up or other resources initialize.
    * 
    * <p>
-   * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
-   * Condition.
+   * More efficient/elegant to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or
+   * even a raw Condition.
    * </p>
    * 
    * @throws InterruptedException on thread interruption
