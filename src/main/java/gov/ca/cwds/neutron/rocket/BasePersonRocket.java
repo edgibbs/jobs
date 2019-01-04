@@ -605,12 +605,17 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       if (results != null && !results.isEmpty()) {
         // SNAP-820: Launch Command stalls/hangs here under heavy CPU load.
         LOGGER.info("Found {} persons to index", results.size());
-        final NeutronCounter cntr = new NeutronCounter();
+        final NeutronCounter cntr1 = new NeutronCounter();
+        final NeutronCounter cntr2 = new NeutronCounter();
         final int nLogEvery = flightPlan.isLastRunMode() ? 10 : 1000;
 
         results.stream().forEach(p -> {
-          CheeseRay.logEvery(LOGGER, nLogEvery, cntr.incrementAndGet(), "prep doc", "prep doc");
-          fl.addAffectedDocumentId(p.getPrimaryKey().toString());
+          final String id = p.getPrimaryKey().toString();
+          CheeseRay.logEvery(LOGGER, nLogEvery, cntr1.incrementAndGet(), "track doc id", "prep",
+              id);
+          fl.addAffectedDocumentId(id);
+
+          CheeseRay.logEvery(LOGGER, nLogEvery, cntr2.incrementAndGet(), "prep doc", "prep doc");
           prepareDocumentTrapException(bp, p);
         });
 

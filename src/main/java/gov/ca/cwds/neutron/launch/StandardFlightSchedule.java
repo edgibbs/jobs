@@ -116,10 +116,10 @@ public enum StandardFlightSchedule {
    */
   REPLICATION_TIME(ReplicationLagRocket.class, // rocket class
       "replication_time", // rocket name
-      6, // initial load order
-      5, // start delay seconds. N/A.
-      60000, // execute every N seconds. N/A.
-      null, // last run priority. N/A.
+      6, // start delay seconds.
+      5, // execute every N seconds.
+      800, // last run priority.
+      null, // N/A
       true, // run in Last Change mode
       false, // run in Initial Load
       false // People index
@@ -129,11 +129,23 @@ public enum StandardFlightSchedule {
   // PEOPLE SUMMARY INDEX ROCKETS:
   // ===============================
 
+  // private StandardFlightSchedule(Class<?> klazz, String rocketName, int startDelaySeconds,
+  // int waitPeriodSeconds, int lastRunPriority, String nestedElement, boolean runLastChange,
+  // boolean runInitialLoad, boolean forPeopleIndex) {
+
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 20, 5, 1000, null, true, true,
-      false),
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, // rocket class
+      "people_summary", // rocket name
+      12, // start delay in seconds.
+      3, // execute every N seconds.
+      1000, // last run priority. Highest wins.
+      null, // nested element: N/A
+      true, // run in Last Change mode
+      true, // run in Initial Load
+      false // for People Index
+  ),
 
   /**
    * Document root: Reporter.
