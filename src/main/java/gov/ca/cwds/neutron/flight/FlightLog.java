@@ -846,6 +846,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       LOGGER.debug("total seconds: {}", totalSeconds);
       attribs.putIfAbsent("total_seconds", totalSeconds);
 
+      final long totalMilliSeconds = endTime - startTime;
+      attribs.putIfAbsent("total_milliseconds", totalMilliSeconds);
+
       if (!attribs.isEmpty()) {
         try {
           LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
