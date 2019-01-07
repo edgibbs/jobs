@@ -237,6 +237,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(final BulkProcessor bp, N t) throws IOException {
+    LOGGER.trace("prep doc id: {}", t.getPrimaryKey());
     Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
         .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
           ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
@@ -289,6 +290,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, N t)
       throws NeutronCheckedException {
+    LOGGER.trace("prep upsert: id: {}", t.getPrimaryKey());
     if (StringUtils.isNotBlank(getLegacySourceTable())) {
       esp.setLegacySourceTable(getLegacySourceTable());
     }

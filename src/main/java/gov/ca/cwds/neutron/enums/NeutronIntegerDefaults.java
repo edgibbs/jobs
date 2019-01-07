@@ -54,7 +54,7 @@ public enum NeutronIntegerDefaults {
    * 
    * @see JobLogs
    */
-  LOG_EVERY(5000);
+  LOG_EVERY(1000);
 
   private final int value;
 
