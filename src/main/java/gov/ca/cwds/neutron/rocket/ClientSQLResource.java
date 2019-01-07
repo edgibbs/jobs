@@ -386,9 +386,6 @@ public class ClientSQLResource implements ApiMarker {
       + "  UNION ALL SELECT ohp.FKPLC_EPST AS CLIENT_ID \n"
       + "      FROM O_HM_PLT ohp \n"
       + "      WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
-      + "  UNION ALL SELECT csh.FKCHLD_CLT AS CLIENT_ID \n"
-      + "      FROM CSECHIST csh \n"
-      + "      WHERE csh.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END' \n"
       + " ) s2 \n"
       + ") x \n";
   //@formatter:on
