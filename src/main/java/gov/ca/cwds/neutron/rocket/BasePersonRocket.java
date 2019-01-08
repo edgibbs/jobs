@@ -610,13 +610,13 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         final NeutronCounter cntr2 = new NeutronCounter();
         final int nLogEvery = flightPlan.isLastRunMode() ? 10 : 1000;
 
-        // SNAP-820: Launch Command stalls/hangs here under CPU load or ES load.
-        results.stream().forEach(p -> {
+        // SNAP-820: People Summary job stalls here under CPU load or ES load.
+        results.stream().sequential().forEach(p -> {
           final String id = p.getPrimaryKey().toString();
           CheeseRay.logEvery(LOGGER, nLogEvery, cntr1.incrementAndGet(), "track doc", "prep", id);
           fl.addAffectedDocumentId(id);
 
-          CheeseRay.logEvery(LOGGER, nLogEvery, cntr2.incrementAndGet(), "prep doc", "prep doc");
+          CheeseRay.logEvery(LOGGER, nLogEvery, cntr2.incrementAndGet(), "prep doc", "prep", id);
           prepareDocumentTrapException(bp, p);
         });
 

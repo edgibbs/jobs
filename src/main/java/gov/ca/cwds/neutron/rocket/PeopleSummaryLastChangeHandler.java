@@ -223,7 +223,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       con.commit(); // free db resources
 
       // CATCH: commit clears temp tables, forcing us to find changed clients again.
-      // OPTION: use a standing client id table and clear it before each run.
+      // SNAP-808: save changed records to standing table.
 
       // 0-999, 1000-1999, 2000-2999, etc.
       for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {

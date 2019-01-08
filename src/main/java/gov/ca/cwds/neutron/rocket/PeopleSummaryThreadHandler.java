@@ -634,11 +634,21 @@ public class PeopleSummaryThreadHandler
     clear();
   }
 
+  /**
+   * <p>
+   * SNAP-820: manual gc needed for Initial Load, not continuous mode. Should seldom call gc
+   * directly anyway.
+   * </p>
+   * {@inheritDoc}
+   */
   @Override
   public void handleFinishRange(Pair<String, String> range) {
     doneThreadRetrieve();
     clear();
-    freeMemory();
+
+    if (getRocket().isInitialLoadJdbc()) {
+      freeMemory();
+    }
   }
 
   @Override
