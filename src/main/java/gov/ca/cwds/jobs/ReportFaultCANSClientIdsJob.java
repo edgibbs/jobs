@@ -1,9 +1,11 @@
 package gov.ca.cwds.jobs;
 
-import static gov.ca.cwds.neutron.atom.AtomHibernate.CURRENT_SCHEMA;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -40,10 +41,6 @@ import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
-import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.neutron.flight.FlightPlan;
-
 /**
  * Validates CANS Client IDs against legacy DB2 CLIET_T table and reports not valid ones.
  *
@@ -57,10 +54,8 @@ public class ReportFaultCANSClientIdsJob {
   private static final String PARAM_EXTERNAL_ID = "externalId";
   private static final String PARAM_ID = "id";
   private static final String PARAM_NEW_EXTERNAL_ID = "newExternalId";
-  private static final List<String> DB_CMS_PROPERTY_LIST =
-      Arrays.asList("DB_CMS_USER", "DB_CMS_PASSWORD", "DB_CMS_JDBC_URL", CURRENT_SCHEMA);
-  private static final List<String> DB_RS_PROPERTY_LIST =
-      Arrays.asList("DB_RS_USER", "DB_RS_PASSWORD", "DB_RS_JDBC_URL", "DB_RS_SCHEMA");
+  private static final String PARAM_NEW_PERSON_ID = "newPersonId";
+  private static final String PARAM_PERSON_ID = "personId";
   private static final Logger LOGGER = LoggerFactory.getLogger(ReportFaultCANSClientIdsJob.class);
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
@@ -72,29 +67,29 @@ public class ReportFaultCANSClientIdsJob {
       "SELECT p.id, p.external_id, p.first_name, p.middle_name, p.last_name, p.suffix, p.dob, p.gender"
           + ", c.name AS county_name, a.status AS cans_status, a.event_date AS event_date"
           + ", u.external_id AS user_id, u.first_name AS u_first_name, u.last_name AS u_last_name "
-          + " FROM {h-schema}person p" + " LEFT JOIN {h-schema}county c ON p.county_id = c.id"
+          + " FROM {h-schema}person p LEFT JOIN {h-schema}county c ON p.county_id = c.id"
           + " LEFT JOIN ("
           + "     SELECT DISTINCT ON (person_id) person_id, status, event_date, created_by, updated_by "
-          + "     FROM {h-schema}assessment" + "     ORDER BY person_id asc, "
+          + "     FROM {h-schema}assessment ORDER BY person_id asc, "
           + "             event_date desc, " // Most recent
           + "             status desc" // IN-PROCESS is more important then COMPLETED, DELETED
-          + " ) a ON p.id = a.person_id" + " LEFT JOIN {h-schema}person u"
+          + " ) a ON p.id = a.person_id LEFT JOIN {h-schema}person u"
           + "     ON (CASE WHEN a.updated_by IS NOT NULL THEN a.updated_by ELSE a.created_by END) = u.id"
           + " WHERE p.person_role = 'CLIENT'"
-          + " ORDER BY user_id, county_name, last_name, first_name" + " FOR READ ONLY";
+          + " ORDER BY user_id, county_name, last_name, first_name FOR READ ONLY";
   private static final String NQ_CMS_CLIENT_FIND =
-      "SELECT 1 FROM {h-schema}CLIENT_T" + " WHERE IDENTIFIER = :cmsKey" + " FOR READ ONLY WITH UR";
-  private static final String NQ_RS_MERGE_CLIENT_FIND =
-      "SELECT IDENTIFIER, IBMSNAP_OPERATION FROM {h-schema}CLIENT_T" + " WHERE"
-          + "    IBMSNAP_COMMITSEQ IN (SELECT IBMSNAP_COMMITSEQ" + "       FROM {h-schema}CLIENT_T"
-          + "       WHERE IBMSNAP_OPERATION = 'D' AND IDENTIFIER = :cmsKey)"
-          + "    AND IDENTIFIER != :cmsKey" // Any other record linked to the (D)eleted one.
-          + " FOR READ ONLY WITH UR";
+      "SELECT IDENTIFIER FROM {h-schema}CLIENT_T WHERE IDENTIFIER = :cmsKey FOR READ ONLY WITH UR";
+  private static final String NQ_CANS_CLIENT_FIND_BY_EXTERNAL_ID =
+      "SELECT id FROM {h-schema}person WHERE external_id = :externalId FOR READ ONLY";
+  private static final String NQ_CMS_MERGE_CLIENT_FIND =
+      "SELECT KEPTOBJ_ID FROM {h-schema}MRHIST_T WHERE DELOBJ_ID = :cmsKey";
   private static final String NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE = "UPDATE {h-schema}person"
-      + " SET external_id = :newExternalId" + " WHERE id = :id AND external_id = :externalId";
+      + " SET external_id = :newExternalId WHERE id = :id AND external_id = :externalId";
+  private static final String NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID = "UPDATE {h-schema}assessment"
+      + " SET person_id = :newPersonId WHERE person_id = :personId";
+  private static final String NQ_CANS_CLIENT_DELETE = "DELETE FROM {h-schema}person WHERE id = :id";
   private SessionFactory cansSessionFactory;
   private SessionFactory cmsSessionFactory;
-  private SessionFactory rsSessionFactory;
   private String baseDir;
   private List<CansClient> clientList;
   private String reportFileName;
@@ -109,34 +104,10 @@ public class ReportFaultCANSClientIdsJob {
   private int nextRowNum = 1; // headerRow is 0
   private int[] columnsWidth = new int[columns.length];
 
-
   private ReportFaultCANSClientIdsJob() {
     cansSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_NS).buildSessionFactory();
     cmsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
-
-    // Temporary overwrite DB_CMS_<> properties with DB_RS_<> env vars values to reuse
-    // HIBERNATE_CONFIG_CMS
-    // for RS session factory
-    String envValue = null;
-    for (int i = 0; i < DB_RS_PROPERTY_LIST.size(); i++) {
-      envValue = System.getenv(DB_RS_PROPERTY_LIST.get(i));
-      // When RS env vars are not provided - run in report mode only.
-      if (envValue == null) {
-        rsSessionFactory = null;
-        break;
-      }
-      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), envValue);
-    }
-    if (envValue != null) {
-      rsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
-    }
-    // Restore DB_CMS_<> properties from env. vars
-    for (int i = 0; i < DB_CMS_PROPERTY_LIST.size(); i++) {
-      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), System.getenv(DB_CMS_PROPERTY_LIST.get(i)));
-    }
-
   }
-
 
   /**
    * Job entry point.
@@ -228,15 +199,6 @@ public class ReportFaultCANSClientIdsJob {
     } catch (HibernateException e) {
       LOGGER.info(SESSION_INFO, e);
       return cmsSessionFactory.openSession();
-    }
-  }
-
-  private Session grabRsCmsSession() {
-    try {
-      return rsSessionFactory.getCurrentSession();
-    } catch (HibernateException e) {
-      LOGGER.info(SESSION_INFO, e);
-      return rsSessionFactory.openSession();
     }
   }
 
@@ -357,7 +319,7 @@ public class ReportFaultCANSClientIdsJob {
 
     } catch (IllegalArgumentException e) {
       LOGGER.info("Client [id: {}] -> Error getting CMS Key from UI Id: {}", clientDto.id,
-          e.getMessage(), e);
+          e.getMessage());
       // Let see if it matches base62 10 character pattern
       if (!externalId.matches("[0-9a-zA-Z]{10}")) {
         clientDto.setComment(e.getMessage());
@@ -404,48 +366,58 @@ public class ReportFaultCANSClientIdsJob {
 
   private void attemptToFix(CansClient clientDto) {
     // Attempt to fix automatically assuming it might be deleted as a result of merge.
-    if (rsSessionFactory == null || !clientDto.comment.equals(CLIENT_NOT_FOUND_IN_CMS)) {
+    if (cmsSessionFactory == null || !clientDto.comment.equals(CLIENT_NOT_FOUND_IN_CMS)) {
       // But only those NOT_FOUND_IN_CMS
       return;
     }
     LOGGER.info("Client [id: {}] -> Attempting to fix...", clientDto.id);
     clientDto.setComment(clientDto.comment + " Attempting to fix... ");
     String newKey = null;
-    Session rsSession = grabRsCmsSession();
-    Transaction rsTxn = rsSession.beginTransaction();
+    Session cmsSession = grabCmsSession();
+    Transaction cmsTxn = cmsSession.beginTransaction();
     String sourceRowKey = clientDto.cmsKey;
     // Finding Merge Target Row Key
     try {
-      List<Object[]> objectArrayList;
+      List<Object> cmsObjectArrayList;
       do {
-        objectArrayList = rsSession.createNativeQuery(NQ_RS_MERGE_CLIENT_FIND)
+        cmsObjectArrayList = cmsSession.createNativeQuery(NQ_CMS_MERGE_CLIENT_FIND)
             .setParameter(CMS_KEY, sourceRowKey, StringType.INSTANCE).setReadOnly(true)
             .getResultList();
-        if (objectArrayList.isEmpty()) {
+        if (cmsObjectArrayList.isEmpty()) {
           newKey = null;
         } else {
-          newKey = (String) objectArrayList.get(0)[0];
+          newKey = (String) cmsObjectArrayList.get(0);
         }
+        //Prepare for chained merge
         sourceRowKey = newKey;
-      } while (sourceRowKey != null && "D".equals(objectArrayList.get(0)[1])); // If found merge
-                                                                               // target also
-                                                                               // deleted continue
-                                                                               // with finding it's
-                                                                               // merge target
+        if (newKey != null) {
+          //Check to see if found Merge Target exist in CLIENT table
+          cmsObjectArrayList = cmsSession.createNativeQuery(NQ_CMS_CLIENT_FIND)
+              .setParameter(CMS_KEY, newKey, StringType.INSTANCE).setReadOnly(true)
+              .getResultList();
+          if (!cmsObjectArrayList.isEmpty()) {
+            //Found - no need to look for chained merge
+            sourceRowKey = null;
+          } else {
+            newKey = null;
+          }
+        }
+      } while (sourceRowKey != null); // If merge target not found
+      // continue with finding it's merge target
     } catch (Exception e) {
-      rsTxn.rollback();
-      LOGGER.error("Client [id: {}] -> Error while working with RS database:\n {}", clientDto.id,
+      cmsTxn.rollback();
+      LOGGER.error("Client [id: {}] -> Error while working with CMS database:\n {}", clientDto.id,
           e.getMessage(), e);
-      clientDto.setComment(clientDto.comment.concat(" Error while working with RS database: ")
+      clientDto.setComment(clientDto.comment.concat(" Error while working with CMS database: ")
           .concat(e.getMessage()));
     } finally {
-      rsTxn.rollback();
+      cmsTxn.rollback();
     }
     // Updating CANS Client Row ExternalId with found Merge Targer Row Key
     if (newKey != null) {
-      LOGGER.info("Client [id: {}] -> Merge Target Id Found. Updating Client record...",
+      LOGGER.info("Client [id: {}] -> Merge Target Id Found. Updating CANS...",
           clientDto.id);
-      clientDto.setComment(clientDto.comment + " Merge Target Id Found. Updating Client record...");
+      clientDto.setComment(clientDto.comment + " Merge Target Id Found. Updating CANS...");
       Session cansSession = grabCansSession();
       Transaction cansTxn = cansSession.beginTransaction();
       try {
@@ -453,15 +425,49 @@ public class ReportFaultCANSClientIdsJob {
         final String newExternalId = clientDto.externalId.equals(clientDto.cmsKey) ? newKey
             : CmsKeyIdGenerator.getUIIdentifierFromKey(newKey);
 
-        if (grabCansSession().createNativeQuery(NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE)
-            .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE)
-            .setParameter(PARAM_EXTERNAL_ID, clientDto.externalId, StringType.INSTANCE)
-            .setParameter(PARAM_NEW_EXTERNAL_ID, newExternalId, StringType.INSTANCE)
-            .executeUpdate() == 1) {
+        //See if CANS already has record with this external id
+        List<Object> cansObjectArrayList = cansSession.createNativeQuery(
+            NQ_CANS_CLIENT_FIND_BY_EXTERNAL_ID)
+            .setParameter(PARAM_EXTERNAL_ID, newExternalId, StringType.INSTANCE)
+            .getResultList();
+        if (cansObjectArrayList.isEmpty()) {
+          //Not Found - Just UPDATE the external_id field in the original person record
+          cansSession.createNativeQuery(NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE)
+              .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE)
+              .setParameter(PARAM_EXTERNAL_ID, clientDto.externalId, StringType.INSTANCE)
+              .setParameter(PARAM_NEW_EXTERNAL_ID, newExternalId, StringType.INSTANCE)
+              .executeUpdate();
           LOGGER.info("Client [id: {}] -> " + SUCCESS + ". New External Id: [{}].", clientDto.id,
               newExternalId);
           clientDto.setComment(
               clientDto.comment + SUCCESS + ". New Client External Id: [" + newExternalId + "].");
+          return;
+        } else {
+          //Found existing record with same external id:
+          // - re-associate assessments from original person record to the found one.
+          Long newPersonId = ((BigInteger) cansObjectArrayList.get(0)).longValue();
+          grabCansSession().createNativeQuery(NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID)
+              .setParameter(PARAM_PERSON_ID, clientDto.id, LongType.INSTANCE)
+              .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE)
+              .executeUpdate();
+          LOGGER.info("Client [id: {}] -> New External Id: [{}]. There is existing Client [id: {}]"
+                  + " with this External Id. Re-associating assessments to existing Client.",
+              clientDto.id, newExternalId, newPersonId);
+          clientDto.setComment(
+              clientDto.comment + ". New External Id: [" + newExternalId + "]. There is existing"
+                  + " Client [id: " + newPersonId.toString() + "]  with this External Id."
+                  + " Re-associating assessments to existing Client.");
+
+          // - delete original person record.
+          grabCansSession().createNativeQuery(NQ_CANS_CLIENT_DELETE)
+              .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE)
+              .executeUpdate();
+          LOGGER.info("Client [id: {}] -> Deleting Client.", clientDto.id);
+          clientDto.setComment(
+              clientDto.comment + ". Deleting Client.");
+
+          LOGGER.info("Client [id: {}] -> " + SUCCESS, clientDto.id);
+          clientDto.setComment(clientDto.comment + SUCCESS);
           return;
         }
       } catch (Exception e) {
@@ -566,7 +572,8 @@ public class ReportFaultCANSClientIdsJob {
     String cmsKey;
     String comment;
 
-    CansClient() {}
+    CansClient() {
+    }
 
     String getExternalId() {
       return externalId;
