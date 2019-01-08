@@ -605,12 +605,12 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       final List<N> results = fetchLastRunResults(lastRunDt, deletionResults);
 
       if (results != null && !results.isEmpty()) {
-        // SNAP-820: Launch Command stalls/hangs here under heavy CPU load.
         LOGGER.info("Found {} persons to index", results.size());
         final NeutronCounter cntr1 = new NeutronCounter();
         final NeutronCounter cntr2 = new NeutronCounter();
         final int nLogEvery = flightPlan.isLastRunMode() ? 10 : 1000;
 
+        // SNAP-820: Launch Command stalls/hangs here under CPU load or ES load.
         results.stream().forEach(p -> {
           final String id = p.getPrimaryKey().toString();
           CheeseRay.logEvery(LOGGER, nLogEvery, cntr1.incrementAndGet(), "track doc", "prep", id);

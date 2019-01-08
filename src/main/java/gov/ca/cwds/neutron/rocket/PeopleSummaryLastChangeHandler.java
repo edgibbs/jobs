@@ -36,10 +36,13 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final long serialVersionUID = 1L;
 
-  private static final int BUNDLE_KEY_SIZE = 5000;
+  private static final int BUNDLE_KEY_SIZE = 2000;
 
   private static final int LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue() / 10;
 
+  /**
+   * Client primary keys.
+   */
   private final List<String> keys = new ArrayList<>(BUNDLE_KEY_SIZE * 2);
 
   private int rangeStart = 0;
@@ -142,8 +145,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     try (final PreparedStatement ps = con.prepareStatement(INS_LST_CHG_KEY_BUNDLE, TFO, CRO)) {
       con.commit();
       final List<String> bundle = keys.subList(start, end);
-      LOGGER.debug("insertNextKeyBundle(): bundle size: {}, start: {}, end: {}", bundle.size(),
-          start, end);
+      LOGGER.debug("bundle size: {}, start: {}, end: {}", bundle.size(), start, end);
 
       for (String key : bundle) {
         CheeseRay.logEvery(LOGGER, ++ret, "insert bundle keys", "keys");
@@ -189,6 +191,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
 
+      // SNAP-808: process changed records only once.
       final Date overrideLastChgDate = rocket.getFlightPlan().getOverrideLastEndTime();
       final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_CLI_IDS_LST_CHG,
           rocket.determineLastSuccessfulRunTime(),
@@ -197,7 +200,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
       step(STEP.FIND_CHANGED_CLIENT);
-      LOGGER.debug("Changed client SQL\n{}", sqlChangedClients);
+      LOGGER.debug("What Changed SQL\n{}", sqlChangedClients);
       try (final PreparedStatement stmt = con.prepareStatement(sqlChangedClients, TFO, CRO)) {
         read(stmt, rs -> readClientKeys(rs));
       } finally {
@@ -226,7 +229,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {
         rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, Math.max(totalKeys, 1)); //
         range = Pair.of(String.valueOf(rangeStart), String.valueOf(rangeEnd));
-        LOGGER.debug("last change key subset range: {}", range);
+        LOGGER.info("last change key subset range: {}", range);
         super.handleSecondaryJdbc(con, range);
       }
 
