@@ -1,6 +1,5 @@
 package gov.ca.cwds.jobs;
 
-import static gov.ca.cwds.neutron.atom.AtomHibernate.CURRENT_SCHEMA;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -57,10 +56,6 @@ public class ReportFaultCANSClientIdsJob {
   private static final String PARAM_NEW_EXTERNAL_ID = "newExternalId";
   private static final String PARAM_NEW_PERSON_ID = "newPersonId";
   private static final String PARAM_PERSON_ID = "personId";
-  private static final List<String> DB_CMS_PROPERTY_LIST =
-      Arrays.asList("DB_CMS_USER", "DB_CMS_PASSWORD", "DB_CMS_JDBC_URL", CURRENT_SCHEMA);
-  private static final List<String> DB_RS_PROPERTY_LIST =
-      Arrays.asList("DB_RS_USER", "DB_RS_PASSWORD", "DB_RS_JDBC_URL", "DB_RS_SCHEMA");
   private static final Logger LOGGER = LoggerFactory.getLogger(ReportFaultCANSClientIdsJob.class);
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
@@ -95,7 +90,6 @@ public class ReportFaultCANSClientIdsJob {
   private static final String NQ_CANS_CLIENT_DELETE = "DELETE FROM {h-schema}person WHERE id = :id";
   private SessionFactory cansSessionFactory;
   private SessionFactory cmsSessionFactory;
-  private SessionFactory rsSessionFactory;
   private String baseDir;
   private List<CansClient> clientList;
   private String reportFileName;
@@ -110,34 +104,10 @@ public class ReportFaultCANSClientIdsJob {
   private int nextRowNum = 1; // headerRow is 0
   private int[] columnsWidth = new int[columns.length];
 
-
   private ReportFaultCANSClientIdsJob() {
     cansSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_NS).buildSessionFactory();
     cmsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
-
-    // Temporary overwrite DB_CMS_<> properties with DB_RS_<> env vars values to reuse
-    // HIBERNATE_CONFIG_CMS
-    // for RS session factory
-    String envValue = null;
-    for (int i = 0; i < DB_RS_PROPERTY_LIST.size(); i++) {
-      envValue = System.getenv(DB_RS_PROPERTY_LIST.get(i));
-      // When RS env vars are not provided - run in report mode only.
-      if (envValue == null) {
-        rsSessionFactory = null;
-        break;
-      }
-      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), envValue);
-    }
-    if (envValue != null) {
-      rsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
-    }
-    // Restore DB_CMS_<> properties from env. vars
-    for (int i = 0; i < DB_CMS_PROPERTY_LIST.size(); i++) {
-      System.setProperty(DB_CMS_PROPERTY_LIST.get(i), System.getenv(DB_CMS_PROPERTY_LIST.get(i)));
-    }
-
   }
-
 
   /**
    * Job entry point.
@@ -229,15 +199,6 @@ public class ReportFaultCANSClientIdsJob {
     } catch (HibernateException e) {
       LOGGER.info(SESSION_INFO, e);
       return cmsSessionFactory.openSession();
-    }
-  }
-
-  private Session grabRsCmsSession() {
-    try {
-      return rsSessionFactory.getCurrentSession();
-    } catch (HibernateException e) {
-      LOGGER.info(SESSION_INFO, e);
-      return rsSessionFactory.openSession();
     }
   }
 
@@ -405,7 +366,7 @@ public class ReportFaultCANSClientIdsJob {
 
   private void attemptToFix(CansClient clientDto) {
     // Attempt to fix automatically assuming it might be deleted as a result of merge.
-    if (rsSessionFactory == null || !clientDto.comment.equals(CLIENT_NOT_FOUND_IN_CMS)) {
+    if (cmsSessionFactory == null || !clientDto.comment.equals(CLIENT_NOT_FOUND_IN_CMS)) {
       // But only those NOT_FOUND_IN_CMS
       return;
     }
@@ -442,7 +403,7 @@ public class ReportFaultCANSClientIdsJob {
           }
         }
       } while (sourceRowKey != null); // If merge target not found
-                                      // continue with finding it's merge target
+      // continue with finding it's merge target
     } catch (Exception e) {
       cmsTxn.rollback();
       LOGGER.error("Client [id: {}] -> Error while working with CMS database:\n {}", clientDto.id,
