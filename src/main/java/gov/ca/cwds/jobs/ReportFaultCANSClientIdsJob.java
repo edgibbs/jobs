@@ -87,6 +87,8 @@ public class ReportFaultCANSClientIdsJob {
       + " SET external_id = :newExternalId WHERE id = :id AND external_id = :externalId";
   private static final String NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID = "UPDATE {h-schema}assessment"
       + " SET person_id = :newPersonId WHERE person_id = :personId";
+  private static final String NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID = "UPDATE {h-schema}assessment_aud"
+      + " SET person_id = :newPersonId WHERE person_id = :personId";
   private static final String NQ_CANS_CLIENT_DELETE = "DELETE FROM {h-schema}person WHERE id = :id";
   private SessionFactory cansSessionFactory;
   private SessionFactory cmsSessionFactory;
@@ -447,6 +449,11 @@ public class ReportFaultCANSClientIdsJob {
           // - re-associate assessments from original person record to the found one.
           Long newPersonId = ((BigInteger) cansObjectArrayList.get(0)).longValue();
           grabCansSession().createNativeQuery(NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID)
+              .setParameter(PARAM_PERSON_ID, clientDto.id, LongType.INSTANCE)
+              .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE)
+              .executeUpdate();
+          // - update assessment auditntable as well.
+          grabCansSession().createNativeQuery(NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID)
               .setParameter(PARAM_PERSON_ID, clientDto.id, LongType.INSTANCE)
               .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE)
               .executeUpdate();
