@@ -30,7 +30,7 @@ public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
     when(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal())).thenReturn("main");
     // when(rs.getString(ColumnPosition.ADR_FRG_ADRT_B.ordinal())).thenReturn("");
-    when(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal())).thenReturn("");
+    // when(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal())).thenReturn("");
     when(rs.getString(ColumnPosition.ADR_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     // when(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal())).thenReturn("");
     // when(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal())).thenReturn("");
@@ -40,7 +40,7 @@ public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
     when(rs.getString(ColumnPosition.ADR_CITY_NM.ordinal())).thenReturn("Campbell");
     when(rs.getString(ColumnPosition.ADR_ZIP_NO.ordinal())).thenReturn("95008");
 
-    when(rs.getShort(ColumnPosition.ADR_GVR_ENTC.ordinal())).thenReturn((short) 1080);
+    // when(rs.getShort(ColumnPosition.ADR_GVR_ENTC.ordinal())).thenReturn((short) 1080);
     when(rs.getShort(ColumnPosition.ADR_ST_SFX_C.ordinal())).thenReturn((short) 0);
     when(rs.getShort(ColumnPosition.ADR_STATE_C.ordinal())).thenReturn((short) 1828);
     when(rs.getShort(ColumnPosition.ADR_UNT_DSGC.ordinal())).thenReturn((short) 2067);

@@ -146,7 +146,7 @@ public class ClientSQLResource implements ApiMarker {
       + "  adr.EMRG_TELNO        AS ADR_EMRG_TELNO,\n"
    // + "  adr.FRG_ADRT_B        AS ADR_FRG_ADRT_B,\n"
    // + "  adr.GVR_ENTC          AS ADR_GVR_ENTC,\n"
-      + "  TRIM(adr.HEADER_ADR)  AS ADR_HEADER_ADR,\n"
+   // + "  TRIM(adr.HEADER_ADR)  AS ADR_HEADER_ADR,\n"
       + "  adr.MSG_EXT_NO        AS ADR_MSG_EXT_NO,\n"
       + "  adr.MSG_TEL_NO        AS ADR_MSG_TEL_NO,\n"
    // + "  TRIM(adr.POSTDIR_CD)  AS ADR_POSTDIR_CD,\n"

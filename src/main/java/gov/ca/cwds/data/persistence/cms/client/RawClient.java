@@ -299,7 +299,6 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltCommonMiddleName = trimToNull(rs.getString(ColPos.CLT_COM_MID_NM.ordinal()));
 
     this.cltEmailAddress = trimToNull(rs.getString(ColPos.CLT_EMAIL_ADDR.ordinal()));
-    // this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
     this.cltGenderCode = trimToNull(rs.getString(ColPos.CLT_GENDER_CD.ordinal()));
     this.cltHispUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_HISP_UD_CD.ordinal()));
     this.cltHispanicOriginCode = trimToNull(rs.getString(ColPos.CLT_HISP_CD.ordinal()));
@@ -315,6 +314,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltSocialSecurityNumber = trimToNull(rs.getString(ColPos.CLT_SS_NO.ordinal()));
     this.cltSuffixTitleDescription = trimToNull(rs.getString(ColPos.CLT_SUFX_TLDSC.ordinal()));
 
+    // this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
     // this.cltMilitaryStatusCode = trimToNull(rs.getString(ColPos.CLT_MILT_STACD.ordinal()));
     // this.cltImmigrationStatusType = rs.getShort(ColPos.CLT_IMGT_STC.ordinal());
     // this.cltLiterateCode = trimToNull(rs.getString(ColPos.CLT_LITRATE_CD.ordinal()));
