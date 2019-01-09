@@ -11,7 +11,7 @@ public class ClientSQLResource implements ApiMarker {
   // Neutron, the next generation.
   // =================================
 
-  public static final String[] POLLED_TABLES = {"ADDRS_T", "CASE_T", "CL_ADDRT", "CLIENT_T",
+  protected static final String[] POLLED_TABLES = {"ADDRS_T", "CASE_T", "CL_ADDRT", "CLIENT_T",
       "CLSCP_ET", "CSECHIST", "O_HM_PLT", "OCL_NM_T", "PLC_EPST", "PLC_HM_T", "SAF_ALRT"};
 
   public static final String KEY_SOURCE = "FROM GT_ID   gt\n";
