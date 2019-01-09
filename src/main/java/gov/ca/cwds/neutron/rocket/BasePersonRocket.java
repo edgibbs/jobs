@@ -237,6 +237,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(final BulkProcessor bp, N t) throws IOException {
+    LOGGER.trace("prep doc id: {}", t.getPrimaryKey());
     Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
         .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
           ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
@@ -259,13 +260,14 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   @SuppressWarnings("rawtypes")
   protected DocWriteRequest prepareUpsertRequestNoChecked(ElasticSearchPerson esp, N t) {
     DocWriteRequest<?> ret;
+    final FlightLog fl = getFlightLog();
     try {
       if (isDelete(t)) {
         ret = bulkDelete(t.getPrimaryKey().toString());
-        getFlightLog().incrementBulkDeleted();
+        fl.incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        getFlightLog().incrementBulkPrepared();
+        fl.incrementBulkPrepared();
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
@@ -288,6 +290,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected UpdateRequest prepareUpsertRequest(ElasticSearchPerson esp, N t)
       throws NeutronCheckedException {
+    LOGGER.trace("prep upsert: id: {}", t.getPrimaryKey());
     if (StringUtils.isNotBlank(getLegacySourceTable())) {
       esp.setLegacySourceTable(getLegacySourceTable());
     }
@@ -499,8 +502,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * thread/connection pools warm up or other resources initialize.
    * 
    * <p>
-   * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
-   * Condition.
+   * More efficient/elegant to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or
+   * even a raw Condition.
    * </p>
    * 
    * @throws InterruptedException on thread interruption
@@ -549,7 +552,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       prepareDocument(bp, p);
     } catch (Exception e) {
       fail();
-      throw CheeseRay.runtime(LOGGER, e, "IO EXCEPTION: {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "ERROR PREPARING DOCUMENT! {}", e.getMessage());
     }
   }
 
@@ -594,6 +597,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected Date doLastRun(Date lastRunDt) throws NeutronCheckedException {
     LOGGER.info("LAST RUN MODE!");
+    final FlightLog fl = getFlightLog();
 
     try {
       final BulkProcessor bp = buildBulkProcessor();
@@ -602,21 +606,41 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
       if (results != null && !results.isEmpty()) {
         LOGGER.info("Found {} persons to index", results.size());
-        results.stream().forEach(p -> { // NOSONAR
-          getFlightLog().addAffectedDocumentId(p.getPrimaryKey().toString());
+        final NeutronCounter cntr1 = new NeutronCounter();
+        final NeutronCounter cntr2 = new NeutronCounter();
+        final int nLogEvery = flightPlan.isLastRunMode() ? 10 : 1000;
+
+        // SNAP-820: People Summary job stalls here under CPU load or ES load.
+        results.stream().sequential().forEach(p -> {
+          final String id = p.getPrimaryKey().toString();
+          CheeseRay.logEvery(LOGGER, nLogEvery, cntr1.incrementAndGet(), "track doc", "prep", id);
+          fl.addAffectedDocumentId(id);
+
+          CheeseRay.logEvery(LOGGER, nLogEvery, cntr2.incrementAndGet(), "prep doc", "prep", id);
           prepareDocumentTrapException(bp, p);
         });
+
+        // SNAP-820: People Summary job never reaches this line after stall.
+        LOGGER.info("Indexed {} persons", results.size());
       } else {
         LOGGER.info("NO PERSON CHANGES FOUND");
       }
 
+      LOGGER.debug("Delete restricted, if any");
       deleteRestricted(deletionResults, bp); // last run only
+
+      LOGGER.debug("Awaiting bulk processor ...");
       awaitBulkProcessorClose(bp);
+      LOGGER.debug("Bulk processor done");
+
+      LOGGER.debug("Validate documents");
       validateDocuments();
-      return new Date(getFlightLog().getStartTime());
+      LOGGER.debug("Validated documents");
+
+      return new Date(fl.getStartTime());
     } catch (Exception e) {
       fail();
-      throw CheeseRay.checked(LOGGER, e, "General Exception: {}", e.getMessage());
+      throw CheeseRay.checked(LOGGER, e, "GENERAL EXCEPTION: {}", e.getMessage());
     } finally {
       done();
     }

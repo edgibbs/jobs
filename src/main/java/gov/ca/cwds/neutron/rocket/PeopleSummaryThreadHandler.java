@@ -549,7 +549,7 @@ public class PeopleSummaryThreadHandler
       step(STEP.SEL_ADDRESS);
       read(stmtSelAddress, rs -> readAddress(rs));
 
-      loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
+      // loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
       step(STEP.SEL_CLIENT_COUNTY);
       read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
@@ -582,7 +582,7 @@ public class PeopleSummaryThreadHandler
 
       try {
         if (isInitialLoad()) {
-          fl.markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
+          fl.markRangeError(range); // FULL MODE: Fail the BUCKET, NOT the WHOLE FLIGHT!
         } else {
           rocket.fail(); // Last change: fail the whole job!
         }
@@ -634,11 +634,21 @@ public class PeopleSummaryThreadHandler
     clear();
   }
 
+  /**
+   * <p>
+   * SNAP-820: manual gc needed for Initial Load, not continuous mode. Should seldom call gc
+   * directly anyway.
+   * </p>
+   * {@inheritDoc}
+   */
   @Override
   public void handleFinishRange(Pair<String, String> range) {
     doneThreadRetrieve();
     clear();
-    freeMemory();
+
+    if (getRocket().isInitialLoadJdbc()) {
+      freeMemory();
+    }
   }
 
   @Override
