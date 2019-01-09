@@ -41,9 +41,9 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
     when(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.CLA_FKADDRS_T.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.CLA_FKCLIENT_T.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
-    when(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal())).thenReturn("");
-    when(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal())).thenReturn("N");
-    when(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal())).thenReturn("N");
+    // when(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal())).thenReturn("");
+    // when(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal())).thenReturn("N");
+    // when(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal())).thenReturn("N");
 
     when(rs.getShort(ColumnPosition.CLA_ADDR_TPC.ordinal())).thenReturn((short) 32);
 
