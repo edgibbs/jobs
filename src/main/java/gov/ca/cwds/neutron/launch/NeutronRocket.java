@@ -87,6 +87,7 @@ public class NeutronRocket implements InterruptableJob {
       map.put("track", flightLog);
       context.setResult(flightLog);
 
+      // SNAP-820: launch rocket in interruptible thread.
       flight.run();
       flight.done();
       LOGGER.info("HAPPY LANDING! rocket: {}", rocketName);

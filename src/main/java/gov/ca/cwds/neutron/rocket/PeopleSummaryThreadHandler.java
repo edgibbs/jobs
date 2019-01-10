@@ -535,6 +535,8 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelEthnicity = con.prepareStatement(SEL_ETHNIC, TFO, CRO);
         final PreparedStatement stmtSelSafety = con.prepareStatement(SEL_SAFETY, TFO, CRO)) {
 
+      // QUESTION: when to commit.
+
       // Client keys for this bundle.
       step(STEP.SET_CLIENT_KEY);
       loadClientRange(con, stmtInsClient, range);
