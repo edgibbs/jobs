@@ -25,7 +25,9 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
   private static final long serialVersionUID = 1L;
 
   protected enum ColumnPosition {
-    START, CLT_IDENTIFIER, CLA_IDENTIFIER, ADR_IDENTIFIER, ADR_LST_UPD_ID, ADR_LST_UPD_TS, ADR_ADDR_DSC, ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO,
+    START, CLT_IDENTIFIER, CLA_IDENTIFIER, ADR_IDENTIFIER, ADR_LST_UPD_ID, ADR_LST_UPD_TS,
+    // ADR_ADDR_DSC,
+    ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO,
     // ADR_FRG_ADRT_B,
     // ADR_GVR_ENTC,
     // ADR_HEADER_ADR,
@@ -145,7 +147,7 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     this.adrStreetName = trimToNull(rs.getString(ColumnPosition.ADR_STREET_NM.ordinal()));
     this.adrStreetNumber = trimToNull(rs.getString(ColumnPosition.ADR_STREET_NO.ordinal()));
     this.adrZip = trimToNull(rs.getString(ColumnPosition.ADR_ZIP_NO.ordinal()));
-    this.adrAddressDescription = trimToNull(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal()));
+    // this.adrAddressDescription = trimToNull(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal()));
     this.adrZip4 = rs.getShort(ColumnPosition.ADR_ZIP_SFX_NO.ordinal());
     // this.adrPostDirCd = trimToNull(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal()));
     // this.adrPreDirCd = trimToNull(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal()));

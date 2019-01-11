@@ -28,7 +28,7 @@ public class RawAddressTest extends Goddard<ReplicatedClient, RawClient> {
   public static void prepResultSetGood(ResultSet rs) throws SQLException {
     when(rs.getString(ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
-    when(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal())).thenReturn("main");
+    // when(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal())).thenReturn("main");
     // when(rs.getString(ColumnPosition.ADR_FRG_ADRT_B.ordinal())).thenReturn("");
     // when(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal())).thenReturn("");
     when(rs.getString(ColumnPosition.ADR_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);

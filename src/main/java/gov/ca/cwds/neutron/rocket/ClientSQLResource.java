@@ -140,7 +140,7 @@ public class ClientSQLResource implements ApiMarker {
       + "  adr.IDENTIFIER        AS ADR_IDENTIFIER,\n"
       + "  adr.LST_UPD_ID        AS ADR_LST_UPD_ID,\n"
       + "  adr.LST_UPD_TS        AS ADR_LST_UPD_TS,\n"
-      + "  TRIM(adr.ADDR_DSC)    AS ADR_ADDR_DSC,\n"
+   // + "  TRIM(adr.ADDR_DSC)    AS ADR_ADDR_DSC,\n"
       + "  TRIM(adr.CITY_NM)     AS ADR_CITY_NM,\n"
       + "  adr.EMRG_EXTNO        AS ADR_EMRG_EXTNO,\n"
       + "  adr.EMRG_TELNO        AS ADR_EMRG_TELNO,\n"

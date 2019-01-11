@@ -45,7 +45,7 @@ public class FlightRecorder implements AtomFlightRecorder {
   }
 
   @Override
-  public void logFlight(Class<?> klazz, FlightLog flightLog) {
+  public synchronized void logFlight(Class<?> klazz, FlightLog flightLog) {
     lastFlightLogs.put(klazz, flightLog);
 
     if (!flightLogHistory.containsKey(klazz)) {
@@ -55,23 +55,24 @@ public class FlightRecorder implements AtomFlightRecorder {
   }
 
   @Override
-  public FlightLog getLastFlightLog(final Class<?> klazz) {
+  public synchronized FlightLog getLastFlightLog(final Class<?> klazz) {
     return lastFlightLogs.get(klazz);
   }
 
   @Override
-  public FlightLog getLastFlightLog(StandardFlightSchedule sched) {
+  public synchronized FlightLog getLastFlightLog(StandardFlightSchedule sched) {
     return getLastFlightLog(sched.getRocketClass());
   }
 
   @Override
-  public List<FlightLog> getFlightLogHistory(final Class<?> klazz) {
+  public synchronized List<FlightLog> getFlightLogHistory(final Class<?> klazz) {
     return flightLogHistory.containsKey(klazz) ? new ArrayList<>(flightLogHistory.get(klazz))
         : new ArrayList<>();
   }
 
   @Override
-  public FlightSummary summarizeFlight(StandardFlightSchedule flightSchedule, FlightLog flightLog) {
+  public synchronized FlightSummary summarizeFlight(StandardFlightSchedule flightSchedule,
+      FlightLog flightLog) {
     FlightSummary summary = flightSummaries.get(flightSchedule);
     if (summary == null) {
       summary = new FlightSummary(flightSchedule);
@@ -83,7 +84,7 @@ public class FlightRecorder implements AtomFlightRecorder {
   }
 
   @Override
-  public FlightSummary getFlightSummary(StandardFlightSchedule flightSchedule) {
+  public synchronized FlightSummary getFlightSummary(StandardFlightSchedule flightSchedule) {
     return flightSummaries.get(flightSchedule);
   }
 

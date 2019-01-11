@@ -597,7 +597,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return status;
   }
 
-  public String[] getAffectedDocumentIds() {
+  public synchronized String[] getAffectedDocumentIds() {
     return affectedDocumentIds.toArray(new String[0]);
   }
 

@@ -79,7 +79,7 @@ public class LaunchDirector implements AtomLaunchDirector {
    * SNAP-820: memory leak, if rockets are not removed.
    * </p>
    */
-  // private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
+  private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
 
   private Timer abortFlightTimer;
 
@@ -118,7 +118,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   @SuppressWarnings("rawtypes")
   public BasePersonRocket fuelRocket(final Class<?> klass, final FlightPlan flightPlan)
       throws NeutronCheckedException {
-    return this.rocketFactory.fuelRocket(klass, flightPlan);
+    return rocketFactory.fuelRocket(klass, flightPlan);
   }
 
   /**
@@ -132,7 +132,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   @SuppressWarnings("rawtypes")
   public BasePersonRocket fuelRocket(final String rocketName, final FlightPlan flightPlan)
       throws NeutronCheckedException {
-    return this.rocketFactory.fuelRocket(rocketName, flightPlan);
+    return rocketFactory.fuelRocket(rocketName, flightPlan);
   }
 
   @Override
@@ -177,7 +177,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   public void stopScheduler(boolean waitForJobsToComplete) throws NeutronCheckedException {
     LOGGER.warn("STOP SCHEDULER! wait for jobs to complete: {}", waitForJobsToComplete);
     try {
-      this.getScheduler().shutdown(waitForJobsToComplete);
+      getScheduler().shutdown(waitForJobsToComplete);
     } catch (SchedulerException e) {
       throw CheeseRay.checked(LOGGER, e, "FAILED TO STOP SCHEDULER! {}", e.getMessage());
     }
@@ -187,7 +187,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   public void startScheduler() throws NeutronCheckedException {
     LOGGER.warn("START SCHEDULER!");
     try {
-      this.getScheduler().start();
+      getScheduler().start();
     } catch (Exception e) {
       LOGGER.error("FAILED TO START SCHEDULER! {}", e.getMessage(), e);
       throw CheeseRay.checked(LOGGER, e, "FAILED TO START SCHEDULER! {}", e.getMessage());
@@ -211,8 +211,7 @@ public class LaunchDirector implements AtomLaunchDirector {
   }
 
   public Map<TriggerKey, NeutronRocket> getRocketsInFlight() {
-    // return rocketsInFlight;
-    return null;
+    return rocketsInFlight;
   }
 
   public AtomRocketFactory getRocketFactory() {
