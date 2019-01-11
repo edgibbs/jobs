@@ -23,7 +23,7 @@ public class FlightRecorder implements AtomFlightRecorder {
   private static final int KEEP_LAST_FLIGHTS = 100;
 
   /**
-   * Keep the last N flight logs by rocket class.
+   * Keep the last {@link #KEEP_LAST_FLIGHTS} flight logs by rocket class.
    */
   private final Map<Class<?>, CircularFifoQueue<FlightLog>> flightLogHistory =
       new ConcurrentHashMap<>();

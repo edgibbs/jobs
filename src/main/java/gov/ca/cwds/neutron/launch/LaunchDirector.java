@@ -74,8 +74,12 @@ public class LaunchDirector implements AtomLaunchDirector {
    * <p>
    * OPTION: Quartz scheduler can track this too. Obsolete implementation?
    * </p>
+   * 
+   * <p>
+   * SNAP-820: memory leak, if rockets are not removed.
+   * </p>
    */
-  private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
+  // private final Map<TriggerKey, NeutronRocket> rocketsInFlight = new ConcurrentHashMap<>();
 
   private Timer abortFlightTimer;
 
@@ -192,7 +196,7 @@ public class LaunchDirector implements AtomLaunchDirector {
 
   @Override
   public void markRocketAsInFlight(final TriggerKey key, NeutronRocket rocket) {
-    rocketsInFlight.put(key, rocket);
+    // rocketsInFlight.put(key, rocket);
   }
 
   /**
@@ -201,13 +205,14 @@ public class LaunchDirector implements AtomLaunchDirector {
    * @param key trigger key
    */
   public void removeExecutingJob(final TriggerKey key) {
-    if (rocketsInFlight.containsKey(key)) {
-      rocketsInFlight.remove(key);
-    }
+    // if (rocketsInFlight.containsKey(key)) {
+    // rocketsInFlight.remove(key);
+    // }
   }
 
   public Map<TriggerKey, NeutronRocket> getRocketsInFlight() {
-    return rocketsInFlight;
+    // return rocketsInFlight;
+    return null;
   }
 
   public AtomRocketFactory getRocketFactory() {
