@@ -648,7 +648,7 @@ public class PeopleSummaryThreadHandler
     doneThreadRetrieve();
     clear();
 
-    if (getRocket().isInitialLoadJdbc()) {
+    if (!getRocket().getFlightPlan().isLastRunMode()) {
       freeMemory();
     }
   }
