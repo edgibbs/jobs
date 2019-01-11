@@ -96,13 +96,14 @@ public class NeutronRocket implements InterruptableJob {
       LOGGER.error("FAILURE TO LAUNCH! rocket: {}", rocketName, e);
       throw new JobExecutionException("FAILURE TO LAUNCH! rocket: " + rocketName, e);
     } finally {
+      final BasePersonRocket gcRocket = rocket;
       this.rocket = null; // SNAP-820: potential memory leak
       flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
 
       try {
         if (!flightLog.isInitialLoad()) {
-          flightLog.notifyMonitor(rocket.getEventType());
+          flightLog.notifyMonitor(gcRocket.getEventType());
         }
       } finally {
         LOGGER.info("FLIGHT SUMMARY: rocket: {}\n{}", rocketName, flightLog);

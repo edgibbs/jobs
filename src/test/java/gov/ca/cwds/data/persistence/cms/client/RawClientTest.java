@@ -293,9 +293,8 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltCreationDate_A$() throws Exception {
     Date actual = target.getCltCreationDate();
-    // Date expected = null;
-    // assertThat(actual, is(equalTo(expected)));
-    assertThat(actual, is(notNullValue()));
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
@@ -334,14 +333,14 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltDeathDate_A$() throws Exception {
     Date actual = target.getCltDeathDate();
-    Date expected = sqlDate;
+    Date expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getCltDeathDateVerifiedIndicator_A$() throws Exception {
     String actual = target.getCltDeathDateVerifiedIndicator();
-    String expected = "N";
+    String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -369,7 +368,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltDriverLicenseStateCodeType_A$() throws Exception {
     Short actual = target.getCltDriverLicenseStateCodeType();
-    Short expected = 1828;
+    Short expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -456,7 +455,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltImmigrationStatusType_A$() throws Exception {
     Short actual = target.getCltImmigrationStatusType();
-    Short expected = 1199;
+    Short expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -658,7 +657,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltSoc158SealedClientIndicator_A$() throws Exception {
     String actual = target.getCltSoc158SealedClientIndicator();
-    String expected = "Y";
+    String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -749,7 +748,7 @@ public class RawClientTest extends Goddard<RawClient, ApiGroupNormalizer<Replica
   @Test
   public void getCltZippyCreatedIndicator_A$() throws Exception {
     String actual = target.getCltZippyCreatedIndicator();
-    String expected = "N";
+    String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

@@ -111,14 +111,14 @@ public class PlacementHomeAddressTest extends Goddard<ReplicatedClient, RawClien
   @Test
   public void getPlacementEpisodeGovernmentEntityCd_A$() throws Exception {
     Short actual = target.getPlacementEpisodeGovernmentEntityCd();
-    Short expected = 1111;
+    Short expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getPlacementHomeGovernmentEntityCd_A$() throws Exception {
     Short actual = target.getPlacementHomeGovernmentEntityCd();
-    Short expected = 1111;
+    Short expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
