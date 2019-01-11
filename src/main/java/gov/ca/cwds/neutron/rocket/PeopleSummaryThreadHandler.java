@@ -572,7 +572,7 @@ public class PeopleSummaryThreadHandler
       con.commit(); // free db resources again
 
       step(STEP.SET_PLACEMENT_KEY);
-      loadClientRange(con, stmtInsClient, range);
+      // loadClientRange(con, stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
       step(STEP.SEL_PLACEMENT_HOME);

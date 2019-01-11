@@ -29,7 +29,7 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     // ADR_ADDR_DSC,
     ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO,
     // ADR_FRG_ADRT_B,
-    // ADR_GVR_ENTC,
+    ADR_GVR_ENTC,
     // ADR_HEADER_ADR,
     ADR_MSG_EXT_NO, ADR_MSG_TEL_NO,
     // ADR_POSTDIR_CD,
@@ -137,7 +137,7 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     this.adrEmergencyNumber = rs.getLong(ColumnPosition.ADR_EMRG_TELNO.ordinal());
     this.adrEmergencyExtension = rs.getInt(ColumnPosition.ADR_EMRG_EXTNO.ordinal());
     // this.adrFrgAdrtB = trimToNull(rs.getString(ColumnPosition.ADR_FRG_ADRT_B.ordinal()));
-    // this.adrGovernmentEntityCd = rs.getShort(ColumnPosition.ADR_GVR_ENTC.ordinal());
+    this.adrGovernmentEntityCd = rs.getShort(ColumnPosition.ADR_GVR_ENTC.ordinal());
     this.adrMessageNumber = rs.getLong(ColumnPosition.ADR_MSG_TEL_NO.ordinal());
     this.adrMessageExtension = rs.getInt(ColumnPosition.ADR_MSG_EXT_NO.ordinal());
     // this.adrHeaderAddress = trimToNull(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal()));
