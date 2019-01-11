@@ -227,9 +227,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // 0-999, 1000-1999, 2000-2999, etc.
       for (rangeStart = 0; rangeStart < totalKeys; rangeStart += BUNDLE_KEY_SIZE) {
-        rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, Math.max(totalKeys, 1)); //
+        rangeEnd = Math.min(rangeStart + BUNDLE_KEY_SIZE - 1, Math.max(totalKeys, 1));
         range = Pair.of(String.valueOf(rangeStart), String.valueOf(rangeEnd));
-        LOGGER.info("last change key subset range: {}", range);
+        LOGGER.info("last change key subset range {} of {}", range, totalKeys);
         super.handleSecondaryJdbc(con, range);
       }
 
