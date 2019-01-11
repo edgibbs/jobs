@@ -241,13 +241,12 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     // SNAP-820: separate Jackson from ES client to diagnose hang.
 
     LOGGER.debug("PREP doc id: {}", t.getPrimaryKey());
-    final List<DocWriteRequest<?>> ready =
-        Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
-            .map(p -> prepareUpsertRequestNoChecked(p, t)).collect(Collectors.toList());
+    final List<?> ready = Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
+        .map(p -> prepareUpsertRequestNoChecked(p, t)).collect(Collectors.toList());
 
     LOGGER.debug("SEND doc id: {}", t.getPrimaryKey());
     ready.stream().sequential().forEach(x -> {
-      ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
+      ElasticTransformer.pushToBulkProcessor(flightLog, bp, (DocWriteRequest<?>) x);
     });
 
     // Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
