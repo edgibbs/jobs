@@ -138,7 +138,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
         plan.setDequeRerunIds(dequeRerunIds);
       }
 
-      final FlightLog flightLog = this.launchDirector.launch(flightSchedule.getRocketClass(), plan);
+      final FlightLog flightLog = launchDirector.launch(flightSchedule.getRocketClass(), plan);
       return flightLog.toJson();
     } catch (Exception e) {
       LOGGER.error("FAILED TO LAUNCH ON DEMAND! {}", e.getMessage(), e);

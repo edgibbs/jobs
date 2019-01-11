@@ -29,7 +29,7 @@ public class FlightRecorder implements AtomFlightRecorder {
       new ConcurrentHashMap<>();
 
   /**
-   * Keep the very last flight logs by rocket class.
+   * Keep the <strong>last flight logs</strong> by rocket class.
    */
   private final Map<Class<?>, FlightLog> lastFlightLogs = new ConcurrentHashMap<>();
 
