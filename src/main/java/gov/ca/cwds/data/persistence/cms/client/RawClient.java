@@ -314,6 +314,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltSocialSecurityNumber = trimToNull(rs.getString(ColPos.CLT_SS_NO.ordinal()));
     this.cltSuffixTitleDescription = trimToNull(rs.getString(ColPos.CLT_SUFX_TLDSC.ordinal()));
 
+    // SNAP-820: Only retrieve needed columns.
     // this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
     // this.cltMilitaryStatusCode = trimToNull(rs.getString(ColPos.CLT_MILT_STACD.ordinal()));
     // this.cltImmigrationStatusType = rs.getShort(ColPos.CLT_IMGT_STC.ordinal());
