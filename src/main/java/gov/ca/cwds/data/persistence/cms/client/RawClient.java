@@ -292,26 +292,17 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     super.read(rs);
 
     this.cltSensitivityIndicator = trimToNull(rs.getString(ColPos.CLT_SENSTV_IND.ordinal()));
-    this.cltSoc158SealedClientIndicator = trimToNull(rs.getString(ColPos.CLT_SOC158_IND.ordinal()));
     this.cltBirthDate = rs.getDate(ColPos.CLT_BIRTH_DT.ordinal());
     this.cltClientIndexNumber = trimToNull(rs.getString(ColPos.CLT_CL_INDX_NO.ordinal()));
     this.cltCommonFirstName = (rs.getString(ColPos.CLT_COM_FST_NM.ordinal()));
     this.cltCommonLastName = trimToNull(rs.getString(ColPos.CLT_COM_LST_NM.ordinal()));
     this.cltCommonMiddleName = trimToNull(rs.getString(ColPos.CLT_COM_MID_NM.ordinal()));
-    this.cltCreationDate = rs.getDate(ColPos.CLT_CREATN_DT.ordinal());
-    this.cltDeathDate = rs.getDate(ColPos.CLT_DEATH_DT.ordinal());
-    this.cltDeathDateVerifiedIndicator = trimToNull(rs.getString(ColPos.CLT_DTH_DT_IND.ordinal()));
-    this.cltDriverLicenseNumber = trimToNull(rs.getString(ColPos.CLT_DRV_LIC_NO.ordinal()));
-    this.cltDriverLicenseStateCodeType = rs.getShort(ColPos.CLT_D_STATE_C.ordinal());
+
     this.cltEmailAddress = trimToNull(rs.getString(ColPos.CLT_EMAIL_ADDR.ordinal()));
-    this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
     this.cltGenderCode = trimToNull(rs.getString(ColPos.CLT_GENDER_CD.ordinal()));
     this.cltHispUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_HISP_UD_CD.ordinal()));
     this.cltHispanicOriginCode = trimToNull(rs.getString(ColPos.CLT_HISP_CD.ordinal()));
-    this.cltImmigrationStatusType = rs.getShort(ColPos.CLT_IMGT_STC.ordinal());
-    this.cltLiterateCode = trimToNull(rs.getString(ColPos.CLT_LITRATE_CD.ordinal()));
     this.cltMaritalStatusType = rs.getShort(ColPos.CLT_MRTL_STC.ordinal());
-    this.cltMilitaryStatusCode = trimToNull(rs.getString(ColPos.CLT_MILT_STACD.ordinal()));
     this.cltNamePrefixDescription = trimToNull(rs.getString(ColPos.CLT_NMPRFX_DSC.ordinal()));
     this.cltNameType = rs.getShort(ColPos.CLT_NAME_TPC.ordinal());
 
@@ -320,16 +311,32 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltSecondaryLanguageType = rs.getShort(ColPos.CLT_S_LANG_TC.ordinal());
     this.cltReligionType = rs.getShort(ColPos.CLT_RLGN_TPC.ordinal());
 
-    this.cltSensitiveHlthInfoOnFileIndicator =
-        trimToNull(rs.getString(ColPos.CLT_SNTV_HLIND.ordinal()));
-    this.cltSoc158PlacementCode = trimToNull(rs.getString(ColPos.CLT_SOCPLC_CD.ordinal()));
-    this.cltSocialSecurityNumChangedCode =
-        trimToNull(rs.getString(ColPos.CLT_SSN_CHG_CD.ordinal()));
     this.cltSocialSecurityNumber = trimToNull(rs.getString(ColPos.CLT_SS_NO.ordinal()));
     this.cltSuffixTitleDescription = trimToNull(rs.getString(ColPos.CLT_SUFX_TLDSC.ordinal()));
-    this.cltTribalAncestryClientIndicatorVar =
-        trimToNull(rs.getString(ColPos.CLT_TRBA_CLT_B.ordinal()));
-    this.cltZippyCreatedIndicator = trimToNull(rs.getString(ColPos.CLT_ZIPPY_IND.ordinal()));
+
+    // SNAP-820: Only retrieve needed columns.
+    // this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
+    // this.cltMilitaryStatusCode = trimToNull(rs.getString(ColPos.CLT_MILT_STACD.ordinal()));
+    // this.cltImmigrationStatusType = rs.getShort(ColPos.CLT_IMGT_STC.ordinal());
+    // this.cltLiterateCode = trimToNull(rs.getString(ColPos.CLT_LITRATE_CD.ordinal()));
+    // this.cltSensitiveHlthInfoOnFileIndicator =
+    // trimToNull(rs.getString(ColPos.CLT_SNTV_HLIND.ordinal()));
+    // this.cltSoc158PlacementCode = trimToNull(rs.getString(ColPos.CLT_SOCPLC_CD.ordinal()));
+    // this.cltSocialSecurityNumChangedCode =
+    // trimToNull(rs.getString(ColPos.CLT_SSN_CHG_CD.ordinal()));
+
+    // this.cltSoc158SealedClientIndicator =
+    // trimToNull(rs.getString(ColPos.CLT_SOC158_IND.ordinal()));
+    // this.cltCreationDate = rs.getDate(ColPos.CLT_CREATN_DT.ordinal());
+    // this.cltDeathDate = rs.getDate(ColPos.CLT_DEATH_DT.ordinal());
+    // this.cltDeathDateVerifiedIndicator =
+    // trimToNull(rs.getString(ColPos.CLT_DTH_DT_IND.ordinal()));
+    // this.cltDriverLicenseNumber = trimToNull(rs.getString(ColPos.CLT_DRV_LIC_NO.ordinal()));
+    // this.cltDriverLicenseStateCodeType = rs.getShort(ColPos.CLT_D_STATE_C.ordinal());
+
+    // this.cltTribalAncestryClientIndicatorVar =
+    // trimToNull(rs.getString(ColPos.CLT_TRBA_CLT_B.ordinal()));
+    // this.cltZippyCreatedIndicator = trimToNull(rs.getString(ColPos.CLT_ZIPPY_IND.ordinal()));
 
     this.cltLastUpdatedId = trimToNull(rs.getString(ColPos.CLT_LST_UPD_ID.ordinal()));
     this.cltLastUpdatedTime = rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal());

@@ -20,6 +20,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.persistence.FlushModeType;
 
@@ -237,11 +238,21 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * @see #prepareUpsertRequest(ElasticSearchPerson, PersistentObject)
    */
   protected void prepareDocument(final BulkProcessor bp, N t) throws IOException {
-    LOGGER.trace("prep doc id: {}", t.getPrimaryKey());
-    Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
-        .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
-          ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
-        });
+    // SNAP-820: separate Jackson from ES client to diagnose hang.
+
+    LOGGER.trace("PREP doc id: {}", t.getPrimaryKey());
+    final List<?> ready = Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
+        .map(p -> prepareUpsertRequestNoChecked(p, t)).collect(Collectors.toList());
+
+    LOGGER.trace("SEND doc id: {}", t.getPrimaryKey());
+    ready.stream().sequential().forEach(x -> {
+      ElasticTransformer.pushToBulkProcessor(flightLog, bp, (DocWriteRequest<?>) x);
+    });
+
+    // Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
+    // .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
+    // ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
+    // });
   }
 
   /**

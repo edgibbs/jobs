@@ -35,8 +35,8 @@ public class PlacementHomeAddressTest extends Goddard<ReplicatedClient, RawClien
     when(rs.getString(ColumnPosition.PH_ID.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.OHP_ID.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
 
-    when(rs.getShort(ColumnPosition.PH_GVR_ENTC.ordinal())).thenReturn((short) 1111);
-    when(rs.getShort(ColumnPosition.PE_GVR_ENTC.ordinal())).thenReturn((short) 1111);
+    // when(rs.getShort(ColumnPosition.PH_GVR_ENTC.ordinal())).thenReturn((short) 1111);
+    // when(rs.getShort(ColumnPosition.PE_GVR_ENTC.ordinal())).thenReturn((short) 1111);
     when(rs.getShort(ColumnPosition.STATE_C.ordinal())).thenReturn((short) 1828);
     when(rs.getShort(ColumnPosition.ZIP_SFX_NO.ordinal())).thenReturn((short) 1234);
 
@@ -111,14 +111,14 @@ public class PlacementHomeAddressTest extends Goddard<ReplicatedClient, RawClien
   @Test
   public void getPlacementEpisodeGovernmentEntityCd_A$() throws Exception {
     Short actual = target.getPlacementEpisodeGovernmentEntityCd();
-    Short expected = 1111;
+    Short expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getPlacementHomeGovernmentEntityCd_A$() throws Exception {
     Short actual = target.getPlacementHomeGovernmentEntityCd();
-    Short expected = 1111;
+    Short expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

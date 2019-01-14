@@ -38,7 +38,10 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   private static final long serialVersionUID = 1L;
 
   public enum ColumnPosition {
-    START, CLIENT_ID, PE_THIRD_ID, OHP_ID, PH_ID, START_DT, END_DT, PE_GVR_ENTC, PH_GVR_ENTC, STREET_NO, STREET_NM, CITY_NM, STATE_C, ZIP_NO, ZIP_SFX_NO, PH_LST_UPD_TS, PRM_TEL_NO, PRM_EXT_NO
+    START, CLIENT_ID, PE_THIRD_ID, OHP_ID, PH_ID, START_DT, END_DT,
+    // PE_GVR_ENTC,
+    // PH_GVR_ENTC,
+    STREET_NO, STREET_NM, CITY_NM, STATE_C, ZIP_NO, ZIP_SFX_NO, PH_LST_UPD_TS, PRM_TEL_NO, PRM_EXT_NO
   }
 
   // System code cache is unhappy with this unknown value.
@@ -114,8 +117,8 @@ public class PlacementHomeAddress extends ApiObjectIdentity
     this.otherHomePlacementId = ifNull(rs.getString(ColumnPosition.PH_ID.ordinal()));
     this.placementHomeId = ifNull(rs.getString(ColumnPosition.OHP_ID.ordinal()));
 
-    this.placementHomeGovernmentEntityCd = rs.getShort(ColumnPosition.PH_GVR_ENTC.ordinal());
-    this.placementEpisodeGovernmentEntityCd = rs.getShort(ColumnPosition.PE_GVR_ENTC.ordinal());
+    // this.placementHomeGovernmentEntityCd = rs.getShort(ColumnPosition.PH_GVR_ENTC.ordinal());
+    // this.placementEpisodeGovernmentEntityCd = rs.getShort(ColumnPosition.PE_GVR_ENTC.ordinal());
 
     this.city = ifNull(rs.getString(ColumnPosition.CITY_NM.ordinal()));
     this.state = rs.getShort(ColumnPosition.STATE_C.ordinal());

@@ -527,13 +527,15 @@ public class PeopleSummaryThreadHandler
             con.prepareStatement(sqlPlacementAddress, TFO, CRO);
         final PreparedStatement stmtSelClient = con.prepareStatement(SEL_CLI, TFO, CRO);
         final PreparedStatement stmtSelCliAddr = con.prepareStatement(SEL_CLI_ADDR, TFO, CRO);
-        final PreparedStatement stmtSelCliCnty = con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
         final PreparedStatement stmtSelAddress = con.prepareStatement(SEL_ADDR, TFO, CRO);
+        final PreparedStatement stmtSelCliCnty = con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
         final PreparedStatement stmtSelAka = con.prepareStatement(SEL_AKA, TFO, CRO);
         final PreparedStatement stmtSelCase = con.prepareStatement(SEL_CASE, TFO, CRO);
         final PreparedStatement stmtSelCsec = con.prepareStatement(SEL_CSEC, TFO, CRO);
         final PreparedStatement stmtSelEthnicity = con.prepareStatement(SEL_ETHNIC, TFO, CRO);
         final PreparedStatement stmtSelSafety = con.prepareStatement(SEL_SAFETY, TFO, CRO)) {
+
+      // QUESTION: when to commit.
 
       // Client keys for this bundle.
       step(STEP.SET_CLIENT_KEY);
@@ -544,33 +546,41 @@ public class PeopleSummaryThreadHandler
 
       // SNAP-735: missing addresses.
       step(STEP.SEL_CLIENT_ADDRESS);
+      LOGGER.trace("SEL_CLI_ADDR: \n{}", SEL_CLI_ADDR);
       read(stmtSelCliAddr, rs -> readClientAddress(rs));
 
       step(STEP.SEL_ADDRESS);
+      LOGGER.trace("SEL_ADDR: \n{}", SEL_ADDR);
       read(stmtSelAddress, rs -> readAddress(rs));
 
       // loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
       step(STEP.SEL_CLIENT_COUNTY);
+      LOGGER.trace("SEL_CLI_COUNTY: \n{}", SEL_CLI_COUNTY);
       read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
       step(STEP.SEL_AKA);
+      LOGGER.trace("SEL_AKA: \n{}", SEL_AKA);
       read(stmtSelAka, rs -> readAka(rs));
 
       step(STEP.SEL_CASE);
+      LOGGER.trace("SEL_CASE: \n{}", SEL_CASE);
       read(stmtSelCase, rs -> readCase(rs));
 
       step(STEP.SEL_CSEC);
+      LOGGER.trace("SEL_CSEC: \n{}", SEL_CSEC);
       read(stmtSelCsec, rs -> readCsec(rs));
 
       step(STEP.SEL_ETHNIC);
+      LOGGER.trace("SEL_ETHNIC: \n{}", SEL_ETHNIC);
       read(stmtSelEthnicity, rs -> readEthnicity(rs));
 
       step(STEP.SEL_SAFETY);
+      LOGGER.trace("SEL_SAFETY: \n{}", SEL_SAFETY);
       read(stmtSelSafety, rs -> readSafetyAlert(rs));
       con.commit(); // free db resources again
 
       step(STEP.SET_PLACEMENT_KEY);
-      loadClientRange(con, stmtInsClient, range);
+      // loadClientRange(con, stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
       step(STEP.SEL_PLACEMENT_HOME);
@@ -646,7 +656,7 @@ public class PeopleSummaryThreadHandler
     doneThreadRetrieve();
     clear();
 
-    if (getRocket().isInitialLoadJdbc()) {
+    if (!getRocket().getFlightPlan().isLastRunMode()) {
       freeMemory();
     }
   }

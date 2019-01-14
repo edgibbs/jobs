@@ -122,9 +122,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   @JsonIgnore
   private long timeEndPull;
 
-  private final Map<String, Long> timings = new LinkedHashMap<>(31);
+  private final Map<String, Long> timings = Collections.synchronizedMap(new LinkedHashMap<>(31));
 
-  private final Map<String, String> otherMetrics = new LinkedHashMap<>(11);
+  private final Map<String, String> otherMetrics =
+      Collections.synchronizedMap(new LinkedHashMap<>(11));
 
   private boolean initialLoad;
 
@@ -474,7 +475,16 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   // ACCESSORS:
   // =======================
 
-  public void addAffectedDocumentId(String docId) {
+  /**
+   * Track processed documents in last change mode.
+   * 
+   * <p>
+   * SNAP-820: synchronize for safety, since container CircularFifoQueue is not thread safe.
+   * </p>
+   * 
+   * @param docId ES document id
+   */
+  public synchronized void addAffectedDocumentId(String docId) {
     affectedDocumentIds.add(docId);
   }
 
@@ -587,7 +597,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return status;
   }
 
-  public String[] getAffectedDocumentIds() {
+  public synchronized String[] getAffectedDocumentIds() {
     return affectedDocumentIds.toArray(new String[0]);
   }
 

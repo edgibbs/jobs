@@ -25,7 +25,16 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
   private static final long serialVersionUID = 1L;
 
   protected enum ColumnPosition {
-    START, CLT_IDENTIFIER, CLA_IDENTIFIER, ADR_IDENTIFIER, ADR_LST_UPD_ID, ADR_LST_UPD_TS, ADR_ADDR_DSC, ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO, ADR_FRG_ADRT_B, ADR_GVR_ENTC, ADR_HEADER_ADR, ADR_MSG_EXT_NO, ADR_MSG_TEL_NO, ADR_POSTDIR_CD, ADR_PREDIR_CD, ADR_PRM_EXT_NO, ADR_PRM_TEL_NO, ADR_STATE_C, ADR_STREET_NM, ADR_STREET_NO, ADR_ST_SFX_C, ADR_UNT_DSGC, ADR_UNIT_NO, ADR_ZIP_NO, ADR_ZIP_SFX_NO, ADR_IBMSNAP_LOGMARKER, ADR_IBMSNAP_OPERATION
+    START, CLT_IDENTIFIER, CLA_IDENTIFIER, ADR_IDENTIFIER, ADR_LST_UPD_ID, ADR_LST_UPD_TS,
+    // ADR_ADDR_DSC,
+    ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO,
+    // ADR_FRG_ADRT_B,
+    ADR_GVR_ENTC,
+    // ADR_HEADER_ADR,
+    ADR_MSG_EXT_NO, ADR_MSG_TEL_NO,
+    // ADR_POSTDIR_CD,
+    // ADR_PREDIR_CD,
+    ADR_PRM_EXT_NO, ADR_PRM_TEL_NO, ADR_STATE_C, ADR_STREET_NM, ADR_STREET_NO, ADR_ST_SFX_C, ADR_UNT_DSGC, ADR_UNIT_NO, ADR_ZIP_NO, ADR_ZIP_SFX_NO, ADR_IBMSNAP_LOGMARKER, ADR_IBMSNAP_OPERATION
   }
 
   // =======================
@@ -127,21 +136,21 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     this.adrCity = trimToNull(rs.getString(ColumnPosition.ADR_CITY_NM.ordinal()));
     this.adrEmergencyNumber = rs.getLong(ColumnPosition.ADR_EMRG_TELNO.ordinal());
     this.adrEmergencyExtension = rs.getInt(ColumnPosition.ADR_EMRG_EXTNO.ordinal());
-    this.adrFrgAdrtB = trimToNull(rs.getString(ColumnPosition.ADR_FRG_ADRT_B.ordinal()));
+    // this.adrFrgAdrtB = trimToNull(rs.getString(ColumnPosition.ADR_FRG_ADRT_B.ordinal()));
     this.adrGovernmentEntityCd = rs.getShort(ColumnPosition.ADR_GVR_ENTC.ordinal());
     this.adrMessageNumber = rs.getLong(ColumnPosition.ADR_MSG_TEL_NO.ordinal());
     this.adrMessageExtension = rs.getInt(ColumnPosition.ADR_MSG_EXT_NO.ordinal());
-    this.adrHeaderAddress = trimToNull(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal()));
+    // this.adrHeaderAddress = trimToNull(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal()));
     this.adrPrimaryNumber = rs.getLong(ColumnPosition.ADR_PRM_TEL_NO.ordinal());
     this.adrPrimaryExtension = rs.getInt(ColumnPosition.ADR_PRM_EXT_NO.ordinal());
     this.adrState = rs.getShort(ColumnPosition.ADR_STATE_C.ordinal());
     this.adrStreetName = trimToNull(rs.getString(ColumnPosition.ADR_STREET_NM.ordinal()));
     this.adrStreetNumber = trimToNull(rs.getString(ColumnPosition.ADR_STREET_NO.ordinal()));
     this.adrZip = trimToNull(rs.getString(ColumnPosition.ADR_ZIP_NO.ordinal()));
-    this.adrAddressDescription = trimToNull(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal()));
+    // this.adrAddressDescription = trimToNull(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal()));
     this.adrZip4 = rs.getShort(ColumnPosition.ADR_ZIP_SFX_NO.ordinal());
-    this.adrPostDirCd = trimToNull(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal()));
-    this.adrPreDirCd = trimToNull(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal()));
+    // this.adrPostDirCd = trimToNull(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal()));
+    // this.adrPreDirCd = trimToNull(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal()));
     this.adrStreetSuffixCd = rs.getShort(ColumnPosition.ADR_ST_SFX_C.ordinal());
     this.adrUnitDesignationCd = rs.getShort(ColumnPosition.ADR_UNT_DSGC.ordinal());
     this.adrUnitNumber = trimToNull(rs.getString(ColumnPosition.ADR_UNIT_NO.ordinal()));
