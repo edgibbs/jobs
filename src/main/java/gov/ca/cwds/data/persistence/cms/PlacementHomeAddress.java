@@ -38,10 +38,7 @@ public class PlacementHomeAddress extends ApiObjectIdentity
   private static final long serialVersionUID = 1L;
 
   public enum ColumnPosition {
-    START, CLIENT_ID, PE_THIRD_ID, OHP_ID, PH_ID, START_DT, END_DT,
-    // PE_GVR_ENTC,
-    // PH_GVR_ENTC,
-    STREET_NO, STREET_NM, CITY_NM, STATE_C, ZIP_NO, ZIP_SFX_NO, PH_LST_UPD_TS, PRM_TEL_NO, PRM_EXT_NO
+    START, CLIENT_ID, PE_THIRD_ID, OHP_ID, PH_ID, START_DT, END_DT, PE_GVR_ENTC, PH_GVR_ENTC, STREET_NO, STREET_NM, CITY_NM, STATE_C, ZIP_NO, ZIP_SFX_NO, PH_LST_UPD_TS, PRM_TEL_NO, PRM_EXT_NO
   }
 
   // System code cache is unhappy with this unknown value.
