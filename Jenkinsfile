@@ -17,6 +17,9 @@ switch(env.BUILD_JOB_TYPE) {
 
 def buildPullRequest() {
   node('tpt4-slave') {
+    def serverArti = Artifactory.server 'CWDS_DEV'
+    def rtGradle = Artifactory.newGradleBuild()
+    def triggerProperties = githubPullRequestBuilderTriggerProperties()
     properties([disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
       string(defaultValue: 'master', description: '', name: 'branch'),
