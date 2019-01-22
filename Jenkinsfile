@@ -2,6 +2,10 @@ import groovy.transform.Field
 @Library('jenkins-pipeline-utils') _
 
 @Field
+def serverArti = Artifactory.server 'CWDS_DEV'
+@Field
+def rtGradle = Artifactory.newGradleBuild()
+@Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 @Field
 def newTag
@@ -18,7 +22,7 @@ def buildPullRequest() {
     properties([disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
       string(defaultValue: 'master', description: '', name: 'branch'),
-      //booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
+      booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
       string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])])
 
     try {
@@ -76,8 +80,6 @@ def buildMaster() {
 
 def checkOut()  {
   stage('Check Out') {
-    def serverArti = Artifactory.server 'CWDS_DEV'
-    def rtGradle = Artifactory.newGradleBuild()
     cleanWs()
     git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
     rtGradle.tool = 'Gradle_35'
@@ -96,8 +98,6 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build'){
-    def serverArti = Artifactory.server 'CWDS_DEV'
-    def rtGradle = Artifactory.newGradleBuild()
     def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
