@@ -5,12 +5,6 @@ import groovy.transform.Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 @Field
 def newTag
-@Field
-def buildInfo
-@Field
-def serverArti
-@Field
-def rtGradle
 
 switch(env.BUILD_JOB_TYPE) {
   case "master": buildMaster(); break;
@@ -22,6 +16,8 @@ def buildPullRequest() {
   node('tpt4-slave') {
     def triggerProperties = githubPullRequestBuilderTriggerProperties()
     properties([disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    githubConfig(),
+    pipelineTriggers([triggerProperties]),
     parameters([
       string(defaultValue: 'master', description: '', name: 'branch'),
       booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
@@ -82,8 +78,8 @@ def buildMaster() {
 
 def checkOut()  {
   stage('Check Out') {
-    serverArti = Artifactory.server 'CWDS_DEV'
-    rtGradle = Artifactory.newGradleBuild()
+    def serverArti = Artifactory.server 'CWDS_DEV'
+    def rtGradle = Artifactory.newGradleBuild()
     cleanWs()
     git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
     rtGradle.tool = 'Gradle_35'
@@ -101,9 +97,9 @@ def verifySemVerLabel() {
 }
 
 def build() {
-  stage('Build'){
-    rtGradle = Artifactory.newGradleBuild()
-    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
+  stage('Build') {
+    def rtGradle = Artifactory.newGradleBuild()
+    def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
 
@@ -156,4 +152,8 @@ def cleanWorkspace() {
     publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index-all.html', reportName: 'javadoc', reportTitles: 'javadoc'])
     archiveArtifacts artifacts: '**/LaunchCommand-*.jar', fingerprint: true
   }
+}
+
+def githubConfig() {
+  githubConfigProperties('https://github.com/ca-cwds/jobs')
 }
