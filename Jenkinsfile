@@ -96,8 +96,8 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build'){
-    //def serverArti = Artifactory.server 'CWDS_DEV'
-    //def rtGradle = Artifactory.newGradleBuild()
+    def serverArti = Artifactory.server 'CWDS_DEV'
+    def rtGradle = Artifactory.newGradleBuild()
     def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
