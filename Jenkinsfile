@@ -3,6 +3,7 @@ import groovy.transform.Field
 
 @Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
+@Field
 def newTag
 
 switch(env.BUILD_JOB_TYPE) {
@@ -95,8 +96,8 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build'){
-    def serverArti = Artifactory.server 'CWDS_DEV'
-    def rtGradle = Artifactory.newGradleBuild()
+    //def serverArti = Artifactory.server 'CWDS_DEV'
+    //def rtGradle = Artifactory.newGradleBuild()
     def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
