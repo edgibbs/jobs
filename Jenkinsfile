@@ -94,7 +94,7 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build'){
-    def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -DnewVersion=${newTag}".toString()
+    def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
 
