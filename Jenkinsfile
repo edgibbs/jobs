@@ -30,6 +30,7 @@ def buildPullRequest() {
         //emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
         //subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
         currentBuild.result = "FAILURE"
+        throw exception
     } finally {
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests', reportFiles: 'index.html', reportName: 'JUnit Report', reportTitles: 'JUnit tests summary'])
         cleanWs()
