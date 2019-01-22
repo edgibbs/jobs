@@ -2,10 +2,6 @@ import groovy.transform.Field
 @Library('jenkins-pipeline-utils') _
 
 @Field
-def serverArti = Artifactory.server 'CWDS_DEV'
-@Field
-def rtGradle = Artifactory.newGradleBuild()
-@Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 @Field
 def newTag
@@ -80,6 +76,7 @@ def buildMaster() {
 
 def checkOut()  {
   stage('Check Out') {
+    gradleConfig()
     cleanWs()
     git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
     rtGradle.tool = 'Gradle_35'
@@ -90,6 +87,12 @@ def checkOut()  {
   }
 }
 
+def gradleConfig() {
+  def serverArti = Artifactory.server 'CWDS_DEV'
+  def rtGradle = Artifactory.newGradleBuild()
+}
+
+
 def verifySemVerLabel() {
   stage('Verify SemVer Label') {
     checkForLabel('jobs')
@@ -98,6 +101,7 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build'){
+    gradleConfig()
     def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
