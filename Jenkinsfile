@@ -13,8 +13,6 @@ switch(env.BUILD_JOB_TYPE) {
 
 def buildPullRequest() {
   node('tpt4-slave') {
-    def serverArti = Artifactory.server 'CWDS_DEV'
-    def rtGradle = Artifactory.newGradleBuild()
     def triggerProperties = githubPullRequestBuilderTriggerProperties()
     properties([disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
@@ -29,8 +27,8 @@ def buildPullRequest() {
       testAndCoverage()
       sonarQubeAnalysis()
     } catch(Exception exception) {
-        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-        subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
+        //emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+        //subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
         currentBuild.result = "FAILURE"
     } finally {
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests', reportFiles: 'index.html', reportName: 'JUnit Report', reportTitles: 'JUnit tests summary'])
@@ -76,6 +74,8 @@ def buildMaster() {
 
 def checkOut()  {
   stage('Check Out') {
+    def serverArti = Artifactory.server 'CWDS_DEV'
+    def rtGradle = Artifactory.newGradleBuild()
     cleanWs()
     git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
     rtGradle.tool = 'Gradle_35'
