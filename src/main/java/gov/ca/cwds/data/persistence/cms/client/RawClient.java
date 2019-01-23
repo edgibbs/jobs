@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.trimToNull;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -20,16 +21,21 @@ import javax.persistence.Enumerated;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
-public class RawClient extends ClientReference implements NeutronJdbcReader<RawClient>,
-    ApiGroupNormalizer<ReplicatedClient>, Comparable<RawClient>, Comparator<RawClient> {
+public class RawClient extends ClientReference
+    implements NeutronJdbcReader<RawClient>, ApiGroupNormalizer<ReplicatedClient>,
+    Comparable<RawClient>, Comparator<RawClient>, NeutronReplicatedTime {
 
   private static final long serialVersionUID = 1L;
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(RawClient.class);
 
   private Map<String, RawClientAddress> clientAddress = new LinkedHashMap<>();
 
@@ -280,7 +286,13 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
 
   @Type(type = "timestamp")
   @Column(name = "CLT_LST_UPD_TS")
-  protected Date cltLastUpdatedTime;
+  protected Date cltLastUpdatedTime; // millisecond precision. Good enough.
+
+  @Type(type = "timestamp")
+  @Column(name = "ADDED_TS")
+  protected Timestamp cltAddedTime;
+
+  protected volatile boolean hasAddedTs = true;
 
   @Override
   public Serializable getPrimaryKey() {
@@ -294,7 +306,7 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltSensitivityIndicator = trimToNull(rs.getString(ColPos.CLT_SENSTV_IND.ordinal()));
     this.cltBirthDate = rs.getDate(ColPos.CLT_BIRTH_DT.ordinal());
     this.cltClientIndexNumber = trimToNull(rs.getString(ColPos.CLT_CL_INDX_NO.ordinal()));
-    this.cltCommonFirstName = (rs.getString(ColPos.CLT_COM_FST_NM.ordinal()));
+    this.cltCommonFirstName = trimToNull(rs.getString(ColPos.CLT_COM_FST_NM.ordinal()));
     this.cltCommonLastName = trimToNull(rs.getString(ColPos.CLT_COM_LST_NM.ordinal()));
     this.cltCommonMiddleName = trimToNull(rs.getString(ColPos.CLT_COM_MID_NM.ordinal()));
 
@@ -314,7 +326,23 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     this.cltSocialSecurityNumber = trimToNull(rs.getString(ColPos.CLT_SS_NO.ordinal()));
     this.cltSuffixTitleDescription = trimToNull(rs.getString(ColPos.CLT_SUFX_TLDSC.ordinal()));
 
-    // SNAP-820: Only retrieve needed columns.
+    this.cltLastUpdatedId = trimToNull(rs.getString(ColPos.CLT_LST_UPD_ID.ordinal()));
+    this.cltLastUpdatedTime = rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal());
+
+    this.setCltReplicationOperation(
+        CmsReplicationOperation.strToRepOp(rs.getString(ColPos.CLT_IBMSNAP_OPERATION.ordinal())));
+    this.setCltReplicationDate(rs.getTimestamp(ColPos.CLT_IBMSNAP_LOGMARKER.ordinal()));
+
+    if (hasAddedTs) {
+      try {
+        this.cltAddedTime = rs.getTimestamp(ColPos.CLT_ADDED_TS.ordinal());
+      } catch (Exception e) {
+        LOGGER.warn("NO COLUMN 'ADDED_TS'!");
+        hasAddedTs = false;
+      }
+    }
+
+    // SNAP-820: unneeded columns.
     // this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
     // this.cltMilitaryStatusCode = trimToNull(rs.getString(ColPos.CLT_MILT_STACD.ordinal()));
     // this.cltImmigrationStatusType = rs.getShort(ColPos.CLT_IMGT_STC.ordinal());
@@ -338,14 +366,18 @@ public class RawClient extends ClientReference implements NeutronJdbcReader<RawC
     // trimToNull(rs.getString(ColPos.CLT_TRBA_CLT_B.ordinal()));
     // this.cltZippyCreatedIndicator = trimToNull(rs.getString(ColPos.CLT_ZIPPY_IND.ordinal()));
 
-    this.cltLastUpdatedId = trimToNull(rs.getString(ColPos.CLT_LST_UPD_ID.ordinal()));
-    this.cltLastUpdatedTime = rs.getTimestamp(ColPos.CLT_LST_UPD_TS.ordinal());
-
-    this.setCltReplicationOperation(
-        CmsReplicationOperation.strToRepOp(rs.getString(ColPos.CLT_IBMSNAP_OPERATION.ordinal())));
-    this.setCltReplicationDate(rs.getDate(ColPos.CLT_IBMSNAP_LOGMARKER.ordinal()));
-
     return this;
+  }
+
+  @Override
+  public long calcReplicationTime() {
+    return hasAddedTime() ? Math.abs(cltAddedTime.getTime() - cltReplicationDate.getTime()) : 0;
+  }
+
+  @Override
+  public boolean hasAddedTime() {
+    return cltAddedTime.after(cltReplicationDate)
+        && Math.abs(cltAddedTime.getTime() - cltReplicationDate.getTime()) < 900000; // 15 minutes
   }
 
   @Override

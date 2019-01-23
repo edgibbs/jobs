@@ -820,6 +820,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return timings;
   }
 
+  /**
+   * Send flight metrics to New Relic (or other monitoring system).
+   * 
+   * @param eventType registered New Relic event
+   */
   public void notifyMonitor(String eventType) {
     LOGGER.debug("Prepare to notify New Relic");
     final Map<String, Object> attribs = new LinkedHashMap<>();
@@ -868,7 +873,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
           NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
           LOGGER.error("FAILED TO SEND TO NEW RELIC!", e);
-          // CheeseRay.runtime(LOGGER, e, "FAILED TO SEND TO NEW RELIC! {}", e.getMessage());
+          addWarning("FAILED TO SEND TO NEW RELIC!");
         }
       }
     }

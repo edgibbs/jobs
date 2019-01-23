@@ -100,7 +100,8 @@ public class ClientSQLResource implements ApiMarker {
    // + "  clt.TRBA_CLT_B        AS CLT_TRBA_CLT_B,\n"
    // + "  clt.ZIPPY_IND         AS CLT_ZIPPY_IND,\n"
       + "  clt.IBMSNAP_LOGMARKER AS CLT_IBMSNAP_LOGMARKER,\n"
-      + "  clt.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION\n"
+      + "  clt.IBMSNAP_OPERATION AS CLT_IBMSNAP_OPERATION,\n"
+      + "  clt.ADDED_TS          AS CLT_ADDED_TS\n"
       + KEY_SOURCE
       + "JOIN  CLIENT_T clt ON clt.IDENTIFIER = gt.IDENTIFIER\n"
       + SEL_OPTIMIZE;
@@ -162,7 +163,8 @@ public class ClientSQLResource implements ApiMarker {
       + "  TRIM(adr.ZIP_NO)      AS ADR_ZIP_NO,\n"
       + "  adr.ZIP_SFX_NO        AS ADR_ZIP_SFX_NO,\n"
       + "  adr.IBMSNAP_LOGMARKER AS ADR_IBMSNAP_LOGMARKER,\n"
-      + "  adr.IBMSNAP_OPERATION AS ADR_IBMSNAP_OPERATION\n"
+      + "  adr.IBMSNAP_OPERATION AS ADR_IBMSNAP_OPERATION,\n"
+      + "  adr.ADDED_TS          AS ADR_ADDED_TS\n"
       + KEY_SOURCE
       + "JOIN CL_ADDRT cla ON  gt.IDENTIFIER = cla.FKCLIENT_T\n"
       + "JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER\n"

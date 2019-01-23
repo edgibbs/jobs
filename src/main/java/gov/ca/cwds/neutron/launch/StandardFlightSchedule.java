@@ -120,7 +120,7 @@ public enum StandardFlightSchedule {
       45, // execute every N seconds.
       800, // last run priority.
       null, // N/A
-      true, // run in Last Change mode
+      false, // run in Last Change mode
       false, // run in Initial Load
       false // People index
   ),

@@ -278,7 +278,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         fl.incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        fl.incrementBulkPrepared();
+        // fl.incrementBulkPrepared();
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());

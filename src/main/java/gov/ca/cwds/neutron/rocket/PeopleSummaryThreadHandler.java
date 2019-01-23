@@ -132,6 +132,8 @@ public class PeopleSummaryThreadHandler
 
     REPLICATION_TIME("Millis to replicate records"),
 
+    REPLICATION_TIME_SECS("Seconds to replicate records"),
+
     DONE("Job done")
 
     ;
@@ -451,7 +453,6 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
-    // readClient(rs); // No longer.
     final int cntrRetrieved = rawClients.size();
 
     LOGGER.info("handleMainResults(): commit");
@@ -535,8 +536,6 @@ public class PeopleSummaryThreadHandler
         final PreparedStatement stmtSelEthnicity = con.prepareStatement(SEL_ETHNIC, TFO, CRO);
         final PreparedStatement stmtSelSafety = con.prepareStatement(SEL_SAFETY, TFO, CRO)) {
 
-      // QUESTION: when to commit.
-
       // Client keys for this bundle.
       step(STEP.SET_CLIENT_KEY);
       loadClientRange(con, stmtInsClient, range);
@@ -553,7 +552,6 @@ public class PeopleSummaryThreadHandler
       LOGGER.trace("SEL_ADDR: \n{}", SEL_ADDR);
       read(stmtSelAddress, rs -> readAddress(rs));
 
-      // loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
       step(STEP.SEL_CLIENT_COUNTY);
       LOGGER.trace("SEL_CLI_COUNTY: \n{}", SEL_CLI_COUNTY);
       read(stmtSelCliCnty, rs -> readClientCounty(rs));
@@ -577,16 +575,15 @@ public class PeopleSummaryThreadHandler
       step(STEP.SEL_SAFETY);
       LOGGER.trace("SEL_SAFETY: \n{}", SEL_SAFETY);
       read(stmtSelSafety, rs -> readSafetyAlert(rs));
-      con.commit(); // free db resources again
 
       step(STEP.SET_PLACEMENT_KEY);
-      // loadClientRange(con, stmtInsClient, range);
       prepPlacementClients(stmtInsClientPlaceHome, range);
 
       step(STEP.SEL_PLACEMENT_HOME);
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
 
+      calcReplicationDelay(); // When ready
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
 
@@ -608,6 +605,10 @@ public class PeopleSummaryThreadHandler
 
     step(STEP.DONE_RETRIEVAL);
     LOGGER.debug("handleSecondaryJdbc(): DONE");
+  }
+
+  protected void calcReplicationDelay() {
+    // No-op in Initial Load.
   }
 
   protected void mapReplicatedClient(PlacementHomeAddress pha) {

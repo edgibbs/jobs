@@ -375,7 +375,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
     target.setFakeRanges(true);
     final int actual = target.extractHibernate();
-    final int expected = 2;
+    final int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
