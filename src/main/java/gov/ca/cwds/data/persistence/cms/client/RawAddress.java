@@ -139,8 +139,6 @@ public class RawAddress extends ClientAddressReference
   @Column(name = "ADR_ADDED_TS")
   protected Date adrAddedTime;
 
-  protected volatile boolean hasAddedTs = true;
-
   @Override
   public RawAddress read(ResultSet rs) throws SQLException {
     super.read(rs);
@@ -168,15 +166,7 @@ public class RawAddress extends ClientAddressReference
     this.adrReplicationOperation = CmsReplicationOperation
         .strToRepOp(rs.getString(ColumnPosition.ADR_IBMSNAP_OPERATION.ordinal()));
     this.adrReplicationDate = rs.getTimestamp(ColumnPosition.ADR_IBMSNAP_LOGMARKER.ordinal());
-
-    if (hasAddedTs) {
-      try {
-        this.adrAddedTime = rs.getTimestamp(ColumnPosition.ADR_ADDED_TS.ordinal());
-      } catch (Exception e) {
-        LOGGER.warn("NO COLUMN 'ADDED_TS' IN ADDRS_T!");
-        hasAddedTs = false;
-      }
-    }
+    this.adrAddedTime = rs.getTimestamp(ColumnPosition.ADR_ADDED_TS.ordinal());
 
     // SNAP-820: OBSOLETE COLUMNS.
     // this.adrHeaderAddress = trimToNull(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal()));

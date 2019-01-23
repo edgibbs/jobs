@@ -292,8 +292,6 @@ public class RawClient extends ClientReference
   @Column(name = "ADDED_TS")
   protected Timestamp cltAddedTime;
 
-  protected volatile boolean hasAddedTs = true;
-
   @Override
   public Serializable getPrimaryKey() {
     return this.cltId;
@@ -332,15 +330,7 @@ public class RawClient extends ClientReference
     this.setCltReplicationOperation(
         CmsReplicationOperation.strToRepOp(rs.getString(ColPos.CLT_IBMSNAP_OPERATION.ordinal())));
     this.setCltReplicationDate(rs.getTimestamp(ColPos.CLT_IBMSNAP_LOGMARKER.ordinal()));
-
-    if (hasAddedTs) {
-      try {
-        this.cltAddedTime = rs.getTimestamp(ColPos.CLT_ADDED_TS.ordinal());
-      } catch (Exception e) {
-        LOGGER.warn("NO COLUMN 'ADDED_TS'!");
-        hasAddedTs = false;
-      }
-    }
+    this.cltAddedTime = rs.getTimestamp(ColPos.CLT_ADDED_TS.ordinal());
 
     // SNAP-820: unneeded columns.
     // this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
