@@ -869,21 +869,21 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
       // AR-325: replication metrics.
       // blue line: DB2 replication.
-      // green line: Neutron processing time + ES refresh interval.
+      // green line: job processing time + ES refresh interval + delay between job runs.
       if (lastEndTime != 0) {
         attribs.putIfAbsent("last_run_end_time",
             Instant.ofEpochMilli(lastEndTime).getEpochSecond());
         final long runTotalMillis = lastEndTime - startTime;
-        final long runTotalSeconds = runTotalMillis / 1000;
+        final float runTotalSeconds = runTotalMillis / 1000;
 
         LOGGER.debug("since last run: millis: {}, seconds: {}", runTotalMillis, runTotalSeconds);
         attribs.putIfAbsent("run_since_last_run_secs", runTotalSeconds);
         attribs.putIfAbsent("run_since_last_run_millis", runTotalMillis);
 
-        final long totalGreenLineSecs = runTotalSeconds + 3; // NEXT: ES refresh interval
+        final float totalGreenLineSecs = runTotalSeconds + 3; // NEXT: ES refresh interval
         attribs.putIfAbsent("green_line_secs", totalGreenLineSecs);
 
-        final long totalGreenLineMillis = runTotalMillis + 3000; // NEXT: ES refresh interval
+        final float totalGreenLineMillis = runTotalMillis + 3000; // NEXT: ES refresh interval
         attribs.putIfAbsent("green_line_millis", totalGreenLineMillis);
       }
 
