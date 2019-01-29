@@ -114,6 +114,9 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   private long endTime;
 
   @JsonIgnore
+  private long lastEndTime;
+
+  @JsonIgnore
   private long timeStartPoll;
 
   @JsonIgnore
@@ -673,7 +676,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
         .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
         .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
         .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
-        .append("\n\tbulk after:      ").append(pad(recsBulkAfter.get()))
         .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
 
     if (!initialLoad && !affectedDocumentIds.isEmpty()) {
@@ -847,33 +849,55 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       }
 
       attribs.putIfAbsent("warnings", warnings.size());
-      attribs.putIfAbsent("errors", isFatalError());
+      attribs.putIfAbsent("run_failed", isFatalError());
       attribs.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
+
       attribs.putIfAbsent("es_deleted", recsBulkDeleted.get());
-      attribs.putIfAbsent("es_before", recsBulkBefore.get());
-      attribs.putIfAbsent("es_after", recsBulkAfter.get());
+      attribs.putIfAbsent("es_indexed", recsBulkBefore.get());
       attribs.putIfAbsent("es_errors", recsBulkError.get());
+      attribs.putIfAbsent("es_refresh_interval", 3); // NEXT: read index settings
 
-      attribs.putIfAbsent("start", startTime);
-      attribs.putIfAbsent("done", endTime);
+      attribs.putIfAbsent("run_start_time", Instant.ofEpochMilli(startTime).getEpochSecond());
+      attribs.putIfAbsent("run_end_time", Instant.ofEpochMilli(endTime).getEpochSecond());
 
-      final long totalSeconds = (endTime - startTime) / 1000;
-      LOGGER.debug("total seconds: {}", totalSeconds);
-      attribs.putIfAbsent("total_seconds", totalSeconds);
+      final long runSeconds = (endTime - startTime) / 1000;
+      LOGGER.debug("Neutron: this run seconds: {}", runSeconds);
+      attribs.putIfAbsent("run_seconds", runSeconds);
 
-      final long totalMilliSeconds = endTime - startTime;
-      attribs.putIfAbsent("total_milliseconds", totalMilliSeconds);
+      final long runMillis = endTime - startTime;
+      attribs.putIfAbsent("run_millis", runMillis);
+
+      // AR-325: replication metrics.
+      // blue line: DB2 replication.
+      // green line: Neutron processing time + ES refresh interval.
+      if (lastEndTime != 0) {
+        attribs.putIfAbsent("last_run_end_time",
+            Instant.ofEpochMilli(lastEndTime).getEpochSecond());
+        final long runTotalMillis = lastEndTime - startTime;
+        final long runTotalSeconds = runTotalMillis / 1000;
+
+        LOGGER.debug("since last run: millis: {}, seconds: {}", runTotalMillis, runTotalSeconds);
+        attribs.putIfAbsent("run_since_last_run_secs", runTotalSeconds);
+        attribs.putIfAbsent("run_since_last_run_millis", runTotalMillis);
+
+        final long totalGreenLineSecs = runTotalSeconds + 3; // NEXT: ES refresh interval
+        attribs.putIfAbsent("green_line_secs", totalGreenLineSecs);
+
+        final long totalGreenLineMillis = runTotalMillis + 3000; // NEXT: ES refresh interval
+        attribs.putIfAbsent("green_line_millis", totalGreenLineMillis);
+      }
 
       if (!attribs.isEmpty()) {
         try {
           LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
               attribs.size());
           attribs.entrySet().stream().forEach(
-              e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 24), e.getValue()));
+              e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 26), e.getValue()));
           NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
-          LOGGER.error("FAILED TO SEND TO NEW RELIC!", e);
-          addWarning("FAILED TO SEND TO NEW RELIC!");
+          final String msg = "FAILED TO SEND TO NEW RELIC!";
+          LOGGER.error(msg, e);
+          addWarning(msg);
         }
       }
     }
@@ -881,6 +905,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public Map<String, String> getOtherMetrics() {
     return otherMetrics;
+  }
+
+  public long getLastEndTime() {
+    return lastEndTime;
+  }
+
+  public void setLastEndTime(long lastEndTime) {
+    this.lastEndTime = lastEndTime;
   }
 
 }

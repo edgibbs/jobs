@@ -98,7 +98,7 @@ public interface AtomLoadStepHandler<N extends PersistentObject> {
   }
 
   default String getEventType() {
-    return "neutron_lc_other";
+    return "";
   }
 
 }

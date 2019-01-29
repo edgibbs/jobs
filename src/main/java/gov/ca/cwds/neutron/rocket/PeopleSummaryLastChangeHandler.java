@@ -261,18 +261,20 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   @Override
   protected void calcReplicationDelay() {
     final FlightLog fl = getRocket().getFlightLog();
+
+    // AR-325: replication metrics.
+    // Don't calculate replication delay here anymore.
     final OptionalDouble avgRepTimeClient = rawClients.values().stream()
         .filter(RawClient::hasAddedTime).mapToLong(RawClient::calcReplicationTime).average();
-
     final OptionalDouble avgRepTimeAddress = rawClients.values().stream()
         .flatMap(c -> c.getClientAddress().values().stream()).map(RawClientAddress::getAddress)
         .filter(RawAddress::hasAddedTime).mapToLong(RawAddress::calcReplicationTime).average();
-
     long maxRepLag =
         (long) Math.max(avgRepTimeClient.isPresent() ? avgRepTimeClient.getAsDouble() : 0,
             avgRepTimeAddress.isPresent() ? avgRepTimeAddress.getAsDouble() : 0);
     maxRepLag = maxRepLag == 0 ? lastReplicationDelay.get() : maxRepLag;
-    fl.addOtherMetric(STEP.REPLICATION_TIME.name().toLowerCase(), "" + maxRepLag);
+
+    fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(), "" + maxRepLag);
     fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), "" + (maxRepLag / 1000));
     lastReplicationDelay.set(maxRepLag);
     LOGGER.info("replication time: client: {}, address: {}, max lag: {}", avgRepTimeClient,

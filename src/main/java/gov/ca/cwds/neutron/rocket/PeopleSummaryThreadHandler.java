@@ -130,7 +130,7 @@ public class PeopleSummaryThreadHandler
 
     INDEX_TO_ES("Wait on Elasticsearch indexing"),
 
-    REPLICATION_TIME("Millis to replicate records"),
+    REPLICATION_TIME_MILLIS("Millis to replicate records"),
 
     REPLICATION_TIME_SECS("Seconds to replicate records"),
 
@@ -583,7 +583,8 @@ public class PeopleSummaryThreadHandler
       readPlacementAddress(stmtSelPlacementAddress);
       con.commit(); // free db resources. Make DBA's happy.
 
-      calcReplicationDelay(); // When ready
+      // AR-325: reinstate replicate metric rocket.
+      // calcReplicationDelay(); // When ready
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
 
@@ -771,7 +772,7 @@ public class PeopleSummaryThreadHandler
         stmt.setString(1, p.getLeft());
         stmt.setString(2, p.getRight());
       } catch (Exception e) {
-        LOGGER.trace("FAILED TO SET PARAMS. Last change mode?", e);
+        LOGGER.warn("FAILED TO SET PARAMS. Last change mode?", e);
       }
     }
 

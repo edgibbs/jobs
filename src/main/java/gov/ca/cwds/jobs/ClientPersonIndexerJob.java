@@ -34,6 +34,7 @@ import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -41,6 +42,8 @@ import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryLastChangeHandler;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
+import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler.STEP;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
@@ -66,6 +69,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientPersonIndexerJob.class);
+
+  private static Date lastEndTime = new Date();
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
@@ -97,9 +102,23 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
   @Override
   public Date launch(Date lastSuccessfulRunTime) throws NeutronCheckedException {
+    final FlightLog fl = getFlightLog();
     allocateThreadHandler();
     largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
-    return super.launch(lastSuccessfulRunTime);
+    final Date ret = super.launch(lastSuccessfulRunTime);
+
+    // AR-325: replication metrics.
+    lastEndTime = new Date();
+    fl.setLastEndTime(lastEndTime.getTime());
+
+    final Float lastReplicationSecs = ReplicationLagRocket.getLastReplicationSeconds();
+    if (lastReplicationSecs != null && lastReplicationSecs != 0.0F) {
+      final String replicationSecs = lastReplicationSecs.toString();
+      fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), replicationSecs);
+      fl.addOtherMetric("blue_line_secs", replicationSecs);
+    }
+
+    return ret;
   }
 
   @Override
@@ -377,6 +396,10 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public String getEventType() {
     return "neutron_lc_client";
+  }
+
+  public static Date getLastEndTime() {
+    return lastEndTime;
   }
 
   /**

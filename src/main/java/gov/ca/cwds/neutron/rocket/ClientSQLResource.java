@@ -464,11 +464,44 @@ public class ClientSQLResource implements ApiMarker {
 
   public static final String INS_LST_CHG_KEY_BUNDLE = "INSERT INTO GT_ID (IDENTIFIER) VALUES (?)";
 
+  //@formatter:off
+  public static final String SEL_REPL_TIME_REAL =
+        "SELECT x.* FROM (\n"
+      + " SELECT 'D' AS TIME_UNIT, '1' AS UNITS_BACK, MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
+      + " FROM ADDRS_T \n"
+      + " WHERE IBMSNAP_LOGMARKER > (CURRENT TIMESTAMP - 24 HOUR)\n"
+      + " UNION ALL\n"
+      + " SELECT 'H' AS TIME_UNIT, '8' AS UNITS_BACK, MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
+      + " FROM ADDRS_T \n"
+      + " WHERE IBMSNAP_LOGMARKER > (CURRENT TIMESTAMP - 8 HOUR)\n"
+      + " UNION ALL\n"
+      + " SELECT 'H' AS TIME_UNIT, '4' AS UNITS_BACK, MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
+      + " FROM ADDRS_T \n"
+      + " WHERE IBMSNAP_LOGMARKER > (CURRENT TIMESTAMP - 4 HOUR)\n"
+      + " UNION ALL\n"
+      + " SELECT 'H' AS TIME_UNIT, '1' AS UNITS_BACK, MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
+      + " FROM ADDRS_T \n"
+      + " WHERE IBMSNAP_LOGMARKER > (CURRENT TIMESTAMP - 1 HOUR)\n"
+      + " UNION ALL\n"
+      + " SELECT 'M' AS TIME_UNIT, '5' AS UNITS_BACK, MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
+      + " FROM ADDRS_T \n"
+      + " WHERE IBMSNAP_LOGMARKER > (CURRENT TIMESTAMP - 5 MINUTE)\n"
+      + " UNION ALL\n"
+      + " SELECT 'M' AS TIME_UNIT, '1' AS UNITS_BACK, MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
+      + " FROM ADDRS_T \n"
+      + " WHERE IBMSNAP_LOGMARKER > (CURRENT TIMESTAMP - 1 MINUTE)\n"
+      + ") x\n"
+      + "WHERE x.REP_MAX IS NOT NULL\n"
+      + "ORDER BY TIME_UNIT DESC, UNITS_BACK DESC\n"
+      + "FETCH FIRST 1 ROWS ONLY\n"
+      + "FOR READ ONLY WITH UR";
+  //@formatter:on
+
   /**
    * Unreliable query results from IBM's replication tracking tables. Keep for records.
    */
   //@formatter:off
-  public static final String SEL_REPL_TIME =
+  public static final String SEL_REPL_TIME_IBM =
         "WITH STEP1 AS (\n"
       + " SELECT\n"
       + "    m.SOURCE_TABLE,\n"
