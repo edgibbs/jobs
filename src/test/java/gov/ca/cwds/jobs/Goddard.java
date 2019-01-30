@@ -322,6 +322,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
 
     // Queries.
     nq = mock(NativeQuery.class);
+    when(session.createNativeQuery(any(String.class))).thenReturn(nq);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
     when(nq.setParameter(any(String.class), any(String.class), any(StringType.class)))

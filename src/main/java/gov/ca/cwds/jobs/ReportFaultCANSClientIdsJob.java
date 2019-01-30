@@ -506,10 +506,11 @@ public class ReportFaultCANSClientIdsJob {
   }
 
   protected void reportClient(CansClient clientPojo) {
-    Row row = sheet.createRow(nextRowNum++);
-    CellStyle cellStyle =
+    final Row row = sheet.createRow(nextRowNum++);
+    final CellStyle cellStyle =
         clientPojo.comment.contains(SUCCESS) ? detailsRowFixedStyle : detailsRowStyle;
-    CellStyle dateStyle = clientPojo.comment.contains(SUCCESS) ? dateCellFixedStyle : dateCellStyle;
+    final CellStyle dateStyle =
+        clientPojo.comment.contains(SUCCESS) ? dateCellFixedStyle : dateCellStyle;
 
     // Create cells
     for (int index = 0; index < columns.length; index++) {

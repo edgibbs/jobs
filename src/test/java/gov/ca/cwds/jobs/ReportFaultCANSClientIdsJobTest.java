@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -21,6 +20,7 @@ import gov.ca.cwds.jobs.ReportFaultCANSClientIdsJob.CansClient;
 public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   ReportFaultCANSClientIdsJob target;
+  CansClient cansClient;
 
   @Override
   @Before
@@ -28,6 +28,9 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
     super.setup();
     target = new ReportFaultCANSClientIdsJob(sessionFactory, sessionFactory);
     target.initReport();
+
+    cansClient = new CansClient();
+    cansClient.id = 12345L;
   }
 
   @Test
@@ -67,16 +70,16 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void setObjectProperty_A$Object$Field$Object() throws Exception {
-    Object object = null;
-    Field field = mock(Field.class);
-    Object fieldValue = null;
+    Object object = cansClient;
+    Field field = object.getClass().getDeclaredField("lastName");
+    Object fieldValue = "Smith";
     ReportFaultCANSClientIdsJob.setObjectProperty(object, field, fieldValue);
   }
 
   @Test
   public void grabCansSession_A$() throws Exception {
     Session actual = target.grabCansSession();
-    Session expected = null;
+    Session expected = session;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -110,6 +113,7 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
     final File fakeBaseDir = tempFolder.newFolder();
     target.setBaseDir(fakeBaseDir.getAbsolutePath());
     target.initReport();
+    target.generateReport();
     target.finalizeReport();
   }
 
@@ -141,7 +145,7 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
     target.setBaseDir(fakeBaseDir.getAbsolutePath());
     target.initReport();
 
-    final CansClient clientPojo = new CansClient();
+    final CansClient clientPojo = cansClient;
     clientPojo.comment = "Sink me!";
     target.reportClient(clientPojo);
   }
