@@ -384,6 +384,7 @@ public class ReportFaultCANSClientIdsJob {
       // But only those NOT_FOUND_IN_CMS
       return;
     }
+
     LOGGER.info("Client [id: {}] -> Attempting to fix...", clientDto.id);
     clientDto.setComment(clientDto.comment + " Attempting to fix... ");
     String newKey = null;

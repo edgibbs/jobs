@@ -26,6 +26,7 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
   public void setup() throws Exception {
     super.setup();
     target = new ReportFaultCANSClientIdsJob(sessionFactory, sessionFactory);
+    target.initReport();
   }
 
   @Test
@@ -47,19 +48,20 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void mapNQResults_A$List$Class() throws Exception {
-    List objectArrayList = new ArrayList();
-    List<Object> actual =
+    final List objectArrayList = new ArrayList();
+    final List<Object> actual =
         ReportFaultCANSClientIdsJob.mapNQResults(objectArrayList, CansClient.class);
-    List<Object> expected = null;
+    final List<Object> expected = new ArrayList();
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getNQResultColumnAnnotatedFields_A$Class() throws Exception {
-    Class<Object> genericType = mock(Class.class);
-    List<Field> actual = ReportFaultCANSClientIdsJob.getNQResultColumnAnnotatedFields(genericType);
-    List<Field> expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    final List<Field> actual =
+        ReportFaultCANSClientIdsJob.getNQResultColumnAnnotatedFields(CansClient.class);
+    // List<Field> expected = null;
+    // assertThat(actual, is(equalTo(expected)));
+    assertThat(actual, is(notNullValue()));
   }
 
   @Test
@@ -72,7 +74,6 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void grabCansSession_A$() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
     Session actual = target.grabCansSession();
     Session expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -80,7 +81,6 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void grabCmsSession_A$() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
     Session actual = target.grabCmsSession();
     Session expected = null;
     assertThat(actual, is(equalTo(expected)));
@@ -88,54 +88,48 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void buildClientList_A$() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
     target.buildClientList();
   }
 
   @Test
   public void generateReport_A$() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
     target.generateReport();
   }
 
   @Test
   public void initReport_A$() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
     target.initReport();
   }
 
   @Test
   public void finalizeReport_A$() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
+    target.initReport();
     target.finalizeReport();
   }
 
   @Test
   public void isValidClientId_A$Object() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
-    CansClient clientDto = null;
-    boolean actual = target.isValidClientId(clientDto);
-    boolean expected = false;
+    final CansClient clientDto = new CansClient();
+    final boolean actual = target.isValidClientId(clientDto);
+    final boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void attemptToFix_A$Object() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
-    CansClient clientDto = null;
+    final CansClient clientDto = new CansClient();
+    clientDto.comment = "That's what she said";
     target.attemptToFix(clientDto);
   }
 
   @Test
   public void buildReportFileName_A$() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
     target.buildReportFileName();
   }
 
   @Test
   public void reportClient_A$Object() throws Exception {
-    ReportFaultCANSClientIdsJob target = new ReportFaultCANSClientIdsJob();
-    CansClient clientPojo = null;
+    CansClient clientPojo = new CansClient();
     target.reportClient(clientPojo);
   }
 
