@@ -6,6 +6,7 @@ import java.util.Map;
 
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdFetchLogs;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdFlightHistory;
+import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdGc;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdLastRunStatus;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdPause;
 import gov.ca.cwds.neutron.vox.jmx.cmd.VoxCmdRerunKey;
@@ -41,7 +42,9 @@ public enum VoxCommandType {
 
   WAYBACK(VoxCmdWayBack.class, "wayback"),
 
-  RERUN(VoxCmdRerunKey.class, "rerun")
+  RERUN(VoxCmdRerunKey.class, "rerun"),
+
+  GC(VoxCmdGc.class, "gc")
 
   ;
 
