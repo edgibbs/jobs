@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +83,7 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
   @Test
   public void grabCmsSession_A$() throws Exception {
     Session actual = target.grabCmsSession();
-    Session expected = null;
+    Session expected = session;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -93,6 +94,9 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void generateReport_A$() throws Exception {
+    final File fakeBaseDir = tempFolder.newFolder();
+    target.setBaseDir(fakeBaseDir.getAbsolutePath());
+    target.initReport();
     target.generateReport();
   }
 
@@ -103,6 +107,8 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void finalizeReport_A$() throws Exception {
+    final File fakeBaseDir = tempFolder.newFolder();
+    target.setBaseDir(fakeBaseDir.getAbsolutePath());
     target.initReport();
     target.finalizeReport();
   }
@@ -124,12 +130,19 @@ public class ReportFaultCANSClientIdsJobTest extends Goddard {
 
   @Test
   public void buildReportFileName_A$() throws Exception {
+    final File fakeBaseDir = tempFolder.newFolder();
+    target.setBaseDir(fakeBaseDir.getAbsolutePath());
     target.buildReportFileName();
   }
 
   @Test
   public void reportClient_A$Object() throws Exception {
-    CansClient clientPojo = new CansClient();
+    final File fakeBaseDir = tempFolder.newFolder();
+    target.setBaseDir(fakeBaseDir.getAbsolutePath());
+    target.initReport();
+
+    final CansClient clientPojo = new CansClient();
+    clientPojo.comment = "Sink me!";
     target.reportClient(clientPojo);
   }
 

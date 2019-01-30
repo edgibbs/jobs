@@ -97,7 +97,7 @@ public class ReportFaultCANSClientIdsJob {
   private SessionFactory cansSessionFactory;
   private SessionFactory cmsSessionFactory;
   private String baseDir;
-  private List<CansClient> clientList;
+  private List<CansClient> clientList = new ArrayList<>();
   private String reportFileName;
 
   // Excel related
@@ -536,6 +536,14 @@ public class ReportFaultCANSClientIdsJob {
         LOGGER.error("Error: {}", e);
       }
     }
+  }
+
+  public String getBaseDir() {
+    return baseDir;
+  }
+
+  public void setBaseDir(String baseDir) {
+    this.baseDir = baseDir;
   }
 
   // -----------------------------------------------------------------------------------------------
