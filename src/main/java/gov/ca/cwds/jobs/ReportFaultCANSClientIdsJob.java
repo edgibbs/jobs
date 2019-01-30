@@ -3,9 +3,6 @@ package gov.ca.cwds.jobs;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
-import gov.ca.cwds.jobs.schedule.LaunchCommand;
-import gov.ca.cwds.neutron.flight.FlightPlan;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -41,8 +39,12 @@ import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.ca.cwds.data.persistence.cms.CmsKeyIdGenerator;
+import gov.ca.cwds.jobs.schedule.LaunchCommand;
+import gov.ca.cwds.neutron.flight.FlightPlan;
+
 /**
- * Validates CANS Client IDs against legacy DB2 CLIET_T table and reports not valid ones.
+ * Validates CANS Client IDs against legacy DB2 CLIENT_T table and reports invalid ones.
  *
  * @author CWDS API Team
  */
@@ -85,16 +87,19 @@ public class ReportFaultCANSClientIdsJob {
       "SELECT KEPTOBJ_ID FROM {h-schema}MRHIST_T WHERE DELOBJ_ID = :cmsKey";
   private static final String NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE = "UPDATE {h-schema}person"
       + " SET external_id = :newExternalId WHERE id = :id AND external_id = :externalId";
-  private static final String NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID = "UPDATE {h-schema}assessment"
-      + " SET person_id = :newPersonId WHERE person_id = :personId";
-  private static final String NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID = "UPDATE {h-schema}assessment_aud"
-      + " SET person_id = :newPersonId WHERE person_id = :personId";
+  private static final String NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID =
+      "UPDATE {h-schema}assessment" + " SET person_id = :newPersonId WHERE person_id = :personId";
+  private static final String NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID =
+      "UPDATE {h-schema}assessment_aud"
+          + " SET person_id = :newPersonId WHERE person_id = :personId";
   private static final String NQ_CANS_CLIENT_DELETE = "DELETE FROM {h-schema}person WHERE id = :id";
+
   private SessionFactory cansSessionFactory;
   private SessionFactory cmsSessionFactory;
   private String baseDir;
-  private List<CansClient> clientList;
+  private List<CansClient> clientList = new ArrayList<>();
   private String reportFileName;
+
   // Excel related
   private Workbook workbook;
   private Sheet sheet;
@@ -106,7 +111,14 @@ public class ReportFaultCANSClientIdsJob {
   private int nextRowNum = 1; // headerRow is 0
   private int[] columnsWidth = new int[columns.length];
 
-  private ReportFaultCANSClientIdsJob() {
+
+  protected ReportFaultCANSClientIdsJob(SessionFactory cansSessionFactory,
+      SessionFactory cmsSessionFactory) {
+    this.cansSessionFactory = cansSessionFactory;
+    this.cmsSessionFactory = cmsSessionFactory;
+  }
+
+  protected ReportFaultCANSClientIdsJob() {
     cansSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_NS).buildSessionFactory();
     cmsSessionFactory = new Configuration().configure(HIBERNATE_CONFIG_CMS).buildSessionFactory();
   }
@@ -135,10 +147,11 @@ public class ReportFaultCANSClientIdsJob {
 
       System.exit(-1);
     }
+
     System.exit(0);
   }
 
-  private static <T> List<T> mapNQResults(List<Object[]> objectArrayList, Class<T> genericType) {
+  protected static <T> List<T> mapNQResults(List<Object[]> objectArrayList, Class<T> genericType) {
     List<T> ret = new ArrayList<>();
     List<Field> mappingFields = getNQResultColumnAnnotatedFields(genericType);
     try {
@@ -160,7 +173,7 @@ public class ReportFaultCANSClientIdsJob {
   }
 
   // Get ordered list of fields
-  private static <T> List<Field> getNQResultColumnAnnotatedFields(Class<T> genericType) {
+  protected static <T> List<Field> getNQResultColumnAnnotatedFields(Class<T> genericType) {
     Field[] fields = genericType.getDeclaredFields();
     List<Field> orderedFields = Arrays.asList(new Field[fields.length]);
     for (Field field : fields) {
@@ -172,7 +185,7 @@ public class ReportFaultCANSClientIdsJob {
     return orderedFields;
   }
 
-  private static void setObjectProperty(Object object, Field field, Object fieldValue) {
+  protected static void setObjectProperty(Object object, Field field, Object fieldValue) {
     try {
       if (fieldValue != null && field.getType() != fieldValue.getClass()) {
         if (field.getType() == Long.class && fieldValue instanceof BigInteger) {
@@ -186,7 +199,7 @@ public class ReportFaultCANSClientIdsJob {
     }
   }
 
-  private Session grabCansSession() {
+  protected Session grabCansSession() {
     try {
       return this.cansSessionFactory.getCurrentSession();
     } catch (HibernateException e) {
@@ -195,7 +208,7 @@ public class ReportFaultCANSClientIdsJob {
     }
   }
 
-  private Session grabCmsSession() {
+  protected Session grabCmsSession() {
     try {
       return cmsSessionFactory.getCurrentSession();
     } catch (HibernateException e) {
@@ -205,7 +218,7 @@ public class ReportFaultCANSClientIdsJob {
   }
 
   @SuppressWarnings("unchecked")
-  private void buildClientList() {
+  protected void buildClientList() {
     Session session = grabCansSession();
     Transaction txn = session.beginTransaction();
     try {
@@ -221,7 +234,7 @@ public class ReportFaultCANSClientIdsJob {
     }
   }
 
-  private void generateReport() {
+  protected void generateReport() {
     buildReportFileName();
     try {
       initReport();
@@ -240,7 +253,7 @@ public class ReportFaultCANSClientIdsJob {
     }
   }
 
-  private void initReport() {
+  protected void initReport() {
     // Create a Workbook
     workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
 
@@ -296,7 +309,7 @@ public class ReportFaultCANSClientIdsJob {
     dateCellFixedStyle.setFont(detailsFontFixed);
   }
 
-  private void finalizeReport() {
+  protected void finalizeReport() {
     // Resize all columns to fit the content size
     for (int i = 0; i < columns.length; i++) {
       sheet.setColumnWidth(i, min(columnsWidth[i] * 256, 255 * 256));
@@ -313,7 +326,7 @@ public class ReportFaultCANSClientIdsJob {
     }
   }
 
-  private boolean isValidClientId(CansClient clientDto) {
+  protected boolean isValidClientId(CansClient clientDto) {
     final String externalId = clientDto.getExternalId();
     try {
       // Convert to CMS Key
@@ -365,19 +378,20 @@ public class ReportFaultCANSClientIdsJob {
     return false;
   }
 
-
-  private void attemptToFix(CansClient clientDto) {
+  protected void attemptToFix(CansClient clientDto) {
     // Attempt to fix automatically assuming it might be deleted as a result of merge.
     if (cmsSessionFactory == null || !clientDto.comment.equals(CLIENT_NOT_FOUND_IN_CMS)) {
       // But only those NOT_FOUND_IN_CMS
       return;
     }
+
     LOGGER.info("Client [id: {}] -> Attempting to fix...", clientDto.id);
     clientDto.setComment(clientDto.comment + " Attempting to fix... ");
     String newKey = null;
     Session cmsSession = grabCmsSession();
     Transaction cmsTxn = cmsSession.beginTransaction();
     String sourceRowKey = clientDto.cmsKey;
+
     // Finding Merge Target Row Key
     try {
       List<Object> cmsObjectArrayList;
@@ -390,15 +404,14 @@ public class ReportFaultCANSClientIdsJob {
         } else {
           newKey = (String) cmsObjectArrayList.get(0);
         }
-        //Prepare for chained merge
+        // Prepare for chained merge
         sourceRowKey = newKey;
         if (newKey != null) {
-          //Check to see if found Merge Target exist in CLIENT table
+          // Check to see if found Merge Target exist in CLIENT table
           cmsObjectArrayList = cmsSession.createNativeQuery(NQ_CMS_CLIENT_FIND)
-              .setParameter(CMS_KEY, newKey, StringType.INSTANCE).setReadOnly(true)
-              .getResultList();
+              .setParameter(CMS_KEY, newKey, StringType.INSTANCE).setReadOnly(true).getResultList();
           if (!cmsObjectArrayList.isEmpty()) {
-            //Found - no need to look for chained merge
+            // Found - no need to look for chained merge
             sourceRowKey = null;
           } else {
             newKey = null;
@@ -415,10 +428,10 @@ public class ReportFaultCANSClientIdsJob {
     } finally {
       cmsTxn.rollback();
     }
+
     // Updating CANS Client Row ExternalId with found Merge Targer Row Key
     if (newKey != null) {
-      LOGGER.info("Client [id: {}] -> Merge Target Id Found. Updating CANS...",
-          clientDto.id);
+      LOGGER.info("Client [id: {}] -> Merge Target Id Found. Updating CANS...", clientDto.id);
       clientDto.setComment(clientDto.comment + " Merge Target Id Found. Updating CANS...");
       Session cansSession = grabCansSession();
       Transaction cansTxn = cansSession.beginTransaction();
@@ -427,13 +440,12 @@ public class ReportFaultCANSClientIdsJob {
         final String newExternalId = clientDto.externalId.equals(clientDto.cmsKey) ? newKey
             : CmsKeyIdGenerator.getUIIdentifierFromKey(newKey);
 
-        //See if CANS already has record with this external id
-        List<Object> cansObjectArrayList = cansSession.createNativeQuery(
-            NQ_CANS_CLIENT_FIND_BY_EXTERNAL_ID)
-            .setParameter(PARAM_EXTERNAL_ID, newExternalId, StringType.INSTANCE)
-            .getResultList();
+        // See if CANS already has record with this external id
+        List<Object> cansObjectArrayList = cansSession
+            .createNativeQuery(NQ_CANS_CLIENT_FIND_BY_EXTERNAL_ID)
+            .setParameter(PARAM_EXTERNAL_ID, newExternalId, StringType.INSTANCE).getResultList();
         if (cansObjectArrayList.isEmpty()) {
-          //Not Found - Just UPDATE the external_id field in the original person record
+          // Not Found - Just UPDATE the external_id field in the original person record
           cansSession.createNativeQuery(NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE)
               .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE)
               .setParameter(PARAM_EXTERNAL_ID, clientDto.externalId, StringType.INSTANCE)
@@ -445,33 +457,29 @@ public class ReportFaultCANSClientIdsJob {
               clientDto.comment + SUCCESS + ". New Client External Id: [" + newExternalId + "].");
           return;
         } else {
-          //Found existing record with same external id:
+          // Found existing record with same external id:
           // - re-associate assessments from original person record to the found one.
           Long newPersonId = ((BigInteger) cansObjectArrayList.get(0)).longValue();
           grabCansSession().createNativeQuery(NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID)
               .setParameter(PARAM_PERSON_ID, clientDto.id, LongType.INSTANCE)
-              .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE)
-              .executeUpdate();
+              .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE).executeUpdate();
           // - update assessment auditntable as well.
           grabCansSession().createNativeQuery(NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID)
               .setParameter(PARAM_PERSON_ID, clientDto.id, LongType.INSTANCE)
-              .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE)
-              .executeUpdate();
-          LOGGER.info("Client [id: {}] -> New External Id: [{}]. There is existing Client [id: {}]"
+              .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE).executeUpdate();
+          LOGGER.info(
+              "Client [id: {}] -> New External Id: [{}]. There is existing Client [id: {}]"
                   + " with this External Id. Re-associating assessments to existing Client.",
               clientDto.id, newExternalId, newPersonId);
-          clientDto.setComment(
-              clientDto.comment + ". New External Id: [" + newExternalId + "]. There is existing"
-                  + " Client [id: " + newPersonId.toString() + "]  with this External Id."
-                  + " Re-associating assessments to existing Client.");
+          clientDto.setComment(clientDto.comment + ". New External Id: [" + newExternalId
+              + "]. There is existing" + " Client [id: " + newPersonId.toString()
+              + "]  with this External Id." + " Re-associating assessments to existing Client.");
 
           // - delete original person record.
           grabCansSession().createNativeQuery(NQ_CANS_CLIENT_DELETE)
-              .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE)
-              .executeUpdate();
+              .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE).executeUpdate();
           LOGGER.info("Client [id: {}] -> Deleting Client.", clientDto.id);
-          clientDto.setComment(
-              clientDto.comment + ". Deleting Client.");
+          clientDto.setComment(clientDto.comment + ". Deleting Client.");
 
           LOGGER.info("Client [id: {}] -> " + SUCCESS, clientDto.id);
           clientDto.setComment(clientDto.comment + SUCCESS);
@@ -491,17 +499,19 @@ public class ReportFaultCANSClientIdsJob {
     clientDto.setComment(clientDto.comment + " Merge Target Id NOT Found. " + FAILED);
   }
 
-  private void buildReportFileName() {
+  protected void buildReportFileName() {
     reportFileName = Paths.get(baseDir).toAbsolutePath().toString() + File.separatorChar
         + getClass().getSimpleName() + "_"
         + new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date()) + ".xlsx";
   }
 
-  private void reportClient(CansClient clientPojo) {
-    Row row = sheet.createRow(nextRowNum++);
-    CellStyle cellStyle =
+  protected void reportClient(CansClient clientPojo) {
+    final Row row = sheet.createRow(nextRowNum++);
+    final CellStyle cellStyle =
         clientPojo.comment.contains(SUCCESS) ? detailsRowFixedStyle : detailsRowStyle;
-    CellStyle dateStyle = clientPojo.comment.contains(SUCCESS) ? dateCellFixedStyle : dateCellStyle;
+    final CellStyle dateStyle =
+        clientPojo.comment.contains(SUCCESS) ? dateCellFixedStyle : dateCellStyle;
+
     // Create cells
     for (int index = 0; index < columns.length; index++) {
       Cell cell = row.createCell(index);
@@ -520,7 +530,6 @@ public class ReportFaultCANSClientIdsJob {
           // Rest is Strings
           cell.setCellValue((String) field.get(clientPojo));
           valueLength = cell.getStringCellValue().trim().length();
-
         }
         columnsWidth[index] = max(columnsWidth[index], valueLength + valueLength / 2);
       } catch (IllegalAccessException e) {
@@ -530,17 +539,24 @@ public class ReportFaultCANSClientIdsJob {
     }
   }
 
+  public String getBaseDir() {
+    return baseDir;
+  }
+
+  public void setBaseDir(String baseDir) {
+    this.baseDir = baseDir;
+  }
+
   // -----------------------------------------------------------------------------------------------
   @Target(ElementType.TYPE)
   @Retention(RetentionPolicy.RUNTIME)
-  private @interface NQResultEntity {
+  protected @interface NQResultEntity {
 
   }
 
   @Target(ElementType.FIELD)
   @Retention(RetentionPolicy.RUNTIME)
-  private @interface NQResultColumn {
-
+  protected @interface NQResultColumn {
     int index();
   }
 
@@ -549,38 +565,50 @@ public class ReportFaultCANSClientIdsJob {
 
     @NQResultColumn(index = 0)
     Long id;
+
     @NQResultColumn(index = 1)
     String externalId;
+
     @NQResultColumn(index = 2)
     String firstName;
+
     @NQResultColumn(index = 3)
     String middleName;
+
     @NQResultColumn(index = 4)
     String lastName;
+
     @NQResultColumn(index = 5)
     String suffix;
+
     @NQResultColumn(index = 6)
     Date dob;
+
     @NQResultColumn(index = 7)
     String gender;
+
     @NQResultColumn(index = 8)
     String countyName;
+
     @NQResultColumn(index = 9)
     String cansStatus;
+
     @NQResultColumn(index = 10)
     Date eventDate;
+
     @NQResultColumn(index = 11)
     String userId;
+
     @NQResultColumn(index = 12)
     String userFirstName;
+
     @NQResultColumn(index = 13)
     String userLastName;
 
     String cmsKey;
     String comment;
 
-    CansClient() {
-    }
+    CansClient() {}
 
     String getExternalId() {
       return externalId;
