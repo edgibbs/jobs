@@ -3,7 +3,10 @@ package gov.ca.cwds.neutron.rocket;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -26,6 +29,8 @@ public class ReplicationLagRocketTest extends Goddard<DatabaseResetEntry, Databa
   public void setup() throws Exception {
     super.setup();
 
+    when(rs.getFloat(any())).thenReturn(2.5F);
+
     dao = new DbResetStatusDao(sessionFactory);
     target = new ReplicationLagRocket(dao, MAPPER, lastRunFile, flightPlan, launchDirector);
   }
@@ -44,8 +49,8 @@ public class ReplicationLagRocketTest extends Goddard<DatabaseResetEntry, Databa
   public void launch_A$Date() throws Exception {
     Date lastRunDate = new Date();
     Date actual = target.launch(lastRunDate);
-    Date expected = null;
-    assertThat(actual, is(equalTo(expected)));
+    Date expected = lastRunDate;
+    assertThat(actual, is(greaterThanOrEqualTo(expected)));
   }
 
   @Test
@@ -69,7 +74,7 @@ public class ReplicationLagRocketTest extends Goddard<DatabaseResetEntry, Databa
   @Test
   public void getLastReplicationSeconds_A$() throws Exception {
     Float actual = ReplicationLagRocket.getLastReplicationSeconds();
-    Float expected = null;
+    Float expected = 0.0F;
     assertThat(actual, is(equalTo(expected)));
   }
 
