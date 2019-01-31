@@ -892,7 +892,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
           LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
               attribs.size());
           attribs.entrySet().stream().forEach(
-              e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 26), e.getValue()));
+              e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 27), e.getValue()));
           NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
           final String msg = "FAILED TO SEND TO NEW RELIC!";
