@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -101,21 +102,34 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
+  public void close() throws IOException {
+    deallocateThreadHandler(); // SNAP-877: free memory no matter what
+    super.close();
+  }
+
+  @Override
   public Date launch(Date lastSuccessfulRunTime) throws NeutronCheckedException {
     final FlightLog fl = getFlightLog();
-    allocateThreadHandler();
-    largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
-    final Date ret = super.launch(lastSuccessfulRunTime);
+    Date ret = null;
 
-    // AR-325: replication metrics.
-    lastEndTime = new Date();
-    fl.setLastEndTime(lastEndTime.getTime());
+    try {
+      allocateThreadHandler();
+      largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
+      ret = super.launch(lastSuccessfulRunTime);
 
-    final Float lastReplicationSecs = ReplicationLagRocket.getLastReplicationSeconds();
-    if (lastReplicationSecs != null && lastReplicationSecs != 0.0F) {
-      final String replicationSecs = lastReplicationSecs.toString();
-      fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), replicationSecs);
-      fl.addOtherMetric("blue_line_secs", replicationSecs);
+      // AR-325: replication metrics.
+      lastEndTime = new Date();
+      fl.setLastEndTime(lastEndTime.getTime());
+
+      final Float lastReplicationSecs = ReplicationLagRocket.getLastReplicationSeconds();
+      if (lastReplicationSecs != null && lastReplicationSecs != 0.0F) {
+        final String replicationSecs = lastReplicationSecs.toString();
+        fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), replicationSecs);
+        fl.addOtherMetric("blue_line_secs", replicationSecs); // blue = replication
+      }
+
+    } finally {
+      deallocateThreadHandler(); // SNAP-877: free memory no matter what
     }
 
     return ret;
@@ -369,7 +383,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * Both modes. Set this thread's handler to null.
    */
   public void deallocateThreadHandler() {
-    if (handler.get() != null) {
+    if (handler != null && handler.get() != null) {
       handler.set(null);
     }
   }

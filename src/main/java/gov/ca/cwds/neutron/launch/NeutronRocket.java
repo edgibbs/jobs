@@ -116,7 +116,7 @@ public class NeutronRocket implements InterruptableJob {
 
   @Override
   public void interrupt() throws UnableToInterruptJobException {
-    LOGGER.warn("ABORT FLIGHT! rocket: {}", this.getRocket().getClass());
+    LOGGER.warn("ABORT FLIGHT! rocket: {}", getRocket().getClass());
     getFlightLog().fail();
   }
 

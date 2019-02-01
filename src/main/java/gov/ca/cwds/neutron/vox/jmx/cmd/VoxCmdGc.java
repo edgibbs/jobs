@@ -7,15 +7,10 @@ import gov.ca.cwds.neutron.launch.LaunchPad;
 import gov.ca.cwds.neutron.vox.jmx.VoxJMXCommandClient;
 
 /**
- * Shutdown Launch Command in either mode.
- * 
- * <p>
- * NOTE: Still looks up MBean (LaunchPad instance) for a given rocket, despite globally shutting
- * down Launch Command.
- * </p>
+ * Request garbage collection. Useful for finding memory leaks.
  * 
  * @author CWDS API Team
- * @see LaunchPad#shutdown()
+ * @see LaunchPad#gc()
  */
 public class VoxCmdGc extends VoxJMXCommandClient {
 
@@ -31,8 +26,8 @@ public class VoxCmdGc extends VoxJMXCommandClient {
 
   @Override
   public String run() {
-    String ret = "RUN GARBAGE COLLECTION!";
-    LOGGER.warn("RUN GARBAGE COLLECTION!");
+    String ret = "REQUEST GARBAGE COLLECTION!";
+    LOGGER.warn(ret);
 
     try {
       getMbean().gc(); // LaunchPad MBean.

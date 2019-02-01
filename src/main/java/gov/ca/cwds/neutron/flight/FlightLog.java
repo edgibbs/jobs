@@ -61,6 +61,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private static volatile boolean globalErrorFlag = false;
 
+  public static final int esRefreshIntervalSecs = 1;
+
   /**
    * Runtime rocket name. Distinguish this rocket's threads from other running threads.
    */
@@ -855,7 +857,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       attribs.putIfAbsent("es_deleted", recsBulkDeleted.get());
       attribs.putIfAbsent("es_indexed", recsBulkBefore.get());
       attribs.putIfAbsent("es_errors", recsBulkError.get());
-      attribs.putIfAbsent("es_refresh_interval", 3); // NEXT: read index settings
+      attribs.putIfAbsent("es_refresh_interval", esRefreshIntervalSecs); // NEXT: read index
+                                                                         // settings
 
       attribs.putIfAbsent("run_start_time", Instant.ofEpochMilli(startTime).getEpochSecond());
       attribs.putIfAbsent("run_end_time", Instant.ofEpochMilli(endTime).getEpochSecond());
@@ -880,10 +883,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
         attribs.putIfAbsent("run_since_last_run_secs", runTotalSeconds);
         attribs.putIfAbsent("run_since_last_run_millis", runTotalMillis);
 
-        final float totalGreenLineSecs = runTotalSeconds + 3; // NEXT: ES refresh interval
+        final float totalGreenLineSecs = runTotalSeconds + esRefreshIntervalSecs;
         attribs.putIfAbsent("green_line_secs", totalGreenLineSecs);
 
-        final float totalGreenLineMillis = runTotalMillis + 3000; // NEXT: ES refresh interval
+        final float totalGreenLineMillis = runTotalMillis + (esRefreshIntervalSecs * 1000);
         attribs.putIfAbsent("green_line_millis", totalGreenLineMillis);
       }
 
