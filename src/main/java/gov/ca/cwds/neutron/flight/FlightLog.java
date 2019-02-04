@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -824,6 +825,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return timings;
   }
 
+  protected void append(StringBuilder buf, Map.Entry<String, Object> e) {
+    buf.append('\n').append(StringUtils.rightPad(e.getKey(), 27)).append(": ").append(e.getValue());
+  }
+
   /**
    * Send flight metrics to New Relic (or other monitoring system).
    * 
@@ -858,7 +863,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       attribs.putIfAbsent("es_indexed", recsBulkBefore.get());
       attribs.putIfAbsent("es_errors", recsBulkError.get());
       attribs.putIfAbsent("es_refresh_interval", esRefreshIntervalSecs); // NEXT: read index
-                                                                         // settings
+                                                                         // settings live
 
       attribs.putIfAbsent("run_start_time", Instant.ofEpochMilli(startTime).getEpochSecond());
       attribs.putIfAbsent("run_end_time", Instant.ofEpochMilli(endTime).getEpochSecond());
@@ -892,10 +897,12 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
       if (!attribs.isEmpty()) {
         try {
-          LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}", eventType,
-              attribs.size());
-          attribs.entrySet().stream().forEach(
-              e -> LOGGER.info("{}: {}", StringUtils.rightPad(e.getKey(), 27), e.getValue()));
+          final StringBuilder buf = new StringBuilder();
+          attribs.entrySet().stream()
+              .sorted(Comparator.comparing(Map.Entry<String, Object>::getKey))
+              .forEach(e -> this.append(buf, e));
+          LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}\n{}\n", eventType,
+              attribs.size(), buf.toString());
           NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
           final String msg = "FAILED TO SEND TO NEW RELIC!";
