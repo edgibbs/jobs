@@ -98,6 +98,11 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build') {
+    rtGradle.tool = 'Gradle_35'
+    rtGradle.resolver repo:'repo', server: serverArti
+    rtGradle.deployer.mavenCompatible = true
+    rtGradle.deployer.deployMavenDescriptors = true
+    rtGradle.useWrapper = true
     def rtGradle = Artifactory.newGradleBuild()
     def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
