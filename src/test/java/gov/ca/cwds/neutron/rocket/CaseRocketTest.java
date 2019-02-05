@@ -730,6 +730,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test(expected = NeutronRuntimeException.class)
   public void test_runMultiThreadIndexing_A$() throws Exception {
+    this.bombResultSet();
     target.runMultiThreadIndexing();
   }
 
@@ -741,6 +742,7 @@ public class CaseRocketTest extends Goddard<ReplicatedPersonCases, EsCaseRelated
 
   @Test(expected = NeutronRuntimeException.class)
   public void test_threadRetrieveByJdbc_A$() throws Exception {
+    this.bombResultSet();
     target.threadRetrieveByJdbc();
   }
 
