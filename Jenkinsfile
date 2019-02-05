@@ -102,13 +102,13 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build') {
-    serverArti = Artifactory.server 'CWDS_DEV'
-    rtGradle = Artifactory.newGradleBuild()
-    rtGradle.tool = 'Gradle_35'
-    rtGradle.resolver repo:'repo', server: serverArti
-    rtGradle.deployer.mavenCompatible = true
-    rtGradle.deployer.deployMavenDescriptors = true
-    rtGradle.useWrapper = true
+//    serverArti = Artifactory.server 'CWDS_DEV'
+//    rtGradle = Artifactory.newGradleBuild()
+//    rtGradle.tool = 'Gradle_35'
+//    rtGradle.resolver repo:'repo', server: serverArti
+//    rtGradle.deployer.mavenCompatible = true
+//    rtGradle.deployer.deployMavenDescriptors = true
+//    rtGradle.useWrapper = true
     def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
