@@ -83,15 +83,15 @@ def buildMaster() {
 
 def checkOut()  {
   stage('Check Out') {
-    serverArti = Artifactory.server 'CWDS_DEV'
-    rtGradle = Artifactory.newGradleBuild()
+//    serverArti = Artifactory.server 'CWDS_DEV'
+//    rtGradle = Artifactory.newGradleBuild()
     cleanWs()
     git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
-    rtGradle.tool = 'Gradle_35'
-    rtGradle.resolver repo:'repo', server: serverArti
-    rtGradle.deployer.mavenCompatible = true
-    rtGradle.deployer.deployMavenDescriptors = true
-    rtGradle.useWrapper = true
+//    rtGradle.tool = 'Gradle_35'
+//    rtGradle.resolver repo:'repo', server: serverArti
+//    rtGradle.deployer.mavenCompatible = true
+//    rtGradle.deployer.deployMavenDescriptors = true
+//    rtGradle.useWrapper = true
   }
 }
 
