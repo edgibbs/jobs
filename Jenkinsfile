@@ -3,9 +3,10 @@ import groovy.transform.Field
 
 @Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
-
 @Field
 def newTag
+@Field
+def rtGradle = Artifactory.newGradleBuild()
 
 switch(env.BUILD_JOB_TYPE) {
   case "master": buildMaster(); break;
@@ -100,7 +101,6 @@ def verifySemVerLabel() {
 def build() {
   stage('Build') {
     def serverArti = Artifactory.server 'CWDS_DEV'
-    def rtGradle = Artifactory.newGradleBuild()
     rtGradle.tool = 'Gradle_35'
     rtGradle.resolver repo:'repo', server: serverArti
     rtGradle.deployer.mavenCompatible = true
