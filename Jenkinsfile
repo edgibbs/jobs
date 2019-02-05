@@ -5,6 +5,10 @@ import groovy.transform.Field
 def GITHUB_CREDENTIALS_ID = '433ac100-b3c2-4519-b4d6-207c029a103b'
 @Field
 def newTag
+@Field
+def serverArti
+@Field
+def rtGradle
 
 switch(env.BUILD_JOB_TYPE) {
   case "master": buildMaster(); break;
@@ -24,7 +28,6 @@ def buildPullRequest() {
       string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])])
 
     try {
-      def rtGradle = Artifactory.newGradleBuild()
       checkOut()
       verifySemVerLabel()
       build()
@@ -99,7 +102,8 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build') {
-    def serverArti = Artifactory.server 'CWDS_DEV'
+    serverArti = Artifactory.server 'CWDS_DEV'
+    rtGradle = Artifactory.newGradleBuild()
     rtGradle.tool = 'Gradle_35'
     rtGradle.resolver repo:'repo', server: serverArti
     rtGradle.deployer.mavenCompatible = true
