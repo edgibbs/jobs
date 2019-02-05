@@ -106,7 +106,6 @@ def build() {
     rtGradle.deployer.mavenCompatible = true
     rtGradle.deployer.deployMavenDescriptors = true
     rtGradle.useWrapper = true
-    def rtGradle = Artifactory.newGradleBuild()
     def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "jar shadowJar -DRelease=true -D build=${BUILD_NUMBER} -DnewVersion=${newTag}".toString()
   }
 }
