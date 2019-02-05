@@ -54,8 +54,8 @@ def buildMaster() {
     parameters([
       booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
       string(defaultValue: 'master', description: '', name: 'branch'),
-      //booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
-      //string(defaultValue: '', description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
+      booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
+      string(defaultValue: '', description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
       string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])
     ])
 
@@ -140,7 +140,7 @@ def tagRepo() {
 def pushToArtifatory() {
   stage ('Push to artifactory'){
     rtGradle.deployer.deployArtifacts = true
-    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=true -DnewVersion=${newTag}".toString()
+    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=\$RELEASE_PROJECT -DBuildNumber=\$BUILD_NUMBER -DCustomVersion=\$OVERRIDE_VERSION -DnewVersion=${newTag}".toString()
     rtGradle.deployer.deployArtifacts = false
   }
 }
