@@ -375,7 +375,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
     target.setFakeRanges(true);
     final int actual = target.extractHibernate();
-    final int expected = 2;
+    final int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -990,7 +990,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     target.addThread(make, target_, threads);
   }
 
-  @Test(expected = InterruptedException.class)
+  @Test
   public void normalizeLoop_A$List$Object$int() throws Exception {
     runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 3500L);
 

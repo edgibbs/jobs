@@ -425,11 +425,11 @@ public class HyperCube extends NeutronGuiceModule {
     // DRS: IBM's DB2 type 4 JDBC driver is NOT compliant without these arcane settings!
     // SNAP-710: Result set safety: avoid ERRORCODE=-1224, SQLSTATE=55032
     // ResultSet.next() BLOWS UP WITHOUT THESE!
-    config.setProperty("allowNextOnExhaustedResultSet", "1"); // ARE YOU SERIOUS?!
+    config.setProperty("allowNextOnExhaustedResultSet", "1"); // Still needed?
 
     // http://www-01.ibm.com/support/docview.wss?uid=swg21461670
     // https://developer.ibm.com/answers/questions/194821/invalid-operation-result-set-is-closed-errorcode-4.html
-    config.setProperty("resultSetHoldability", "1");
+    // config.setProperty("resultSetHoldability", "1"); // Set in JDBC URL
     // config.setProperty("enableRowsetSupport", "1"); // Enable DB2 multi-row fetch
 
     LOGGER.debug("HyperCube.makeCmsSessionFactory: connect");

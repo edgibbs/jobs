@@ -278,7 +278,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         fl.incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        fl.incrementBulkPrepared();
+        // fl.incrementBulkPrepared();
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
@@ -730,11 +730,12 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         // Last run mode:
         // INT-1723: Neutron to create Elasticsearch Alias for people-summary index
         // If index name is provided, use it, else take alias from ES config.
-        final String indexNameOverride = getFlightPlan().getIndexName();
+        final FlightPlan fp = getFlightPlan();
+        final String indexNameOverride = fp.getIndexName();
         final String effectiveIndexName =
             StringUtils.isBlank(indexNameOverride) ? esDao.getConfig().getElasticsearchAlias()
                 : indexNameOverride;
-        getFlightPlan().setIndexName(effectiveIndexName);
+        fp.setIndexName(effectiveIndexName);
         doLastRun(lastRun);
       }
 

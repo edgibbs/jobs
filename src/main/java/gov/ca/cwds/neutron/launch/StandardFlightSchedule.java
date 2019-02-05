@@ -102,10 +102,10 @@ public enum StandardFlightSchedule {
    */
   VOX_ROCKET(VoxListenerRocket.class, // rocket class
       "vox", // rocket name
-      5, // initial load order
-      20, // start delay seconds. N/A.
-      60000, // execute every N seconds. N/A.
-      null, // last run priority. N/A.
+      5, // start delay seconds.
+      20, // execute every N seconds.
+      4000, // last run priority.. Highest wins.
+      null, // N/A
       true, // run in Last Change mode
       false, // run in Initial Load
       false // People index
@@ -118,7 +118,7 @@ public enum StandardFlightSchedule {
       "replication_time", // rocket name
       6, // start delay seconds.
       45, // execute every N seconds.
-      800, // last run priority.
+      6000, // last run priority.. Highest wins.
       null, // N/A
       true, // run in Last Change mode
       false, // run in Initial Load
@@ -139,7 +139,7 @@ public enum StandardFlightSchedule {
   PEOPLE_SUMMARY(ClientPersonIndexerJob.class, // rocket class
       "people_summary", // rocket name
       12, // start delay in seconds.
-      3, // execute every N seconds.
+      2, // execute every N seconds.
       10000, // last run priority. Highest wins.
       null, // nested element: N/A
       true, // run in Last Change mode

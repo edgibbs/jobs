@@ -79,16 +79,18 @@ public class RawClientAddress extends ClientAddressReference
     this.claId = trimToNull(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal()));
     this.claFkAddress = trimToNull(rs.getString(ColumnPosition.CLA_FKADDRS_T.ordinal()));
     this.claFkClient = trimToNull(rs.getString(ColumnPosition.CLA_FKCLIENT_T.ordinal()));
-    // this.claFkReferral = trimToNull(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal()));
     this.claAddressType = rs.getShort(ColumnPosition.CLA_ADDR_TPC.ordinal());
-    // this.claHomelessInd = trimToNull(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal()));
-    // this.claBkInmtId = trimToNull(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal()));
     this.claEffectiveEndDate = rs.getDate(ColumnPosition.CLA_EFF_END_DT.ordinal());
     this.claEffectiveStartDate = rs.getDate(ColumnPosition.CLA_EFF_STRTDT.ordinal());
 
     this.setClaReplicationOperation(CmsReplicationOperation
         .strToRepOp(rs.getString(ColumnPosition.CLA_IBMSNAP_OPERATION.ordinal())));
     this.setClaReplicationDate(rs.getDate(ColumnPosition.CLA_IBMSNAP_LOGMARKER.ordinal()));
+
+    // SNAP-820: unneeded columns.
+    // this.claHomelessInd = trimToNull(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal()));
+    // this.claBkInmtId = trimToNull(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal()));
+    // this.claFkReferral = trimToNull(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal()));
 
     return this;
   }

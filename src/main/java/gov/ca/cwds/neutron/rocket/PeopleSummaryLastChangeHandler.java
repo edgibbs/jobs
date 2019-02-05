@@ -11,15 +11,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
 
+import gov.ca.cwds.data.persistence.cms.client.RawAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawClient;
+import gov.ca.cwds.data.persistence.cms.client.RawClientAddress;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -48,6 +54,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   private int rangeStart = 0;
 
   private int rangeEnd = 0;
+
+  private static AtomicLong lastReplicationDelay = new AtomicLong(30000L);
 
   /**
    * Preferred ctor.
@@ -248,6 +256,29 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     }
 
     LOGGER.info("handleSecondaryJdbc: DONE");
+  }
+
+  @Override
+  protected void calcReplicationDelay() {
+    final FlightLog fl = getRocket().getFlightLog();
+
+    // AR-325: replication metrics.
+    // Don't calculate replication delay here anymore.
+    final OptionalDouble avgRepTimeClient = rawClients.values().stream()
+        .filter(RawClient::hasAddedTime).mapToLong(RawClient::calcReplicationTime).average();
+    final OptionalDouble avgRepTimeAddress = rawClients.values().stream()
+        .flatMap(c -> c.getClientAddress().values().stream()).map(RawClientAddress::getAddress)
+        .filter(RawAddress::hasAddedTime).mapToLong(RawAddress::calcReplicationTime).average();
+    long maxRepLag =
+        (long) Math.max(avgRepTimeClient.isPresent() ? avgRepTimeClient.getAsDouble() : 0,
+            avgRepTimeAddress.isPresent() ? avgRepTimeAddress.getAsDouble() : 0);
+    maxRepLag = maxRepLag == 0 ? lastReplicationDelay.get() : maxRepLag;
+
+    fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(), "" + maxRepLag);
+    fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), "" + (maxRepLag / 1000));
+    lastReplicationDelay.set(maxRepLag);
+    LOGGER.info("replication time: client: {}, address: {}, max lag: {}", avgRepTimeClient,
+        avgRepTimeAddress, maxRepLag);
   }
 
   @Override

@@ -93,7 +93,7 @@ public class ReporterIndexerJobTest
         "INSERT INTO GT_ID (IDENTIFIER)\n "
         + "SELECT DISTINCT R.FKREFERL_T\n "
         + "FROM REPTR_T R \n "
-        + "WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000'";
+        + "WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:30:12.000'";
     //@formatter:on
     assertThat(actual, is(equalTo(expected)));
   }

@@ -2,6 +2,7 @@ package gov.ca.cwds.neutron.launch;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
@@ -102,7 +103,7 @@ public class NeutronRocket implements InterruptableJob {
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
 
       try {
-        if (!flightLog.isInitialLoad()) {
+        if (!flightLog.isInitialLoad() && !StringUtils.isBlank(gcRocket.getEventType())) {
           flightLog.notifyMonitor(gcRocket.getEventType());
         }
       } finally {
@@ -115,7 +116,7 @@ public class NeutronRocket implements InterruptableJob {
 
   @Override
   public void interrupt() throws UnableToInterruptJobException {
-    LOGGER.warn("ABORT FLIGHT! rocket: {}", this.getRocket().getClass());
+    LOGGER.warn("ABORT FLIGHT! rocket: {}", getRocket().getClass());
     getFlightLog().fail();
   }
 

@@ -81,6 +81,16 @@ public class NeutronSchedulerListener implements SchedulerListener {
   @Override
   public void schedulerError(String msg, SchedulerException cause) {
     LOGGER.warn("scheduler error: {}", msg, cause);
+
+    // NO ZOMBIES!
+    // On OutOfMemoryError, exit and dump heap.
+    if (cause.getCause() != null) {
+      final Throwable t = cause.getCause();
+      if (t instanceof OutOfMemoryError) {
+        LOGGER.error("\n\nOUT OF MEMORY! EXIT!\n\n", cause);
+        System.exit(-1);
+      }
+    }
   }
 
   @Override
