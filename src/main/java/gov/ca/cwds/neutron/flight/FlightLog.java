@@ -834,11 +834,11 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
    * 
    * <p>
    * <strong>Replication metrics (AR-325):</strong>
+   * </p>
    * <ul>
    * <li>blue line: DB2 replication</li>
    * <li>green line: job processing time + ES refresh interval + delay between job runs.</li>
    * </ul>
-   * </p>
    * 
    * Summary: blue line is replication, green line is everything else.
    * 

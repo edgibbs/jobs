@@ -990,7 +990,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     target.addThread(make, target_, threads);
   }
 
-  @Test(expected = InterruptedException.class)
+  @Test
   public void normalizeLoop_A$List$Object$int() throws Exception {
     runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 3500L);
 
