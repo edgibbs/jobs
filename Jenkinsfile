@@ -61,9 +61,9 @@ def buildMaster() {
 
     try {
       checkOut()
-      javadoc()
       incrementTag()
       build()
+      javadoc()
       testAndCoverage()
       sonarQubeAnalysis()
       tagRepo()
