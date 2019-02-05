@@ -31,6 +31,7 @@ def buildPullRequest() {
       checkOut()
       verifySemVerLabel()
       build()
+      javadoc()
       testAndCoverage()
       sonarQubeAnalysis()
     } catch(Exception exception) {
@@ -82,8 +83,8 @@ def buildMaster() {
 
 def checkOut()  {
   stage('Check Out') {
-    def serverArti = Artifactory.server 'CWDS_DEV'
-    def rtGradle = Artifactory.newGradleBuild()
+    serverArti = Artifactory.server 'CWDS_DEV'
+    rtGradle = Artifactory.newGradleBuild()
     cleanWs()
     git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
     rtGradle.tool = 'Gradle_35'
@@ -102,8 +103,8 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build') {
-//    serverArti = Artifactory.server 'CWDS_DEV'
-//    rtGradle = Artifactory.newGradleBuild()
+    serverArti = Artifactory.server 'CWDS_DEV'
+    rtGradle = Artifactory.newGradleBuild()
     rtGradle.tool = 'Gradle_35'
     rtGradle.resolver repo:'repo', server: serverArti
     rtGradle.deployer.mavenCompatible = true
