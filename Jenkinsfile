@@ -35,8 +35,8 @@ def buildPullRequest() {
       testAndCoverage()
       sonarQubeAnalysis()
     } catch(Exception exception) {
-        //emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-        //subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
+        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+        subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
         currentBuild.result = "FAILURE"
         throw exception
     } finally {
@@ -83,15 +83,8 @@ def buildMaster() {
 
 def checkOut()  {
   stage('Check Out') {
-//    serverArti = Artifactory.server 'CWDS_DEV'
-//    rtGradle = Artifactory.newGradleBuild()
     cleanWs()
     git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
-//    rtGradle.tool = 'Gradle_35'
-//    rtGradle.resolver repo:'repo', server: serverArti
-//    rtGradle.deployer.mavenCompatible = true
-//    rtGradle.deployer.deployMavenDescriptors = true
-//    rtGradle.useWrapper = true
   }
 }
 
