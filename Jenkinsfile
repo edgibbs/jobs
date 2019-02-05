@@ -98,6 +98,8 @@ def verifySemVerLabel() {
 
 def build() {
   stage('Build') {
+    def serverArti = Artifactory.server 'CWDS_DEV'
+    def rtGradle = Artifactory.newGradleBuild()
     rtGradle.tool = 'Gradle_35'
     rtGradle.resolver repo:'repo', server: serverArti
     rtGradle.deployer.mavenCompatible = true
