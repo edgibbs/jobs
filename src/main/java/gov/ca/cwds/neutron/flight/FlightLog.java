@@ -832,6 +832,16 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   /**
    * Send flight metrics to New Relic (or other monitoring system).
    * 
+   * <p>
+   * <strong>Replication metrics (AR-325):</strong>
+   * <ul>
+   * <li>blue line: DB2 replication</li>
+   * <li>green line: job processing time + ES refresh interval + delay between job runs.</li>
+   * </ul>
+   * </p>
+   * 
+   * Summary: blue line is replication, green line is everything else.
+   * 
    * @param eventType registered New Relic event
    */
   public void notifyMonitor(String eventType) {
@@ -875,9 +885,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       final float runMillis = endTime - startTime;
       attribs.putIfAbsent("run_millis", runMillis);
 
-      // AR-325: replication metrics.
-      // blue line: DB2 replication.
-      // green line: job processing time + ES refresh interval + delay between job runs.
       if (lastEndTime != 0) {
         attribs.putIfAbsent("last_run_end_time",
             Instant.ofEpochMilli(lastEndTime).getEpochSecond());
