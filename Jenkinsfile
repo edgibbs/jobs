@@ -71,6 +71,7 @@ def buildMaster() {
       tagRepo()
       pushToArtifatory()
       deployToRundeck()
+      triggerReleasePipeline()
       cleanWorkspace()
     } catch (Exception exception) {
         notifySlack(SLACK_WEBHOOK_URL, "Neutron-Jobs", exception)
