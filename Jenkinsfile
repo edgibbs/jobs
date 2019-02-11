@@ -197,7 +197,7 @@ def deploy(environment) {
 }
 
 def checkOutStage() {
-  stage() {
+  stage('Check Out Stage') {
     dir('de-ansible') {
       cleanWs()
       git branch: "master", credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/de-ansible.git'
