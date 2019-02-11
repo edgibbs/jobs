@@ -81,6 +81,21 @@ def buildMaster() {
   }
 }
 
+def releasePipeline() {
+  parameters([
+    string(name: 'APP_VERSION', defaultValue: '', description: 'App version to deploy')
+  ])
+
+  try {
+    deploy('preint')
+    deploy('integration')
+  } catch (Exception exception) {
+    currentBuild.result = "FAILURE"
+    throw exception
+  }
+}
+
+
 def checkOut()  {
   stage('Check Out') {
     cleanWs()
@@ -151,6 +166,17 @@ def deployToRundeck() {
   }
 }
 
+def triggerReleasePipeline() {
+  stage('Trigger Release Pipeline') {
+    withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+      sh "curl -v -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/PreInt-Integration/job/deploy-neutron-jobs/buildWithParameters" +
+      "?token=trigger-neutron-jobs-deploy" +
+      "&cause=Caused%20by%20Build%20${env.BUILD_ID}" +
+      "&APP_VERSION=${newTag}'"
+    }
+  }
+}
+
 def cleanWorkspace() {
   stage('Clean WorkSpace') {
     publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index-all.html', reportName: 'javadoc', reportTitles: 'javadoc'])
@@ -160,4 +186,28 @@ def cleanWorkspace() {
 
 def githubConfig() {
   githubConfigProperties('https://github.com/ca-cwds/jobs')
+}
+
+def deploy(environment) {
+  node(environment) {
+    deployToStage(environment, env.APP_VERSION)
+    updateManifestStage(environment, env.APP_VERSION)
+  }
+}
+
+def deployToStage(environment, version) {
+  stage("deploy to $environment") {
+    ws {
+      git branch: "master", credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/de-ansible.git'
+      sh "ansible-playbook -e Job_StartScript=$Job_StartScript -e Java_heap_size=$Java_heap_size -e JobLastRun_time=$Reset_JobLastRun_time -e VERSION_NUMBER=$version -i inventories/$environment/hosts.yml deploy-jobs-to-rundeck.yml --vault-password-file ~/.ssh/vault.txt -vv" \
+      sh "sudo echo $version > /tmp/rundeck-$environment.txt"
+    }
+  }
+}
+
+def updateManifestStage(environment, version) {
+  stage("Update Manifest Version for $Environemnt") {
+    updateManifest("jobs", environment, GITHUB_CREDENTIALS_ID, version) {
+    }
+  }
 }
