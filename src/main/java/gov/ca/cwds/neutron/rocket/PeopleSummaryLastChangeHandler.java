@@ -17,6 +17,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.client.RawAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
@@ -26,7 +28,9 @@ import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Monitor;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
@@ -44,7 +48,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private static final int BUNDLE_KEY_SIZE = 2000;
 
-  private static final int LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue() / 10;
+  private static final int LOG_EVERY = NeutronIntegerDefaults.LOG_EVERY.getValue() / 5;
+
+  protected static final Logger LOGGER =
+      LoggerFactory.getLogger(PeopleSummaryLastChangeHandler.class);
 
   /**
    * Client primary keys.
@@ -138,12 +145,13 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   }
 
   @Override
-  protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
+  protected int loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
     LOGGER.trace("loadClientRange(): begin");
-    con.commit();
-    final int clientCount = insertNextKeyBundle(con, rangeStart, rangeEnd);
-    LOGGER.info("loadClientRange(): client count: {}", clientCount);
+    con.commit(); // Clear temp tables every time.
+    final int ret = insertNextKeyBundle(con, rangeStart, rangeEnd);
+    LOGGER.debug("loadClientRange(): client count: {}", ret);
+    return ret;
   }
 
   protected int insertNextKeyBundle(Connection con, int start, int end) {
@@ -186,6 +194,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   @Override
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     final ClientPersonIndexerJob rocket = getRocket();
+    final FlightPlan fp = rocket.getFlightPlan();
     final Date lastRunTime = rocket.getFlightLog().getLastChangeSince();
     LOGGER.info("handleSecondaryJdbc(): last successful run: {}", lastRunTime);
     handleStartRange(range);
@@ -195,7 +204,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     // ---------------------------
 
     // SNAP-725: use the same retrieval logic as Initial Load.
-    try (final Session session = rocket.getJobDao().grabSession()) {
+    try (final Session session = rocket.getJobDao().grabSession();
+        final NeutronDB2Monitor mon = new NeutronDB2Monitor(con, fp.isDebug())) {
       NeutronJdbcUtils.enableBatchSettings(session);
       NeutronJdbcUtils.enableBatchSettings(con);
 
@@ -205,10 +215,10 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           rocket.determineLastSuccessfulRunTime(),
           overrideLastChgDate != null ? overrideLastChgDate : new Date());
 
-      // Get list changed clients and process in bundles of BUNDLE_KEY_SIZE.
+      // Get list of changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
       step(STEP.FIND_CHANGED_CLIENT);
-      LOGGER.debug("What Changed SQL\n{}", sqlChangedClients);
+      LOGGER.debug("What Changed SQL\n{}\n", sqlChangedClients);
       try (final PreparedStatement stmt = con.prepareStatement(sqlChangedClients, TFO, CRO)) {
         read(stmt, rs -> readClientKeys(rs));
       } finally {
@@ -252,7 +262,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
       throw CheeseRay.runtime(LOGGER, e, "OUTER EXTRACT ERROR!: {}", e.getMessage());
     } finally {
-      // session goes out of scope
+      // session and monitor go out of scope.
     }
 
     LOGGER.info("handleSecondaryJdbc: DONE");
@@ -263,7 +273,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     final FlightLog fl = getRocket().getFlightLog();
 
     // AR-325: replication metrics.
-    // Don't calculate replication delay here anymore.
+    // Don't calculate replication delay here for the moment.
+    // Will use this approach when column ADDED_TS rolls out to remaining replicated tables.
     final OptionalDouble avgRepTimeClient = rawClients.values().stream()
         .filter(RawClient::hasAddedTime).mapToLong(RawClient::calcReplicationTime).average();
     final OptionalDouble avgRepTimeAddress = rawClients.values().stream()

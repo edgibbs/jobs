@@ -115,6 +115,12 @@ public enum NeutronCmdLineOption {
       "Drop index for full (initial) load", false, 0, Boolean.class, ',')),
 
   /**
+   * Debug mode. Enable database monitoring and other diagnostics.
+   */
+  DEBUG(NeutronCmdLineParser.makeOpt("g", NeutronLongCmdLineName.CMD_LINE_DEBUG,
+      "Debug mode. Monitor database connections", false, 0, Boolean.class, ',')),
+
+  /**
    * Drop index before running full (initial) load.
    */
   LEGACY_PEOPLE_MAPPING(

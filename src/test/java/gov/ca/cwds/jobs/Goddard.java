@@ -465,6 +465,23 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(rs.getString(any(Integer.class))).thenThrow(SQLException.class);
   }
 
+  public Thread runKillThreadWait(final BasePersonRocket<T, M> target, long sleepMillis) {
+    final Thread t = new Thread(() -> {
+      try {
+        lock.lockInterruptibly();
+        await("kill thread").atMost(sleepMillis, TimeUnit.MILLISECONDS).untilTrue(isRunwayClear);
+        throw new IllegalStateException("DIE");
+      } catch (Exception e) {
+        e.printStackTrace();
+      } finally {
+        lock.unlock(); // unlock no matter what happens
+      }
+    });
+
+    t.start();
+    return t;
+  }
+
   public Thread runKillThread(final BasePersonRocket<T, M> target, long sleepMillis) {
     final Thread t = new Thread(() -> {
       try {
