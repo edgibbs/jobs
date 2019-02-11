@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -130,7 +131,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private final Map<String, Long> timings = Collections.synchronizedMap(new LinkedHashMap<>(31));
 
-  private final Map<String, String> otherMetrics =
+  private final Map<String, Object> otherMetrics =
       Collections.synchronizedMap(new LinkedHashMap<>(11));
 
   private boolean initialLoad;
@@ -803,7 +804,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void addOtherMetrics(FlightLog fl) {
-    final Map<String, String> otherTimings = fl.getOtherMetrics();
+    final Map<String, Object> otherTimings = fl.getOtherMetrics();
     if (otherTimings != null && !otherTimings.isEmpty()) {
       otherMetrics.putAll(otherTimings);
     }
@@ -817,7 +818,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     timings.put(event, val);
   }
 
-  public void addOtherMetric(String event, String val) {
+  public void addOtherMetric(String event, Object val) {
     otherMetrics.put(event, val);
   }
 
@@ -826,7 +827,8 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   protected void append(StringBuilder buf, Map.Entry<String, Object> e) {
-    buf.append('\n').append(StringUtils.rightPad(e.getKey(), 27)).append(": ").append(e.getValue());
+    buf.append('\n').append('\t').append(StringUtils.rightPad(e.getKey(), 27)).append(": ")
+        .append(e.getValue());
   }
 
   /**
@@ -905,13 +907,17 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       if (!attribs.isEmpty()) {
         try {
           final StringBuilder buf = new StringBuilder();
-          attribs.entrySet().stream()
+          attribs.entrySet().stream().filter(e -> Objects.nonNull(e.getKey()))
               .sorted(Comparator.comparing(Map.Entry<String, Object>::getKey))
               .forEach(e -> this.append(buf, e));
           LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}\n{}\n", eventType,
               attribs.size(), buf.toString());
+
+          // NEXT: inject this dependency.
+          // Base FlightLog should NOT be tied to New Relic.
           NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
         } catch (Exception e) {
+          // Don't re-throw. Don't fail the run, because you can't send metrics to NR.
           final String msg = "FAILED TO SEND TO NEW RELIC!";
           LOGGER.error(msg, e);
           addWarning(msg);
@@ -920,7 +926,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     }
   }
 
-  public Map<String, String> getOtherMetrics() {
+  public Map<String, Object> getOtherMetrics() {
     return otherMetrics;
   }
 

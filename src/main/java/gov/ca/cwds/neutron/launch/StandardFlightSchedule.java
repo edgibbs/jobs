@@ -98,7 +98,7 @@ public enum StandardFlightSchedule {
   ),
 
   /**
-   * If requested, drop and create Elasticsearch People Summary index.
+   * VOX (RMI) listener rocket.
    */
   VOX_ROCKET(VoxListenerRocket.class, // rocket class
       "vox", // rocket name
@@ -128,10 +128,6 @@ public enum StandardFlightSchedule {
   // ===============================
   // PEOPLE SUMMARY INDEX ROCKETS:
   // ===============================
-
-  // private StandardFlightSchedule(Class<?> klazz, String rocketName, int startDelaySeconds,
-  // int waitPeriodSeconds, int lastRunPriority, String nestedElement, boolean runLastChange,
-  // boolean runInitialLoad, boolean forPeopleIndex) {
 
   /**
    * People Summary index.

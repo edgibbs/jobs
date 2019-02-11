@@ -88,9 +88,10 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
         if (lagSeconds != null) {
           LOGGER.info("Replication took {} seconds", lagSeconds);
           lastReplicationSeconds = lagSeconds;
-          fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lagSeconds.toString());
+
+          fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lagSeconds);
           fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(),
-              new Float(lagSeconds * 1000).toString());
+              new Float(lagSeconds * 1000));
         }
 
       } finally {

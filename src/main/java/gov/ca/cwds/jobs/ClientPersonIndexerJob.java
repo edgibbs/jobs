@@ -123,9 +123,9 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
 
       final Float lastReplicationSecs = ReplicationLagRocket.getLastReplicationSeconds();
       if (lastReplicationSecs != null && lastReplicationSecs != 0.0F) {
-        final String replicationSecs = lastReplicationSecs.toString();
-        fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), replicationSecs);
-        fl.addOtherMetric("blue_line_secs", replicationSecs); // blue = replication
+        fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lastReplicationSecs);
+        fl.addOtherMetric("blue_line_secs", lastReplicationSecs); // blue = replication
+        fl.addOtherMetric("blue_line_millis", lastReplicationSecs * 1000);
       }
 
     } finally {
@@ -373,10 +373,9 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * Both modes. Construct an appropriate handler for this thread.
    */
   public void allocateThreadHandler() {
-    if (handler.get() == null) {
-      handler.set(getFlightPlan().isLastRunMode() ? new PeopleSummaryLastChangeHandler(this)
-          : new PeopleSummaryThreadHandler(this));
-    }
+    deallocateThreadHandler();
+    handler.set(getFlightPlan().isLastRunMode() ? new PeopleSummaryLastChangeHandler(this)
+        : new PeopleSummaryThreadHandler(this));
   }
 
   /**
@@ -384,6 +383,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    */
   public void deallocateThreadHandler() {
     if (handler != null && handler.get() != null) {
+      handler.get().setRocket(null);
+      handler.get().clear();
       handler.set(null);
     }
   }

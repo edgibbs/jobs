@@ -25,6 +25,7 @@ public class NeutronLongCmdLineName {
   public static final String CMD_LINE_INITIAL_LOAD = "initial_load";
   public static final String CMD_LINE_REFRESH_MQT = "refresh_mqt";
   public static final String CMD_LINE_DROP_INDEX = "drop_index";
+  public static final String CMD_LINE_DEBUG = "debug";
 
   public static final String CMD_LINE_LEGACY_PEOPLE_MAPPING = "legacy_people_mapping";
   public static final String CMD_LINE_NO_PEOPLE_INDEX = "no_people_index";
