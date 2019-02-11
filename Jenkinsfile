@@ -9,6 +9,8 @@ def newTag
 def serverArti
 @Field
 def rtGradle
+@Field
+def SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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'
 
 switch(env.BUILD_JOB_TYPE) {
   case "master": buildMaster(); break;
@@ -71,6 +73,7 @@ def buildMaster() {
       deployToRundeck()
       cleanWorkspace()
     } catch (Exception exception) {
+        notifySlack(SLACK_WEBHOOK_URL, "Neutron-Jobs", exception)
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
         subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
         currentBuild.result = "FAILURE"
@@ -90,6 +93,7 @@ def releasePipeline() {
     deploy('preint')
     deploy('integration')
   } catch (Exception exception) {
+    notifySlack(SLACK_WEBHOOK_URL, "Neutron-Jobs", exception)
     currentBuild.result = "FAILURE"
     throw exception
   }
