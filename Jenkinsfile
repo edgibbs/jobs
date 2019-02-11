@@ -9,6 +9,8 @@ def newTag
 def serverArti
 @Field
 def rtGradle
+@Field
+def SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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'
 
 switch(env.BUILD_JOB_TYPE) {
   case "master": buildMaster(); break;
@@ -71,6 +73,7 @@ def buildMaster() {
       deployToRundeck()
       cleanWorkspace()
     } catch (Exception exception) {
+        notifySlack(SLACK_WEBHOOK_URL, "Neutron-Jobs", exception)
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
         subject: "Neutron Jobs failed with ${e.message}", to: "david.smith@osi.ca.gov, igor.chornobay@osi.ca.gov"
         currentBuild.result = "FAILURE"
@@ -80,6 +83,22 @@ def buildMaster() {
     }
   }
 }
+
+def releasePipeline() {
+  parameters([
+    string(name: 'APP_VERSION', defaultValue: '', description: 'App version to deploy')
+  ])
+
+  try {
+    deploy('preint')
+    deploy('integration')
+  } catch (Exception exception) {
+    notifySlack(SLACK_WEBHOOK_URL, "Neutron-Jobs", exception)
+    currentBuild.result = "FAILURE"
+    throw exception
+  }
+}
+
 
 def checkOut()  {
   stage('Check Out') {
@@ -151,6 +170,17 @@ def deployToRundeck() {
   }
 }
 
+def triggerReleasePipeline() {
+  stage('Trigger Release Pipeline') {
+    withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+      sh "curl -v -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/PreInt-Integration/job/deploy-neutron-jobs/buildWithParameters" +
+      "?token=trigger-neutron-jobs-deploy" +
+      "&cause=Caused%20by%20Build%20${env.BUILD_ID}" +
+      "&APP_VERSION=${newTag}'"
+    }
+  }
+}
+
 def cleanWorkspace() {
   stage('Clean WorkSpace') {
     publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/docs/javadoc', reportFiles: 'index-all.html', reportName: 'javadoc', reportTitles: 'javadoc'])
@@ -160,4 +190,36 @@ def cleanWorkspace() {
 
 def githubConfig() {
   githubConfigProperties('https://github.com/ca-cwds/jobs')
+}
+
+def deploy(environment) {
+  node(environment) {
+    checkOutStage()
+    deployToStage(environment, env.APP_VERSION)
+    updateManifestStage(environment, env.APP_VERSION)
+  }
+}
+
+def checkOutStage() {
+  stage('Check Out Stage') {
+    dir('de-ansible') {
+      cleanWs()
+      git branch: "master", credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/de-ansible.git'
+    }
+  }
+}
+
+
+def deployToStage(environment, version) {
+  stage("Deploy to $environment") {
+    dir('de-ansible') {
+      sh "ansible-playbook -e Job_StartScript=$Job_StartScript -e Java_heap_size=$Java_heap_size -e JobLastRun_time=$Reset_JobLastRun_time -e VERSION_NUMBER=$version -i inventories/$environment/hosts.yml deploy-jobs-to-rundeck.yml --vault-password-file ~/.ssh/vault.txt -vv"
+    }
+  }
+}
+
+def updateManifestStage(environment, version) {
+  stage("Update Manifest Version for $environment") {
+    updateManifest("jobs", environment, GITHUB_CREDENTIALS_ID, version)
+  }
 }
