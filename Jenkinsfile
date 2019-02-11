@@ -195,25 +195,16 @@ def githubConfig() {
 
 def deploy(environment) {
   node(environment) {
-    checkOutStage()
     deployToStage(environment, env.APP_VERSION)
     updateManifestStage(environment, env.APP_VERSION)
   }
 }
 
-def checkOutStage() {
-  stage('Check Out Stage') {
-    dir('de-ansible') {
-      cleanWs()
-      git branch: "master", credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/de-ansible.git'
-    }
-  }
-}
-
-
 def deployToStage(environment, version) {
   stage("Deploy to $environment") {
-    dir('de-ansible') {
+    ws {
+      cleanWs()
+      git branch: "master", credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/de-ansible.git'
       sh "ansible-playbook -e Job_StartScript=$Job_StartScript -e Java_heap_size=$Java_heap_size -e JobLastRun_time=$Reset_JobLastRun_time -e VERSION_NUMBER=$version -i inventories/$environment/hosts.yml deploy-jobs-to-rundeck.yml --vault-password-file ~/.ssh/vault.txt -vv"
     }
   }
