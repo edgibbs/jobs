@@ -619,7 +619,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         LOGGER.info("Found {} persons to index", results.size());
         final NeutronCounter cntr1 = new NeutronCounter();
         final NeutronCounter cntr2 = new NeutronCounter();
-        final int nLogEvery = flightPlan.isLastRunMode() ? 10 : 1000;
+        final int nLogEvery = flightPlan.isLastRunMode() ? 50 : 2000;
 
         // SNAP-820: People Summary job stalls here under CPU load or ES load.
         results.stream().sequential().forEach(p -> {

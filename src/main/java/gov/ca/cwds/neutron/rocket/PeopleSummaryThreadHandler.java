@@ -606,7 +606,7 @@ public class PeopleSummaryThreadHandler
 
         con.rollback();
       } catch (Exception e2) {
-        LOGGER.trace("NESTED ROLLBACK EXCEPTION!", e2);
+        LOGGER.debug("NESTED ROLLBACK EXCEPTION!", e2);
       }
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     } finally {

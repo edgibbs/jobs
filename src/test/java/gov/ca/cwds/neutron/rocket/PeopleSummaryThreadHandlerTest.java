@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -30,14 +31,21 @@ import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
+import gov.ca.cwds.data.persistence.cms.client.RawAddressTest;
+import gov.ca.cwds.data.persistence.cms.client.RawCaseTest;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
+import gov.ca.cwds.data.persistence.cms.client.RawClientAddressTest;
+import gov.ca.cwds.data.persistence.cms.client.RawClientTest;
+import gov.ca.cwds.data.persistence.cms.client.RawEthnicityTest;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
+import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler.STEP;
 
 public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, RawClient> {
+
   PeopleSummaryThreadHandler target;
   ClientPersonIndexerJob rocket;
   ReplicatedClientDao dao;
@@ -145,7 +153,6 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(rs.next()).thenThrow(NeutronCheckedException.class);
     when(preparedStatement.executeUpdate()).thenThrow(NeutronCheckedException.class);
     rocket = mock(ClientPersonIndexerJob.class);
-
     when(rocket.getFlightPlan()).thenThrow(NeutronCheckedException.class);
     target = new PeopleSummaryThreadHandler(rocket);
     String sqlInitialLoad = null;
@@ -220,37 +227,30 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(rocket.isRunning()).thenReturn(true);
     rocket.allocateThreadHandler();
     target = new PeopleSummaryThreadHandler(rocket);
-
     Consumer<ResultSet> consumer = mock(Consumer.class);
     target.read(preparedStatement, consumer);
   }
 
-  // @Test
-  // public void readAny_A$ResultSet$NeutronJdbcReader$BiConsumer$String() throws Exception {
-  //
-  //
-  //
-  //
-  // NeutronJdbcReader<RawClient> reader = mock(NeutronJdbcReader.class);
-  // BiConsumer<RawClient, Object> organizer = mock(BiConsumer.class);
-  // String msg = null;
-  //
-  //
-  // target.readAny(rs, reader, organizer, msg);
-  // }
-
   @Test
   public void readClient_A$ResultSet() throws Exception {
+    RawClientTest.prepResultSetGood(rs);
     target.readClient(rs);
   }
 
   @Test
   public void readClientAddress_A$ResultSet() throws Exception {
+    RawClientTest.prepResultSetGood(rs);
+    target.readClient(rs);
+    when(rs.next()).thenReturn(true).thenReturn(false);
+
+    RawClientAddressTest.prepResultSetGood(rs);
+    when(rs.next()).thenReturn(true).thenReturn(false);
     target.readClientAddress(rs);
   }
 
   @Test
   public void readAddress_A$ResultSet() throws Exception {
+    RawAddressTest.prepResultSetGood(rs);
     target.readAddress(rs);
   }
 
@@ -266,6 +266,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void readCase_A$ResultSet() throws Exception {
+    RawCaseTest.prepResultSetGood(rs);
     target.readCase(rs);
   }
 
@@ -276,6 +277,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void readEthnicity_A$ResultSet() throws Exception {
+    RawEthnicityTest.prepResultSetGood(rs);
     target.readEthnicity(rs);
   }
 
@@ -310,7 +312,6 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
     doThrow(SQLException.class).when(con).commit();
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
-
     Pair<String, String> range = mock(Pair.class);
     target.loadClientRange(con, preparedStatement, range);
   }
@@ -328,7 +329,6 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
     doThrow(SQLException.class).when(con).commit();
-
     Pair<String, String> p = mock(Pair.class);
     target.prepPlacementClients(preparedStatement, p);
   }
@@ -342,6 +342,63 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   public void getRocket_A$() throws Exception {
     ClientPersonIndexerJob actual = target.getRocket();
     assertThat(actual, is(notNullValue()));
+  }
+
+  @Test
+  public void step_A$Object() throws Exception {
+    target.step(STEP.SEL_AKA);
+  }
+
+  @Test
+  public void loadClientRange_A$Connection$PreparedStatement$Pair() throws Exception {
+    PreparedStatement stmtInsClient = preparedStatement;
+    Pair<String, String> range = pair;
+    int actual = target.loadClientRange(con, stmtInsClient, range);
+    int expected = 1;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void loadClientRange_A$Connection$PreparedStatement$Pair_T$SQLException()
+      throws Exception {
+    PreparedStatement stmtInsClient = preparedStatement;
+    Pair<String, String> range = pair;
+    bombResultSet();
+    try {
+      target.loadClientRange(con, stmtInsClient, range);
+      fail("Expected exception was not thrown!");
+    } catch (SQLException e) {
+    }
+  }
+
+  @Test
+  public void isInitialLoad_A$() throws Exception {
+    boolean actual = target.isInitialLoad();
+    boolean expected = true;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void addOtherTimings_A$() throws Exception {
+    target.addOtherTimings();
+  }
+
+  @Test
+  public void calcReplicationDelay_A$() throws Exception {
+    target.calcReplicationDelay();
+  }
+
+  @Test
+  public void getEventType_A$() throws Exception {
+    String actual = target.getEventType();
+    String expected = "neutron_initial_load_client";
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRocket_A$ClientPersonIndexerJob() throws Exception {
+    ClientPersonIndexerJob rocket_ = mock(ClientPersonIndexerJob.class);
+    target.setRocket(rocket_);
   }
 
 }

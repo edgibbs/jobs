@@ -1,7 +1,12 @@
 package gov.ca.cwds.neutron.rocket;
 
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.CLEANUP_TEMP_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.DEL_OLD_TRACKS;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_ALL;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_KEY_BUNDLE;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_TRACK_CHANGES;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_IDS_LST_CHG;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_NEXT_RUN_ID;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -53,6 +58,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   protected static final Logger LOGGER =
       LoggerFactory.getLogger(PeopleSummaryLastChangeHandler.class);
 
+  private static AtomicLong lastReplicationDelay = new AtomicLong(30000L);
+
   /**
    * Client primary keys.
    */
@@ -62,7 +69,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private int rangeEnd = 0;
 
-  private static AtomicLong lastReplicationDelay = new AtomicLong(30000L);
+  private int runId = 0;
 
   /**
    * Preferred ctor.
@@ -126,6 +133,27 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     session.flush();
   }
 
+  /**
+   * Read the next available run id from the DB2 sequence.
+   * 
+   * @param rs result set to iterate
+   */
+  protected void readNextRunId(final ResultSet rs) {
+    LOGGER.trace("readNextRunId(): begin");
+    int counter = 0;
+    final ClientPersonIndexerJob rocket = getRocket();
+
+    try {
+      while (rocket.isRunning() && rs.next() && (runId = rs.getInt(1)) != 0) {
+        CheeseRay.logEvery(LOGGER, LOG_EVERY, ++counter, "Read", "run id");
+      }
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ RUN ID! {}", e.getMessage(), e);
+    }
+
+    LOGGER.info("Run id: {}", runId);
+  }
+
   protected void readClientKeys(final ResultSet rs) {
     LOGGER.trace("readClientKeys(): begin");
     int counter = 0;
@@ -138,7 +166,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         keys.add(key);
       }
     } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT KEY! {}", e.getMessage(), e);
+      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ CLIENT KEYS! {}", e.getMessage(), e);
     }
 
     LOGGER.info("Retrieved {} client keys.", counter);
@@ -211,16 +239,36 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
       // SNAP-808: process changed records only once.
       final Date overrideLastChgDate = rocket.getFlightPlan().getOverrideLastEndTime();
-      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(SEL_CLI_IDS_LST_CHG,
+      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(INS_LST_CHG_ALL,
           rocket.determineLastSuccessfulRunTime(),
           overrideLastChgDate != null ? overrideLastChgDate : new Date());
 
       // Get list of changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
       step(STEP.FIND_CHANGED_CLIENT);
-      LOGGER.debug("What Changed SQL\n{}\n", sqlChangedClients);
-      try (final PreparedStatement stmt = con.prepareStatement(sqlChangedClients, TFO, CRO)) {
-        read(stmt, rs -> readClientKeys(rs));
+
+      // SNAP-915: Track changed records in temp table TMP_LC_TRK_CHG (changes found this run).
+      // At job end, push those recs into LC_TRK_CHG (changes found in past runs).
+      try (final PreparedStatement delOldTracks = con.prepareStatement(DEL_OLD_TRACKS, TFO, CRO);
+          final PreparedStatement selNextRunId = con.prepareStatement(SEL_NEXT_RUN_ID, TFO, CRO);
+          final PreparedStatement insChangedClients =
+              con.prepareStatement(sqlChangedClients, TFO, CRO);
+          final PreparedStatement selChangedClients =
+              con.prepareStatement(SEL_CLI_IDS_LST_CHG, TFO, CRO)) {
+        LOGGER.debug("Delete old tracks: {}", DEL_OLD_TRACKS);
+        delOldTracks.executeUpdate();
+
+        LOGGER.debug("Read next run id");
+        LOGGER.debug("What Changed SQL\n{}\n", sqlChangedClients);
+        read(selNextRunId, rs -> readNextRunId(rs)); // get run id
+
+        LOGGER.debug("Track changed rows");
+        insChangedClients.setInt(1, runId); // Track changed rows in temp
+        insChangedClients.executeUpdate();
+
+        LOGGER.debug("Pull changed client id's");
+        selChangedClients.setInt(1, runId);
+        read(selChangedClients, rs -> readClientKeys(rs)); // get ALL clients for this run
       } finally {
         // Auto-close statement.
       }
@@ -236,7 +284,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       final int totalKeys = keys.size();
-      LOGGER.info("keys: {}", totalKeys);
+      LOGGER.info("LAST CHANGE: total keys: {}", totalKeys);
       rangeStart = rangeEnd = 0;
       con.commit(); // free db resources
 
@@ -249,6 +297,19 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         range = Pair.of(String.valueOf(rangeStart), String.valueOf(rangeEnd));
         LOGGER.info("last change key subset range {} of {}", range, totalKeys);
         super.handleSecondaryJdbc(con, range);
+      }
+
+      // SNAP-915: insert successfully processed changed records into table LC_TRK_CHG.
+      try (
+          final PreparedStatement insChangedClients =
+              con.prepareStatement(INS_TRACK_CHANGES, TFO, CRO);
+          final PreparedStatement stmtCleanup = con.prepareStatement(CLEANUP_TEMP_CHG, TFO, CRO)) {
+        insChangedClients.setInt(1, runId); // Track changed rows in temp
+        insChangedClients.executeUpdate();
+
+        stmtCleanup.executeUpdate(); // clear temp track
+      } finally {
+        // Auto-close statement.
       }
 
       LOGGER.info("***** DONE retrieving data *****");
@@ -301,6 +362,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   @Override
   public String getEventType() {
     return "neutron_lc_client";
+  }
+
+  public int getRunId() {
+    return runId;
+  }
+
+  public void setRunId(int runId) {
+    this.runId = runId;
   }
 
 }

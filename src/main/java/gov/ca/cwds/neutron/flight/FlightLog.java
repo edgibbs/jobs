@@ -3,15 +3,12 @@ package gov.ca.cwds.neutron.flight;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +29,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
-import com.newrelic.api.agent.NewRelic;
 
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.atom.AtomRocketControl;
@@ -826,11 +822,6 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     return timings;
   }
 
-  protected void append(StringBuilder buf, Map.Entry<String, Object> e) {
-    buf.append('\n').append('\t').append(StringUtils.rightPad(e.getKey(), 27)).append(": ")
-        .append(e.getValue());
-  }
-
   /**
    * Send flight metrics to New Relic (or other monitoring system).
    * 
@@ -847,83 +838,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
    * @param eventType registered New Relic event
    */
   public void notifyMonitor(String eventType) {
-    LOGGER.debug("Prepare to notify New Relic");
-    final Map<String, Object> attribs = new LinkedHashMap<>();
-
-    if (!isInitialLoad()) {
-      if (!timings.isEmpty()) {
-        // Convert long timestamp to UNIX timestamp (aka "seconds since epoch").
-        timings.entrySet().stream().forEach(e -> attribs.put(e.getKey(),
-            Instant.ofEpochMilli(new Date(e.getValue()).getTime()).getEpochSecond()));
-      }
-
-      // SNAP-796: replication metrics.
-      if (!otherMetrics.isEmpty()) {
-        otherMetrics.entrySet().stream().forEach(e -> attribs.put(e.getKey(), e.getValue()));
-      }
-
-      if (lastChangeSince != null) {
-        attribs.putIfAbsent("changed_since",
-            Instant.ofEpochMilli(this.lastChangeSince.getTime()).getEpochSecond());
-      }
-
-      attribs.putIfAbsent("warnings", warnings.size());
-      attribs.putIfAbsent("run_failed", isFatalError());
-      attribs.putIfAbsent("recs_pulled", recsSentToIndexQueue.get());
-
-      attribs.putIfAbsent("es_deleted", recsBulkDeleted.get());
-      attribs.putIfAbsent("es_indexed", recsBulkBefore.get());
-      attribs.putIfAbsent("es_errors", recsBulkError.get());
-      attribs.putIfAbsent("es_refresh_interval", esRefreshIntervalSecs); // NEXT: read index
-                                                                         // settings live
-
-      attribs.putIfAbsent("run_start_time", Instant.ofEpochMilli(startTime).getEpochSecond());
-      attribs.putIfAbsent("run_end_time", Instant.ofEpochMilli(endTime).getEpochSecond());
-
-      final float runSeconds = (endTime - startTime) / 1000;
-      LOGGER.debug("Neutron: this run seconds: {}", runSeconds);
-      attribs.putIfAbsent("run_seconds", runSeconds);
-
-      final float runMillis = endTime - startTime;
-      attribs.putIfAbsent("run_millis", runMillis);
-
-      if (lastEndTime != 0) {
-        attribs.putIfAbsent("last_run_end_time",
-            Instant.ofEpochMilli(lastEndTime).getEpochSecond());
-        final float runTotalMillis = lastEndTime - startTime;
-        final float runTotalSeconds = runTotalMillis / 1000;
-
-        LOGGER.debug("since last run: millis: {}, seconds: {}", runTotalMillis, runTotalSeconds);
-        attribs.putIfAbsent("run_since_last_run_secs", runTotalSeconds);
-        attribs.putIfAbsent("run_since_last_run_millis", runTotalMillis);
-
-        final float totalGreenLineSecs = runTotalSeconds + esRefreshIntervalSecs;
-        attribs.putIfAbsent("green_line_secs", totalGreenLineSecs);
-
-        final float totalGreenLineMillis = runTotalMillis + (esRefreshIntervalSecs * 1000);
-        attribs.putIfAbsent("green_line_millis", totalGreenLineMillis);
-      }
-
-      if (!attribs.isEmpty()) {
-        try {
-          final StringBuilder buf = new StringBuilder();
-          attribs.entrySet().stream().filter(e -> Objects.nonNull(e.getKey()))
-              .sorted(Comparator.comparing(Map.Entry<String, Object>::getKey))
-              .forEach(e -> this.append(buf, e));
-          LOGGER.info("****** Notify New Relic ****** event: {}, attribs: {}\n{}\n", eventType,
-              attribs.size(), buf.toString());
-
-          // NEXT: inject this dependency.
-          // Base FlightLog should NOT be tied to New Relic.
-          NewRelic.getAgent().getInsights().recordCustomEvent(eventType, attribs);
-        } catch (Exception e) {
-          // Don't re-throw. Don't fail the run, because you can't send metrics to NR.
-          final String msg = "FAILED TO SEND TO NEW RELIC!";
-          LOGGER.error(msg, e);
-          addWarning(msg);
-        }
-      }
-    }
+    new NeutronNewRelicNotifier().notifyMonitor(this, eventType);;
   }
 
   public Map<String, Object> getOtherMetrics() {
@@ -936,6 +851,10 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   public void setLastEndTime(long lastEndTime) {
     this.lastEndTime = lastEndTime;
+  }
+
+  public static int getEsrefreshintervalsecs() {
+    return esRefreshIntervalSecs;
   }
 
 }

@@ -4,13 +4,17 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -32,6 +36,11 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
   public void setup() throws Exception {
     super.setup();
     target = new FlightLog(StandardFlightSchedule.PEOPLE_SUMMARY.getRocketName());
+    target.setInitialLoad(false);
+
+    target.addAffectedDocumentId(DEFAULT_CLIENT_ID);
+    target.addOtherMetric("nr_fun", "supercalifragilisticexpialadocious");
+    target.addTimingEvent("potty_break");
   }
 
   @Test
@@ -553,7 +562,7 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getAffectedDocumentIds_A$() throws Exception {
     final String[] actual = target.getAffectedDocumentIds();
-    final String[] expected = new String[0];
+    final String[] expected = {DEFAULT_CLIENT_ID};
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -578,4 +587,370 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
     assertThat(actual, is(equalTo(expected)));
   }
 
+  @Test
+  public void fail_A$String() throws Exception {
+    String reason = null;
+    target.fail(reason);
+  }
+
+  @Test
+  public void addToDenormalized_A$int() throws Exception {
+    int addMe = 0;
+    int actual = target.addToDenormalized(addMe);
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void markStartChangePoll_A$() throws Exception {
+    target.markStartChangePoll();
+  }
+
+  @Test
+  public void markStartDataPoll_A$() throws Exception {
+    target.markStartDataPoll();
+  }
+
+  @Test
+  public void markEndDataPoll_A$() throws Exception {
+    target.markEndDataPoll();
+  }
+
+  @Test
+  public void incrementDenormalized_A$() throws Exception {
+    int actual = target.incrementDenormalized();
+    int expected = 1;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setRangeStatus_A$Pair$FlightStatus() throws Exception {
+    Pair<String, String> pair = mock(Pair.class);
+    FlightStatus flightStatus = FlightStatus.RUNNING;
+    target.setRangeStatus(pair, flightStatus);
+  }
+
+  @Test
+  public void markRangeSuccess_A$Pair() throws Exception {
+    Pair<String, String> pair = mock(Pair.class);
+    target.markRangeSuccess(pair);
+  }
+
+  @Test
+  public void markRangeError_A$Pair() throws Exception {
+    Pair<String, String> pair = mock(Pair.class);
+    target.markRangeError(pair);
+  }
+
+  @Test
+  public void filterStatus_A$FlightStatus$FlightStatusArray() throws Exception {
+    FlightStatus actual_ = FlightStatus.RUNNING;
+    FlightStatus[] scanFor = new FlightStatus[] {};
+    boolean actual = target.filterStatus(actual_, scanFor);
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void filterRanges_A$FlightStatusArray() throws Exception {
+    FlightStatus[] statuses = new FlightStatus[] {};
+    List actual = target.filterRanges(statuses);
+    List expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void buildImmutableList_A$FlightStatusArray() throws Exception {
+    FlightStatus[] statuses = new FlightStatus[] {};
+    List actual = target.buildImmutableList(statuses);
+    List expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getCurrentDenormalized_A$() throws Exception {
+    int actual = target.getCurrentDenormalized();
+    int expected = 0;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getWarnings_A$() throws Exception {
+    List<String> actual = target.getWarnings();
+    List<String> expected = new ArrayList<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getStartTimeAsDate_A$() throws Exception {
+    Date actual = target.getStartTimeAsDate();
+    Date expected = new Date();
+    assertThat(actual, is(greaterThanOrEqualTo(expected)));
+  }
+
+  @Test
+  public void getEndTimeAsDate_A$() throws Exception {
+    Date actual = target.getEndTimeAsDate();
+    Date expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isGlobalError_A$() throws Exception {
+    boolean actual = FlightLog.isGlobalError();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isGlobalErrorFlag_A$() throws Exception {
+    boolean actual = FlightLog.isGlobalErrorFlag();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isFatalError_A$() throws Exception {
+    boolean actual = target.isFatalError();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneRetrieve_A$() throws Exception {
+    boolean actual = target.isDoneRetrieve();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneTransform_A$() throws Exception {
+    boolean actual = target.isDoneTransform();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneIndex_A$() throws Exception {
+    boolean actual = target.isDoneIndex();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void isDoneFlight_A$() throws Exception {
+    boolean actual = target.isDoneFlight();
+    boolean expected = false;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getRecsSentToIndexQueue_A$() throws Exception {
+    AtomicInteger actual = target.getRecsSentToIndexQueue();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsSentToBulkProcessor_A$() throws Exception {
+    AtomicInteger actual = target.getRecsSentToBulkProcessor();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRowsNormalized_A$() throws Exception {
+    AtomicInteger actual = target.getRowsNormalized();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRowsDenormalized_A$() throws Exception {
+    AtomicInteger actual = target.getRowsDenormalized();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkPrepared_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkPrepared();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkDeleted_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkDeleted();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkBefore_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkBefore();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkAfter_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkAfter();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getRecsBulkError_A$() throws Exception {
+    AtomicInteger actual = target.getRecsBulkError();
+    AtomicInteger expected = new AtomicInteger(0);
+    assertThat(actual.get(), is(equalTo(expected.get())));
+  }
+
+  @Test
+  public void getInitialLoadRangeStatus_A$() throws Exception {
+    final Map<Pair<String, String>, FlightStatus> actual = target.getInitialLoadRangeStatus();
+    final Map<Pair<String, String>, FlightStatus> expected = new HashMap<>();
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setStartTime_A$long() throws Exception {
+    long startTime = 0L;
+    target.setStartTime(startTime);
+  }
+
+  @Test
+  public void getFailureCause_A$() throws Exception {
+    String actual = target.getFailureCause();
+    String expected = null;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setFailureCause_A$String() throws Exception {
+    String failureCause = null;
+    target.setFailureCause(failureCause);
+  }
+
+  @Test
+  public void getTimeStartPoll_A$() throws Exception {
+    long actual = target.getTimeStartPoll();
+    long expected = 0L;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setTimeStartPoll_A$long() throws Exception {
+    long timeStartPoll = 0L;
+    target.setTimeStartPoll(timeStartPoll);
+  }
+
+  @Test
+  public void getTimeStartPull_A$() throws Exception {
+    long actual = target.getTimeStartPull();
+    long expected = 0L;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setTimeStartPull_A$long() throws Exception {
+    long timeStartPull = 0L;
+    target.setTimeStartPull(timeStartPull);
+  }
+
+  @Test
+  public void getTimeEndPull_A$() throws Exception {
+    long actual = target.getTimeEndPull();
+    long expected = 0L;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setTimeEndPull_A$long() throws Exception {
+    long timeEndPull = 0L;
+    target.setTimeEndPull(timeEndPull);
+  }
+
+  @Test
+  public void addWarning_A$String() throws Exception {
+    String warning = null;
+    target.addWarning(warning);
+  }
+
+  @Test
+  public void addTimingEvents_A$FlightLog() throws Exception {
+    FlightLog fl = mock(FlightLog.class);
+    target.addTimingEvents(fl);
+  }
+
+  @Test
+  public void addOtherMetrics_A$FlightLog() throws Exception {
+    FlightLog fl = mock(FlightLog.class);
+    target.addOtherMetrics(fl);
+  }
+
+  @Test
+  public void addTimingEvent_A$String() throws Exception {
+    String event = null;
+    target.addTimingEvent(event);
+  }
+
+  @Test
+  public void addTimingEvent_A$String$long() throws Exception {
+    String event = null;
+    long val = 0L;
+    target.addTimingEvent(event, val);
+  }
+
+  @Test
+  public void addOtherMetric_A$String$Object() throws Exception {
+    String event = null;
+    Object val = null;
+    target.addOtherMetric(event, val);
+  }
+
+  @Test
+  public void getTimings_A$() throws Exception {
+    Map<String, Long> actual = target.getTimings();
+    Map<String, Long> expected = new HashMap<>();
+    expected.put("potty_break", new Date().getTime());
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void notifyMonitor_A$String() throws Exception {
+    String eventType = null;
+    target.notifyMonitor(eventType);
+  }
+
+  @Test
+  public void getOtherMetrics_A$() throws Exception {
+    Map<String, Object> actual = target.getOtherMetrics();
+    Map<String, Object> expected = new HashMap<>();
+    expected.put("nr_fun", "supercalifragilisticexpialadocious");
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getLastEndTime_A$() throws Exception {
+    long actual = target.getLastEndTime();
+    long expected = 0L;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setLastEndTime_A$long() throws Exception {
+    long lastEndTime = 0L;
+    target.setLastEndTime(lastEndTime);
+  }
+
+  @Test
+  public void getEsrefreshintervalsecs_A$() throws Exception {
+    final int actual = FlightLog.getEsrefreshintervalsecs();
+    final int expected = 1;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
 }
+
