@@ -1,12 +1,15 @@
 package gov.ca.cwds.jobs;
 
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
+
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 import javax.persistence.Table;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.slf4j.Logger;
@@ -80,6 +83,10 @@ public class OtherClientNameIndexerJob
     super(dao, esDao, flightPlan.getLastRunLoc(), mapper, flightPlan, launchDirector);
     this.denormDao = denormDao;
   }
+
+  private File createFile(String file) {
+	  return new File(FilenameUtils.getFullPath(file), FilenameUtils.getName(file));
+	    }
 
   /**
    * DB2's optimizer is not very bright.
