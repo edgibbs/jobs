@@ -1,7 +1,6 @@
 package gov.ca.cwds.jobs;
 
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
