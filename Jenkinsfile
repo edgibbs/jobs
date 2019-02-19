@@ -55,7 +55,6 @@ def buildMaster() {
     pipelineTriggers([triggerProperties]), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
       booleanParam(defaultValue: true, description: '', name: 'USE_NEWRELIC'),
-      string(defaultValue: 'master', description: '', name: 'branch'),
       booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
       string(defaultValue: '', description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
       string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')])
@@ -94,7 +93,6 @@ def releasePipeline() {
     deploy('preint')
     deploy('integration')
   } catch (Exception exception) {
-    notifySlack(SLACK_WEBHOOK_URL, "Neutron-Jobs", exception)
     currentBuild.result = "FAILURE"
     throw exception
   }
@@ -104,7 +102,7 @@ def releasePipeline() {
 def checkOut()  {
   stage('Check Out') {
     cleanWs()
-    git branch: '$branch', credentialsId: GITHUB_CREDENTIALS_ID, url: 'git@github.com:ca-cwds/jobs.git'
+    checkout scm
   }
 }
 
