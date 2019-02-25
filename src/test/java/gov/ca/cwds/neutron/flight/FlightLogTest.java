@@ -915,7 +915,7 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
     Map<String, Long> actual = target.getTimings();
     Map<String, Long> expected = new HashMap<>();
     expected.put("potty_break", new Date().getTime());
-    assertThat(actual, is(equalTo(expected)));
+    assertThat(actual.get("potty_break"), is(greaterThanOrEqualTo(expected.get("potty_break"))));
   }
 
   @Test

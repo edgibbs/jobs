@@ -118,6 +118,10 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
     return lastReplicationSeconds;
   }
 
+  public static void setLastReplicationSeconds(Float lastReplicationSeconds) {
+    ReplicationLagRocket.lastReplicationSeconds = lastReplicationSeconds;
+  }
+
   /**
    * Rocket launch point.
    * 

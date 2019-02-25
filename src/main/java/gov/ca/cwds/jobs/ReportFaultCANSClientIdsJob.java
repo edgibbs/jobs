@@ -52,19 +52,23 @@ import gov.ca.cwds.neutron.flight.FlightPlan;
     "fb-contrib:CLI_CONSTANT_LIST_INDEX"})
 public class ReportFaultCANSClientIdsJob {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReportFaultCANSClientIdsJob.class);
+
   private static final String CMS_KEY = "cmsKey";
   private static final String PARAM_EXTERNAL_ID = "externalId";
   private static final String PARAM_ID = "id";
   private static final String PARAM_NEW_EXTERNAL_ID = "newExternalId";
   private static final String PARAM_NEW_PERSON_ID = "newPersonId";
   private static final String PARAM_PERSON_ID = "personId";
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReportFaultCANSClientIdsJob.class);
+
   private static final String HIBERNATE_CONFIG_CMS = "jobs-cms-hibernate.cfg.xml";
   private static final String HIBERNATE_CONFIG_NS = "jobs-ns-hibernate.cfg.xml";
   private static final String CLIENT_NOT_FOUND_IN_CMS = "Client Not found in CMS.";
+  private static final String ERROR_SESSION_INFO = "Can't get current session. Opening new one.";
+
   private static final String SUCCESS = "SUCCESS";
   private static final String FAILED = "FAILED";
-  private static final String SESSION_INFO = "Can't get current session. Opening new one.";
+
   private static final String NQ_CANS_CLIENTS_ALL =
       "SELECT p.id, p.external_id, p.first_name, p.middle_name, p.last_name, p.suffix, p.dob, p.gender"
           + ", c.name AS county_name, a.status AS cans_status, a.event_date AS event_date"
@@ -88,7 +92,7 @@ public class ReportFaultCANSClientIdsJob {
   private static final String NQ_CANS_CLIENT_EXTERNAL_ID_UPDATE = "UPDATE {h-schema}person"
       + " SET external_id = :newExternalId WHERE id = :id AND external_id = :externalId";
   private static final String NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID =
-      "UPDATE {h-schema}assessment" + " SET person_id = :newPersonId WHERE person_id = :personId";
+      "UPDATE {h-schema}assessment SET person_id = :newPersonId WHERE person_id = :personId";
   private static final String NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID =
       "UPDATE {h-schema}assessment_aud"
           + " SET person_id = :newPersonId WHERE person_id = :personId";
@@ -96,9 +100,11 @@ public class ReportFaultCANSClientIdsJob {
 
   private SessionFactory cansSessionFactory;
   private SessionFactory cmsSessionFactory;
+
   private String baseDir;
-  private List<CansClient> clientList = new ArrayList<>();
   private String reportFileName;
+
+  private List<CansClient> clientList = new ArrayList<>();
 
   // Excel related
   private Workbook workbook;
@@ -144,7 +150,6 @@ public class ReportFaultCANSClientIdsJob {
       LOGGER.info("DONE validating client ids. Report is in the file:\n {}", job.reportFileName);
     } catch (Exception e) {
       LOGGER.error("\n\nEXECUTION FAILED !!!\n {}\n\n", e.getMessage(), e);
-
       System.exit(-1);
     }
 
@@ -152,11 +157,12 @@ public class ReportFaultCANSClientIdsJob {
   }
 
   protected static <T> List<T> mapNQResults(List<Object[]> objectArrayList, Class<T> genericType) {
-    List<T> ret = new ArrayList<>();
-    List<Field> mappingFields = getNQResultColumnAnnotatedFields(genericType);
+    final List<T> ret = new ArrayList<>();
+    final List<Field> mappingFields = getNQResultColumnAnnotatedFields(genericType);
+
     try {
       for (Object[] objectArr : objectArrayList) {
-        T t = genericType.newInstance();
+        final T t = genericType.newInstance();
         for (int index = 0; index < objectArr.length; index++) {
           setObjectProperty(t, mappingFields.get(index), objectArr[index]);
         }
@@ -169,19 +175,22 @@ public class ReportFaultCANSClientIdsJob {
       LOGGER.debug("Illegal access: ", iae);
       ret.clear();
     }
+
     return ret;
   }
 
   // Get ordered list of fields
   protected static <T> List<Field> getNQResultColumnAnnotatedFields(Class<T> genericType) {
-    Field[] fields = genericType.getDeclaredFields();
-    List<Field> orderedFields = Arrays.asList(new Field[fields.length]);
+    final Field[] fields = genericType.getDeclaredFields();
+    final List<Field> orderedFields = Arrays.asList(new Field[fields.length]);
+
     for (Field field : fields) {
       if (field.isAnnotationPresent(NQResultColumn.class)) {
-        NQResultColumn nqrc = field.getAnnotation(NQResultColumn.class);
+        final NQResultColumn nqrc = field.getAnnotation(NQResultColumn.class);
         orderedFields.set(nqrc.index(), field);
       }
     }
+
     return orderedFields;
   }
 
@@ -201,10 +210,10 @@ public class ReportFaultCANSClientIdsJob {
 
   protected Session grabCansSession() {
     try {
-      return this.cansSessionFactory.getCurrentSession();
+      return cansSessionFactory.getCurrentSession();
     } catch (HibernateException e) {
-      LOGGER.info(SESSION_INFO, e);
-      return this.cansSessionFactory.openSession();
+      LOGGER.info(ERROR_SESSION_INFO, e);
+      return cansSessionFactory.openSession();
     }
   }
 
@@ -212,15 +221,15 @@ public class ReportFaultCANSClientIdsJob {
     try {
       return cmsSessionFactory.getCurrentSession();
     } catch (HibernateException e) {
-      LOGGER.info(SESSION_INFO, e);
+      LOGGER.info(ERROR_SESSION_INFO, e);
       return cmsSessionFactory.openSession();
     }
   }
 
   @SuppressWarnings("unchecked")
   protected void buildClientList() {
-    Session session = grabCansSession();
-    Transaction txn = session.beginTransaction();
+    final Session session = grabCansSession();
+    final Transaction txn = session.beginTransaction();
     try {
       clientList = mapNQResults(
           session.createNativeQuery(NQ_CANS_CLIENTS_ALL).setReadOnly(true).getResultList(),
@@ -261,35 +270,37 @@ public class ReportFaultCANSClientIdsJob {
      * CreationHelper helps us create instances of various things like DataFormat, Hyperlink,
      * RichTextString etc, in a format (HSSF, XSSF) independent way
      */
-    CreationHelper createHelper = workbook.getCreationHelper();
+    final CreationHelper createHelper = workbook.getCreationHelper();
 
     // Create a Sheet
     sheet = workbook.createSheet("CANS Clients");
 
     // Create a Font for styling header cells
-    Font headerFont = workbook.createFont();
+    final Font headerFont = workbook.createFont();
     headerFont.setBold(true);
     headerFont.setFontHeightInPoints((short) 14);
     headerFont.setColor(IndexedColors.BLUE.getIndex());
 
     // Create a CellStyle with the font
-    CellStyle headerCellStyle = workbook.createCellStyle();
+    final CellStyle headerCellStyle = workbook.createCellStyle();
     headerCellStyle.setFont(headerFont);
 
     // Create a Row
-    Row headerRow = sheet.createRow(0);
+    final Row headerRow = sheet.createRow(0);
 
     // Create cells
     for (int index = 0; index < columns.length; index++) {
-      Cell cell = headerRow.createCell(index);
-      String cellValue = columns[index].getName();
+      final Cell cell = headerRow.createCell(index);
+      final String cellValue = columns[index].getName();
+
       cell.setCellValue(cellValue);
       columnsWidth[index] = max(columnsWidth[index], cellValue.length() + cellValue.length() / 2);
       cell.setCellStyle(headerCellStyle);
     }
 
     // Create data Format for Dates cells
-    Short dateCellDataFormat = createHelper.createDataFormat().getFormat("MM/dd/yyyy");
+    final Short dateCellDataFormat = createHelper.createDataFormat().getFormat("MM/dd/yyyy");
+
     // Create Cell Style for formatting Date
     dateCellStyle = workbook.createCellStyle();
     dateCellStyle.setDataFormat(dateCellDataFormat);
@@ -297,12 +308,13 @@ public class ReportFaultCANSClientIdsJob {
     dateCellFixedStyle.setDataFormat(dateCellDataFormat);
 
     // Create a Row Style for styling details rows with a font color
-    Font detailsFont = workbook.createFont();
+    final Font detailsFont = workbook.createFont();
     detailsFont.setColor(IndexedColors.RED.getIndex());
     detailsRowStyle = workbook.createCellStyle();
     detailsRowStyle.setFont(detailsFont);
     dateCellStyle.setFont(detailsFont);
-    Font detailsFontFixed = workbook.createFont();
+
+    final Font detailsFontFixed = workbook.createFont();
     detailsFontFixed.setColor(IndexedColors.GREEN.getIndex());
     detailsRowFixedStyle = workbook.createCellStyle();
     detailsRowFixedStyle.setFont(detailsFontFixed);
@@ -312,12 +324,14 @@ public class ReportFaultCANSClientIdsJob {
   protected void finalizeReport() {
     // Resize all columns to fit the content size
     for (int i = 0; i < columns.length; i++) {
+      // NEXT: explain the selection of these settings.
       sheet.setColumnWidth(i, min(columnsWidth[i] * 256, 255 * 256));
     }
+
     try (FileOutputStream fileOut = new FileOutputStream(reportFileName)) {
       // Write the output to a file
       workbook.write(fileOut);
-      fileOut.close();
+      fileOut.close(); // redundant; its auto-closeable in resource block
       // Closing the workbook
       workbook.close();
     } catch (IOException e) {
@@ -331,7 +345,6 @@ public class ReportFaultCANSClientIdsJob {
     try {
       // Convert to CMS Key
       clientDto.setCmsKey(CmsKeyIdGenerator.getKeyFromUIIdentifier(externalId));
-
     } catch (IllegalArgumentException e) {
       LOGGER.info("Client [id: {}] -> Error getting CMS Key from UI Id: {}", clientDto.id,
           e.getMessage());
@@ -347,8 +360,9 @@ public class ReportFaultCANSClientIdsJob {
     }
 
     if (clientDto.cmsKey != null) {
-      Session session = grabCmsSession();
-      Transaction txn = session.beginTransaction();
+      // WARNING: connection leak??
+      final Session session = grabCmsSession();
+      final Transaction txn = session.beginTransaction();
       try {
         if (session.createNativeQuery(NQ_CMS_CLIENT_FIND)
             .setParameter(CMS_KEY, clientDto.cmsKey, StringType.INSTANCE).setReadOnly(true)
@@ -359,6 +373,7 @@ public class ReportFaultCANSClientIdsJob {
           txn.rollback();
           return false;
         }
+
         txn.rollback();
         LOGGER.info("Client [id: {}] -> Found in CMS.", clientDto.id);
         return true;
@@ -375,6 +390,7 @@ public class ReportFaultCANSClientIdsJob {
       LOGGER.info("Client [id: {}] -> Client Id is [null].", clientDto.id);
       clientDto.setComment("Client Id is [null].");
     }
+
     return false;
   }
 
@@ -388,8 +404,8 @@ public class ReportFaultCANSClientIdsJob {
     LOGGER.info("Client [id: {}] -> Attempting to fix...", clientDto.id);
     clientDto.setComment(clientDto.comment + " Attempting to fix... ");
     String newKey = null;
-    Session cmsSession = grabCmsSession();
-    Transaction cmsTxn = cmsSession.beginTransaction();
+    final Session cmsSession = grabCmsSession();
+    final Transaction cmsTxn = cmsSession.beginTransaction();
     String sourceRowKey = clientDto.cmsKey;
 
     // Finding Merge Target Row Key
@@ -404,6 +420,7 @@ public class ReportFaultCANSClientIdsJob {
         } else {
           newKey = (String) cmsObjectArrayList.get(0);
         }
+
         // Prepare for chained merge
         sourceRowKey = newKey;
         if (newKey != null) {
@@ -495,6 +512,7 @@ public class ReportFaultCANSClientIdsJob {
         cansTxn.commit();
       }
     }
+
     LOGGER.info("Client [id: {}] ->  Merge Target Id NOT Found. {}", clientDto.id, FAILED);
     clientDto.setComment(clientDto.comment + " Merge Target Id NOT Found. " + FAILED);
   }
@@ -514,10 +532,12 @@ public class ReportFaultCANSClientIdsJob {
 
     // Create cells
     for (int index = 0; index < columns.length; index++) {
-      Cell cell = row.createCell(index);
+      final Cell cell = row.createCell(index);
       cell.setCellStyle(cellStyle);
-      Field field = columns[index];
+
+      final Field field = columns[index];
       int valueLength = 0;
+
       try {
         if (field.getType() == Long.class) {
           cell.setCellValue((Long) field.get(clientPojo));

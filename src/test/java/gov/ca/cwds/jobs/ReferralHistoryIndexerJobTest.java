@@ -153,7 +153,7 @@ public class ReferralHistoryIndexerJobTest
 
     EsPersonReferral addMe = new EsPersonReferral();
     addMe.setClientId("qz11234567");
-    addMe.setReferralId("abc1234567");
+    addMe.setReferralId(DEFAULT_CLIENT_ID);
 
     recs.add(addMe);
     ReplicatedPersonReferrals actual = target.normalizeSingle(recs);
@@ -627,12 +627,12 @@ public class ReferralHistoryIndexerJobTest
 
     EsPersonReferral addMe = new EsPersonReferral();
     addMe.setClientId("qz11234567");
-    addMe.setReferralId("abc1234567");
+    addMe.setReferralId(DEFAULT_CLIENT_ID);
     listReadyToNorm.add(addMe);
 
     addMe = new EsPersonReferral();
     addMe.setClientId(DEFAULT_CLIENT_ID);
-    addMe.setReferralId("abc1234567");
+    addMe.setReferralId(DEFAULT_CLIENT_ID);
     listReadyToNorm.add(addMe);
 
     final int actual =
@@ -641,12 +641,21 @@ public class ReferralHistoryIndexerJobTest
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Ignore
-  @Test(expected = NeutronRuntimeException.class)
+  @Test
   public void threadRetrieveByJdbc_Args__() throws Exception {
     this.bombResultSet();
-    this.runKillThreadWait(target, 300);
-    target.threadRetrieveByJdbc();
+    this.runKillThread(target, 3000);
+
+    try {
+      target.threadRetrieveByJdbc();
+    } catch (Exception e) {
+      if (e instanceof InterruptedException
+          || (e.getCause() != null && e.getCause() instanceof InterruptedException)) {
+        // ignore
+      } else {
+        throw e;
+      }
+    }
   }
 
   @Test

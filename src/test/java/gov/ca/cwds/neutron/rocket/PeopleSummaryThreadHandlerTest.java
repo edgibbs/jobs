@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -32,6 +31,7 @@ import org.junit.Test;
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawAddressTest;
+import gov.ca.cwds.data.persistence.cms.client.RawAkaTest;
 import gov.ca.cwds.data.persistence.cms.client.RawCaseTest;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.client.RawClientAddressTest;
@@ -234,15 +234,14 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   @Test
   public void readClient_A$ResultSet() throws Exception {
     RawClientTest.prepResultSetGood(rs);
+    when(rs.next()).thenReturn(true).thenReturn(false);
     target.readClient(rs);
+    System.out.println(target.getRawClients());
   }
 
   @Test
   public void readClientAddress_A$ResultSet() throws Exception {
-    RawClientTest.prepResultSetGood(rs);
-    target.readClient(rs);
-    when(rs.next()).thenReturn(true).thenReturn(false);
-
+    readClient_A$ResultSet();
     RawClientAddressTest.prepResultSetGood(rs);
     when(rs.next()).thenReturn(true).thenReturn(false);
     target.readClientAddress(rs);
@@ -250,39 +249,48 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void readAddress_A$ResultSet() throws Exception {
+    readClientAddress_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
     RawAddressTest.prepResultSetGood(rs);
     target.readAddress(rs);
   }
 
   @Test
   public void readClientCounty_A$ResultSet() throws Exception {
+    readClient_A$ResultSet();
     target.readClientCounty(rs);
   }
 
   @Test
   public void readAka_A$ResultSet() throws Exception {
+    readClient_A$ResultSet();
+    RawAkaTest.prepResultSetGood(rs);
     target.readAka(rs);
   }
 
   @Test
   public void readCase_A$ResultSet() throws Exception {
+    readClient_A$ResultSet();
     RawCaseTest.prepResultSetGood(rs);
     target.readCase(rs);
   }
 
   @Test
   public void readCsec_A$ResultSet() throws Exception {
+    readClient_A$ResultSet();
     target.readCsec(rs);
   }
 
   @Test
   public void readEthnicity_A$ResultSet() throws Exception {
+    readClient_A$ResultSet();
     RawEthnicityTest.prepResultSetGood(rs);
     target.readEthnicity(rs);
   }
 
   @Test
   public void readSafetyAlert_A$ResultSet() throws Exception {
+    readClient_A$ResultSet();
     target.readSafetyAlert(rs);
   }
 
@@ -302,7 +310,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   @Test
   public void loadClientRange_A$PreparedStatement$Pair() throws Exception {
     PreparedStatement stmtInsClient = mock(PreparedStatement.class);
-    Pair<String, String> range = mock(Pair.class);
+    Pair<String, String> range = pair;
     target.loadClientRange(con, stmtInsClient, range);
   }
 
@@ -312,14 +320,14 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
     doThrow(SQLException.class).when(con).commit();
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
-    Pair<String, String> range = mock(Pair.class);
+    Pair<String, String> range = pair;
     target.loadClientRange(con, preparedStatement, range);
   }
 
   @Test
   public void prepPlacementClients_A$PreparedStatement$Pair() throws Exception {
     PreparedStatement stmt = mock(PreparedStatement.class);
-    Pair<String, String> p = mock(Pair.class);
+    Pair<String, String> p = pair;
     target.prepPlacementClients(stmt, p);
   }
 
@@ -329,7 +337,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
     doThrow(SQLException.class).when(con).commit();
-    Pair<String, String> p = mock(Pair.class);
+    Pair<String, String> p = pair;
     target.prepPlacementClients(preparedStatement, p);
   }
 
@@ -358,17 +366,14 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
+  @Test(expected = SQLException.class)
   public void loadClientRange_A$Connection$PreparedStatement$Pair_T$SQLException()
       throws Exception {
     PreparedStatement stmtInsClient = preparedStatement;
     Pair<String, String> range = pair;
     bombResultSet();
-    try {
-      target.loadClientRange(con, stmtInsClient, range);
-      fail("Expected exception was not thrown!");
-    } catch (SQLException e) {
-    }
+
+    target.loadClientRange(con, stmtInsClient, range);
   }
 
   @Test

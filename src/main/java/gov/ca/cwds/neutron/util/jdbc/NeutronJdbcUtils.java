@@ -356,6 +356,13 @@ public final class NeutronJdbcUtils {
     return work.getTotalProcessed();
   }
 
+  public static int runPreparedStatementInsertLastChangeKeys(final Session session, Date start,
+      Date end, int runId, final String sql, final Function<Connection, PreparedStatement> func) {
+    final NeutronWorkTotalImpl work = new WorkPrepareWhatChanged(start, end, runId, sql, func);
+    doWork(session, work);
+    return work.getTotalProcessed();
+  }
+
   public static int runStatementInsertRownumBundle(final Session session, int start, int end,
       final Function<Connection, PreparedStatement> func) {
     final NeutronWorkTotalImpl work = new WorkPrepareRownumBundle(start, end, func);
@@ -373,7 +380,7 @@ public final class NeutronJdbcUtils {
   public static Function<Connection, PreparedStatement> getPreparedStatementMaker(String sql) {
     return c -> {
       try {
-        LOGGER.info("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
+        LOGGER.trace("PREPARE LAST CHANGE SQL:\n\n{}\n", sql);
         return c.prepareStatement(sql);
       } catch (SQLException e) {
         throw CheeseRay.runtime(LOGGER, e, "FAILED TO PREPARE STATEMENT! SQL: {}", sql);
@@ -388,7 +395,7 @@ public final class NeutronJdbcUtils {
    */
   public static void clearSession(final Session session) {
     try {
-      // Hibernate session clear may fail without a transaction.
+      // Hibernate Session.clear() may fail without a transaction.
       grabTransaction(session);
       session.clear(); // Hibernate "duplicate object" bug
     } catch (Exception e) {

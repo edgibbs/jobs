@@ -29,6 +29,7 @@ import gov.ca.cwds.data.persistence.cms.client.RawClient;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.exception.NeutronRuntimeException;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket;
 
 public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawClient> {
 
@@ -166,16 +167,17 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
     dao = mock(ReplicatedClientDao.class);
     when(dao.find(any())).thenReturn(rep);
 
-    final TestClientPersonIndexerJob target = new TestClientPersonIndexerJob(dao, esDao,
+    final TestClientPersonIndexerJob tgt = new TestClientPersonIndexerJob(dao, esDao,
         lastRunFile, mapper, sessionFactory, null, flightPlan);
-    target.setTxn(transaction);
-    final boolean actual = target.validateAddresses(rep, person);
+    tgt.setTxn(transaction);
+    final boolean actual = tgt.validateAddresses(rep, person);
     final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void validateDocument_A$ElasticSearchPerson() throws Exception {
+    when(flightPlan.isValidateAfterIndexing()).thenReturn(true);
     final ElasticSearchPerson person = new ElasticSearchPerson();
     person.setId(DEFAULT_CLIENT_ID);
     person.setLastName("Young");
@@ -283,9 +285,9 @@ public class ClientPersonIndexerJobTest extends Goddard<ReplicatedClient, RawCli
     ClientPersonIndexerJob.main(args);
   }
 
-  @Test(expected = NeutronCheckedException.class)
+  @Test
   public void launch_A$Date() throws Exception {
-    when(flightPlan.getOverrideLastRunStartTime()).thenThrow(IllegalStateException.class);
+    ReplicationLagRocket.setLastReplicationSeconds(3F);
     Date lastSuccessfulRunTime = new Date();
     Date actual = target.launch(lastSuccessfulRunTime);
     Date expected = new Date();

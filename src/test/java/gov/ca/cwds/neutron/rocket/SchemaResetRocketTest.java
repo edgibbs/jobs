@@ -27,11 +27,13 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
   @Before
   public void setup() throws Exception {
     super.setup();
-
     dao = new DbResetStatusDao(sessionFactory);
+
     target = new SchemaResetRocket(dao, mapper, lastRunFile, flightPlan, launchDirector);
     target.setPollPeriodInSeconds(2);
     target.setTimeoutSeconds(5);
+
+    when(proc.getOutputParameterValue("RETSTATUS")).thenReturn("0");
   }
 
   @Test
@@ -56,7 +58,7 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
 
   @Test(expected = NeutronRuntimeException.class)
   public void refreshSchema_A$() throws Exception {
-    runKillThread(target, 3500L);
+    runKillThread(target, 8500L);
     target.refreshSchema();
   }
 
@@ -79,6 +81,58 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
     String actual = target.getDbSchema();
     String expected = "CWSNS1";
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void getSchemaRefreshTimeoutSeconds_A$() throws Exception {
+    int actual = target.getSchemaRefreshTimeoutSeconds();
+    int expected = 5;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setSchemaRefreshTimeoutSeconds_A$int() throws Exception {
+    int schemaRefreshTimeoutSeconds = 0;
+    target.setSchemaRefreshTimeoutSeconds(schemaRefreshTimeoutSeconds);
+  }
+
+  @Test
+  public void getPollPeriodInSeconds_A$() throws Exception {
+    int actual = target.getPollPeriodInSeconds();
+    int expected = 2;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setPollPeriodInSeconds_A$int() throws Exception {
+    int pollPeriodInSeconds = 0;
+    target.setPollPeriodInSeconds(pollPeriodInSeconds);
+  }
+
+  @Test
+  public void done_A$() throws Exception {
+    try {
+      target.done();
+    } catch (NeutronRuntimeException e) {
+    }
+  }
+
+  @Test(expected = Exception.class)
+  public void fail_A$() throws Exception {
+    target.fail();
+  }
+
+  @Test
+  public void getTimeoutSeconds_A$() throws Exception {
+    int actual = target.getTimeoutSeconds();
+    int expected = 5;
+    assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void setTimeoutSeconds_A$int() throws Exception {
+    int timeoutSeconds = 0;
+    target.setTimeoutSeconds(timeoutSeconds);
   }
 
 }

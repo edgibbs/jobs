@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -204,6 +205,19 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     final List<? extends ApiTypedIdentifier<String>> actual = target.getOptionalCollection(esp, t);
     final List<? extends ApiTypedIdentifier<String>> expected = new ArrayList<>();
     assertThat(actual, is(equalTo(expected)));
+  }
+
+  @Test
+  public void waitOnQueue() throws Exception {
+    try {
+      target.waitOnQueue();
+    } catch (Exception e) {
+      if (e instanceof InterruptedException) {
+        // ignore
+      } else {
+        throw e;
+      }
+    }
   }
 
   @Test
@@ -567,7 +581,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test
   @Ignore
   public void doInitialLoadJdbc_Args__() throws Exception {
-    runKillThread(target);
+    runKillThread(target, 5500L);
     target.doInitialLoadJdbc();
     markTestDone();
   }
@@ -853,7 +867,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getQueueIndex() throws Exception {
-    final ConcurrentLinkedDeque<TestNormalizedEntity> actual = target.getQueueIndex();
+    final Queue<TestNormalizedEntity> actual = target.getQueueIndex();
     assertThat(actual, notNullValue());
   }
 
@@ -1168,7 +1182,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void getQueueIndex_A$() throws Exception {
-    final ConcurrentLinkedDeque<TestNormalizedEntity> actual = target.getQueueIndex();
+    final Queue<TestNormalizedEntity> actual = target.getQueueIndex();
     assertThat(actual, is(notNullValue()));
   }
 

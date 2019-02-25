@@ -38,6 +38,7 @@ import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Monitor;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
+import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 
 /**
  * Last change logic for {@link ClientPersonIndexerJob}, Client loader rocket for the People Summary
@@ -251,20 +252,22 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       // At job end, push those recs into LC_TRK_CHG (changes found in past runs).
       try (final PreparedStatement delOldTracks = con.prepareStatement(DEL_OLD_TRACKS, TFO, CRO);
           final PreparedStatement selNextRunId = con.prepareStatement(SEL_NEXT_RUN_ID, TFO, CRO);
-          final PreparedStatement insChangedClients =
-              con.prepareStatement(sqlChangedClients, TFO, CRO);
           final PreparedStatement selChangedClients =
               con.prepareStatement(SEL_CLI_IDS_LST_CHG, TFO, CRO)) {
         LOGGER.debug("Delete old tracks: {}", DEL_OLD_TRACKS);
         delOldTracks.executeUpdate();
 
+        LOGGER.trace("What Changed SQL\n{}\n", sqlChangedClients);
         LOGGER.debug("Read next run id");
-        LOGGER.debug("What Changed SQL\n{}\n", sqlChangedClients);
         read(selNextRunId, rs -> readNextRunId(rs)); // get run id
 
-        LOGGER.debug("Track changed rows");
-        insChangedClients.setInt(1, runId); // Track changed rows in temp
-        insChangedClients.executeUpdate();
+        final Date start = NeutronDateUtils.lookBack(lastRunTime);
+        final Date end = new Date();
+        LOGGER.debug("Track changed rows: start: {}, end: {}, run id: {}", start, end, runId);
+
+        // Track changed rows in temp
+        NeutronJdbcUtils.runPreparedStatementInsertLastChangeKeys(session, start, end, runId,
+            sqlChangedClients, rocket.getPreparedStatementMaker(sqlChangedClients));
 
         LOGGER.debug("Pull changed client id's");
         selChangedClients.setInt(1, runId);
@@ -364,6 +367,7 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     return "neutron_lc_client";
   }
 
+  @Override
   public int getRunId() {
     return runId;
   }

@@ -87,11 +87,6 @@ public class RawClientAddress extends ClientAddressReference
         .strToRepOp(rs.getString(ColumnPosition.CLA_IBMSNAP_OPERATION.ordinal())));
     this.setClaReplicationDate(rs.getDate(ColumnPosition.CLA_IBMSNAP_LOGMARKER.ordinal()));
 
-    // SNAP-820: unneeded columns.
-    // this.claHomelessInd = trimToNull(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal()));
-    // this.claBkInmtId = trimToNull(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal()));
-    // this.claFkReferral = trimToNull(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal()));
-
     return this;
   }
 

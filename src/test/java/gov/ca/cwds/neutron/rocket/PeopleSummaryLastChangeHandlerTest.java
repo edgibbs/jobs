@@ -36,9 +36,15 @@ public class PeopleSummaryLastChangeHandlerTest extends Goddard<ReplicatedClient
   @Before
   public void setup() throws Exception {
     super.setup();
+
     dao = new ReplicatedClientDao(sessionFactory);
+    when(flightPlan.getLastRunLoc()).thenReturn(tempFile.getAbsolutePath());
+
+    flightRecord.setLastChangeSince(new Date());
+
     rocket =
         new ClientPersonIndexerJob(dao, esDao, lastRunFile, MAPPER, flightPlan, launchDirector);
+    rocket.setFlightLog(flightRecord);
     target = new PeopleSummaryLastChangeHandler(rocket);
   }
 

@@ -13,8 +13,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -162,7 +164,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  protected ConcurrentLinkedDeque<N> queueIndex = new ConcurrentLinkedDeque<>();
+  // protected ConcurrentLinkedDeque<N> queueIndex = new ConcurrentLinkedDeque<>();
+
+  protected Queue<N> queueIndex = new ConcurrentLinkedQueue<>();
 
   /**
    * Construct rocket with all required dependencies.
@@ -543,7 +547,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     int i = cntr;
     N t; // Normalized type
 
-    while (isRunning() && (t = queueIndex.pollFirst()) != null) {
+    while (isRunning() && (t = queueIndex.poll()) != null) {
       CheeseRay.logEvery(++i, "Indexed", "recs to ES");
       prepareDocument(bp, t);
     }
@@ -1092,7 +1096,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @return index queue implementation
    */
-  protected ConcurrentLinkedDeque<N> getQueueIndex() {
+  protected Queue<N> getQueueIndex() {
     return queueIndex;
   }
 

@@ -38,23 +38,6 @@ public abstract class ClientReference extends ApiObjectIdentity implements Persi
     CLT_NAME_TPC, CLT_P_ETHNCTYC, CLT_P_LANG_TPC, CLT_RLGN_TPC, CLT_S_LANG_TC, CLT_SENSTV_IND,
 
     CLT_SS_NO, CLT_SUFX_TLDSC, CLT_IBMSNAP_LOGMARKER, CLT_IBMSNAP_OPERATION, CLT_ADDED_TS
-
-    // OBSOLETE:
-    // CLT_CREATN_DT,
-    // CLT_DEATH_DT,
-    // CLT_DTH_DT_IND,
-    // CLT_DRV_LIC_NO,
-    // CLT_D_STATE_C,
-    // CLT_TRBA_CLT_B,
-    // CLT_ZIPPY_IND,
-    // CLT_SOCPLC_CD,
-    // CLT_SOC158_IND,
-    // CLT_SSN_CHG_CD,
-    // CLT_ETH_UD_CD,
-    // CLT_IMGT_STC,
-    // CLT_LITRATE_CD,
-    // CLT_MILT_STACD,
-    // CLT_SNTV_HLIND,
   }
 
   @Id

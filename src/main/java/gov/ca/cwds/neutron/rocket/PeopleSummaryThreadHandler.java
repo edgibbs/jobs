@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -43,8 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
-import gov.ca.cwds.data.persistence.cms.client.ClientReference;
-import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
 import gov.ca.cwds.data.persistence.cms.client.RawAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawAka;
 import gov.ca.cwds.data.persistence.cms.client.RawCase;
@@ -206,27 +203,6 @@ public class PeopleSummaryThreadHandler
     }
 
     LOGGER.trace("read(): done");
-  }
-
-  protected <T extends ClientReference> void readAny(final ResultSet rs,
-      NeutronJdbcReader<T> reader, BiConsumer<ClientReference, T> organizer, String msg) {
-    LOGGER.trace("readAny(): begin");
-    int counter = 0;
-    RawClient c = null;
-    T t;
-
-    try {
-      while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
-        // Find associated raw client, if any, and link.
-        c = rawClients.get(t.getCltId());
-        organizer.accept(c, t);
-        CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", msg);
-      }
-    } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
-    }
-
-    LOGGER.debug("{} {} recs retrieved", msg, counter);
   }
 
   protected void readClient(final ResultSet rs) {
@@ -548,19 +524,20 @@ public class PeopleSummaryThreadHandler
 
       if (keyCount > 0) {
         step(STEP.SEL_CLIENT);
+        LOGGER.trace("SEL_CLI: \n\n{}\n", SEL_CLI);
         read(stmtSelClient, rs -> readClient(rs));
 
         // SNAP-735: missing addresses.
         step(STEP.SEL_CLIENT_ADDRESS);
-        LOGGER.trace("SEL_CLI_ADDR: \n{}", SEL_CLI_ADDR);
+        LOGGER.trace("SEL_CLI_ADDR: \n\n{}\n", SEL_CLI_ADDR);
         read(stmtSelCliAddr, rs -> readClientAddress(rs));
 
         step(STEP.SEL_ADDRESS);
-        LOGGER.trace("SEL_ADDR: \n{}", SEL_ADDR);
+        LOGGER.trace("SEL_ADDR: \n\n{}\n", SEL_ADDR);
         read(stmtSelAddress, rs -> readAddress(rs));
 
         step(STEP.SEL_CLIENT_COUNTY);
-        LOGGER.trace("SEL_CLI_COUNTY: \n{}", SEL_CLI_COUNTY);
+        LOGGER.trace("SEL_CLI_COUNTY: \n\n{}\n", SEL_CLI_COUNTY);
         read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
         step(STEP.SEL_AKA);
@@ -839,6 +816,14 @@ public class PeopleSummaryThreadHandler
 
   public void setRocket(ClientPersonIndexerJob rocket) {
     this.rocket = rocket;
+  }
+
+  public int getRunId() {
+    return 0;
+  }
+
+  public Map<String, RawClient> getRawClients() {
+    return rawClients;
   }
 
 }
