@@ -14,7 +14,7 @@ public class ClientAddressReference extends ClientReference {
 
   private static final long serialVersionUID = 1L;
 
-  protected enum ColumnPosition {
+  public enum ColumnPosition {
     START, CLT_IDENTIFIER, CLA_IDENTIFIER, CLA_LST_UPD_ID, CLA_LST_UPD_TS, CLA_ADDR_TPC, CLA_EFF_END_DT, CLA_EFF_STRTDT, CLA_FKADDRS_T, CLA_FKCLIENT_T, CLA_IBMSNAP_LOGMARKER, CLA_IBMSNAP_OPERATION
   }
 

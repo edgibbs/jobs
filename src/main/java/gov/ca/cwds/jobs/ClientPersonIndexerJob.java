@@ -122,7 +122,7 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       fl.setLastEndTime(lastEndTime.getTime());
 
       final Float lastReplicationSecs = ReplicationLagRocket.getLastReplicationSeconds();
-      if (lastReplicationSecs != null && lastReplicationSecs != 0.0F) {
+      if (lastReplicationSecs != null) {
         fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lastReplicationSecs);
         fl.addOtherMetric("blue_line_secs", lastReplicationSecs); // blue = replication
         fl.addOtherMetric("blue_line_millis", lastReplicationSecs * 1000);

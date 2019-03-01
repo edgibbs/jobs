@@ -122,7 +122,7 @@ public class NeutronDB2Utils {
 
     try {
       final boolean isDb2ConWrapper = con.isWrapperFor(DB2Connection.class);
-      LOGGER.info("wrapper for DB2 connection? {}", isDb2ConWrapper);
+      LOGGER.trace("wrapper for DB2 connection? {}", isDb2ConWrapper);
 
       if (isDb2ConWrapper) {
         final DB2Connection db2Con = con.unwrap(DB2Connection.class);

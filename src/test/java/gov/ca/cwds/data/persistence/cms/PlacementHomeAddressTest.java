@@ -35,18 +35,14 @@ public class PlacementHomeAddressTest extends Goddard<ReplicatedClient, RawClien
     when(rs.getString(ColumnPosition.PH_ID.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.OHP_ID.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
 
-    // when(rs.getShort(ColumnPosition.PH_GVR_ENTC.ordinal())).thenReturn((short) 1111);
-    // when(rs.getShort(ColumnPosition.PE_GVR_ENTC.ordinal())).thenReturn((short) 1111);
     when(rs.getShort(ColumnPosition.STATE_C.ordinal())).thenReturn((short) 1828);
-    when(rs.getShort(ColumnPosition.ZIP_SFX_NO.ordinal())).thenReturn((short) 1234);
-
     when(rs.getString(ColumnPosition.CITY_NM.ordinal())).thenReturn("Campbell");
     when(rs.getString(ColumnPosition.STREET_NM.ordinal())).thenReturn("Via Roma");
     when(rs.getString(ColumnPosition.STREET_NO.ordinal())).thenReturn("2111");
-
     when(rs.getInt(ColumnPosition.ZIP_NO.ordinal())).thenReturn(95008);
-    when(rs.getInt(ColumnPosition.PRM_EXT_NO.ordinal())).thenReturn(1234);
+    when(rs.getShort(ColumnPosition.ZIP_SFX_NO.ordinal())).thenReturn((short) 1234);
 
+    when(rs.getInt(ColumnPosition.PRM_EXT_NO.ordinal())).thenReturn(1234);
     when(rs.getLong(ColumnPosition.PRM_TEL_NO.ordinal())).thenReturn(4083742790L);
 
     Date date = new Date();

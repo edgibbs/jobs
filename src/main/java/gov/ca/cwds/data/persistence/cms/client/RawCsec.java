@@ -20,7 +20,7 @@ public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCse
 
   private static final long serialVersionUID = 1L;
 
-  protected enum ColumnPosition {
+  public enum ColumnPosition {
     START, CLT_IDENTIFIER, CSH_THIRD_ID, CSH_CSEC_TPC, CSH_START_DT, CSH_END_DT, CSH_LST_UPD_ID, CSH_LST_UPD_TS, CSH_IBMSNAP_OPERATION, CSH_IBMSNAP_LOGMARKER
   }
 

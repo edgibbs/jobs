@@ -132,7 +132,7 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getWaitPeriodSeconds_Args__() throws Exception {
     final int actual = target.getWaitPeriodSeconds();
-    final int expected = 2;
+    final int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 

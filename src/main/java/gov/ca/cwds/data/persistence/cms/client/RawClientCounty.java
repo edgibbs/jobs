@@ -16,7 +16,7 @@ public class RawClientCounty extends ClientReference implements NeutronJdbcReade
 
   private static final long serialVersionUID = 1L;
 
-  protected enum ColumnPosition {
+  public enum ColumnPosition {
     START, CLT_IDENTIFIER, CLC_GVR_ENTC, CLC_LST_UPD_TS, CLC_LST_UPD_OP, CLC_CNTY_RULE
   }
 

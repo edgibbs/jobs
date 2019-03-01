@@ -32,7 +32,7 @@ public class NeutronDB2Monitor implements Closeable, DB2SystemMonitor {
 
   private final void init(final Connection con, boolean monitorMe) {
     if (monitorMe) {
-      LOGGER.info("MONITOR DB2 CONNECTIONS");
+      LOGGER.debug("MONITOR DB2 CONNECTIONS");
       monitor = NeutronDB2Utils.monitorStart(con);
     }
   }

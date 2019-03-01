@@ -21,7 +21,7 @@ public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader
 
   private static final long serialVersionUID = 1L;
 
-  protected enum ColumnPosition {
+  public enum ColumnPosition {
     START, CLT_IDENTIFIER, SAL_THIRD_ID, SAL_ACTV_RNC, SAL_ACTV_DT, SAL_ACTV_GEC, SAL_ACTV_TXT, SAL_DACT_DT, SAL_DACT_GEC, SAL_DACT_TXT, SAL_LST_UPD_ID, SAL_LST_UPD_TS, SAL_IBMSNAP_LOGMARKER, SAL_IBMSNAP_OPERATION
   }
 

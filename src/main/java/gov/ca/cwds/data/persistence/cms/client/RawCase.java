@@ -14,7 +14,7 @@ public class RawCase extends ClientReference implements NeutronJdbcReader<RawCas
 
   private static final long serialVersionUID = 1L;
 
-  protected enum ColumnPosition {
+  public enum ColumnPosition {
     START, CLT_IDENTIFIER, CAS_IDENTIFIER, CAS_RSP_AGY_CD, CAS_IBMSNAP_OPERATION, CAS_IBMSNAP_LOGMARKER
   }
 

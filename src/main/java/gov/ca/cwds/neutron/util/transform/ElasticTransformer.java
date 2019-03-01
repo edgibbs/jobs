@@ -304,7 +304,7 @@ public final class ElasticTransformer {
    */
   public static ElasticSearchLegacyDescriptor createLegacyDescriptor(String legacyId,
       Date legacyLastUpdated, LegacyTable legacyTable) {
-    final ElasticSearchLegacyDescriptor ret = new ElasticSearchLegacyDescriptor();
+    final ElasticSearchLegacyDescriptor ret = new NeutronElasticSearchLegacyDescriptor();
 
     if (!StringUtils.isBlank(legacyId)) {
       final String cleanLegacyId = legacyId.trim(); // data errors in CHAR(10) keys.

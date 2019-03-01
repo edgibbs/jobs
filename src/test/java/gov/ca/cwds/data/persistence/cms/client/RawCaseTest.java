@@ -22,7 +22,7 @@ public class RawCaseTest extends Goddard<ReplicatedClient, RawClient> {
 
   public static void prepResultSetGood(ResultSet rs) throws SQLException {
     when(rs.getString(ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
-    when(rs.getString(ColumnPosition.CAS_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.CAS_IDENTIFIER.ordinal())).thenReturn("1234567xyz");
     when(rs.getString(ColumnPosition.CAS_RSP_AGY_CD.ordinal())).thenReturn("C");
   }
 
@@ -48,7 +48,7 @@ public class RawCaseTest extends Goddard<ReplicatedClient, RawClient> {
     RawCase actual = target.read(rs);
 
     RawCase expected = new RawCase();
-    expected.setOpenCaseId(DEFAULT_CLIENT_ID);
+    expected.setOpenCaseId("1234567xyz");
     expected.setOpenCaseResponsibleAgencyCode("C");
     expected.setCltId(DEFAULT_CLIENT_ID);
 

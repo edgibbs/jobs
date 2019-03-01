@@ -64,8 +64,11 @@ public class NeutronNewRelicNotifier implements AtomMonitorNotifier {
       attribs.putIfAbsent("es_deleted", fl.getRecsBulkDeleted().get());
       attribs.putIfAbsent("es_indexed", fl.getRecsBulkBefore().get());
       attribs.putIfAbsent("es_errors", fl.getRecsBulkError().get());
-      attribs.putIfAbsent("es_refresh_interval", fl.getEsrefreshintervalsecs()); // NEXT: read index
-      // settings live
+
+      // NEXT: read index settings live
+      final int refreshInterval =
+          fl.getRecsSentToIndexQueue().get() > 0 ? FlightLog.getEsrefreshintervalsecs() : 0;
+      attribs.putIfAbsent("es_refresh_interval", refreshInterval);
 
       attribs.putIfAbsent("run_start_time",
           Instant.ofEpochMilli(fl.getStartTime()).getEpochSecond());
@@ -88,10 +91,10 @@ public class NeutronNewRelicNotifier implements AtomMonitorNotifier {
         attribs.putIfAbsent("run_since_last_run_secs", runTotalSeconds);
         attribs.putIfAbsent("run_since_last_run_millis", runTotalMillis);
 
-        final float totalGreenLineSecs = runTotalSeconds + fl.getEsrefreshintervalsecs();
+        final float totalGreenLineSecs = runTotalSeconds + refreshInterval;
         attribs.putIfAbsent("green_line_secs", totalGreenLineSecs);
 
-        final float totalGreenLineMillis = runTotalMillis + (fl.getEsrefreshintervalsecs() * 1000);
+        final float totalGreenLineMillis = runTotalMillis + (refreshInterval * 1000);
         attribs.putIfAbsent("green_line_millis", totalGreenLineMillis);
       }
 

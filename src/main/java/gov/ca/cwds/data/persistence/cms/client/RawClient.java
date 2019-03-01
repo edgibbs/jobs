@@ -332,30 +332,6 @@ public class RawClient extends ClientReference
     this.setCltReplicationDate(rs.getTimestamp(ColPos.CLT_IBMSNAP_LOGMARKER.ordinal()));
     this.cltAddedTime = rs.getTimestamp(ColPos.CLT_ADDED_TS.ordinal());
 
-    // SNAP-820: unneeded columns.
-    // this.cltEthUnableToDetReasonCode = trimToNull(rs.getString(ColPos.CLT_ETH_UD_CD.ordinal()));
-    // this.cltMilitaryStatusCode = trimToNull(rs.getString(ColPos.CLT_MILT_STACD.ordinal()));
-    // this.cltImmigrationStatusType = rs.getShort(ColPos.CLT_IMGT_STC.ordinal());
-    // this.cltLiterateCode = trimToNull(rs.getString(ColPos.CLT_LITRATE_CD.ordinal()));
-    // this.cltSensitiveHlthInfoOnFileIndicator =
-    // trimToNull(rs.getString(ColPos.CLT_SNTV_HLIND.ordinal()));
-    // this.cltSoc158PlacementCode = trimToNull(rs.getString(ColPos.CLT_SOCPLC_CD.ordinal()));
-    // this.cltSocialSecurityNumChangedCode =
-    // trimToNull(rs.getString(ColPos.CLT_SSN_CHG_CD.ordinal()));
-
-    // this.cltSoc158SealedClientIndicator =
-    // trimToNull(rs.getString(ColPos.CLT_SOC158_IND.ordinal()));
-    // this.cltCreationDate = rs.getDate(ColPos.CLT_CREATN_DT.ordinal());
-    // this.cltDeathDate = rs.getDate(ColPos.CLT_DEATH_DT.ordinal());
-    // this.cltDeathDateVerifiedIndicator =
-    // trimToNull(rs.getString(ColPos.CLT_DTH_DT_IND.ordinal()));
-    // this.cltDriverLicenseNumber = trimToNull(rs.getString(ColPos.CLT_DRV_LIC_NO.ordinal()));
-    // this.cltDriverLicenseStateCodeType = rs.getShort(ColPos.CLT_D_STATE_C.ordinal());
-
-    // this.cltTribalAncestryClientIndicatorVar =
-    // trimToNull(rs.getString(ColPos.CLT_TRBA_CLT_B.ordinal()));
-    // this.cltZippyCreatedIndicator = trimToNull(rs.getString(ColPos.CLT_ZIPPY_IND.ordinal()));
-
     return this;
   }
 

@@ -624,7 +624,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   public String toString() {
     final DateFormat fmt = new SimpleDateFormat(NeutronDateTimeFormat.FMT_LEGACY_TIMESTAMP.getFormat());
     final StringBuilder buf = new StringBuilder();
-    buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t").append(rocketName);
+    buf.append("\n[\n    FLIGHT STATUS: ").append(status).append(":\t    ").append(rocketName);
 
     if (initialLoad) {
       buf.append("\n\n    INITIAL LOAD:\n\tranges started:  ")
@@ -635,7 +635,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
        // .append(pad(filterRanges(FlightStatus.FAILED).size()))
           ;
     } else {
-      buf.append("\n\n    LAST CHANGE:\n\tchanged since:          ").append(this.lastChangeSince)
+      buf.append("\n\n    LAST CHANGE:\n\tchanged since:              ").append(this.lastChangeSince)
       // .append("\n\tstart change polling:   ").append(new Date(timeStartPoll))
       // .append("\n\tstart pulling data:     ").append(new Date(timeStartPull))
       // .append("\n\tdone  pulling data:     ").append(new Date(timeEndPull))
@@ -643,14 +643,14 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     }
 
     if (!warnings.isEmpty()) {
-      buf.append("\n\n  >>>>> WARNINGS:\n\t:          ").append(this.warnings.size());
+      buf.append("\n\n  >>>>> WARNINGS:\n\t:              ").append(this.warnings.size());
     }
 
     if (!isInitialLoad() && !timings.isEmpty()) {
       buf.append("\n\n    STEPS:");
       timings.entrySet().stream().forEach(e -> 
         buf.append("\n\t")
-           .append(StringUtils.rightPad(e.getKey() + ":", 24))
+           .append(StringUtils.rightPad(e.getKey() + ":", 28))
            .append(fmt.format(new Date(e.getValue()))));
     }
 
@@ -658,25 +658,25 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
       buf.append("\n\n    OTHER METRICS:");
       otherMetrics.entrySet().stream().forEach(e -> 
         buf.append("\n\t")
-           .append(StringUtils.rightPad(e.getKey() + ":", 24))
+           .append(StringUtils.rightPad(e.getKey() + ":", 28))
            .append(e.getValue()));
     }
 
-    buf.append("\n\n    RUN TIME:\n\tstart:                  ").append(fmt.format(new Date(startTime)));
+    buf.append("\n\n    RUN TIME:\n\tstart:                      ").append(fmt.format(new Date(startTime)));
     if (endTime > 0L) {
-      buf.append("\n\tend:                    ").append(fmt.format(new Date(endTime)))
-         .append("\n\ttotal seconds:          ").append((endTime - startTime) / 1000);
+      buf.append("\n\tend:                        ").append(fmt.format(new Date(endTime)))
+         .append("\n\ttotal seconds:              ").append((endTime - startTime) / 1000);
     }
 
-    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tprocessed:       ")
+    buf.append("\n\n    RECORDS RETRIEVED:").append("\n\tprocessed:           ")
         .append(pad(recsSentToIndexQueue.get()))
-        .append("\n\tnormalized:      ").append(pad(rowsNormalized.get()))
-        .append("\n\tde-normalized:   ").append(pad(rowsDenormalized.get()))
+        .append("\n\tnormalized:          ").append(pad(rowsNormalized.get()))
+        .append("\n\tde-normalized:       ").append(pad(rowsDenormalized.get()))
         .append("\n\n    ELASTICSEARCH:")
-        .append("\n\tbulk prepared:   ").append(pad(recsBulkPrepared.get()))
-        .append("\n\tbulk deleted:    ").append(pad(recsBulkDeleted.get()))
-        .append("\n\tbulk before:     ").append(pad(recsBulkBefore.get()))
-        .append("\n\tbulk errors:     ").append(pad(recsBulkError.get()));
+        .append("\n\tbulk prepared:       ").append(pad(recsBulkPrepared.get()))
+        .append("\n\tbulk deleted:        ").append(pad(recsBulkDeleted.get()))
+        .append("\n\tbulk before:         ").append(pad(recsBulkBefore.get()))
+        .append("\n\tbulk errors:         ").append(pad(recsBulkError.get()));
 
     if (!initialLoad && !affectedDocumentIds.isEmpty()) {
       buf.append("\n\n    SAMPLE DOCUMENTS:").append("\n\tdocument id's:    ")

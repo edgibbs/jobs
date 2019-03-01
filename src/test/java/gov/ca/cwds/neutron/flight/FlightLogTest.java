@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -912,10 +913,10 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void getTimings_A$() throws Exception {
-    Map<String, Long> actual = target.getTimings();
-    Map<String, Long> expected = new HashMap<>();
+    final Map<String, Long> actual = target.getTimings();
+    final Map<String, Long> expected = new HashMap<>();
     expected.put("potty_break", new Date().getTime());
-    assertThat(actual.get("potty_break"), is(greaterThanOrEqualTo(expected.get("potty_break"))));
+    assertThat(actual.get("potty_break"), is(lessThanOrEqualTo(expected.get("potty_break"))));
   }
 
   @Test

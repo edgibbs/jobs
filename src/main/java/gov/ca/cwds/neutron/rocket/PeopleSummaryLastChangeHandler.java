@@ -303,13 +303,12 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       }
 
       // SNAP-915: insert successfully processed changed records into table LC_TRK_CHG.
-      try (
-          final PreparedStatement insChangedClients =
-              con.prepareStatement(INS_TRACK_CHANGES, TFO, CRO);
+      try (final PreparedStatement insClients = con.prepareStatement(INS_TRACK_CHANGES, TFO, CRO);
           final PreparedStatement stmtCleanup = con.prepareStatement(CLEANUP_TEMP_CHG, TFO, CRO)) {
-        insChangedClients.setInt(1, runId); // Track changed rows in temp
-        insChangedClients.executeUpdate();
+        insClients.setInt(1, runId); // Track changed rows in temp
+        insClients.executeUpdate();
 
+        stmtCleanup.setInt(1, runId);
         stmtCleanup.executeUpdate(); // clear temp track
       } finally {
         // Auto-close statement.

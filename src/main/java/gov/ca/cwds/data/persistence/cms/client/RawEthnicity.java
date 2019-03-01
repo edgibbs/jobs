@@ -17,7 +17,7 @@ public class RawEthnicity extends ClientReference implements NeutronJdbcReader<R
 
   private static final long serialVersionUID = 1L;
 
-  protected enum ColumnPosition {
+  public enum ColumnPosition {
     START, CLT_IDENTIFIER, ETH_IDENTIFIER, ETHNICITY_CODE
   }
 

@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
@@ -18,6 +17,7 @@ import gov.ca.cwds.dao.cms.DbResetStatusDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
 import gov.ca.cwds.jobs.Goddard;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket.ReplicationTimeMetric;
 
 public class ReplicationLagRocketTest extends Goddard<DatabaseResetEntry, DatabaseResetEntry> {
 
@@ -29,7 +29,11 @@ public class ReplicationLagRocketTest extends Goddard<DatabaseResetEntry, Databa
   public void setup() throws Exception {
     super.setup();
 
-    when(rs.getFloat(any())).thenReturn(2.5F);
+    when(rs.getString(1)).thenReturn("ADDRS_T");
+    when(rs.getFloat(2)).thenReturn(2.5F);
+    when(rs.getFloat(3)).thenReturn(2.0F);
+    when(rs.getFloat(4)).thenReturn(3.0F);
+    when(rs.next()).thenReturn(true).thenReturn(false);
 
     dao = new DbResetStatusDao(sessionFactory);
     target = new ReplicationLagRocket(dao, MAPPER, lastRunFile, flightPlan, launchDirector);
@@ -60,8 +64,8 @@ public class ReplicationLagRocketTest extends Goddard<DatabaseResetEntry, Databa
 
   @Test
   public void pull_A$ResultSet() throws Exception {
-    Float actual = target.pull(rs);
-    Float expected = 0.0F;
+    final ReplicationTimeMetric actual = target.pull(rs);
+    final ReplicationTimeMetric expected = new ReplicationTimeMetric("ADDRS_T", 2.5F, 2.0F, 3.0F);
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -74,7 +78,7 @@ public class ReplicationLagRocketTest extends Goddard<DatabaseResetEntry, Databa
   @Test
   public void getLastReplicationSeconds_A$() throws Exception {
     Float actual = ReplicationLagRocket.getLastReplicationSeconds();
-    Float expected = 0.0F;
+    Float expected = 2.5F;
     assertThat(actual, is(equalTo(expected)));
   }
 

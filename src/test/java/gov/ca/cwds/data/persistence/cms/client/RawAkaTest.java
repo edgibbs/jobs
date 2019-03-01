@@ -26,6 +26,7 @@ public class RawAkaTest extends Goddard<ReplicatedClient, RawClient> {
   RawAka target;
 
   public static void prepResultSetGood(ResultSet rs) throws SQLException {
+    when(rs.getString(ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.ONM_THIRD_ID.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.ONM_FIRST_NM.ordinal())).thenReturn("Homer");
     when(rs.getString(ColumnPosition.ONM_LAST_NM.ordinal())).thenReturn("Simpson");

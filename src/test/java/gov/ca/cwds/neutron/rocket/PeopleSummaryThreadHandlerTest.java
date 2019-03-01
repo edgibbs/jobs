@@ -25,18 +25,28 @@ import java.util.function.Consumer;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import gov.ca.cwds.dao.cms.ReplicatedClientDao;
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
+import gov.ca.cwds.data.persistence.cms.PlacementHomeAddressTest;
 import gov.ca.cwds.data.persistence.cms.client.RawAddressTest;
+import gov.ca.cwds.data.persistence.cms.client.RawAka;
 import gov.ca.cwds.data.persistence.cms.client.RawAkaTest;
+import gov.ca.cwds.data.persistence.cms.client.RawCase;
 import gov.ca.cwds.data.persistence.cms.client.RawCaseTest;
 import gov.ca.cwds.data.persistence.cms.client.RawClient;
+import gov.ca.cwds.data.persistence.cms.client.RawClientAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawClientAddressTest;
+import gov.ca.cwds.data.persistence.cms.client.RawClientCounty;
+import gov.ca.cwds.data.persistence.cms.client.RawClientCountyTest;
 import gov.ca.cwds.data.persistence.cms.client.RawClientTest;
+import gov.ca.cwds.data.persistence.cms.client.RawCsec;
+import gov.ca.cwds.data.persistence.cms.client.RawCsecTest;
+import gov.ca.cwds.data.persistence.cms.client.RawEthnicity;
 import gov.ca.cwds.data.persistence.cms.client.RawEthnicityTest;
+import gov.ca.cwds.data.persistence.cms.client.RawSafetyAlert;
+import gov.ca.cwds.data.persistence.cms.client.RawSafetyAlertTest;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.ClientPersonIndexerJob;
 import gov.ca.cwds.jobs.Goddard;
@@ -54,7 +64,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   @Before
   public void setup() throws Exception {
     super.setup();
-    when(rs.next()).thenReturn(true, true, false);
+    when(rs.next()).thenReturn(true).thenReturn(false);
     dao = new ReplicatedClientDao(sessionFactory);
     rocket =
         new ClientPersonIndexerJob(dao, esDao, lastRunFile, mapper, flightPlan, launchDirector);
@@ -86,7 +96,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void handleSecondaryJdbc_A$Connection$Pair() throws Exception {
-    Pair<String, String> range = pair;
+    final Pair<String, String> range = pair;
     target.handleSecondaryJdbc(con, range);
   }
 
@@ -97,27 +107,29 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     target.handleSecondaryJdbc(con, pair);
   }
 
-  @Test
-  public void mapReplicatedClient_A$PlacementHomeAddress() throws Exception {
-    PlacementHomeAddress pha = mock(PlacementHomeAddress.class);
-    target.mapReplicatedClient(pha);
+  @Test(expected = NeutronRuntimeException.class)
+  public void handleSecondaryJdbc_bomb() throws Exception {
+    doThrow(new SQLException()).when(con).commit();
+    doThrow(new SQLException()).when(con).rollback();
+    doThrow(new SQLException()).when(rs).getString(any());
+    target.handleSecondaryJdbc(con, pair);
   }
 
   @Test
   public void handleJdbcDone_A$Pair() throws Exception {
-    Pair<String, String> range = pair;
+    final Pair<String, String> range = pair;
     target.handleJdbcDone(range);
   }
 
   @Test
   public void handleStartRange_A$Pair() throws Exception {
-    Pair<String, String> range = pair;
+    final Pair<String, String> range = pair;
     target.handleStartRange(range);
   }
 
   @Test
   public void handleFinishRange_A$Pair() throws Exception {
-    Pair<String, String> range = pair;
+    final Pair<String, String> range = pair;
     target.handleFinishRange(range);
   }
 
@@ -128,11 +140,12 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     assertThat(actual, is(equalTo(expected)));
   }
 
-  @Test
-  @Ignore
-  public void fetchLastRunNormalizedResults_A$Date$Set() throws Exception {
+  @Test(expected = NeutronRuntimeException.class)
+  public void fetchLastRunNormalizedResults_bomb() throws Exception {
     final Date lastRunDate = new SimpleDateFormat("yyyy-mm-dd").parse("10-31-2017");
     final Set<String> deletionResults = new HashSet<>();
+
+    bombResultSet();
     final List<ReplicatedClient> actual =
         target.fetchLastRunNormalizedResults(lastRunDate, deletionResults);
     final List<ReplicatedClient> expected = new ArrayList<>();
@@ -179,7 +192,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void prepAffectedClients_A$PreparedStatement$Pair() throws Exception {
-    Pair<String, String> p = pair;
+    final Pair<String, String> p = pair;
     target.prepPlacementClients(preparedStatement, p);
   }
 
@@ -187,7 +200,7 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   public void prepAffectedClients_A$PreparedStatement$Pair_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
-    Pair<String, String> p = pair;
+    final Pair<String, String> p = pair;
     target.prepPlacementClients(preparedStatement, p);
   }
 
@@ -211,8 +224,8 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void isDoneHandlerRetrieve_A$() throws Exception {
-    boolean actual = target.isDoneHandlerRetrieve();
-    boolean expected = false;
+    final boolean actual = target.isDoneHandlerRetrieve();
+    final boolean expected = false;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -239,11 +252,38 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
     System.out.println(target.getRawClients());
   }
 
+  @Test(expected = NeutronRuntimeException.class)
+  public void readClient_bomb() throws Exception {
+    RawClientTest.prepResultSetGood(rs);
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    bombResultSet();
+    target.readClient(rs);
+  }
+
   @Test
   public void readClientAddress_A$ResultSet() throws Exception {
     readClient_A$ResultSet();
     RawClientAddressTest.prepResultSetGood(rs);
     when(rs.next()).thenReturn(true).thenReturn(false);
+    target.readClientAddress(rs);
+  }
+
+  @Test
+  public void readClientAddress_orphan() throws Exception {
+    readClient_A$ResultSet();
+    RawClientAddressTest.prepResultSetGood(rs);
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    when(rs.getString(RawClientAddress.ColumnPosition.CLT_IDENTIFIER.ordinal()))
+        .thenReturn("7654321xyz");
+    target.readClientAddress(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readClientAddress_bomb() throws Exception {
+    readClient_A$ResultSet();
+    RawClientAddressTest.prepResultSetGood(rs);
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    bombResultSet();
     target.readClientAddress(rs);
   }
 
@@ -256,42 +296,200 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   }
 
   @Test
+  public void readAddress_orphan_client() throws Exception {
+    readClientAddress_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawAddressTest.prepResultSetGood(rs);
+    when(rs.getString(RawClientAddress.ColumnPosition.CLT_IDENTIFIER.ordinal()))
+        .thenReturn("7654321xyz");
+    target.readAddress(rs);
+  }
+
+  @Test
+  public void readAddress_orphan_client_address() throws Exception {
+    readClientAddress_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawAddressTest.prepResultSetGood(rs);
+    when(rs.getString(RawClientAddress.ColumnPosition.CLA_IDENTIFIER.ordinal()))
+        .thenReturn("7654321xyz");
+    target.readAddress(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readAddress_bomb() throws Exception {
+    readClientAddress_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawAddressTest.prepResultSetGood(rs);
+    bombResultSet();
+    target.readAddress(rs);
+  }
+
+  @Test
   public void readClientCounty_A$ResultSet() throws Exception {
     readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawClientCountyTest.prepResultSetGood(rs);
+    target.readClientCounty(rs);
+  }
+
+  @Test
+  public void readClientCounty_orphan() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawClientCountyTest.prepResultSetGood(rs);
+    when(rs.getString(RawClientCounty.ColumnPosition.CLT_IDENTIFIER.ordinal()))
+        .thenReturn("7654321xyz");
+    target.readClientCounty(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readClientCounty_bomb() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawClientCountyTest.prepResultSetGood(rs);
+    bombResultSet();
     target.readClientCounty(rs);
   }
 
   @Test
   public void readAka_A$ResultSet() throws Exception {
     readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
     RawAkaTest.prepResultSetGood(rs);
+    target.readAka(rs);
+  }
+
+  @Test
+  public void readAka_orphan() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawAkaTest.prepResultSetGood(rs);
+    when(rs.getString(RawAka.ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn("7654321xyz");
+    target.readAka(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readAka_bomb() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawAkaTest.prepResultSetGood(rs);
+    bombResultSet();
     target.readAka(rs);
   }
 
   @Test
   public void readCase_A$ResultSet() throws Exception {
     readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
     RawCaseTest.prepResultSetGood(rs);
+    target.readCase(rs);
+  }
+
+  @Test
+  public void readCase_orphan() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawCaseTest.prepResultSetGood(rs);
+    when(rs.getString(RawCase.ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn("7654321xyz");
+    target.readCase(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readCase_bomb() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawCaseTest.prepResultSetGood(rs);
+    bombResultSet();
     target.readCase(rs);
   }
 
   @Test
   public void readCsec_A$ResultSet() throws Exception {
     readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawCsecTest.prepResultSetGood(rs);
+    target.readCsec(rs);
+  }
+
+  @Test
+  public void readCsec_orphan() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawCsecTest.prepResultSetGood(rs);
+    when(rs.getString(RawCsec.ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn("7654321xyz");
+    target.readCsec(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readCsec_bomb() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawCsecTest.prepResultSetGood(rs);
+    bombResultSet();
     target.readCsec(rs);
   }
 
   @Test
   public void readEthnicity_A$ResultSet() throws Exception {
     readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
     RawEthnicityTest.prepResultSetGood(rs);
+    target.readEthnicity(rs);
+  }
+
+  @Test
+  public void readEthnicity_orphan() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawEthnicityTest.prepResultSetGood(rs);
+    when(rs.getString(RawEthnicity.ColumnPosition.CLT_IDENTIFIER.ordinal()))
+        .thenReturn("7654321xyz");
+    target.readEthnicity(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readEthnicity_bomb() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawEthnicityTest.prepResultSetGood(rs);
+    bombResultSet();
     target.readEthnicity(rs);
   }
 
   @Test
   public void readSafetyAlert_A$ResultSet() throws Exception {
     readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawSafetyAlertTest.prepResultSetGood(rs);
     target.readSafetyAlert(rs);
+  }
+
+  @Test
+  public void readSafetyAlert_orphan() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawSafetyAlertTest.prepResultSetGood(rs);
+    when(rs.getString(RawSafetyAlert.ColumnPosition.CLT_IDENTIFIER.ordinal()))
+        .thenReturn("7654321xyz");
+    target.readSafetyAlert(rs);
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void readSafetyAlert_bomb() throws Exception {
+    readClient_A$ResultSet();
+    when(rs.next()).thenReturn(true).thenReturn(false);
+    RawSafetyAlertTest.prepResultSetGood(rs);
+    bombResultSet();
+    target.readSafetyAlert(rs);
+  }
+
+  @Test
+  public void mapReplicatedClient_A$PlacementHomeAddress() throws Exception {
+    readClient_A$ResultSet();
+    handleJdbcDone_A$Pair();
+    PlacementHomeAddressTest.prepResultSetGood(rs);
+    final PlacementHomeAddress pha = new PlacementHomeAddress(rs);
+    target.mapReplicatedClient(pha);
   }
 
   @Test
@@ -309,25 +507,24 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void loadClientRange_A$PreparedStatement$Pair() throws Exception {
-    PreparedStatement stmtInsClient = mock(PreparedStatement.class);
-    Pair<String, String> range = pair;
+    final PreparedStatement stmtInsClient = mock(PreparedStatement.class);
+    final Pair<String, String> range = pair;
     target.loadClientRange(con, stmtInsClient, range);
   }
 
   @Test(expected = SQLException.class)
   public void loadClientRange_A$PreparedStatement$Pair_T$SQLException() throws Exception {
-    when(rs.next()).thenThrow(SQLException.class);
-    when(rs.getString(any(String.class))).thenThrow(SQLException.class);
-    doThrow(SQLException.class).when(con).commit();
+    doThrow(SQLException.class).when(preparedStatement).setString(any(Integer.class),
+        any(String.class));
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
-    Pair<String, String> range = pair;
+    final Pair<String, String> range = pair;
     target.loadClientRange(con, preparedStatement, range);
   }
 
   @Test
   public void prepPlacementClients_A$PreparedStatement$Pair() throws Exception {
-    PreparedStatement stmt = mock(PreparedStatement.class);
-    Pair<String, String> p = pair;
+    final PreparedStatement stmt = mock(PreparedStatement.class);
+    final Pair<String, String> p = pair;
     target.prepPlacementClients(stmt, p);
   }
 
@@ -335,9 +532,11 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   public void prepPlacementClients_A$PreparedStatement$Pair_T$SQLException() throws Exception {
     when(rs.next()).thenThrow(SQLException.class);
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
+    doThrow(SQLException.class).when(preparedStatement).setString(any(Integer.class),
+        any(String.class));
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
     doThrow(SQLException.class).when(con).commit();
-    Pair<String, String> p = pair;
+    final Pair<String, String> p = pair;
     target.prepPlacementClients(preparedStatement, p);
   }
 
@@ -359,8 +558,8 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void loadClientRange_A$Connection$PreparedStatement$Pair() throws Exception {
-    PreparedStatement stmtInsClient = preparedStatement;
-    Pair<String, String> range = pair;
+    final PreparedStatement stmtInsClient = preparedStatement;
+    final Pair<String, String> range = pair;
     int actual = target.loadClientRange(con, stmtInsClient, range);
     int expected = 1;
     assertThat(actual, is(equalTo(expected)));
@@ -369,8 +568,8 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
   @Test(expected = SQLException.class)
   public void loadClientRange_A$Connection$PreparedStatement$Pair_T$SQLException()
       throws Exception {
-    PreparedStatement stmtInsClient = preparedStatement;
-    Pair<String, String> range = pair;
+    final PreparedStatement stmtInsClient = preparedStatement;
+    final Pair<String, String> range = pair;
     bombResultSet();
 
     target.loadClientRange(con, stmtInsClient, range);
@@ -378,8 +577,8 @@ public class PeopleSummaryThreadHandlerTest extends Goddard<ReplicatedClient, Ra
 
   @Test
   public void isInitialLoad_A$() throws Exception {
-    boolean actual = target.isInitialLoad();
-    boolean expected = true;
+    final boolean actual = target.isInitialLoad();
+    final boolean expected = true;
     assertThat(actual, is(equalTo(expected)));
   }
 

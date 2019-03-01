@@ -153,7 +153,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     }
   }
 
-  private boolean schemaRefreshCompleted(int waitTimeSeconds) {
+  protected boolean schemaRefreshCompleted(int waitTimeSeconds) {
     if (lock.tryLock()) {
       try {
         final boolean timeExceeded = condDone.await(waitTimeSeconds, TimeUnit.SECONDS);
@@ -168,6 +168,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     }
 
     if (!isRunning()) {
+      LOGGER.warn("WTF schemaRefreshCompleted: #1");
       throw new NeutronRuntimeException("SCHEMA RESET: FLIGHT ABORTED!");
     }
 
@@ -183,7 +184,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     return completed;
   }
 
-  private String findSchemaRefreshStatus() {
+  protected String findSchemaRefreshStatus() {
     return dao.findBySchemaStartTime(getDbSchema()).getRefreshStatus();
   }
 

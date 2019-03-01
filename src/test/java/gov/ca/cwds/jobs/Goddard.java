@@ -166,6 +166,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public DatabaseMetaData meta;
   public NativeQuery<M> nq;
   public ProcedureCall proc;
+  public Query q = Mockito.mock(Query.class);
 
   public SystemCodeDao systemCodeDao;
   public SystemMetaDao systemMetaDao;
@@ -340,7 +341,6 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final ScrollableResults scrollableResults = mock(ScrollableResults.class);
     when(nq.scroll(any(ScrollMode.class))).thenReturn(scrollableResults);
 
-    final Query q = Mockito.mock(Query.class);
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.getNamedQuery(any(String.class))).thenReturn(q);
     when(q.list()).thenReturn(new ArrayList<>());

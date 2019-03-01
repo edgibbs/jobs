@@ -129,9 +129,13 @@ public class PeopleSummaryThreadHandler
 
     INDEX_TO_ES("Wait on Elasticsearch indexing"),
 
-    REPLICATION_TIME_MILLIS("Millis to replicate records"),
+    REPLICATION_TIME_MILLIS("Avg millis to replicate records"),
 
-    REPLICATION_TIME_SECS("Seconds to replicate records"),
+    REPLICATION_TIME_SECS("Avg seconds to replicate records"),
+
+    REPLICATION_TIME_MAX_SECS("Max seconds to replicate records"),
+
+    REPLICATION_TIME_MIN_SECS("Min seconds to replicate records"),
 
     DONE("Job done")
 

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.hibernate.Session;
@@ -13,6 +14,7 @@ import com.google.inject.Inject;
 
 import gov.ca.cwds.dao.cms.DbResetStatusDao;
 import gov.ca.cwds.data.persistence.cms.DatabaseResetEntry;
+import gov.ca.cwds.data.std.ApiObjectIdentity;
 import gov.ca.cwds.jobs.schedule.LaunchCommand;
 import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.flight.FlightLog;
@@ -38,7 +40,30 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
 
   private static final ConditionalLogger LOGGER = new JetPackLogger(ReplicationLagRocket.class);
 
-  private static volatile Float lastReplicationSeconds = 3.0F;
+  private static volatile Float lastReplicationSeconds = 0.0F;
+
+  /**
+   * SNAP-941: measure replication time more accurately.
+   * 
+   * @author SA Tech
+   */
+  protected static class ReplicationTimeMetric extends ApiObjectIdentity {
+
+    private static final long serialVersionUID = 1L;
+
+    final String table;
+    final Float avgTime;
+    final Float minTime;
+    final Float maxTime;
+
+    public ReplicationTimeMetric(String table, Float avgTime, Float minTime, Float maxTime) {
+      this.table = table;
+      this.avgTime = avgTime;
+      this.minTime = minTime;
+      this.maxTime = maxTime;
+    }
+
+  }
 
   protected String repSchema;
   protected String txnSchema;
@@ -76,26 +101,37 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
    * Measure actual replication time.
    */
   protected void measureReplicationLag() {
-    Float lagSeconds = null;
+    ReplicationTimeMetric lag = null;
     final FlightLog fl = getFlightLog();
+
     try (final Session session = getJobDao().grabSession()) {
       final Connection con = NeutronJdbcUtils.prepConnection(session);
       try (final PreparedStatement stmtSel =
           con.prepareStatement(ClientSQLResource.SEL_REPL_TIME_REAL)) {
-        lagSeconds = pull(stmtSel.executeQuery());
+        final Timestamp lastRunTs = new Timestamp(determineLastSuccessfulRunTime().getTime());
+        stmtSel.setTimestamp(1, lastRunTs);
+        stmtSel.setTimestamp(2, lastRunTs);
+        lag = pull(stmtSel.executeQuery());
         con.rollback();
 
-        if (lagSeconds != null) {
-          LOGGER.info("Replication took {} seconds", lagSeconds);
-          lastReplicationSeconds = lagSeconds;
+        if (lag != null) {
+          lastReplicationSeconds = lag.avgTime;
 
-          fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lagSeconds);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lag.avgTime);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MIN_SECS.name().toLowerCase(),
+              new Float(lag.minTime));
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MAX_SECS.name().toLowerCase(),
+              new Float(lag.maxTime));
           fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(),
-              new Float(lagSeconds * 1000));
+              new Float(lag.avgTime * 1000));
         }
-
       } finally {
         // Auto-close statements.
+        try {
+          con.rollback();
+        } catch (Exception e) {
+          // eat it
+        }
       }
     } catch (Exception e) {
       throw CheeseRay.runtime(LOGGER, e, "ERROR CHECKING REPLICATION LAG! {}", e.getMessage());
@@ -104,10 +140,11 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
     }
   }
 
-  protected Float pull(final ResultSet rs) throws SQLException {
-    Float ret = null;
+  protected ReplicationTimeMetric pull(final ResultSet rs) throws SQLException {
+    ReplicationTimeMetric ret = null;
     while (isRunning() && rs.next()) {
-      ret = rs.getFloat(3);
+      ret = new ReplicationTimeMetric(rs.getString(1), rs.getFloat(2), rs.getFloat(3),
+          rs.getFloat(4));
       break;
     }
 
@@ -115,7 +152,7 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
   }
 
   public static Float getLastReplicationSeconds() {
-    return lastReplicationSeconds;
+    return ReplicationLagRocket.lastReplicationSeconds;
   }
 
   public static void setLastReplicationSeconds(Float lastReplicationSeconds) {
