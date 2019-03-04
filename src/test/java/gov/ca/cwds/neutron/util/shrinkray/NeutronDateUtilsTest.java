@@ -80,7 +80,7 @@ public class NeutronDateUtilsTest extends Goddard {
   public void makeTimestampStringLookBack_A$Date() throws Exception {
     Date date = makeDate();
     String actual = NeutronDateUtils.makeTimestampStringLookBack(date);
-    String expected = "2018-10-30 23:49:00.000";
+    String expected = "2018-10-30 23:56:00.000";
     assertThat(actual, is(equalTo(expected)));
   }
 

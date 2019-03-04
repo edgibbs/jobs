@@ -93,7 +93,7 @@ public class CollateralIndividualIndexerJobTest
   public void getPrepLastChangeSQL_A$() throws Exception {
     String actual = target.getPrepLastChangeSQL();
     String expected =
-        "INSERT INTO GT_ID (IDENTIFIER)\n SELECT DISTINCT R.IDENTIFIER \n FROM COLTRL_T R \n WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000'";
+        "INSERT INTO GT_ID (IDENTIFIER)\n SELECT DISTINCT R.IDENTIFIER \n FROM COLTRL_T R \n WHERE R.IBMSNAP_LOGMARKER > '2018-12-31 03:30:12.000'";
     assertThat(actual, is(equalTo(expected)));
   }
 

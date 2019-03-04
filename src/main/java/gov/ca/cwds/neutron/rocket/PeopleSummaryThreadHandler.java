@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -43,8 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
-import gov.ca.cwds.data.persistence.cms.client.ClientReference;
-import gov.ca.cwds.data.persistence.cms.client.NeutronJdbcReader;
 import gov.ca.cwds.data.persistence.cms.client.RawAddress;
 import gov.ca.cwds.data.persistence.cms.client.RawAka;
 import gov.ca.cwds.data.persistence.cms.client.RawCase;
@@ -62,7 +59,9 @@ import gov.ca.cwds.neutron.atom.AtomLoadStepHandler;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
+import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Monitor;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
@@ -130,7 +129,13 @@ public class PeopleSummaryThreadHandler
 
     INDEX_TO_ES("Wait on Elasticsearch indexing"),
 
-    REPLICATION_TIME("Millis to replicate records"),
+    REPLICATION_TIME_MILLIS("Avg millis to replicate records"),
+
+    REPLICATION_TIME_SECS("Avg seconds to replicate records"),
+
+    REPLICATION_TIME_MAX_SECS("Max seconds to replicate records"),
+
+    REPLICATION_TIME_MIN_SECS("Min seconds to replicate records"),
 
     DONE("Job done")
 
@@ -147,7 +152,7 @@ public class PeopleSummaryThreadHandler
     }
   }
 
-  private final ClientPersonIndexerJob rocket;
+  private ClientPersonIndexerJob rocket;
 
   protected boolean doneHandlerRetrieve = false;
 
@@ -202,27 +207,6 @@ public class PeopleSummaryThreadHandler
     }
 
     LOGGER.trace("read(): done");
-  }
-
-  protected <T extends ClientReference> void readAny(final ResultSet rs,
-      NeutronJdbcReader<T> reader, BiConsumer<ClientReference, T> organizer, String msg) {
-    LOGGER.trace("readAny(): begin");
-    int counter = 0;
-    RawClient c = null;
-    T t;
-
-    try {
-      while (rocket.isRunning() && rs.next() && (t = reader.read(rs)) != null) {
-        // Find associated raw client, if any, and link.
-        c = rawClients.get(t.getCltId());
-        organizer.accept(c, t);
-        CheeseRay.logEvery(LOGGER, LG_SZ, ++counter, "read", msg);
-      }
-    } catch (Exception e) {
-      throw CheeseRay.runtime(LOGGER, e, "FAILED TO READ DATA! {}", e.getMessage(), e);
-    }
-
-    LOGGER.debug("{} {} recs retrieved", msg, counter);
   }
 
   protected void readClient(final ResultSet rs) {
@@ -451,7 +435,6 @@ public class PeopleSummaryThreadHandler
    */
   @Override
   public void handleMainResults(ResultSet rs, Connection con) throws SQLException {
-    // readClient(rs); // No longer.
     final int cntrRetrieved = rawClients.size();
 
     LOGGER.info("handleMainResults(): commit");
@@ -461,7 +444,7 @@ public class PeopleSummaryThreadHandler
     flightLog.addToDenormalized(cntrRetrieved);
   }
 
-  protected void loadClientRange(Connection con, final PreparedStatement stmtInsClient,
+  protected int loadClientRange(Connection con, final PreparedStatement stmtInsClient,
       Pair<String, String> range) throws SQLException {
     LOGGER.trace("loadClientRange(): begin");
     con.commit(); // free db resources
@@ -474,8 +457,9 @@ public class PeopleSummaryThreadHandler
       LOGGER.trace("loadClientRange(): FAILED TO SET RANGES. Last change mode?", e);
     }
 
-    final int clientCount = stmtInsClient.executeUpdate();
-    LOGGER.info("loadClientRange(): client count: {}", clientCount);
+    final int ret = stmtInsClient.executeUpdate();
+    LOGGER.info("loadClientRange(): client count: {}", ret);
+    return ret;
   }
 
   protected boolean isInitialLoad() {
@@ -509,6 +493,7 @@ public class PeopleSummaryThreadHandler
   public void handleSecondaryJdbc(Connection con, Pair<String, String> range) throws SQLException {
     LOGGER.trace("handleSecondaryJdbc(): begin");
     final FlightLog fl = rocket.getFlightLog();
+    final FlightPlan fp = rocket.getFlightPlan();
 
     String sqlPlacementAddress;
     try {
@@ -519,6 +504,8 @@ public class PeopleSummaryThreadHandler
     }
 
     try (
+        final NeutronDB2Monitor mon =
+            new NeutronDB2Monitor(con, fp.isDebug() && !fp.isLastRunMode());
         final PreparedStatement stmtInsClient =
             con.prepareStatement(pickPrepDml(INS_CLI_RNG, INS_CLI_LST_CHG));
         final PreparedStatement stmtInsClientPlaceHome =
@@ -527,8 +514,8 @@ public class PeopleSummaryThreadHandler
             con.prepareStatement(sqlPlacementAddress, TFO, CRO);
         final PreparedStatement stmtSelClient = con.prepareStatement(SEL_CLI, TFO, CRO);
         final PreparedStatement stmtSelCliAddr = con.prepareStatement(SEL_CLI_ADDR, TFO, CRO);
-        final PreparedStatement stmtSelCliCnty = con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
         final PreparedStatement stmtSelAddress = con.prepareStatement(SEL_ADDR, TFO, CRO);
+        final PreparedStatement stmtSelCliCnty = con.prepareStatement(SEL_CLI_COUNTY, TFO, CRO);
         final PreparedStatement stmtSelAka = con.prepareStatement(SEL_AKA, TFO, CRO);
         final PreparedStatement stmtSelCase = con.prepareStatement(SEL_CASE, TFO, CRO);
         final PreparedStatement stmtSelCsec = con.prepareStatement(SEL_CSEC, TFO, CRO);
@@ -537,59 +524,70 @@ public class PeopleSummaryThreadHandler
 
       // Client keys for this bundle.
       step(STEP.SET_CLIENT_KEY);
-      loadClientRange(con, stmtInsClient, range);
+      final int keyCount = loadClientRange(con, stmtInsClient, range);
 
-      step(STEP.SEL_CLIENT);
-      read(stmtSelClient, rs -> readClient(rs));
+      if (keyCount > 0) {
+        step(STEP.SEL_CLIENT);
+        LOGGER.trace("SEL_CLI: \n\n{}\n", SEL_CLI);
+        read(stmtSelClient, rs -> readClient(rs));
 
-      // SNAP-735: missing addresses.
-      step(STEP.SEL_CLIENT_ADDRESS);
-      read(stmtSelCliAddr, rs -> readClientAddress(rs));
+        // SNAP-735: missing addresses.
+        step(STEP.SEL_CLIENT_ADDRESS);
+        LOGGER.trace("SEL_CLI_ADDR: \n\n{}\n", SEL_CLI_ADDR);
+        read(stmtSelCliAddr, rs -> readClientAddress(rs));
 
-      step(STEP.SEL_ADDRESS);
-      read(stmtSelAddress, rs -> readAddress(rs));
+        step(STEP.SEL_ADDRESS);
+        LOGGER.trace("SEL_ADDR: \n\n{}\n", SEL_ADDR);
+        read(stmtSelAddress, rs -> readAddress(rs));
 
-      loadClientRange(con, stmtInsClient, range); // Set bundle client keys again.
-      step(STEP.SEL_CLIENT_COUNTY);
-      read(stmtSelCliCnty, rs -> readClientCounty(rs));
+        step(STEP.SEL_CLIENT_COUNTY);
+        LOGGER.trace("SEL_CLI_COUNTY: \n\n{}\n", SEL_CLI_COUNTY);
+        read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
-      step(STEP.SEL_AKA);
-      read(stmtSelAka, rs -> readAka(rs));
+        step(STEP.SEL_AKA);
+        LOGGER.trace("SEL_AKA: \n{}", SEL_AKA);
+        read(stmtSelAka, rs -> readAka(rs));
 
-      step(STEP.SEL_CASE);
-      read(stmtSelCase, rs -> readCase(rs));
+        step(STEP.SEL_CASE);
+        LOGGER.trace("SEL_CASE: \n{}", SEL_CASE);
+        read(stmtSelCase, rs -> readCase(rs));
 
-      step(STEP.SEL_CSEC);
-      read(stmtSelCsec, rs -> readCsec(rs));
+        step(STEP.SEL_CSEC);
+        LOGGER.trace("SEL_CSEC: \n{}", SEL_CSEC);
+        read(stmtSelCsec, rs -> readCsec(rs));
 
-      step(STEP.SEL_ETHNIC);
-      read(stmtSelEthnicity, rs -> readEthnicity(rs));
+        step(STEP.SEL_ETHNIC);
+        LOGGER.trace("SEL_ETHNIC: \n{}", SEL_ETHNIC);
+        read(stmtSelEthnicity, rs -> readEthnicity(rs));
 
-      step(STEP.SEL_SAFETY);
-      read(stmtSelSafety, rs -> readSafetyAlert(rs));
-      con.commit(); // free db resources again
+        step(STEP.SEL_SAFETY);
+        LOGGER.trace("SEL_SAFETY: \n{}", SEL_SAFETY);
+        read(stmtSelSafety, rs -> readSafetyAlert(rs));
 
-      step(STEP.SET_PLACEMENT_KEY);
-      loadClientRange(con, stmtInsClient, range);
-      prepPlacementClients(stmtInsClientPlaceHome, range);
+        step(STEP.SET_PLACEMENT_KEY);
+        prepPlacementClients(stmtInsClientPlaceHome, range);
 
-      step(STEP.SEL_PLACEMENT_HOME);
-      readPlacementAddress(stmtSelPlacementAddress);
+        step(STEP.SEL_PLACEMENT_HOME);
+        readPlacementAddress(stmtSelPlacementAddress);
+      }
+
       con.commit(); // free db resources. Make DBA's happy.
 
+      // AR-325: reinstate replicate metric rocket.
+      // calcReplicationDelay(); // When ready
     } catch (Exception e) {
       LOGGER.error("handleSecondaryJdbc: BOOM!", e);
 
       try {
         if (isInitialLoad()) {
-          fl.markRangeError(range); // FULL MODE: Fail BUCKET, NOT WHOLE FLIGHT!
+          fl.markRangeError(range); // FULL MODE: Fail the BUCKET, NOT the WHOLE FLIGHT!
         } else {
           rocket.fail(); // Last change: fail the whole job!
         }
 
         con.rollback();
       } catch (Exception e2) {
-        LOGGER.trace("NESTED ROLLBACK EXCEPTION!", e2);
+        LOGGER.debug("NESTED ROLLBACK EXCEPTION!", e2);
       }
       throw CheeseRay.runtime(LOGGER, e, "SECONDARY JDBC FAILED! {}", e.getMessage(), e);
     } finally {
@@ -598,6 +596,10 @@ public class PeopleSummaryThreadHandler
 
     step(STEP.DONE_RETRIEVAL);
     LOGGER.debug("handleSecondaryJdbc(): DONE");
+  }
+
+  protected void calcReplicationDelay() {
+    // No-op in Initial Load.
   }
 
   protected void mapReplicatedClient(PlacementHomeAddress pha) {
@@ -634,11 +636,21 @@ public class PeopleSummaryThreadHandler
     clear();
   }
 
+  /**
+   * <p>
+   * SNAP-820: manual gc needed for Initial Load, not continuous mode. Should seldom call gc
+   * directly anyway.
+   * </p>
+   * {@inheritDoc}
+   */
   @Override
   public void handleFinishRange(Pair<String, String> range) {
     doneThreadRetrieve();
-    clear();
-    freeMemory();
+
+    if (getRocket() != null && getRocket().getFlightPlan() != null
+        && !getRocket().getFlightPlan().isLastRunMode()) {
+      freeMemory();
+    }
   }
 
   @Override
@@ -657,6 +669,7 @@ public class PeopleSummaryThreadHandler
       Set<String> deletionResults) {
     final Pair<String, String> range = Pair.<String, String>of("a", "b"); // dummy range
     handleStartRange(range);
+
     this.deletionResults = deletionResults;
     LOGGER.info("After last run fetch: count: {}", normalized.size());
 
@@ -683,8 +696,10 @@ public class PeopleSummaryThreadHandler
       rocket.fail();
       throw CheeseRay.runtime(LOGGER, e, "ERROR EXECUTING LAST CHANGE SQL! {}", e.getMessage());
     } finally {
-      handleFinishRange(range);
+      handleFinishRange(range); // ALWAYS RELEASE MEMORY!!
       rocket.getFlightLog().markRangeComplete(range);
+      clear();
+      this.rocket = null; // Release reference to parent rocket.
     }
   }
 
@@ -718,7 +733,7 @@ public class PeopleSummaryThreadHandler
   /**
    * Release unneeded heap memory early and often.
    */
-  protected void clear() {
+  public void clear() {
     LOGGER.trace("clear containers");
     normalized.clear();
     rawClients.clear();
@@ -750,7 +765,7 @@ public class PeopleSummaryThreadHandler
         stmt.setString(1, p.getLeft());
         stmt.setString(2, p.getRight());
       } catch (Exception e) {
-        LOGGER.trace("FAILED TO SET PARAMS. Last change mode?", e);
+        LOGGER.warn("FAILED TO SET PARAMS. Last change mode?", e);
       }
     }
 
@@ -801,6 +816,18 @@ public class PeopleSummaryThreadHandler
   @Override
   public String getEventType() {
     return "neutron_initial_load_client";
+  }
+
+  public void setRocket(ClientPersonIndexerJob rocket) {
+    this.rocket = rocket;
+  }
+
+  public int getRunId() {
+    return 0;
+  }
+
+  public Map<String, RawClient> getRawClients() {
+    return rawClients;
   }
 
 }

@@ -125,21 +125,21 @@ public class StandardFlightScheduleTest extends Goddard {
   @Test
   public void getStartDelaySeconds_Args__() throws Exception {
     final int actual = target.getStartDelaySeconds();
-    final int expected = 20;
+    final int expected = 12;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getWaitPeriodSeconds_Args__() throws Exception {
     final int actual = target.getWaitPeriodSeconds();
-    final int expected = 5;
+    final int expected = 1;
     assertThat(actual, is(equalTo(expected)));
   }
 
   @Test
   public void getLastRunPriority_Args__() throws Exception {
     final int actual = target.getLastRunPriority();
-    final int expected = 1000;
+    final int expected = 10000;
     assertThat(actual, is(equalTo(expected)));
   }
 

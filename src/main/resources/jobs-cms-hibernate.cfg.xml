@@ -44,9 +44,11 @@
 		<!-- https://github.com/brettwooldridge/HikariCP#configuration-knobs-baby -->
 		<property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
 		<property name="hibernate.hikari.autoCommit">false</property>
-		<property name="hibernate.hikari.maxLifetime">300000</property>
+		<property name="hibernate.hikari.connectionTimeout">45000</property>
+		<property name="hibernate.hikari.idleTimeout">90000</property>
+		<property name="hibernate.hikari.maxLifetime">900000</property>              <!-- 15 minutes -->
 		<property name="hibernate.hikari.minimumIdle">4</property>
-		<property name="hibernate.hikari.maximumPoolSize">16</property>
+		<property name="hibernate.hikari.maximumPoolSize">8</property>
 		<property name="hibernate.hikari.registerMbeans">true</property>
 
 	</session-factory>

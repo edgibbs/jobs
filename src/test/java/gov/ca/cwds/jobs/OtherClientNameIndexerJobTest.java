@@ -206,10 +206,10 @@ public class OtherClientNameIndexerJobTest
         + "SELECT CLT.IDENTIFIER AS CLIENT_ID\n"
         + "FROM OCL_NM_T ONM\n"
         + "JOIN CLIENT_T CLT ON CLT.IDENTIFIER = ONM.FKCLIENT_T\n"
-        + "WHERE ONM.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000' \n"
+        + "WHERE ONM.IBMSNAP_LOGMARKER > '2018-12-31 03:30:12.000' \n"
         + "UNION ALL\nSELECT CLT.IDENTIFIER\n"
         + "FROM CLIENT_T CLT \n"
-        + "WHERE CLT.IBMSNAP_LOGMARKER > '2018-12-31 03:23:12.000' ";
+        + "WHERE CLT.IBMSNAP_LOGMARKER > '2018-12-31 03:30:12.000' ";
     //@formatter:on
     assertThat(actual, is(equalTo(expected)));
   }

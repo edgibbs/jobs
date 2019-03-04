@@ -90,6 +90,7 @@ public interface AtomLaunchPad extends ApiMarker {
    */
   String shutdown() throws NeutronCheckedException;
 
+  void gc();
 
   FlightPlan getFlightPlan();
 

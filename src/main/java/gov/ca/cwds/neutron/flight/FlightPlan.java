@@ -91,6 +91,11 @@ public class FlightPlan implements ApiMarker {
   boolean lastRunMode = true;
 
   /**
+   * Debug mode. Monitor database connections.
+   */
+  private boolean debug = false;
+
+  /**
    * When running in "initial load" mode, specifies the starting bucket of records to be processed
    * by this rocket.
    * <p>
@@ -161,13 +166,14 @@ public class FlightPlan implements ApiMarker {
    * @param simulateLaunch simulate launch (test mode!)
    * @param legacyPeopleMapping use Snapshot 0.9 mapping for People index
    * @param loadPeopleIndex launch rockets for People index
+   * @param debug debug mode
    * @param excludedRockets optionally turn off rockets
    */
   public FlightPlan(String esConfigPeopleLoc, String esConfigPeopleSummaryLoc, String indexName,
       Date lastStartTime, Date lastEndTime, String lastRunLoc, boolean lastRunMode,
       long startBucket, long endBucket, long threadCount, boolean loadSealedAndSensitive,
       boolean rangeGiven, String baseDirectory, boolean refreshMqt, boolean dropIndex,
-      boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex,
+      boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex, boolean debug,
       Set<StandardFlightSchedule> excludedRockets) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
@@ -187,34 +193,36 @@ public class FlightPlan implements ApiMarker {
     this.simulateLaunch = simulateLaunch;
     this.legacyPeopleMapping = legacyPeopleMapping;
     this.loadPeopleIndex = loadPeopleIndex;
+    this.debug = debug;
     this.excludedRockets = excludedRockets;
   }
 
   /**
    * Copy constructor.
    * 
-   * @param flightPlan other rocket options
+   * @param fp other rocket options
    */
-  public FlightPlan(final FlightPlan flightPlan) {
-    this.esConfigPeopleLoc = flightPlan.esConfigPeopleLoc;
-    this.esConfigPeopleSummaryLoc = flightPlan.esConfigPeopleSummaryLoc;
-    this.indexName = StringUtils.trimToNull(flightPlan.indexName);
-    this.overrideLastStartTime = flightPlan.overrideLastStartTime;
-    this.overrideLastEndTime = flightPlan.overrideLastEndTime;
-    this.lastRunLoc = flightPlan.lastRunLoc;
-    this.lastRunMode = flightPlan.lastRunMode;
-    this.startBucket = flightPlan.startBucket;
-    this.endBucket = flightPlan.endBucket;
-    this.threadCount = flightPlan.threadCount;
-    this.loadSealedAndSensitive = flightPlan.loadSealedAndSensitive;
-    this.rangeGiven = flightPlan.rangeGiven;
-    this.baseDirectory = flightPlan.baseDirectory;
-    this.refreshMqt = flightPlan.refreshMqt;
-    this.dropIndex = flightPlan.dropIndex;
-    this.simulateLaunch = flightPlan.simulateLaunch;
-    this.legacyPeopleMapping = flightPlan.legacyPeopleMapping;
-    this.loadPeopleIndex = flightPlan.loadPeopleIndex;
-    this.excludedRockets = flightPlan.excludedRockets;
+  public FlightPlan(final FlightPlan fp) {
+    this.esConfigPeopleLoc = fp.esConfigPeopleLoc;
+    this.esConfigPeopleSummaryLoc = fp.esConfigPeopleSummaryLoc;
+    this.indexName = StringUtils.trimToNull(fp.indexName);
+    this.overrideLastStartTime = fp.overrideLastStartTime;
+    this.overrideLastEndTime = fp.overrideLastEndTime;
+    this.lastRunLoc = fp.lastRunLoc;
+    this.lastRunMode = fp.lastRunMode;
+    this.startBucket = fp.startBucket;
+    this.endBucket = fp.endBucket;
+    this.threadCount = fp.threadCount;
+    this.loadSealedAndSensitive = fp.loadSealedAndSensitive;
+    this.rangeGiven = fp.rangeGiven;
+    this.baseDirectory = fp.baseDirectory;
+    this.refreshMqt = fp.refreshMqt;
+    this.dropIndex = fp.dropIndex;
+    this.simulateLaunch = fp.simulateLaunch;
+    this.legacyPeopleMapping = fp.legacyPeopleMapping;
+    this.loadPeopleIndex = fp.loadPeopleIndex;
+    this.excludedRockets = fp.excludedRockets;
+    this.debug = fp.debug;
   }
 
   /**
@@ -366,6 +374,7 @@ public class FlightPlan implements ApiMarker {
     boolean simulateLaunch = false;
     boolean legacyPeopleMapping = false;
     boolean loadPeopleIndex = true;
+    boolean debug = false;
 
     // CHECKSTYLE:OFF
     Pair<Long, Long> bucketRange = Pair.of(-1L, 0L);
@@ -444,6 +453,10 @@ public class FlightPlan implements ApiMarker {
             simulateLaunch = true;
             break;
 
+          case NeutronLongCmdLineName.CMD_LINE_DEBUG:
+            debug = true;
+            break;
+
           case NeutronLongCmdLineName.CMD_LINE_LEGACY_PEOPLE_MAPPING:
             legacyPeopleMapping = true;
             break;
@@ -469,7 +482,7 @@ public class FlightPlan implements ApiMarker {
     return new FlightPlan(esConfigPeopleLoc, esConfigPeopleSummaryLoc, indexName, lastStartTime,
         lastEndTime, lastRunLoc, lastRunMode, bucketRange.getLeft(), bucketRange.getRight(),
         threadCount, loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex,
-        simulateLaunch, legacyPeopleMapping, loadPeopleIndex, excludedRockets);
+        simulateLaunch, legacyPeopleMapping, loadPeopleIndex, debug, excludedRockets);
   }
 
   public void setStartBucket(long startBucket) {
@@ -615,6 +628,14 @@ public class FlightPlan implements ApiMarker {
     this.dequeRerunIds = dequeRerunIds;
   }
 
+  public boolean isDebug() {
+    return debug;
+  }
+
+  public void setDebug(boolean debug) {
+    this.debug = debug;
+  }
+
   @Override
   public String toString() {
     return "FlightPlan [esConfigPeopleLoc=" + esConfigPeopleLoc + ", esConfigPeopleSummaryLoc="
@@ -625,8 +646,8 @@ public class FlightPlan implements ApiMarker {
         + ", lastRunMode=" + lastRunMode + ", startBucket=" + startBucket + ", endBucket="
         + endBucket + ", threadCount=" + threadCount + ", loadSealedAndSensitive="
         + loadSealedAndSensitive + ", rangeGiven=" + rangeGiven + ", baseDirectory=" + baseDirectory
-        + ", refreshMqt=" + refreshMqt + ", dropIndex=" + dropIndex + ", excludedRockets="
-        + excludedRockets + "]";
+        + ", refreshMqt=" + refreshMqt + ", dropIndex=" + dropIndex + ", debug=" + debug
+        + ", excludedRockets=" + excludedRockets + "]";
   }
 
 }

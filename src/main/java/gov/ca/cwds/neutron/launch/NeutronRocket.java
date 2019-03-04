@@ -2,6 +2,7 @@ package gov.ca.cwds.neutron.launch;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
@@ -35,15 +36,18 @@ public class NeutronRocket implements InterruptableJob {
 
   private final int instanceNumber = instanceCounter.incrementAndGet();
 
+  /**
+   * <strong>SNAP-820:</strong> must clear this variable for gc.
+   */
   @SuppressWarnings("rawtypes")
-  private final BasePersonRocket rocket;
+  private BasePersonRocket rocket;
 
   private final AtomFlightRecorder flightRecorder;
 
   private final StandardFlightSchedule flightSchedule;
 
-  private volatile FlightLog flightLog = new FlightLog(); // "volatile" shows changes immediately
-                                                          // across threads
+  // "volatile" shows changes immediately to other threads.
+  private volatile FlightLog flightLog = new FlightLog();
 
   /**
    * Constructor.
@@ -62,10 +66,6 @@ public class NeutronRocket implements InterruptableJob {
     this.flightRecorder = flightRecorder;
   }
 
-  protected void launch() {
-
-  }
-
   @SuppressWarnings("rawtypes")
   @Override
   public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -74,7 +74,8 @@ public class NeutronRocket implements InterruptableJob {
     final String origThreadName = "" + Thread.currentThread().getName();
 
     NeutronThreadUtils.nameThread(rocketName, this);
-    LOGGER.info("\n\t>>>> LAUNCH! {}, instance # {}", rocket.getClass().getName(), instanceNumber);
+    LOGGER.info("\n\t>>>> LAUNCH! {}, instance # {}\n", rocket.getClass().getName(),
+        instanceNumber);
 
     try (final BasePersonRocket flight = rocket) {
       MDC.put("rocketLog", rocketName);
@@ -87,6 +88,7 @@ public class NeutronRocket implements InterruptableJob {
       map.put("track", flightLog);
       context.setResult(flightLog);
 
+      // SNAP-820: NEXT: launch rocket in interruptible thread.
       flight.run();
       flight.done();
       LOGGER.info("HAPPY LANDING! rocket: {}", rocketName);
@@ -95,12 +97,14 @@ public class NeutronRocket implements InterruptableJob {
       LOGGER.error("FAILURE TO LAUNCH! rocket: {}", rocketName, e);
       throw new JobExecutionException("FAILURE TO LAUNCH! rocket: " + rocketName, e);
     } finally {
+      final BasePersonRocket gcRocket = rocket;
+      this.rocket = null; // SNAP-820: potential memory leak
       flightRecorder.logFlight(flightSchedule.getRocketClass(), flightLog);
       flightRecorder.summarizeFlight(flightSchedule, flightLog);
 
       try {
-        if (!flightLog.isInitialLoad()) {
-          flightLog.notifyMonitor(rocket.getEventType());
+        if (!flightLog.isInitialLoad() && !StringUtils.isBlank(gcRocket.getEventType())) {
+          flightLog.notifyMonitor(gcRocket.getEventType());
         }
       } finally {
         LOGGER.info("FLIGHT SUMMARY: rocket: {}\n{}", rocketName, flightLog);
@@ -112,7 +116,7 @@ public class NeutronRocket implements InterruptableJob {
 
   @Override
   public void interrupt() throws UnableToInterruptJobException {
-    LOGGER.warn("ABORT FLIGHT! rocket: {}", this.getRocket().getClass());
+    LOGGER.warn("ABORT FLIGHT! rocket: {}", getRocket().getClass());
     getFlightLog().fail();
   }
 

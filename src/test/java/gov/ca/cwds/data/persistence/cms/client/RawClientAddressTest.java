@@ -41,15 +41,14 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
     when(rs.getString(ColumnPosition.CLA_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.CLA_FKADDRS_T.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
     when(rs.getString(ColumnPosition.CLA_FKCLIENT_T.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
-    when(rs.getString(ColumnPosition.CLA_FKREFERL_T.ordinal())).thenReturn("");
-    when(rs.getString(ColumnPosition.CLA_HOMLES_IND.ordinal())).thenReturn("N");
-    when(rs.getString(ColumnPosition.CLA_BK_INMT_ID.ordinal())).thenReturn("N");
-
     when(rs.getShort(ColumnPosition.CLA_ADDR_TPC.ordinal())).thenReturn((short) 32);
 
-    Date date = new Date();
+    final Date date = new Date();
     ts = new Timestamp(date.getTime());
     when(rs.getTimestamp(ColumnPosition.CLA_LST_UPD_TS.ordinal())).thenReturn(ts);
+    when(rs.getString(ColumnPosition.CLA_IBMSNAP_OPERATION.ordinal())).thenReturn("U");
+    when(rs.getTimestamp(ColumnPosition.CLA_IBMSNAP_LOGMARKER.ordinal()))
+        .thenReturn(new Timestamp(new Date().getTime()));
 
     sqlDate = new java.sql.Date(date.getTime());
     when(rs.getDate(ColumnPosition.CLA_EFF_END_DT.ordinal())).thenReturn(sqlDate);
@@ -93,7 +92,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaReplicationOperation_A$() throws Exception {
     CmsReplicationOperation actual = target.getClaReplicationOperation();
-    CmsReplicationOperation expected = null;
+    CmsReplicationOperation expected = CmsReplicationOperation.U;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -197,7 +196,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaHomelessInd_A$() throws Exception {
     String actual = target.getClaHomelessInd();
-    String expected = "N";
+    String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -210,7 +209,7 @@ public class RawClientAddressTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void getClaBkInmtId_A$() throws Exception {
     String actual = target.getClaBkInmtId();
-    String expected = "N";
+    String expected = null;
     assertThat(actual, is(equalTo(expected)));
   }
 

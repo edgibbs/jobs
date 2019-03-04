@@ -53,6 +53,7 @@ import gov.ca.cwds.data.std.ApiMultiplePhonesAware;
 import gov.ca.cwds.data.std.ApiPersonAware;
 import gov.ca.cwds.data.std.ApiPhoneAware;
 import gov.ca.cwds.data.std.ApiPhoneAware.PhoneType;
+import gov.ca.cwds.neutron.jetpack.CheeseRay;
 import gov.ca.cwds.neutron.util.transform.ElasticTransformer;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
@@ -388,16 +389,24 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
           final ElasticSearchSystemCode countyCode = new ElasticSearchSystemCode();
           esAddress.setCountySystemCode(countyCode);
 
-          final SystemCode countySysCode =
-              SystemCodeCache.global().getSystemCode(repAddress.getGovernmentEntityCd());
-          if (countySysCode != null) {
-            countyCode.setDescription(countySysCode.getShortDescription());
-            countyCode.setId(countySysCode.getSystemId().toString());
-          }
+          // SNAP-838: reinstate retrieval of placement home gov't entity cd.
+          final Short govCode = repAddress.getGovernmentEntityCd();
+          if (isNumberPopulated(govCode)) {
+            try {
+              final SystemCode countySysCode = SystemCodeCache.global().getSystemCode(govCode);
+              if (countySysCode != null) {
+                countyCode.setDescription(countySysCode.getShortDescription());
+                countyCode.setId(countySysCode.getSystemId().toString());
+              }
 
-          final Short unitType = repAddress.getApiAdrUnitType();
-          if (unitType != null && unitType.intValue() != 0) {
-            esAddress.setUnitType(SystemCodeCache.global().getSystemCodeShortDescription(unitType));
+              final Short unitType = repAddress.getApiAdrUnitType();
+              if (unitType != null && unitType.intValue() != 0) {
+                esAddress
+                    .setUnitType(SystemCodeCache.global().getSystemCodeShortDescription(unitType));
+              }
+            } catch (Exception e) {
+              throw CheeseRay.runtime(LOGGER, e, "ERROR PROCESSING ADDRESS! {}", e.getMessage(), e);
+            }
           }
 
           // SNAP-46: last known phone numbers.
@@ -421,7 +430,7 @@ public class ReplicatedClient extends BaseClient implements ApiPersonAware,
 
   protected ElasticSearchPersonPhone toPhone(String phoneNumber, String phoneNumberExtension,
       PhoneType phoneType) {
-    ElasticSearchPersonPhone ret = new ElasticSearchPersonPhone();
+    final ElasticSearchPersonPhone ret = new ElasticSearchPersonPhone();
 
     ret.setPhoneNumber(phoneNumber);
     ret.setPhoneNumberExtension(phoneNumberExtension);

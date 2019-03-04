@@ -15,17 +15,33 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
 @SuppressWarnings({"squid:S1206"})
-public class RawAddress extends ClientAddressReference implements NeutronJdbcReader<RawAddress> {
+public class RawAddress extends ClientAddressReference
+    implements NeutronJdbcReader<RawAddress>, NeutronReplicatedTime {
 
   private static final long serialVersionUID = 1L;
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(RawAddress.class);
+
   protected enum ColumnPosition {
-    START, CLT_IDENTIFIER, CLA_IDENTIFIER, ADR_IDENTIFIER, ADR_LST_UPD_ID, ADR_LST_UPD_TS, ADR_ADDR_DSC, ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO, ADR_FRG_ADRT_B, ADR_GVR_ENTC, ADR_HEADER_ADR, ADR_MSG_EXT_NO, ADR_MSG_TEL_NO, ADR_POSTDIR_CD, ADR_PREDIR_CD, ADR_PRM_EXT_NO, ADR_PRM_TEL_NO, ADR_STATE_C, ADR_STREET_NM, ADR_STREET_NO, ADR_ST_SFX_C, ADR_UNT_DSGC, ADR_UNIT_NO, ADR_ZIP_NO, ADR_ZIP_SFX_NO, ADR_IBMSNAP_LOGMARKER, ADR_IBMSNAP_OPERATION
+    START, CLT_IDENTIFIER, CLA_IDENTIFIER, ADR_IDENTIFIER, ADR_LST_UPD_ID, ADR_LST_UPD_TS,
+    // ADR_ADDR_DSC,
+    ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO, ADR_FRG_ADRT_B, ADR_GVR_ENTC,
+    // ADR_HEADER_ADR,
+    ADR_MSG_EXT_NO, ADR_MSG_TEL_NO,
+    // ADR_POSTDIR_CD,
+    // ADR_PREDIR_CD,
+    ADR_PRM_EXT_NO, ADR_PRM_TEL_NO,
+
+    ADR_STATE_C, ADR_STREET_NM, ADR_STREET_NO, ADR_ST_SFX_C, ADR_UNT_DSGC, ADR_UNIT_NO, ADR_ZIP_NO, ADR_ZIP_SFX_NO,
+
+    ADR_IBMSNAP_LOGMARKER, ADR_IBMSNAP_OPERATION, ADR_ADDED_TS
   }
 
   // =======================
@@ -119,6 +135,10 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
   @Column(name = "ADR_LST_UPD_TS")
   protected Date adrLastUpdatedTime;
 
+  @Type(type = "timestamp")
+  @Column(name = "ADR_ADDED_TS")
+  protected Date adrAddedTime;
+
   @Override
   public RawAddress read(ResultSet rs) throws SQLException {
     super.read(rs);
@@ -131,17 +151,13 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     this.adrGovernmentEntityCd = rs.getShort(ColumnPosition.ADR_GVR_ENTC.ordinal());
     this.adrMessageNumber = rs.getLong(ColumnPosition.ADR_MSG_TEL_NO.ordinal());
     this.adrMessageExtension = rs.getInt(ColumnPosition.ADR_MSG_EXT_NO.ordinal());
-    this.adrHeaderAddress = trimToNull(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal()));
     this.adrPrimaryNumber = rs.getLong(ColumnPosition.ADR_PRM_TEL_NO.ordinal());
     this.adrPrimaryExtension = rs.getInt(ColumnPosition.ADR_PRM_EXT_NO.ordinal());
     this.adrState = rs.getShort(ColumnPosition.ADR_STATE_C.ordinal());
     this.adrStreetName = trimToNull(rs.getString(ColumnPosition.ADR_STREET_NM.ordinal()));
     this.adrStreetNumber = trimToNull(rs.getString(ColumnPosition.ADR_STREET_NO.ordinal()));
     this.adrZip = trimToNull(rs.getString(ColumnPosition.ADR_ZIP_NO.ordinal()));
-    this.adrAddressDescription = trimToNull(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal()));
     this.adrZip4 = rs.getShort(ColumnPosition.ADR_ZIP_SFX_NO.ordinal());
-    this.adrPostDirCd = trimToNull(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal()));
-    this.adrPreDirCd = trimToNull(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal()));
     this.adrStreetSuffixCd = rs.getShort(ColumnPosition.ADR_ST_SFX_C.ordinal());
     this.adrUnitDesignationCd = rs.getShort(ColumnPosition.ADR_UNT_DSGC.ordinal());
     this.adrUnitNumber = trimToNull(rs.getString(ColumnPosition.ADR_UNIT_NO.ordinal()));
@@ -149,9 +165,27 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
 
     this.adrReplicationOperation = CmsReplicationOperation
         .strToRepOp(rs.getString(ColumnPosition.ADR_IBMSNAP_OPERATION.ordinal()));
-    this.adrReplicationDate = rs.getDate(ColumnPosition.ADR_IBMSNAP_LOGMARKER.ordinal());
+    this.adrReplicationDate = rs.getTimestamp(ColumnPosition.ADR_IBMSNAP_LOGMARKER.ordinal());
+    this.adrAddedTime = rs.getTimestamp(ColumnPosition.ADR_ADDED_TS.ordinal());
+
+    // SNAP-820: OBSOLETE COLUMNS.
+    // this.adrHeaderAddress = trimToNull(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal()));
+    // this.adrAddressDescription = trimToNull(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal()));
+    // this.adrPostDirCd = trimToNull(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal()));
+    // this.adrPreDirCd = trimToNull(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal()));
 
     return this;
+  }
+
+  @Override
+  public long calcReplicationTime() {
+    return hasAddedTime() ? Math.abs(adrAddedTime.getTime() - adrReplicationDate.getTime()) : 0;
+  }
+
+  @Override
+  public boolean hasAddedTime() {
+    return adrAddedTime.after(adrReplicationDate)
+        && Math.abs(adrAddedTime.getTime() - adrReplicationDate.getTime()) < 900000; // 15 minutes
   }
 
   @Override
@@ -365,6 +399,14 @@ public class RawAddress extends ClientAddressReference implements NeutronJdbcRea
     int result = super.hashCode();
     result = prime * result + ((adrId == null) ? 0 : adrId.hashCode());
     return result;
+  }
+
+  public Date getAdrAddedTime() {
+    return adrAddedTime;
+  }
+
+  public void setAdrAddedTime(Date adrAddedTime) {
+    this.adrAddedTime = adrAddedTime;
   }
 
 }

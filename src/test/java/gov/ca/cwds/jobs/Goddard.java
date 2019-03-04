@@ -16,6 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,6 +89,7 @@ import gov.ca.cwds.jobs.test.SimpleTestSystemCodeCache;
 import gov.ca.cwds.jobs.test.TestNormalizedEntityDao;
 import gov.ca.cwds.neutron.atom.AtomCommandCenterConsole;
 import gov.ca.cwds.neutron.atom.AtomFlightPlanManager;
+import gov.ca.cwds.neutron.enums.NeutronDateTimeFormat;
 import gov.ca.cwds.neutron.enums.NeutronSchedulerConstants;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
@@ -163,6 +166,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   public DatabaseMetaData meta;
   public NativeQuery<M> nq;
   public ProcedureCall proc;
+  public Query q = Mockito.mock(Query.class);
 
   public SystemCodeDao systemCodeDao;
   public SystemMetaDao systemMetaDao;
@@ -318,10 +322,11 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(flightPlan.isLoadSealedAndSensitive()).thenReturn(false);
     when(flightPlan.getEsConfigLoc()).thenReturn(esConfileFile.getAbsolutePath());
     when(flightPlan.getThreadCount()).thenReturn(1L);
-    when(flightPlan.getLastRunLoc()).thenReturn(this.lastRunFile);
+    when(flightPlan.getLastRunLoc()).thenReturn(lastRunFile);
 
     // Queries.
     nq = mock(NativeQuery.class);
+    when(session.createNativeQuery(any(String.class))).thenReturn(nq);
     when(session.getNamedNativeQuery(any(String.class))).thenReturn(nq);
     when(nq.setString(any(String.class), any(String.class))).thenReturn(nq);
     when(nq.setParameter(any(String.class), any(String.class), any(StringType.class)))
@@ -336,7 +341,6 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     final ScrollableResults scrollableResults = mock(ScrollableResults.class);
     when(nq.scroll(any(ScrollMode.class))).thenReturn(scrollableResults);
 
-    final Query q = Mockito.mock(Query.class);
     when(sessionFactory.getCurrentSession()).thenReturn(session);
     when(session.getNamedQuery(any(String.class))).thenReturn(q);
     when(q.list()).thenReturn(new ArrayList<>());
@@ -455,6 +459,10 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     markTestDone(); // reset
   }
 
+  public java.util.Date parseDate(String strDate) throws ParseException {
+    return new SimpleDateFormat(NeutronDateTimeFormat.FMT_LEGACY_DATE.getFormat()).parse(strDate);
+  }
+
   protected void bombResultSet() throws SQLException {
     doThrow(SQLException.class).when(con).commit();
     when(preparedStatement.executeUpdate()).thenThrow(SQLException.class);
@@ -462,6 +470,23 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
     when(rs.next()).thenThrow(SQLException.class);
     when(rs.getString(any(String.class))).thenThrow(SQLException.class);
     when(rs.getString(any(Integer.class))).thenThrow(SQLException.class);
+  }
+
+  public Thread runKillThreadWait(final BasePersonRocket<T, M> target, long sleepMillis) {
+    final Thread t = new Thread(() -> {
+      try {
+        lock.lockInterruptibly();
+        await("kill thread").atMost(sleepMillis, TimeUnit.MILLISECONDS).untilTrue(isRunwayClear);
+        throw new IllegalStateException("DIE");
+      } catch (Exception e) {
+        e.printStackTrace();
+      } finally {
+        lock.unlock(); // unlock no matter what happens
+      }
+    });
+
+    t.start();
+    return t;
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target, long sleepMillis) {

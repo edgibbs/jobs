@@ -1,5 +1,6 @@
 package gov.ca.cwds.jobs;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,6 +35,7 @@ import gov.ca.cwds.neutron.atom.AtomLaunchDirector;
 import gov.ca.cwds.neutron.atom.AtomRowMapper;
 import gov.ca.cwds.neutron.atom.AtomValidateDocument;
 import gov.ca.cwds.neutron.exception.NeutronCheckedException;
+import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.inject.annotation.LastRunFile;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
@@ -41,6 +43,8 @@ import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryLastChangeHandler;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
+import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler.STEP;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
@@ -66,6 +70,8 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClientPersonIndexerJob.class);
+
+  private static Date lastEndTime = new Date();
 
   private AtomicInteger nextThreadNum = new AtomicInteger(0);
 
@@ -96,10 +102,37 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   }
 
   @Override
+  public void close() throws IOException {
+    deallocateThreadHandler(); // SNAP-877: free memory no matter what
+    super.close();
+  }
+
+  @Override
   public Date launch(Date lastSuccessfulRunTime) throws NeutronCheckedException {
-    allocateThreadHandler();
-    largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
-    return super.launch(lastSuccessfulRunTime);
+    final FlightLog fl = getFlightLog();
+    Date ret = null;
+
+    try {
+      allocateThreadHandler();
+      largeLoad = determineInitialLoad(lastSuccessfulRunTime) && isLargeDataSet();
+      ret = super.launch(lastSuccessfulRunTime);
+
+      // AR-325: replication metrics.
+      lastEndTime = new Date();
+      fl.setLastEndTime(lastEndTime.getTime());
+
+      final Float lastReplicationSecs = ReplicationLagRocket.getLastReplicationSeconds();
+      if (lastReplicationSecs != null) {
+        fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lastReplicationSecs);
+        fl.addOtherMetric("blue_line_secs", lastReplicationSecs); // blue = replication
+        fl.addOtherMetric("blue_line_millis", lastReplicationSecs * 1000);
+      }
+
+    } finally {
+      deallocateThreadHandler(); // SNAP-877: free memory no matter what
+    }
+
+    return ret;
   }
 
   @Override
@@ -340,17 +373,18 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * Both modes. Construct an appropriate handler for this thread.
    */
   public void allocateThreadHandler() {
-    if (handler.get() == null) {
-      handler.set(getFlightPlan().isLastRunMode() ? new PeopleSummaryLastChangeHandler(this)
-          : new PeopleSummaryThreadHandler(this));
-    }
+    deallocateThreadHandler();
+    handler.set(getFlightPlan().isLastRunMode() ? new PeopleSummaryLastChangeHandler(this)
+        : new PeopleSummaryThreadHandler(this));
   }
 
   /**
    * Both modes. Set this thread's handler to null.
    */
   public void deallocateThreadHandler() {
-    if (handler.get() != null) {
+    if (handler != null && handler.get() != null) {
+      handler.get().setRocket(null);
+      handler.get().clear();
       handler.set(null);
     }
   }
@@ -377,6 +411,10 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
   @Override
   public String getEventType() {
     return "neutron_lc_client";
+  }
+
+  public static Date getLastEndTime() {
+    return lastEndTime;
   }
 
   /**

@@ -95,10 +95,10 @@ public class NeutronDB2Utils {
   public static boolean isDB2OnZOS(final BaseDaoImpl<?> dao) throws NeutronCheckedException {
     boolean ret = false;
 
-    try { // DO NOT CLOSE SESSION/CONNECTION!! No try/catch with resources block.
+    try { // DO NOT CLOSE SESSION/CONNECTION!! DO NOT add try/catch with resources block.
       final Connection con = NeutronJdbcUtils.prepConnection(dao.grabSession());
       final DatabaseMetaData meta = con.getMetaData();
-      LOGGER.debug("meta: product name: {}, production version: {}, major: {}, minor: {}",
+      LOGGER.info("meta: product name: {}, production version: {}, major: {}, minor: {}",
           meta.getDatabaseProductName(), meta.getDatabaseProductVersion(),
           meta.getDatabaseMajorVersion(), meta.getDatabaseMinorVersion());
 
@@ -119,20 +119,19 @@ public class NeutronDB2Utils {
   @SuppressWarnings({"fb-contrib:JVR_JDBC_VENDOR_RELIANCE", "squid:CallToDeprecatedMethod"})
   public static DB2SystemMonitor monitorStart(final Connection con) {
     DB2SystemMonitor ret = null;
-    try {
-      final com.ibm.db2.jcc.t4.b nativeCon =
-          (com.ibm.db2.jcc.t4.b) ((com.mchange.v2.c3p0.impl.NewProxyConnection) con)
-              .unwrap(Class.forName("com.ibm.db2.jcc.t4.b")); // NOSONAR
-      final DB2Connection db2Con = nativeCon;
-      LOGGER.debug("sendDataAsIs_: {}, enableRowsetSupport_: {}", nativeCon.sendDataAsIs_,
-          nativeCon.enableRowsetSupport_);
 
-      ret = db2Con.getDB2SystemMonitor();
-      ret.enable(true);
-      ret.start(DB2SystemMonitor.RESET_TIMES);
-      return ret;
+    try {
+      final boolean isDb2ConWrapper = con.isWrapperFor(DB2Connection.class);
+      LOGGER.trace("wrapper for DB2 connection? {}", isDb2ConWrapper);
+
+      if (isDb2ConWrapper) {
+        final DB2Connection db2Con = con.unwrap(DB2Connection.class);
+        ret = db2Con.getDB2SystemMonitor();
+        ret.enable(true);
+        ret.start(DB2SystemMonitor.RESET_TIMES);
+      }
     } catch (Exception e) {
-      LOGGER.warn("UNABLE TO GRAB DB2 MONITOR: {}", e.getMessage(), e);
+      LOGGER.warn("ERROR CREATING DB2 MONITOR! {}", e.getMessage(), e);
     }
 
     return ret;
@@ -141,25 +140,35 @@ public class NeutronDB2Utils {
   /**
    * Stop the DB2 monitor and report statistics.
    * 
-   * @param monitor current monitor instance
+   * @param mon current monitor instance
    * @throws SQLException on JDBC error
    */
   @SuppressWarnings("unchecked")
-  public static void monitorStopAndReport(final DB2SystemMonitor monitor) throws SQLException {
-    if (monitor != null) {
-      monitor.stop();
+  public static void monitorStopAndReport(final DB2SystemMonitor mon) throws SQLException {
+    if (mon != null) {
+      mon.stop();
       final StringBuilder buf = new StringBuilder();
 
-      buf.append("Server elapsed time (microseconds)=").append(monitor.getServerTimeMicros())
-          .append("Network I/O elapsed time (microseconds)=")
-          .append(monitor.getNetworkIOTimeMicros())
-          .append("Core driver elapsed time (microseconds)=")
-          .append(monitor.getCoreDriverTimeMicros())
-          .append("Application elapsed time (milliseconds)=")
-          .append(monitor.getApplicationTimeMillis()).append("monitor.moreData: 0: ")
-          .append(monitor.moreData(0)).append("monitor.moreData: 1: ").append(monitor.moreData(1))
-          .append("monitor.moreData: 2: ").append(monitor.moreData(2));
-      LOGGER.debug("DB2 monitor report: {}", buf::toString);
+      // mon.moreData(NUMBER_NETWORK_TRIPS)); // WHERE THIS DB2 CONSTANT DEFINED??
+
+      //@formatter:off
+      buf.append("\n\tServer      elapsed time (microseconds): ").append(mon.getServerTimeMicros())
+         .append("\n\tNetwork I/O elapsed time (microseconds): ").append(mon.getNetworkIOTimeMicros())
+         .append("\n\tCore driver elapsed time (microseconds): ").append(mon.getCoreDriverTimeMicros())
+         .append("\n\tApplication elapsed time (milliseconds): ").append(mon.getApplicationTimeMillis());
+      //@formatter:on
+
+      for (int i = 0; i < 3; i++) {
+        try {
+          buf.append("\n\tmonitor.moreData: ").append(i).append(":                     ")
+              .append(mon.moreData(i));
+        } catch (Exception e) {
+          LOGGER.warn("UNKNOWN DB2 MONITOR KEY: {}", i);
+          break;
+        }
+      }
+
+      LOGGER.info("\n\n\t********** DB2 MONITOR REPORT: **********{}\n", buf::toString);
     }
   }
 

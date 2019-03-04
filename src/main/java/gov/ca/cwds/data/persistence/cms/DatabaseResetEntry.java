@@ -1,5 +1,7 @@
 package gov.ca.cwds.data.persistence.cms;
 
+import static gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils.freshDate;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -18,7 +20,6 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
-import gov.ca.cwds.neutron.util.shrinkray.NeutronDateUtils;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 
 /**
@@ -119,19 +120,19 @@ public class DatabaseResetEntry
   }
 
   public Date getStartTime() {
-    return NeutronDateUtils.freshDate(startTime);
+    return freshDate(startTime);
   }
 
   public void setStartTime(Date startTime) {
-    this.startTime = NeutronDateUtils.freshDate(startTime);
+    this.startTime = freshDate(startTime);
   }
 
   public Date getEndTime() {
-    return NeutronDateUtils.freshDate(endTime);
+    return freshDate(endTime);
   }
 
   public void setEndTime(Date endTime) {
-    this.endTime = NeutronDateUtils.freshDate(endTime);
+    this.endTime = freshDate(endTime);
   }
 
   public String getRefreshStatus() {

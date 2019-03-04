@@ -114,9 +114,6 @@ public class PlacementHomeAddress extends ApiObjectIdentity
     this.otherHomePlacementId = ifNull(rs.getString(ColumnPosition.PH_ID.ordinal()));
     this.placementHomeId = ifNull(rs.getString(ColumnPosition.OHP_ID.ordinal()));
 
-    this.placementHomeGovernmentEntityCd = rs.getShort(ColumnPosition.PH_GVR_ENTC.ordinal());
-    this.placementEpisodeGovernmentEntityCd = rs.getShort(ColumnPosition.PE_GVR_ENTC.ordinal());
-
     this.city = ifNull(rs.getString(ColumnPosition.CITY_NM.ordinal()));
     this.state = rs.getShort(ColumnPosition.STATE_C.ordinal());
     this.streetName = ifNull(rs.getString(ColumnPosition.STREET_NM.ordinal()));

@@ -98,14 +98,14 @@ public enum StandardFlightSchedule {
   ),
 
   /**
-   * If requested, drop and create Elasticsearch People Summary index.
+   * VOX (RMI) listener rocket.
    */
   VOX_ROCKET(VoxListenerRocket.class, // rocket class
       "vox", // rocket name
-      5, // initial load order
-      20, // start delay seconds. N/A.
-      60000, // execute every N seconds. N/A.
-      null, // last run priority. N/A.
+      5, // start delay seconds.
+      20, // execute every N seconds.
+      4000, // last run priority.. Highest wins.
+      null, // N/A
       true, // run in Last Change mode
       false, // run in Initial Load
       false // People index
@@ -116,10 +116,10 @@ public enum StandardFlightSchedule {
    */
   REPLICATION_TIME(ReplicationLagRocket.class, // rocket class
       "replication_time", // rocket name
-      6, // initial load order
-      5, // start delay seconds. N/A.
-      60000, // execute every N seconds. N/A.
-      null, // last run priority. N/A.
+      6, // start delay seconds.
+      5, // execute every N seconds.
+      6000, // last run priority.. Highest wins.
+      null, // N/A
       true, // run in Last Change mode
       false, // run in Initial Load
       false // People index
@@ -132,8 +132,16 @@ public enum StandardFlightSchedule {
   /**
    * People Summary index.
    */
-  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, "people_summary", 20, 5, 1000, null, true, true,
-      false),
+  PEOPLE_SUMMARY(ClientPersonIndexerJob.class, // rocket class
+      "people_summary", // rocket name
+      12, // start delay in seconds.
+      1, // execute every N seconds.
+      10000, // last run priority. Highest wins.
+      null, // nested element: N/A
+      true, // run in Last Change mode
+      true, // run in Initial Load
+      false // for People Index
+  ),
 
   /**
    * Document root: Reporter.

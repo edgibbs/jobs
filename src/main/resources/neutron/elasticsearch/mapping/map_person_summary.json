@@ -155,6 +155,11 @@
 				},
 				"legacy_ui_id": {
 					"type": "text",
+					"index": "not_analyzed",
+					"store": true
+				},
+				"legacy_ui_id_flat": {
+					"type": "text",
 					"store": true
 				},
 				"legacy_last_updated": {

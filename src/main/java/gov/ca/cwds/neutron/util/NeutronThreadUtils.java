@@ -54,11 +54,11 @@ public class NeutronThreadUtils {
   }
 
   /**
-   * Super lame but sometimes effective approach to thread management, especially when
-   * thread/connection pools warm up or other resources initialize.
+   * Inefficient but remarkably effective approach to thread management, especially when
+   * thread/connection pools warm up or other expensive resources initialize.
    * 
    * <p>
-   * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a raw
+   * Better to use {@link CyclicBarrier}, {@link CountDownLatch}, {@link Phaser}, or even a Lock
    * Condition.
    * </p>
    */
@@ -77,8 +77,8 @@ public class NeutronThreadUtils {
    * @return free memory in MB
    */
   public static long calcMemory() {
-    final Runtime runtime = Runtime.getRuntime();
-    return (runtime.freeMemory() + (runtime.maxMemory() - runtime.totalMemory())) / 1024L;
+    final Runtime r = Runtime.getRuntime();
+    return (r.freeMemory() + (r.maxMemory() - r.totalMemory())) / 1024L;
   }
 
   /**

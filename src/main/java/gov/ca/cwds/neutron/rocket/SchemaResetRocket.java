@@ -102,47 +102,50 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     if (!isLargeDataSet()) {
       LOGGER.warn("\n\n\n\t   ********** RESET DB2 SCHEMA!! ********** \n\n\n");
 
-      final Session session = getJobDao().grabSession();
-      grabTransaction();
+      try (final Session session = getJobDao().grabSession()) {
+        grabTransaction();
 
-      final ProcedureCall proc = session.createStoredProcedureCall("CWSTMP.SPREFDBS");
-      proc.registerStoredProcedureParameter("SCHEMANM", String.class, ParameterMode.IN);
-      proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
-      proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
+        final ProcedureCall proc = session.createStoredProcedureCall("CWSTMP.SPREFDBS");
+        proc.registerStoredProcedureParameter("SCHEMANM", String.class, ParameterMode.IN);
+        proc.registerStoredProcedureParameter("RETSTATUS", String.class, ParameterMode.OUT);
+        proc.registerStoredProcedureParameter("RETMESSAG", String.class, ParameterMode.OUT);
 
-      proc.setParameter("SCHEMANM", getDbSchema());
-      proc.execute();
+        proc.setParameter("SCHEMANM", getDbSchema());
+        proc.execute();
 
-      final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
-      final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
-      LOGGER.info("reset schema proc: status: {}, msg: {}", returnStatus, returnMsg);
+        final String returnStatus = (String) proc.getOutputParameterValue("RETSTATUS");
+        final String returnMsg = (String) proc.getOutputParameterValue("RETMESSAG");
+        LOGGER.info("reset schema proc: status: {}, msg: {}", returnStatus, returnMsg);
 
-      if (StringUtils.isNotBlank(returnStatus) && returnStatus.charAt(0) != '0') {
-        fail();
-        throw CheeseRay.checked(LOGGER, "DB2 SCHEMA RESET ERROR! {}", returnMsg);
-      } else {
-        // If schema reset operation does not finish in 90 minutes, we timeout with an exception
-        int secondsWaited = 0;
+        if (StringUtils.isNotBlank(returnStatus) && returnStatus.charAt(0) != '0') {
+          fail();
+          throw CheeseRay.checked(LOGGER, "DB2 SCHEMA RESET ERROR! {}", returnMsg);
+        } else {
+          // If schema reset operation does not finish in 90 minutes, we timeout with an exception
+          int secondsWaited = 0;
 
-        while (!schemaRefreshCompleted(pollPeriodInSeconds)) {
-          secondsWaited += pollPeriodInSeconds;
-          LOGGER.info("seconds waited: {}, timeout: {}", secondsWaited, timeoutSeconds);
+          while (!schemaRefreshCompleted(pollPeriodInSeconds)) {
+            secondsWaited += pollPeriodInSeconds;
+            LOGGER.info("seconds waited: {}, timeout: {}", secondsWaited, timeoutSeconds);
 
-          if (!isRunning()) {
-            throw new IllegalStateException("SCHEMA RESET: FLIGHT ABORTED!");
+            if (!isRunning()) {
+              throw new IllegalStateException("SCHEMA RESET: FLIGHT ABORTED!");
+            }
+
+            if (secondsWaited >= timeoutSeconds) {
+              final StringBuilder buf = new StringBuilder();
+              buf.append("DB2 schema reset operation timed out after ").append(secondsWaited / 60)
+                  .append(" minutes");
+
+              LOGGER.error("DB2 schema reset operation timed out after {} seconds", secondsWaited);
+              throw new IllegalStateException(buf.toString());
+            }
           }
 
-          if (secondsWaited >= timeoutSeconds) {
-            final StringBuilder buf = new StringBuilder();
-            buf.append("DB2 schema reset operation timed out after ").append(secondsWaited / 60)
-                .append(" minutes");
-
-            LOGGER.error("DB2 schema reset operation timed out after {} seconds", secondsWaited);
-            throw new IllegalStateException(buf.toString());
-          }
+          LOGGER.warn("DB2 SCHEMA RESET COMPLETED!");
         }
-
-        LOGGER.warn("DB2 SCHEMA RESET COMPLETED!");
+      } finally {
+        // close session
       }
     } else {
       fail();
@@ -150,7 +153,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     }
   }
 
-  private boolean schemaRefreshCompleted(int waitTimeSeconds) {
+  protected boolean schemaRefreshCompleted(int waitTimeSeconds) {
     if (lock.tryLock()) {
       try {
         final boolean timeExceeded = condDone.await(waitTimeSeconds, TimeUnit.SECONDS);
@@ -165,6 +168,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     }
 
     if (!isRunning()) {
+      LOGGER.warn("WTF schemaRefreshCompleted: #1");
       throw new NeutronRuntimeException("SCHEMA RESET: FLIGHT ABORTED!");
     }
 
@@ -180,7 +184,7 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     return completed;
   }
 
-  private String findSchemaRefreshStatus() {
+  protected String findSchemaRefreshStatus() {
     return dao.findBySchemaStartTime(getDbSchema()).getRefreshStatus();
   }
 

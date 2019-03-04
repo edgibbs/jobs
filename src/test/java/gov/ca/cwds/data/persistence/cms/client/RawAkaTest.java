@@ -5,20 +5,46 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import org.junit.Test;
 
+import gov.ca.cwds.data.persistence.cms.client.RawAka.ColumnPosition;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.jobs.Goddard;
 
 public class RawAkaTest extends Goddard<ReplicatedClient, RawClient> {
 
+  static Timestamp ts;
   RawAka target;
+
+  public static void prepResultSetGood(ResultSet rs) throws SQLException {
+    when(rs.getString(ColumnPosition.CLT_IDENTIFIER.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.ONM_THIRD_ID.ordinal())).thenReturn(DEFAULT_CLIENT_ID);
+    when(rs.getString(ColumnPosition.ONM_FIRST_NM.ordinal())).thenReturn("Homer");
+    when(rs.getString(ColumnPosition.ONM_LAST_NM.ordinal())).thenReturn("Simpson");
+    when(rs.getString(ColumnPosition.ONM_MIDDLE_NM.ordinal())).thenReturn("J");
+    when(rs.getString(ColumnPosition.ONM_NMPRFX_DSC.ordinal())).thenReturn("mr");
+
+    Short cd = 1311;
+    when(rs.getShort(ColumnPosition.ONM_NAME_TPC.ordinal())).thenReturn(cd);
+    when(rs.getString(ColumnPosition.ONM_SUFX_TLDSC.ordinal())).thenReturn("jr");
+    when(rs.getString(ColumnPosition.ONM_LST_UPD_ID.ordinal())).thenReturn("0x5");
+
+    final Date date = new Date();
+    ts = new Timestamp(date.getTime());
+    when(rs.getTimestamp(ColumnPosition.ONM_LST_UPD_TS.ordinal())).thenReturn(ts);
+    when(rs.getString(ColumnPosition.ONM_IBMSNAP_OPERATION.ordinal())).thenReturn("U");
+    when(rs.getTimestamp(ColumnPosition.ONM_IBMSNAP_LOGMARKER.ordinal()))
+        .thenReturn(new Timestamp(new Date().getTime()));
+  }
 
   @Override
   public void setup() throws Exception {

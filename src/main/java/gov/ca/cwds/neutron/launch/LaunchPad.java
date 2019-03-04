@@ -45,6 +45,7 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.vox.jmx.VoxLaunchPadMBean;
 
 /**
@@ -138,7 +139,7 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
         plan.setDequeRerunIds(dequeRerunIds);
       }
 
-      final FlightLog flightLog = this.launchDirector.launch(flightSchedule.getRocketClass(), plan);
+      final FlightLog flightLog = launchDirector.launch(flightSchedule.getRocketClass(), plan);
       return flightLog.toJson();
     } catch (Exception e) {
       LOGGER.error("FAILED TO LAUNCH ON DEMAND! {}", e.getMessage(), e);
@@ -354,6 +355,13 @@ public class LaunchPad implements VoxLaunchPadMBean, AtomLaunchPad {
     } catch (Exception e) {
       throw CheeseRay.checked(LOGGER, e, "FAILED TO RESUME FLIGHT! rocket: {}", rocketName);
     }
+  }
+
+  @Override
+  @Managed(description = "Request garbage collection")
+  public void gc() {
+    LOGGER.warn("REQUESTED GARBAGE COLLECTION!");
+    NeutronThreadUtils.freeMemory();
   }
 
   protected void threadShutdownLaunchCommand() {
