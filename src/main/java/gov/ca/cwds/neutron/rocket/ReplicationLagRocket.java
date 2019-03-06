@@ -118,12 +118,9 @@ public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, D
           lastReplicationSeconds = lag.avgTime;
 
           fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lag.avgTime);
-          fl.addOtherMetric(STEP.REPLICATION_TIME_MIN_SECS.name().toLowerCase(),
-              new Float(lag.minTime));
-          fl.addOtherMetric(STEP.REPLICATION_TIME_MAX_SECS.name().toLowerCase(),
-              new Float(lag.maxTime));
-          fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(),
-              new Float(lag.avgTime * 1000));
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MIN_SECS.name().toLowerCase(), lag.minTime);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MAX_SECS.name().toLowerCase(), lag.maxTime);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(), lag.avgTime * 1000F);
         }
       } finally {
         // Auto-close statements.
