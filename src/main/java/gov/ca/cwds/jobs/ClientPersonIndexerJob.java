@@ -382,9 +382,12 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * Both modes. Set this thread's handler to null.
    */
   public void deallocateThreadHandler() {
-    if (handler != null && handler.get() != null) {
-      handler.get().setRocket(null);
-      handler.get().clear();
+    // Oh no! SonarQube is worried sick about calling the same method multiple times!
+    // You know, that enormous cost of deferencing a pointer ... OMG!
+    final PeopleSummaryThreadHandler h = handler != null ? handler.get() : null;
+    if (h != null) {
+      h.setRocket(null);
+      h.clear();
       handler.set(null);
     }
   }
