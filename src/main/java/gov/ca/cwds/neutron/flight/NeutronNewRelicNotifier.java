@@ -79,13 +79,13 @@ public class NeutronNewRelicNotifier implements AtomMonitorNotifier {
       LOGGER.debug("Neutron: this run seconds: {}", runSeconds);
       attribs.putIfAbsent("run_seconds", runSeconds);
 
-      final float runMillis = fl.getEndTime() - fl.getStartTime();
+      final float runMillis = ((float) fl.getEndTime()) - fl.getStartTime();
       attribs.putIfAbsent("run_millis", runMillis);
 
       if (fl.getLastEndTime() != 0) {
         attribs.putIfAbsent("last_run_end_time",
             Instant.ofEpochMilli(fl.getLastEndTime()).getEpochSecond());
-        final float runTotalMillis = fl.getLastEndTime() - fl.getStartTime();
+        final float runTotalMillis = ((float) fl.getLastEndTime()) - fl.getStartTime();
         final float runTotalSeconds = runTotalMillis / 1000F;
 
         LOGGER.debug("since last run: millis: {}, seconds: {}", runTotalMillis, runTotalSeconds);
