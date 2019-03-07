@@ -435,10 +435,10 @@ public class ReportFaultCANSClientIdsJob {
           }
         }
       } while (sourceRowKey != null); // If merge target not found
-      // continue with finding it's merge target
+      // continue finding its merge target
     } catch (Exception e) {
       cmsTxn.rollback();
-      LOGGER.error("Client [id: {}] -> Error while working with CMS database:\n {}", clientDto.id,
+      LOGGER.error("Client [id: {}] -> Error while working with CMS database:\n{}", clientDto.id,
           e.getMessage(), e);
       clientDto.setComment(clientDto.comment.concat(" Error while working with CMS database: ")
           .concat(e.getMessage()));
@@ -450,7 +450,7 @@ public class ReportFaultCANSClientIdsJob {
     if (newKey != null) {
       LOGGER.info("Client [id: {}] -> Merge Target Id Found. Updating CANS...", clientDto.id);
       clientDto.setComment(clientDto.comment + " Merge Target Id Found. Updating CANS...");
-      Session cansSession = grabCansSession();
+      final Session cansSession = grabCansSession();
       Transaction cansTxn = cansSession.beginTransaction();
       try {
         // Store external_id in a format of original value CANS 1.0 or 1.1
@@ -458,7 +458,7 @@ public class ReportFaultCANSClientIdsJob {
             : CmsKeyIdGenerator.getUIIdentifierFromKey(newKey);
 
         // See if CANS already has record with this external id
-        List<Object> cansObjectArrayList = cansSession
+        final List<Object> cansObjectArrayList = cansSession
             .createNativeQuery(NQ_CANS_CLIENT_FIND_BY_EXTERNAL_ID)
             .setParameter(PARAM_EXTERNAL_ID, newExternalId, StringType.INSTANCE).getResultList();
         if (cansObjectArrayList.isEmpty()) {
@@ -476,24 +476,26 @@ public class ReportFaultCANSClientIdsJob {
         } else {
           // Found existing record with same external id:
           // - re-associate assessments from original person record to the found one.
-          Long newPersonId = ((BigInteger) cansObjectArrayList.get(0)).longValue();
-          grabCansSession().createNativeQuery(NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID)
+          final Long newPersonId = ((BigInteger) cansObjectArrayList.get(0)).longValue();
+          cansSession.createNativeQuery(NQ_CANS_ASSESSMENTS_UPDATE_PERSON_ID)
               .setParameter(PARAM_PERSON_ID, clientDto.id, LongType.INSTANCE)
               .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE).executeUpdate();
-          // - update assessment auditntable as well.
-          grabCansSession().createNativeQuery(NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID)
+
+          // - update assessment audit table as well.
+          cansSession.createNativeQuery(NQ_CANS_ASSESSMENTS_AUD_UPDATE_PERSON_ID)
               .setParameter(PARAM_PERSON_ID, clientDto.id, LongType.INSTANCE)
               .setParameter(PARAM_NEW_PERSON_ID, newPersonId, LongType.INSTANCE).executeUpdate();
           LOGGER.info(
               "Client [id: {}] -> New External Id: [{}]. There is existing Client [id: {}]"
                   + " with this External Id. Re-associating assessments to existing Client.",
               clientDto.id, newExternalId, newPersonId);
+          final String strPerson = newPersonId.toString();
           clientDto.setComment(clientDto.comment + ". New External Id: [" + newExternalId
-              + "]. There is existing" + " Client [id: " + newPersonId.toString()
-              + "]  with this External Id." + " Re-associating assessments to existing Client.");
+              + "]. There is existing" + " Client [id: " + strPerson + "]  with this External Id."
+              + " Re-associating assessments to existing Client.");
 
           // - delete original person record.
-          grabCansSession().createNativeQuery(NQ_CANS_CLIENT_DELETE)
+          cansSession.createNativeQuery(NQ_CANS_CLIENT_DELETE)
               .setParameter(PARAM_ID, clientDto.id, LongType.INSTANCE).executeUpdate();
           LOGGER.info("Client [id: {}] -> Deleting Client.", clientDto.id);
           clientDto.setComment(clientDto.comment + ". Deleting Client.");
@@ -509,7 +511,11 @@ public class ReportFaultCANSClientIdsJob {
         clientDto.setComment(clientDto.comment.concat(" Error while working with CANS database: ")
             .concat(e.getMessage()));
       } finally {
-        cansTxn.commit();
+        try {
+          cansTxn.commit();
+        } catch (Exception e2) {
+          LOGGER.debug("error committing.", e2);
+        }
       }
     }
 
