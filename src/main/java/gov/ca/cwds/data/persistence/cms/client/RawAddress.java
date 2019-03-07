@@ -15,8 +15,6 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
@@ -27,16 +25,13 @@ public class RawAddress extends ClientAddressReference
 
   private static final long serialVersionUID = 1L;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RawAddress.class);
-
   protected enum ColumnPosition {
     START, CLT_IDENTIFIER, CLA_IDENTIFIER, ADR_IDENTIFIER, ADR_LST_UPD_ID, ADR_LST_UPD_TS,
-    // ADR_ADDR_DSC,
+
     ADR_CITY_NM, ADR_EMRG_EXTNO, ADR_EMRG_TELNO, ADR_FRG_ADRT_B, ADR_GVR_ENTC,
-    // ADR_HEADER_ADR,
+
     ADR_MSG_EXT_NO, ADR_MSG_TEL_NO,
-    // ADR_POSTDIR_CD,
-    // ADR_PREDIR_CD,
+
     ADR_PRM_EXT_NO, ADR_PRM_TEL_NO,
 
     ADR_STATE_C, ADR_STREET_NM, ADR_STREET_NO, ADR_ST_SFX_C, ADR_UNT_DSGC, ADR_UNIT_NO, ADR_ZIP_NO, ADR_ZIP_SFX_NO,
@@ -167,12 +162,6 @@ public class RawAddress extends ClientAddressReference
         .strToRepOp(rs.getString(ColumnPosition.ADR_IBMSNAP_OPERATION.ordinal()));
     this.adrReplicationDate = rs.getTimestamp(ColumnPosition.ADR_IBMSNAP_LOGMARKER.ordinal());
     this.adrAddedTime = rs.getTimestamp(ColumnPosition.ADR_ADDED_TS.ordinal());
-
-    // SNAP-820: OBSOLETE COLUMNS.
-    // this.adrHeaderAddress = trimToNull(rs.getString(ColumnPosition.ADR_HEADER_ADR.ordinal()));
-    // this.adrAddressDescription = trimToNull(rs.getString(ColumnPosition.ADR_ADDR_DSC.ordinal()));
-    // this.adrPostDirCd = trimToNull(rs.getString(ColumnPosition.ADR_POSTDIR_CD.ordinal()));
-    // this.adrPreDirCd = trimToNull(rs.getString(ColumnPosition.ADR_PREDIR_CD.ordinal()));
 
     return this;
   }
