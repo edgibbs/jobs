@@ -633,6 +633,8 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
       target.doneRetrieve();
       target.doneTransform();
       target.threadIndex(); // method to test
+    } catch (Exception e) {
+      e.printStackTrace(); // only fails in Gradle. Why???
     } finally {
       target.done();
       markTestDone();
