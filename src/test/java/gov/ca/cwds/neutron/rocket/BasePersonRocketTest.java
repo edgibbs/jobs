@@ -634,7 +634,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
       target.doneTransform();
       target.threadIndex(); // method to test
     } catch (Exception e) {
-      e.printStackTrace(); // only fails in Gradle. Why???
+      e.printStackTrace();
     } finally {
       target.done();
       markTestDone();
@@ -644,7 +644,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   @Test(expected = NeutronRuntimeException.class)
   public void threadIndex_Args__error() throws Exception {
     final FlightLog track = mock(FlightLog.class);
-    when(track.isFailed()).thenThrow(IllegalStateException.class);
+    when(track.isRunning()).thenThrow(IllegalStateException.class);
     target.setFlightLog(track);
     runKillThread(target);
     target.threadIndex();
