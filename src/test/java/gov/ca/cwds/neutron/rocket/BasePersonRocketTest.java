@@ -621,13 +621,24 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     }
   }
 
-  @Ignore
-  @Test(expected = NeutronRuntimeException.class)
+  @Test
   public void threadIndex_Args() throws Exception {
-    runKillThread(target);
-    final BulkProcessor bp = mock(BulkProcessor.class);
-    target.threadIndex();
-    markTestDone();
+    runKillThread(target, 22000L); // long running test
+
+    try {
+      for (int i = 0; i < 1000; i++) {
+        target.addToIndexQueue(new TestNormalizedEntity(DEFAULT_CLIENT_ID));
+      }
+
+      target.doneRetrieve();
+      target.doneTransform();
+
+      // final Thread t = new Thread({target.threadIndex();}) ;
+      target.threadIndex(); // method to test
+    } finally {
+      target.done();
+      markTestDone();
+    }
   }
 
   @Test(expected = NeutronRuntimeException.class)
