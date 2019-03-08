@@ -280,9 +280,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         fl.incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        // fl.incrementBulkPrepared();
       }
     } catch (Exception e) {
+      fl.addWarning("FAILED TO BUILD UPSERT FOR PK " + t.getPrimaryKey());
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
     }
 

@@ -165,6 +165,15 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     target.setInsertCollections(esp, t, list);
   }
 
+  @Test(expected = NeutronRuntimeException.class)
+  public void prepareUpsertRequestNoChecked_Args__ElasticSearchPerson__Object__bomb()
+      throws Exception {
+    when(target.getFlightPlan().getIndexName()).thenThrow(IllegalStateException.class);
+    final TestNormalizedEntity t = new TestNormalizedEntity(null);
+    final DocWriteRequest actual = target.prepareUpsertRequestNoChecked(esp, t);
+    assertThat(actual, notNullValue());
+  }
+
   @Test
   public void prepareUpsertRequestNoChecked_Args__ElasticSearchPerson__Object() throws Exception {
     final TestNormalizedEntity t = new TestNormalizedEntity(DEFAULT_CLIENT_ID);
