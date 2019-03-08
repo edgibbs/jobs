@@ -1128,4 +1128,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     return launchDirector;
   }
 
+  public void setLaunchDirector(AtomLaunchDirector launchDirector) {
+    this.launchDirector = launchDirector;
+  }
+
 }

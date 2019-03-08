@@ -1140,6 +1140,15 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
   }
 
   @Test
+  public void determineIndexName() throws Exception {
+    when(flightPlan.getIndexName()).thenReturn("people-summary_2019.03.05.17.20.41");
+
+    LaunchCommand.setInstance(lc);
+    target.setLaunchDirector(launchDirector);
+    target.determineIndexName();
+  }
+
+  @Test
   public void launch_A$Date() throws Exception {
     final Date lastSuccessfulRunTime = new Date();
     final Date actual = target.launch(lastSuccessfulRunTime);
