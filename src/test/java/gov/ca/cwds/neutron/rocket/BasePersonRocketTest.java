@@ -235,10 +235,22 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
       runKillThread(target, NeutronIntegerDefaults.POLL_MILLIS.getValue() + 3500L);
       target.getFlightLog().start();
       target.getFlightLog().doneRetrieve();
-      target.threadNormalize();
+      target.threadNormalize(); // method to test
       target.catchYourBreath();
-    } catch (Exception e) {
-      e.printStackTrace();
+      // } catch (Exception e) {
+      // e.printStackTrace();
+    } finally {
+      markTestDone();
+    }
+  }
+
+  @Test(expected = NeutronRuntimeException.class)
+  public void threadNormalize__bomb() throws Exception {
+    try {
+      final FlightLog fl = mock(FlightLog.class);
+      target.setFlightLog(fl);
+      when(fl.isRunning()).thenThrow(IllegalStateException.class);
+      threadNormalize_Args__();
     } finally {
       markTestDone();
     }
