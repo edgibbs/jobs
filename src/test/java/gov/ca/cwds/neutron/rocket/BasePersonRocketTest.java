@@ -237,8 +237,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
       target.getFlightLog().doneRetrieve();
       target.threadNormalize(); // method to test
       target.catchYourBreath();
-      // } catch (Exception e) {
-      // e.printStackTrace();
     } finally {
       markTestDone();
     }
