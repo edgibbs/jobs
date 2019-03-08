@@ -751,6 +751,23 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, notNullValue());
   }
 
+  @Test(expected = NeutronRuntimeException.class)
+  public void extractLastRunRecsFromView_Args__sql_error_yet_again() throws Exception {
+    final NativeQuery<TestDenormalizedEntity> qn = mock(NativeQuery.class);
+    doThrow(SQLException.class).when(session).clear();
+    doThrow(SQLException.class).when(session).flush();
+
+    final List<TestDenormalizedEntity> denorms = new ArrayList<>();
+    final TestDenormalizedEntity m = new TestDenormalizedEntity(DEFAULT_CLIENT_ID);
+    denorms.add(m);
+    when(qn.list()).thenReturn(denorms);
+
+    final Set<String> deletionResults = mock(Set.class);
+    final List<TestNormalizedEntity> actual =
+        target.extractLastRunRecsFromView(lastRunTime, deletionResults);
+    assertThat(actual, notNullValue());
+  }
+
   @Test
   public void prepHibernatePull_Args__Session__Transaction__Date() throws Exception {
     target.runInsertAllLastChangeKeys(session, lastRunTime, ClientSQLResource.INS_CLI_LST_CHG);
