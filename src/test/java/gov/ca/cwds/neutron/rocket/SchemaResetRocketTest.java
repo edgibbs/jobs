@@ -26,7 +26,6 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
   SchemaResetRocket target;
   DatabaseResetEntry entry;
 
-
   @Override
   @Before
   public void setup() throws Exception {

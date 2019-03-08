@@ -623,7 +623,7 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
   @Test
   public void threadIndex_Args() throws Exception {
-    runKillThread(target, 22000L); // long running test
+    runKillThread(target, 30000L); // long running test
 
     try {
       for (int i = 0; i < 1000; i++) {
@@ -632,8 +632,6 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
 
       target.doneRetrieve();
       target.doneTransform();
-
-      // final Thread t = new Thread({target.threadIndex();}) ;
       target.threadIndex(); // method to test
     } finally {
       target.done();
