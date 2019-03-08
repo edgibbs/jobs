@@ -1146,6 +1146,14 @@ public class BasePersonRocketTest extends Goddard<TestNormalizedEntity, TestDeno
     assertThat(actual, is(notNullValue()));
   }
 
+  @Test()
+  public void launch_A$Date__close_error() throws Exception {
+    target.setBlowupOnClose(true);
+    final Date lastSuccessfulRunTime = new Date();
+    final Date actual = target.launch(lastSuccessfulRunTime);
+    assertThat(actual, is(notNullValue()));
+  }
+
   @Test(expected = Exception.class)
   public void launch_A$Date_T$NeutronCheckedException() throws Exception {
     final Date lastSuccessfulRunTime = new Date();

@@ -40,6 +40,7 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
   private boolean shouldDelete = false;
 
   private boolean blowup = false;
+  private boolean blowupOnClose = false;
 
   @Inject
   public TestIndexerJob(final TestNormalizedEntityDao dao, final ElasticsearchDao esDao,
@@ -230,6 +231,22 @@ public class TestIndexerJob extends BasePersonRocket<TestNormalizedEntity, TestD
     }
 
     super.prepareDocument(bp, t);
+  }
+
+  public boolean isBlowupOnClose() {
+    return blowupOnClose;
+  }
+
+  public void setBlowupOnClose(boolean blowupOnClose) {
+    this.blowupOnClose = blowupOnClose;
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (blowupOnClose) {
+      throw new IOException("BLOWUP ON CLOSE!");
+    }
+    super.close();
   }
 
 }
