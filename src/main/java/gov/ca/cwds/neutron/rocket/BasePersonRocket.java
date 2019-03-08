@@ -412,9 +412,8 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       throw CheeseRay.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
+      LOGGER.info("DONE: jdbc thread");
     }
-
-    LOGGER.info("DONE: jdbc thread");
   }
 
   protected int normalizeLoop(final List<D> grpRecs, Object theLastId, int inCntr)
