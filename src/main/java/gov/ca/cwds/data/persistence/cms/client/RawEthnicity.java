@@ -13,7 +13,7 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 
-@SuppressWarnings({"squid:S1206"})
+@SuppressWarnings({"squid:S2160"})
 public class RawEthnicity extends ClientReference implements NeutronJdbcReader<RawEthnicity> {
 
   private static final long serialVersionUID = 1L;

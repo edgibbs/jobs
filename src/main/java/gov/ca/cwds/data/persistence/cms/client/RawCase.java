@@ -10,7 +10,7 @@ import javax.persistence.Column;
 
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 
-@SuppressWarnings({"squid:S1206"})
+@SuppressWarnings({"squid:S2160"})
 public class RawCase extends ClientReference implements NeutronJdbcReader<RawCase> {
 
   private static final long serialVersionUID = 1L;

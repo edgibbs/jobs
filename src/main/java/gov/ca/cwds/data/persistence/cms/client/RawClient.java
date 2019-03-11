@@ -27,7 +27,7 @@ import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
-@SuppressWarnings({"squid:S1206"})
+@SuppressWarnings({"squid:S2160"})
 public class RawClient extends ClientReference
     implements NeutronJdbcReader<RawClient>, ApiGroupNormalizer<ReplicatedClient>,
     Comparable<RawClient>, Comparator<RawClient>, NeutronReplicatedTime {
