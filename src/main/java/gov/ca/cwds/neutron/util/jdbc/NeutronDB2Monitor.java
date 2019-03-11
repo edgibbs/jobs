@@ -49,8 +49,8 @@ public class NeutronDB2Monitor implements Closeable, DB2SystemMonitor {
   }
 
   @Override
-  public void enable(boolean arg0) throws SQLException {
-    monitor.enable(arg0);
+  public void enable(boolean flag) throws SQLException {
+    monitor.enable(flag);
   }
 
   @Override
@@ -74,13 +74,13 @@ public class NeutronDB2Monitor implements Closeable, DB2SystemMonitor {
   }
 
   @Override
-  public Object moreData(int arg0) throws SQLException {
-    return monitor.moreData(arg0);
+  public Object moreData(int val) throws SQLException {
+    return monitor.moreData(val);
   }
 
   @Override
-  public void start(int arg0) throws SQLException {
-    monitor.start(arg0);
+  public void start(int val) throws SQLException {
+    monitor.start(val);
   }
 
   @Override

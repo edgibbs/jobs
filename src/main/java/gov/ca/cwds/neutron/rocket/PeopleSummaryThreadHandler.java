@@ -93,7 +93,7 @@ public class PeopleSummaryThreadHandler
   protected static final int TFO = TYPE_FORWARD_ONLY;
   protected static final int CRO = CONCUR_READ_ONLY;
 
-  public static enum STEP {
+  public enum STEP {
 
     START("Job start"),
 

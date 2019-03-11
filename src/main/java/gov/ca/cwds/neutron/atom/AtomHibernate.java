@@ -161,7 +161,7 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
   default boolean isLargeDataSet() throws NeutronCheckedException {
     final String schema = getDBSchemaName().toUpperCase().trim();
 
-    // TODO: Bad idea to check data size by replication schema name.
+    // NEXT: Bad idea to check data size by replication schema name.
     // Get the client count instead. Need a client DAO.
     return isDB2OnZOS()
         && (schema.endsWith("RSQ") || schema.endsWith("REP") || schema.endsWith("RSS"));
@@ -225,7 +225,8 @@ public interface AtomHibernate<T extends PersistentObject, M extends ApiGroupNor
    */
   default void runInsertRownumBundle(final Session session, int start, int end, String... sqls) {
     for (String sql : sqls) {
-      NeutronJdbcUtils.runStatementInsertRownumBundle(session, start, end, getPreparedStatementMaker(sql));
+      NeutronJdbcUtils.runStatementInsertRownumBundle(session, start, end,
+          getPreparedStatementMaker(sql));
     }
   }
 

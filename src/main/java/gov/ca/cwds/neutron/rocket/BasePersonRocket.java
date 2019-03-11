@@ -241,7 +241,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected void prepareDocument(final BulkProcessor bp, N t) throws IOException {
     // SNAP-820: separate Jackson from ES client to diagnose hang.
-
     LOGGER.trace("PREP doc id: {}", t.getPrimaryKey());
     final List<?> ready = Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
         .map(p -> prepareUpsertRequestNoChecked(p, t)).collect(Collectors.toList());
@@ -250,11 +249,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     ready.stream().sequential().forEach(x -> {
       ElasticTransformer.pushToBulkProcessor(flightLog, bp, (DocWriteRequest<?>) x);
     });
-
-    // Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
-    // .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
-    // ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
-    // });
   }
 
   /**

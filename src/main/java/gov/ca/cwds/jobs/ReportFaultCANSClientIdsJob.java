@@ -346,6 +346,7 @@ public class ReportFaultCANSClientIdsJob {
       // Convert to CMS Key
       clientDto.setCmsKey(CmsKeyIdGenerator.getKeyFromUIIdentifier(externalId));
     } catch (IllegalArgumentException e) {
+      LOGGER.trace("INVALID CMS KEY! externalId: {}", externalId, e);
       LOGGER.info("Client [id: {}] -> Error getting CMS Key from UI Id: {}", clientDto.id,
           e.getMessage());
       // Let see if it matches base62 10 character pattern

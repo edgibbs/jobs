@@ -85,9 +85,9 @@ public class NeutronThreadUtils {
    * Log available memory, request garbage collection, then log memory again.
    */
   public static void freeMemory() {
-    LOGGER.debug("Free memory, before gc: {} MB", calcMemory());
-    System.gc();
-    LOGGER.debug("Free memory, after  gc: {} MB", calcMemory());
+    // LOGGER.debug("Free memory, before gc: {} MB", calcMemory());
+    // System.gc();
+    // LOGGER.debug("Free memory, after gc: {} MB", calcMemory());
   }
 
 }

@@ -33,7 +33,7 @@ import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
  * @author CWDS API Team
  */
 @SuppressWarnings({"fb-contrib:SIL_SQL_IN_LOOP", "fb-contrib:JVR_JDBC_VENDOR_RELIANCE",
-    "findsecbugs:SQL_INJECTION_JDBC"})
+    "findsecbugs:SQL_INJECTION_JDBC", "squid:S2160"})
 public class ReplicationLagRocket extends BasePersonRocket<DatabaseResetEntry, DatabaseResetEntry> {
 
   private static final long serialVersionUID = 1L;
