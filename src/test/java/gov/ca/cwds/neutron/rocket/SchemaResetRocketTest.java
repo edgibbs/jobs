@@ -83,20 +83,26 @@ public class SchemaResetRocketTest extends Goddard<DatabaseResetEntry, DatabaseR
       target.refreshSchema();
     } catch (Exception e) {
       // code coverage only
+    } finally {
+      markTestDone();
     }
   }
 
   @Test(expected = IllegalStateException.class)
   public void refreshSchema_not_done() throws Exception {
-    // runKillThread(target, 18500L);
-    entry = new DatabaseResetEntry();
-    entry.setEndTime(new Date());
-    entry.setRefreshStatus("N");
-    entry.setSchemaName("CWSNS1");
-    when(dao.findBySchemaStartTime(any(String.class))).thenReturn(entry);
+    try {
+      // runKillThread(target, 18500L);
+      entry = new DatabaseResetEntry();
+      entry.setEndTime(new Date());
+      entry.setRefreshStatus("N");
+      entry.setSchemaName("CWSNS1");
+      when(dao.findBySchemaStartTime(any(String.class))).thenReturn(entry);
 
-    target.setTimeoutSeconds(7);
-    target.refreshSchema();
+      target.setTimeoutSeconds(7);
+      target.refreshSchema();
+    } finally {
+      markTestDone();
+    }
   }
 
   @Test(expected = NeutronRuntimeException.class)
