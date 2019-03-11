@@ -12,6 +12,7 @@ import org.hibernate.annotations.Type;
 
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 
+@SuppressWarnings({"squid:S1206"})
 public class RawClientCounty extends ClientReference implements NeutronJdbcReader<RawClientCounty> {
 
   private static final long serialVersionUID = 1L;
