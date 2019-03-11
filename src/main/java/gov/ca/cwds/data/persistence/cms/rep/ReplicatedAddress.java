@@ -21,7 +21,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
  * 
  * @author CWDS API Team
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"squid:S2160", "serial"})
 @Entity
 @Table(name = "ADDRS_T")
 @JsonPropertyOrder(alphabetic = true)

@@ -76,6 +76,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "REPTR_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings({"squid:S2160", "serial"})
 public class ReplicatedReporter extends BaseReporter implements CmsReplicatedEntity,
     ApiGroupNormalizer<ReplicatedReporter>, EmbeddableCmsReplicatedEntityAware {
 

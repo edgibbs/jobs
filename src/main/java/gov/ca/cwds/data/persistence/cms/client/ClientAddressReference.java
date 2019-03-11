@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
-@SuppressWarnings({"squid:S1206"})
+@SuppressWarnings({"squid:S2160"})
 public class ClientAddressReference extends ClientReference {
 
   private static final long serialVersionUID = 1L;
