@@ -133,6 +133,8 @@ public class FlightPlan implements ApiMarker {
 
   private boolean validateAfterIndexing = false;
 
+  private boolean lastChangeDynamicSql = false;
+
   private Set<StandardFlightSchedule> excludedRockets = new HashSet<>();
 
   private Deque<String> dequeRerunIds = new ConcurrentLinkedDeque<>();
@@ -167,6 +169,7 @@ public class FlightPlan implements ApiMarker {
    * @param legacyPeopleMapping use Snapshot 0.9 mapping for People index
    * @param loadPeopleIndex launch rockets for People index
    * @param debug debug mode
+   * @param lastChangeStaticSql use static SQL for Last Change mode "what changed" query
    * @param excludedRockets optionally turn off rockets
    */
   public FlightPlan(String esConfigPeopleLoc, String esConfigPeopleSummaryLoc, String indexName,
@@ -174,7 +177,7 @@ public class FlightPlan implements ApiMarker {
       long startBucket, long endBucket, long threadCount, boolean loadSealedAndSensitive,
       boolean rangeGiven, String baseDirectory, boolean refreshMqt, boolean dropIndex,
       boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex, boolean debug,
-      Set<StandardFlightSchedule> excludedRockets) {
+      boolean lastChangeStaticSql, Set<StandardFlightSchedule> excludedRockets) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.trimToNull(indexName);
@@ -223,6 +226,7 @@ public class FlightPlan implements ApiMarker {
     this.loadPeopleIndex = fp.loadPeopleIndex;
     this.excludedRockets = fp.excludedRockets;
     this.debug = fp.debug;
+    this.lastChangeDynamicSql = fp.lastChangeDynamicSql;
   }
 
   /**
@@ -482,7 +486,7 @@ public class FlightPlan implements ApiMarker {
     return new FlightPlan(esConfigPeopleLoc, esConfigPeopleSummaryLoc, indexName, lastStartTime,
         lastEndTime, lastRunLoc, lastRunMode, bucketRange.getLeft(), bucketRange.getRight(),
         threadCount, loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex,
-        simulateLaunch, legacyPeopleMapping, loadPeopleIndex, debug, excludedRockets);
+        simulateLaunch, legacyPeopleMapping, loadPeopleIndex, debug, true, excludedRockets);
   }
 
   public void setStartBucket(long startBucket) {
@@ -636,6 +640,14 @@ public class FlightPlan implements ApiMarker {
     this.debug = debug;
   }
 
+  public boolean isLastChangeStaticSql() {
+    return lastChangeDynamicSql;
+  }
+
+  public void setLastChangeStaticSql(boolean lastChangeStaticSql) {
+    this.lastChangeDynamicSql = lastChangeStaticSql;
+  }
+
   @Override
   public String toString() {
     return "FlightPlan [esConfigPeopleLoc=" + esConfigPeopleLoc + ", esConfigPeopleSummaryLoc="
@@ -643,11 +655,12 @@ public class FlightPlan implements ApiMarker {
         + simulateLaunch + ", legacyPeopleMapping=" + legacyPeopleMapping + ", loadPeopleIndex="
         + loadPeopleIndex + ", overrideLastStartTime=" + overrideLastStartTime
         + ", overrideLastEndTime=" + overrideLastEndTime + ", lastRunLoc=" + lastRunLoc
-        + ", lastRunMode=" + lastRunMode + ", startBucket=" + startBucket + ", endBucket="
-        + endBucket + ", threadCount=" + threadCount + ", loadSealedAndSensitive="
+        + ", lastRunMode=" + lastRunMode + ", debug=" + debug + ", startBucket=" + startBucket
+        + ", endBucket=" + endBucket + ", threadCount=" + threadCount + ", loadSealedAndSensitive="
         + loadSealedAndSensitive + ", rangeGiven=" + rangeGiven + ", baseDirectory=" + baseDirectory
-        + ", refreshMqt=" + refreshMqt + ", dropIndex=" + dropIndex + ", debug=" + debug
-        + ", excludedRockets=" + excludedRockets + "]";
+        + ", refreshMqt=" + refreshMqt + ", dropIndex=" + dropIndex + ", validateAfterIndexing="
+        + validateAfterIndexing + ", lastChangeStaticSql=" + lastChangeDynamicSql
+        + ", excludedRockets=" + excludedRockets + ", dequeRerunIds=" + dequeRerunIds + "]";
   }
 
 }

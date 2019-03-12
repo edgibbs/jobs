@@ -403,7 +403,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
       }
     } catch (Exception e) {
       try {
-        con.rollback();;
+        if (con != null) {
+          con.rollback();
+        }
       } catch (Exception e2) {
         LOGGER.trace("ERROR ON SECONDARY ROLLBACK", e2);
       }

@@ -63,7 +63,7 @@ public class WorkPrepareWhatChanged extends NeutronWorkTotalImpl {
    * </p>
    * 
    * @param con database connection
-   * @see ClientSQLResource#INS_LST_CHG_ALL
+   * @see ClientSQLResource#INS_LST_CHG_ALL_DYNAMIC
    */
   @Override
   public void execute(Connection con) throws SQLException {

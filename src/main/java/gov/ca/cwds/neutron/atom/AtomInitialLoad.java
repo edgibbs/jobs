@@ -237,7 +237,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
-      // TODO: Don't start next range, until Elasticsearch has indexed all documents.
+      // NEXT: Don't start next range, until Elasticsearch has indexed all documents.
       // Queue range threads.
       for (Pair<String, String> p : ranges) {
         tasks.add(threadPool.submit(() -> pullRange(p, null)));
