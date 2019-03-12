@@ -647,12 +647,12 @@ public class FlightPlan implements ApiMarker {
     this.debug = debug;
   }
 
-  public boolean isLastChangeStaticSql() {
+  public boolean isLastChangeDynamicSql() {
     return lastChangeDynamicSql;
   }
 
-  public void setLastChangeStaticSql(boolean lastChangeStaticSql) {
-    this.lastChangeDynamicSql = lastChangeStaticSql;
+  public void setLastChangeDynamicSql(boolean lastChangeDynamicSql) {
+    this.lastChangeDynamicSql = lastChangeDynamicSql;
   }
 
   @Override
