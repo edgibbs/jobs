@@ -1090,11 +1090,12 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * Used for testing.
+   * Used by testing and by ManagedBlocker for Initial Load to prevent memory bloat from
+   * Elasticsearch indexing queue. Don't abuse this.
    * 
    * @return index queue implementation
    */
-  protected Queue<N> getQueueIndex() {
+  public Queue<N> getQueueIndex() {
     return queueIndex;
   }
 

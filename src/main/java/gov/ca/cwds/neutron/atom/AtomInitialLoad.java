@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 
@@ -214,6 +215,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
   default void startMultiThreadRetrieve() {
     // Implement marker.
   }
+
+  Queue<N> getQueueIndex();
 
   /**
    * The "extract" part of ETL. Single producer, chained consumers. This rocket normalizes
