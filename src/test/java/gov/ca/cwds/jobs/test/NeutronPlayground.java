@@ -6,10 +6,13 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -130,6 +133,32 @@ public class NeutronPlayground {
 
   }
 
+  public static class TestManagedBlocker implements ManagedBlocker {
+
+    private final int maxQueueSizeBeforeBlocking;
+    private Queue<String> queue;
+
+    public TestManagedBlocker(Queue<String> queue, int maxSizeBeforeBlocking) {
+      this.queue = queue;
+      this.maxQueueSizeBeforeBlocking = maxSizeBeforeBlocking;
+    }
+
+    @Override
+    public boolean block() throws InterruptedException {
+      return false;
+    }
+
+    @Override
+    public boolean isReleasable() {
+      return queue.size() < maxQueueSizeBeforeBlocking;
+    }
+
+    public int getMaxSizeBeforeBlocking() {
+      return maxQueueSizeBeforeBlocking;
+    }
+
+  }
+
   public static class Foo implements Lame {
 
     @Override
@@ -158,9 +187,19 @@ public class NeutronPlayground {
   }
 
   public static void main(String[] args) throws Exception {
-    final NeutronPlayground playground = new NeutronPlayground();
-    playground.testRetry(500);
-    playground.testRetry(2000);
+    // final NeutronPlayground playground = new NeutronPlayground();
+    // playground.testRetry(500);
+    // playground.testRetry(2000);
+
+    final Queue<String> queue = new ConcurrentLinkedQueue<>();
+    final TestManagedBlocker blocker = new TestManagedBlocker(queue, 10000);
+
+    for (int i = 1; i <= 1000; i++) {
+      queue.add("abc" + i);
+    }
+
+    System.out.print("releasable: " + blocker.isReleasable());
+
   }
 
 }
