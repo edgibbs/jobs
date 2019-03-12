@@ -169,7 +169,7 @@ public class FlightPlan implements ApiMarker {
    * @param legacyPeopleMapping use Snapshot 0.9 mapping for People index
    * @param loadPeopleIndex launch rockets for People index
    * @param debug debug mode
-   * @param lastChangeStaticSql use static SQL for Last Change mode "what changed" query
+   * @param lastChangeDynamicSql use dynamic SQL for Last Change mode "what changed" query
    * @param excludedRockets optionally turn off rockets
    */
   public FlightPlan(String esConfigPeopleLoc, String esConfigPeopleSummaryLoc, String indexName,
@@ -177,7 +177,7 @@ public class FlightPlan implements ApiMarker {
       long startBucket, long endBucket, long threadCount, boolean loadSealedAndSensitive,
       boolean rangeGiven, String baseDirectory, boolean refreshMqt, boolean dropIndex,
       boolean simulateLaunch, boolean legacyPeopleMapping, boolean loadPeopleIndex, boolean debug,
-      boolean lastChangeStaticSql, Set<StandardFlightSchedule> excludedRockets) {
+      boolean lastChangeDynamicSql, Set<StandardFlightSchedule> excludedRockets) {
     this.esConfigPeopleLoc = esConfigPeopleLoc;
     this.esConfigPeopleSummaryLoc = esConfigPeopleSummaryLoc;
     this.indexName = StringUtils.trimToNull(indexName);
@@ -197,6 +197,7 @@ public class FlightPlan implements ApiMarker {
     this.legacyPeopleMapping = legacyPeopleMapping;
     this.loadPeopleIndex = loadPeopleIndex;
     this.debug = debug;
+    this.lastChangeDynamicSql = lastChangeDynamicSql;
     this.excludedRockets = excludedRockets;
   }
 
@@ -378,6 +379,7 @@ public class FlightPlan implements ApiMarker {
     boolean simulateLaunch = false;
     boolean legacyPeopleMapping = false;
     boolean loadPeopleIndex = true;
+    boolean lastChangeDynamicSql = false;
     boolean debug = false;
 
     // CHECKSTYLE:OFF
@@ -469,6 +471,10 @@ public class FlightPlan implements ApiMarker {
             loadPeopleIndex = false;
             break;
 
+          case NeutronLongCmdLineName.CMD_LINE_DYNAMIC_SQL:
+            lastChangeDynamicSql = true;
+            break;
+
           case NeutronLongCmdLineName.CMD_LINE_EXCLUDE_ROCKETS:
             excludedRockets = Arrays.asList(opt.getValue().trim().split(",")).stream()
                 .map(StandardFlightSchedule::lookupByRocketName).collect(Collectors.toSet());
@@ -486,7 +492,8 @@ public class FlightPlan implements ApiMarker {
     return new FlightPlan(esConfigPeopleLoc, esConfigPeopleSummaryLoc, indexName, lastStartTime,
         lastEndTime, lastRunLoc, lastRunMode, bucketRange.getLeft(), bucketRange.getRight(),
         threadCount, loadSealedAndSensitive, rangeGiven, baseDirectory, refreshMqt, dropIndex,
-        simulateLaunch, legacyPeopleMapping, loadPeopleIndex, debug, true, excludedRockets);
+        simulateLaunch, legacyPeopleMapping, loadPeopleIndex, debug, lastChangeDynamicSql,
+        excludedRockets);
   }
 
   public void setStartBucket(long startBucket) {
