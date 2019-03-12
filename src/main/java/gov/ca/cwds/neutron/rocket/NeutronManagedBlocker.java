@@ -3,19 +3,19 @@ package gov.ca.cwds.neutron.rocket;
 import java.util.Queue;
 import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 
-public class NeutronManagedBlocker implements ManagedBlocker {
+public class NeutronManagedBlocker<T> implements ManagedBlocker {
 
   private final int maxQueueSizeBeforeBlocking;
-  private Queue<String> queue;
+  private Queue<T> queue;
 
-  public NeutronManagedBlocker(Queue<String> queue, int maxSizeBeforeBlocking) {
+  public NeutronManagedBlocker(Queue<T> queue, int maxSizeBeforeBlocking) {
     this.queue = queue;
     this.maxQueueSizeBeforeBlocking = maxSizeBeforeBlocking;
   }
 
   @Override
   public boolean block() throws InterruptedException {
-    return false;
+    return isReleasable();
   }
 
   @Override

@@ -27,6 +27,7 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.rocket.NeutronManagedBlocker;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
@@ -239,6 +240,8 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       final List<ForkJoinTask<?>> tasks = new ArrayList<>(ranges.size());
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
+      ForkJoinPool.managedBlock(new NeutronManagedBlocker<N>(getQueueIndex(), 50000)); // NEXT:
+                                                                                       // soft-code
 
       // NEXT: Don't start next range, until Elasticsearch has indexed all documents.
       // Queue range threads.

@@ -1095,6 +1095,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * 
    * @return index queue implementation
    */
+  @Override
   public Queue<N> getQueueIndex() {
     return queueIndex;
   }
