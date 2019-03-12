@@ -402,6 +402,11 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         con.commit();
       }
     } catch (Exception e) {
+      try {
+        con.rollback();;
+      } catch (Exception e2) {
+        LOGGER.trace("ERROR ON SECONDARY ROLLBACK", e2);
+      }
       fail();
       throw CheeseRay.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {

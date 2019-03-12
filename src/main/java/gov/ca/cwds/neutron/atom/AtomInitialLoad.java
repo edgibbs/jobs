@@ -218,6 +218,10 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
   /**
    * The "extract" part of ETL. Single producer, chained consumers. This rocket normalizes
    * <strong>without the transform thread</strong>.
+   * 
+   * <p>
+   * Typically used for multi-thread Initial Load, not Last Change mode.
+   * </p>
    */
   default void pullMultiThreadJdbc() {
     nameThread("extract_main");
@@ -233,6 +237,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
+      // TODO: Don't start next range, until Elasticsearch has indexed all documents.
       // Queue range threads.
       for (Pair<String, String> p : ranges) {
         tasks.add(threadPool.submit(() -> pullRange(p, null)));
