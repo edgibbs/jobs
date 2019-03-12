@@ -110,6 +110,7 @@ import gov.ca.cwds.rest.api.domain.cms.SystemCodeCache;
 @Table(name = "CLIENT_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings({"squid:S2160", "serial"})
 public class ReplicatedClient extends BaseClient implements ApiPersonAware,
     ApiMultipleLanguagesAware, ApiMultipleClientAddressAware, ApiMultiplePhonesAware,
     CmsReplicatedEntity, ApiClientCountyAware, ApiClientRaceAndEthnicityAware,

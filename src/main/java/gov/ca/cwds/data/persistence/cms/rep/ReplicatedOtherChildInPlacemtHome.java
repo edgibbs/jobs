@@ -5,8 +5,6 @@ import java.util.Map;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -42,6 +40,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "OTH_KIDT")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings({"squid:S2160", "serial"})
 public class ReplicatedOtherChildInPlacemtHome extends BaseOtherChildInPlacemtHome
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedOtherChildInPlacemtHome> {
 
@@ -91,16 +90,6 @@ public class ReplicatedOtherChildInPlacemtHome extends BaseOtherChildInPlacemtHo
   @Override
   public EmbeddableCmsReplicatedEntity getReplicatedEntity() {
     return replicatedEntity;
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

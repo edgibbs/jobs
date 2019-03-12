@@ -5,8 +5,6 @@ import java.util.Map;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -88,6 +86,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "COLTRL_T")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings({"squid:S2160", "serial"})
 public class ReplicatedCollateralIndividual extends BaseCollateralIndividual
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedCollateralIndividual> {
 
@@ -128,16 +127,6 @@ public class ReplicatedCollateralIndividual extends BaseCollateralIndividual
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.COLLATERAL_INDIVIDUAL);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
   @Override
