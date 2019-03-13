@@ -71,6 +71,7 @@ public class WorkPrepareWhatChanged extends NeutronWorkTotalImpl {
 
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       stmt.setInt(1, runId);
+
       final int totalParams = StringUtils.countMatches(sql, "?") - 1;
       for (int i = 2; i <= totalParams; i++) {
         stmt.setTimestamp(i++, startTs);
