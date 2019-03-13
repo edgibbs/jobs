@@ -413,6 +413,7 @@ public class ClientSQLResource implements ApiMarker {
           + "   CROSS JOIN DRIVER d\n"
           + "   WHERE ohp.IBMSNAP_LOGMARKER BETWEEN d.TS_START AND d.TS_END\n"
           + ") s1\n"
+          + "CROSS JOIN DRIVER d\n"
           + "WHERE (s1.CLIENT_ID, s1.OTHER_ID, s1.TBL, s1.IBMSNAP_LOGMARKER, s1.IBMSNAP_OPERATION) NOT IN (\n"
           + "   SELECT z.CLIENT_ID, z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
           + ")\n";
