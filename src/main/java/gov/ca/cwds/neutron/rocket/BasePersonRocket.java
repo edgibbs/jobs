@@ -346,7 +346,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         t.join();
       }
 
-      // WARN: threading practices. Prefer condition check or timed lock.
+      // WARN: bad threading practice. Prefer condition check or timed lock.
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
       LOGGER.info("PROGRESS TRACK: {}", () -> this.getFlightLog().toString());
     } catch (Exception e) {
@@ -940,7 +940,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         this.sessionFactory.close();
       }
 
-      catchYourBreath(); // a lock would be better
+      catchYourBreath(); // a lock or condition would be better
     }
   }
 

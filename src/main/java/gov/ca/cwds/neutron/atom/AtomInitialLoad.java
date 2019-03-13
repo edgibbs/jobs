@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 import java.util.concurrent.ForkJoinTask;
 
 import javax.persistence.ParameterMode;
@@ -241,18 +242,24 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
-      // NEXT: Don't start next range, until Elasticsearch has indexed all documents.
       // Queue range threads.
       for (Pair<String, String> p : ranges) {
         tasks.add(threadPool.submit(() -> pullRange(p, null)));
       }
 
+      // NEXT: soft-code ES index queue threshold size.
+      final ManagedBlocker mb = new NeutronManagedBlocker<N>(getQueueIndex(), 50000);
+
       // Join threads. Don't let this method return, until all range threads finish.
       for (ForkJoinTask<?> task : tasks) {
         task.get();
 
-        // NEXT: soft-code ES index queue threshold size.
-        ForkJoinPool.managedBlock(new NeutronManagedBlocker<N>(getQueueIndex(), 50000));
+        // Don't start next range, until Elasticsearch has indexed all documents.
+        if (getFlightLog().isInitialLoad()) {
+          log.debug("Check ES indexing queue");
+          ForkJoinPool.managedBlock(mb);
+          log.debug("ES indexing queue ok. Next bundle.");
+        }
       }
 
     } catch (Exception e) {
