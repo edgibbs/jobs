@@ -63,8 +63,12 @@ public class NeutronThreadUtils {
    * </p>
    */
   public static void catchYourBreath() {
+    catchYourBreath(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
+  }
+
+  public static void catchYourBreath(int sleepMillis) {
     try {
-      Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue()); // NOSONAR
+      Thread.sleep(sleepMillis); // NOSONAR
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       LOGGER.warn("Interrupted", e); // appease SonarQube
