@@ -3,7 +3,8 @@ package gov.ca.cwds.neutron.rocket;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
-@SuppressWarnings({"squid:S1192", "findbugs:HSC_HUGE_SHARED_STRING_CONSTANT"})
+@SuppressWarnings({"squid:S1192", "squid:S2160", "squid:S1206", "serial",
+    "findbugs:HSC_HUGE_SHARED_STRING_CONSTANT"})
 public class ClientSQLResource implements ApiMarker {
 
   private static final long serialVersionUID = 1L;

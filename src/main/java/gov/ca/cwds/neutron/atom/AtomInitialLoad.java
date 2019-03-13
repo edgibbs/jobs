@@ -241,9 +241,6 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       final ForkJoinPool threadPool =
           new ForkJoinPool(NeutronThreadUtils.calcReaderThreads(getFlightPlan()));
 
-      // NEXT: soft-code
-      ForkJoinPool.managedBlock(new NeutronManagedBlocker<N>(getQueueIndex(), 50000));
-
       // NEXT: Don't start next range, until Elasticsearch has indexed all documents.
       // Queue range threads.
       for (Pair<String, String> p : ranges) {
@@ -253,6 +250,9 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
       // Join threads. Don't let this method return, until all range threads finish.
       for (ForkJoinTask<?> task : tasks) {
         task.get();
+
+        // NEXT: soft-code ES index queue threshold size.
+        ForkJoinPool.managedBlock(new NeutronManagedBlocker<N>(getQueueIndex(), 50000));
       }
 
     } catch (Exception e) {

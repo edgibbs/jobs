@@ -3,6 +3,15 @@ package gov.ca.cwds.neutron.rocket;
 import java.util.Queue;
 import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 
+import gov.ca.cwds.neutron.atom.AtomInitialLoad;
+
+/**
+ * Implementation of ForkJoinPool.ManagedBlocker. Blocks reader threads, until Elasticsearch
+ * indexing queue size drops below the max threshold.
+ * 
+ * @author CWDS API Team
+ * @see AtomInitialLoad#pullMultiThreadJdbc()
+ */
 public class NeutronManagedBlocker<T> implements ManagedBlocker {
 
   private final int maxQueueSizeBeforeBlocking;
