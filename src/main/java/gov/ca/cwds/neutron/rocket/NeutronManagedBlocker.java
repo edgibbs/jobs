@@ -38,7 +38,7 @@ public class NeutronManagedBlocker<T> implements ManagedBlocker {
     if (threadName.startsWith("extract_")) {
       final int size = queue.size();
       ret = size < maxQueueSizeBeforeBlocking;
-      LOGGER.debug("threadName: {}, ");
+      LOGGER.debug("threadName: {}, size: {}, block: {}", threadName, size, ret);
     }
     return ret;
   }
