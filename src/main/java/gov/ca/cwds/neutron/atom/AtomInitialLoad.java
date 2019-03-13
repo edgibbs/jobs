@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 import java.util.concurrent.ForkJoinTask;
 
 import javax.persistence.ParameterMode;
@@ -144,7 +143,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     final String query = StringUtils.isNotBlank(sql) ? sql.trim()
         : getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", range.getLeft())
             .replaceAll(":toId", range.getRight());
-    log.info("query: {}", query);
+    log.debug("query: {}", query);
 
     // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
     try {
@@ -187,6 +186,15 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
       // Done reading data. Process data, like cleansing and normalizing.
       handleJdbcDone(range);
+
+      // Don't start next range, until Elasticsearch has indexed all documents.
+      if (flightLog.isInitialLoad()) {
+        log.debug("Check ES indexing queue");
+        // NEXT: soft-code ES index queue threshold size.
+        ForkJoinPool.managedBlock(new NeutronManagedBlocker<N>(getQueueIndex(), 50000));
+        log.debug("ES indexing queue ok. Next bundle.");
+      }
+
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
       return getResults();
     } catch (Exception e) {
@@ -247,19 +255,9 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
         tasks.add(threadPool.submit(() -> pullRange(p, null)));
       }
 
-      // NEXT: soft-code ES index queue threshold size.
-      final ManagedBlocker mb = new NeutronManagedBlocker<N>(getQueueIndex(), 50000);
-
       // Join threads. Don't let this method return, until all range threads finish.
       for (ForkJoinTask<?> task : tasks) {
         task.get();
-
-        // Don't start next range, until Elasticsearch has indexed all documents.
-        if (getFlightLog().isInitialLoad()) {
-          log.debug("Check ES indexing queue");
-          ForkJoinPool.managedBlock(mb);
-          log.debug("ES indexing queue ok. Next bundle.");
-        }
       }
 
     } catch (Exception e) {
