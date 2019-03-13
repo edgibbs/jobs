@@ -6,7 +6,6 @@ import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
 import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
 import gov.ca.cwds.neutron.jetpack.JetPackLogger;
-import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 
 /**
  * Implementation of ForkJoinPool.ManagedBlocker. Blocks reader threads, until Elasticsearch
@@ -42,7 +41,7 @@ public class NeutronManagedBlocker<T> implements ManagedBlocker {
       ret = size < maxQueueSizeBeforeBlocking;
       if (!ret) {
         LOGGER.debug("isReleasable: BLOCK! thread: {}, index queue size: {}", threadName, size);
-        NeutronThreadUtils.catchYourBreath(200);
+        // NeutronThreadUtils.catchYourBreath(200);
       }
     }
 
