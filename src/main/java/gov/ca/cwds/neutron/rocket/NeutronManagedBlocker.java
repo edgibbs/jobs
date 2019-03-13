@@ -4,6 +4,8 @@ import java.util.Queue;
 import java.util.concurrent.ForkJoinPool.ManagedBlocker;
 
 import gov.ca.cwds.neutron.atom.AtomInitialLoad;
+import gov.ca.cwds.neutron.jetpack.ConditionalLogger;
+import gov.ca.cwds.neutron.jetpack.JetPackLogger;
 
 /**
  * Implementation of ForkJoinPool.ManagedBlocker. Blocks reader threads, until Elasticsearch
@@ -13,6 +15,8 @@ import gov.ca.cwds.neutron.atom.AtomInitialLoad;
  * @see AtomInitialLoad#pullMultiThreadJdbc()
  */
 public class NeutronManagedBlocker<T> implements ManagedBlocker {
+
+  private static final ConditionalLogger LOGGER = new JetPackLogger(NeutronManagedBlocker.class);
 
   private final int maxQueueSizeBeforeBlocking;
   private Queue<T> queue;
@@ -29,8 +33,14 @@ public class NeutronManagedBlocker<T> implements ManagedBlocker {
 
   @Override
   public boolean isReleasable() {
-    final boolean ours = Thread.currentThread().getName().startsWith("extract_");
-    return !ours || (ours && queue.size() < maxQueueSizeBeforeBlocking);
+    boolean ret = true;
+    final String threadName = Thread.currentThread().getName();
+    if (threadName.startsWith("extract_")) {
+      final int size = queue.size();
+      ret = size < maxQueueSizeBeforeBlocking;
+      LOGGER.debug("threadName: {}, ");
+    }
+    return ret;
   }
 
   public int getMaxSizeBeforeBlocking() {
