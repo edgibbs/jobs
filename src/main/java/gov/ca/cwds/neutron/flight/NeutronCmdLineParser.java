@@ -52,6 +52,7 @@ public class NeutronCmdLineParser {
     ret.addOption(NeutronCmdLineOption.REFRESH_MQT.getOpt());
     ret.addOption(NeutronCmdLineOption.DROP_INDEX.getOpt());
     ret.addOption(NeutronCmdLineOption.DEBUG.getOpt());
+    ret.addOption(NeutronCmdLineOption.LAST_CHG_DYNAMIC_SQL.getOpt());
 
     ret.addOption(NeutronCmdLineOption.NO_INDEX_PEOPLE.getOpt());
     ret.addOption(NeutronCmdLineOption.EXCLUDE_ROCKETS.getOpt());

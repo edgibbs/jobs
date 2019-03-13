@@ -20,7 +20,8 @@ public class NeutronManagedBlocker<T> implements ManagedBlocker {
 
   @Override
   public boolean isReleasable() {
-    return queue.size() < maxQueueSizeBeforeBlocking;
+    return Thread.currentThread().getName().startsWith("extract_")
+        && queue.size() < maxQueueSizeBeforeBlocking;
   }
 
   public int getMaxSizeBeforeBlocking() {
