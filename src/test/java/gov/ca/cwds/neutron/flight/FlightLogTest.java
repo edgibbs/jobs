@@ -10,6 +10,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -229,8 +230,8 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void getStatus_Args__() throws Exception {
-    FlightStatus actual = target.getStatus();
-    FlightStatus expected = FlightStatus.NOT_STARTED;
+    final FlightStatus actual = target.getStatus();
+    final FlightStatus expected = FlightStatus.NOT_STARTED;
     assertThat(actual, is(equalTo(expected)));
   }
 
@@ -907,7 +908,7 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
   @Test
   public void addOtherMetric_A$String$Object() throws Exception {
     final String event = null;
-    final Object val = null;
+    final Float val = null;
     target.addOtherMetric(event, val);
   }
 
@@ -927,8 +928,8 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void getOtherMetrics_A$() throws Exception {
-    final Map<String, Object> actual = target.getOtherMetrics();
-    final Map<String, Object> expected = new HashMap<>();
+    final Map<String, Serializable> actual = target.getOtherMetrics();
+    final Map<String, Serializable> expected = new HashMap<>();
     expected.put("nr_fun", "supercalifragilisticexpialadocious");
     assertThat(actual, is(equalTo(expected)));
   }

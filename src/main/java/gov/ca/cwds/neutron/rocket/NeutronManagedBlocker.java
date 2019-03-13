@@ -35,11 +35,13 @@ public class NeutronManagedBlocker<T> implements ManagedBlocker {
   public boolean isReleasable() {
     boolean ret = true;
     final String threadName = Thread.currentThread().getName();
+
     if (threadName.startsWith("extract_")) {
       final int size = queue.size();
       ret = size < maxQueueSizeBeforeBlocking;
-      LOGGER.debug("threadName: {}, size: {}, block: {}", threadName, size, ret);
+      LOGGER.debug("isReleasable: threadName: {}, size: {}, block: {}", threadName, size, ret);
     }
+
     return ret;
   }
 
