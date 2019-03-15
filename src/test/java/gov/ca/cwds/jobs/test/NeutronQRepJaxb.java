@@ -3,10 +3,11 @@ package gov.ca.cwds.jobs.test;
 import java.io.File;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBIntrospector;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import mqcap.xsd.NeutronQRepHead;
+import mqcap.xsd.MsgType;
 import mqcap.xsd.TransType;
 
 public class NeutronQRepJaxb {
@@ -21,7 +22,7 @@ public class NeutronQRepJaxb {
     final Marshaller m = jc.createMarshaller();
 
     final File xml = new File("/Users/dsmith/cws_legacy/db2/q_rep/repl/q/test.xml");
-    final NeutronQRepHead config = (NeutronQRepHead) unmarshaller.unmarshal(xml);
+    final MsgType config = (MsgType) JAXBIntrospector.getValue(unmarshaller.unmarshal(xml));
 
     m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
     m.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION,
