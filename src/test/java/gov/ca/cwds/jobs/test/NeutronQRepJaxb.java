@@ -22,7 +22,7 @@ public class NeutronQRepJaxb {
 
   public MsgType read(String xmlLocation) throws JAXBException, IOException {
     MsgType ret = null;
-    final JAXBContext jc = JAXBContext.newInstance(TransType.class.getPackage().getName());
+    final JAXBContext jc = JAXBContext.newInstance(MsgType.class.getPackage().getName());
     try (final Reader r =
         new StringReader(IOUtils.resourceToString(xmlLocation, Charset.defaultCharset()));) {
       ret = (MsgType) JAXBIntrospector.getValue(jc.createUnmarshaller().unmarshal(r));
