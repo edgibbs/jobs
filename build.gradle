@@ -116,6 +116,10 @@ dependencies {
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.7.2'
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
 
+    compile group: 'javax.jms', name: 'jms', version: '1.1'
+    compile group: 'com.ibm.mq', name: 'com.ibm.mq.allclient', version: '9.1.1.0'
+    compile group: 'com.ibm', name: 'com.ibm.mqjms', version: '5.3.07'
+    
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
 	testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powerMockVersion
