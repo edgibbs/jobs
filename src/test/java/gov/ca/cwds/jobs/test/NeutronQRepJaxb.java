@@ -12,6 +12,7 @@ import javax.xml.bind.JAXBIntrospector;
 import javax.xml.bind.Marshaller;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import mqcap.xsd.MsgType;
 import mqcap.xsd.TransType;
@@ -49,7 +50,9 @@ public class NeutronQRepJaxb {
 
   public static void main(String[] args) throws Exception {
     final NeutronQRepJaxb inst = new NeutronQRepJaxb();
-    final MsgType msg = inst.read("/qrep/mqcap/test.xml");
+    final MsgType msg =
+        inst.read(args.length > 0 && StringUtils.isNotBlank(args[0]) ? args[0].trim()
+            : "/qrep/mqcap/test.xml");
     inst.write(msg, System.out);
   }
 
