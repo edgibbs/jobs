@@ -16,6 +16,11 @@ import org.apache.commons.io.IOUtils;
 import mqcap.xsd.MsgType;
 import mqcap.xsd.TransType;
 
+/**
+ * JAXB facilitator class for DB2 Q replication XML messages.
+ * 
+ * @author CWDS API Team
+ */
 public class NeutronQRepJaxb {
 
   public NeutronQRepJaxb() {}
