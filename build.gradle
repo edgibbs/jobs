@@ -118,7 +118,7 @@ dependencies {
 
     compile group: 'javax.jms', name: 'jms', version: '1.1'
     compile group: 'com.ibm.mq', name: 'com.ibm.mq.allclient', version: '9.1.1.0'
-    compile group: 'com.ibm', name: 'com.ibm.mqjms', version: '5.3.07'
+    // compile group: 'com.ibm', name: 'com.ibm.mqjms', version: '5.3.07'
     
     compile fileTree(dir: 'lib', include: ['*.jar'])
 
