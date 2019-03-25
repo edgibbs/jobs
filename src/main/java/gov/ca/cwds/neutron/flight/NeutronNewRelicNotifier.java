@@ -52,9 +52,10 @@ public class NeutronNewRelicNotifier implements AtomMonitorNotifier {
             .forEach(e -> attribs.put(e.getKey(), e.getValue()));
       }
 
-      if (fl.getLastChangeSince() != null) {
+      final Date lastChgSince = fl.getLastChangeSince();
+      if (lastChgSince != null) {
         attribs.putIfAbsent("changed_since",
-            Instant.ofEpochMilli(fl.getLastChangeSince().getTime()).getEpochSecond());
+            Instant.ofEpochMilli(lastChgSince.getTime()).getEpochSecond());
       }
 
       attribs.putIfAbsent("warnings", fl.getWarnings().size());
@@ -74,18 +75,18 @@ public class NeutronNewRelicNotifier implements AtomMonitorNotifier {
           Instant.ofEpochMilli(fl.getStartTime()).getEpochSecond());
       attribs.putIfAbsent("run_end_time", Instant.ofEpochMilli(fl.getEndTime()).getEpochSecond());
 
-      final float runSeconds = (fl.getEndTime() - fl.getStartTime()) / 1000;
+      final float runSeconds = (fl.getEndTime() - fl.getStartTime()) / 1000F;
       LOGGER.debug("Neutron: this run seconds: {}", runSeconds);
       attribs.putIfAbsent("run_seconds", runSeconds);
 
-      final float runMillis = fl.getEndTime() - fl.getStartTime();
+      final float runMillis = ((float) fl.getEndTime()) - fl.getStartTime();
       attribs.putIfAbsent("run_millis", runMillis);
 
       if (fl.getLastEndTime() != 0) {
         attribs.putIfAbsent("last_run_end_time",
             Instant.ofEpochMilli(fl.getLastEndTime()).getEpochSecond());
-        final float runTotalMillis = fl.getLastEndTime() - fl.getStartTime();
-        final float runTotalSeconds = runTotalMillis / 1000;
+        final float runTotalMillis = ((float) fl.getLastEndTime()) - fl.getStartTime();
+        final float runTotalSeconds = runTotalMillis / 1000F;
 
         LOGGER.debug("since last run: millis: {}, seconds: {}", runTotalMillis, runTotalSeconds);
         attribs.putIfAbsent("run_since_last_run_secs", runTotalSeconds);
@@ -94,7 +95,7 @@ public class NeutronNewRelicNotifier implements AtomMonitorNotifier {
         final float totalGreenLineSecs = runTotalSeconds + refreshInterval;
         attribs.putIfAbsent("green_line_secs", totalGreenLineSecs);
 
-        final float totalGreenLineMillis = runTotalMillis + (refreshInterval * 1000);
+        final float totalGreenLineMillis = runTotalMillis + (refreshInterval * 1000F);
         attribs.putIfAbsent("green_line_millis", totalGreenLineMillis);
       }
 

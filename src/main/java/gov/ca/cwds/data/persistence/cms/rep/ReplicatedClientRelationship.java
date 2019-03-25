@@ -48,6 +48,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "CLN_RELT")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings({"squid:S2160", "serial"})
 public class ReplicatedClientRelationship extends BaseClientRelationship
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedClientRelationship> {
 

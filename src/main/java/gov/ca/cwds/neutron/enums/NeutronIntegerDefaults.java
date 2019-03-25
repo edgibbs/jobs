@@ -12,7 +12,7 @@ public enum NeutronIntegerDefaults {
   /**
    * Give Elasticsearch bulk indexing a chance to catch its breath.
    */
-  WAIT_BULK_PROCESSOR(25),
+  WAIT_BULK_PROCESSOR(15),
 
   /**
    * Default bucket size for Initial Load clients using 1024 buckets.

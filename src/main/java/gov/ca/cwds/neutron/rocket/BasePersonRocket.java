@@ -164,8 +164,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    * <strong>OPTION:</strong> size by environment (production size or small test data set).
    * </p>
    */
-  // protected ConcurrentLinkedDeque<N> queueIndex = new ConcurrentLinkedDeque<>();
-
   protected Queue<N> queueIndex = new ConcurrentLinkedQueue<>();
 
   /**
@@ -243,7 +241,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
    */
   protected void prepareDocument(final BulkProcessor bp, N t) throws IOException {
     // SNAP-820: separate Jackson from ES client to diagnose hang.
-
     LOGGER.trace("PREP doc id: {}", t.getPrimaryKey());
     final List<?> ready = Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
         .map(p -> prepareUpsertRequestNoChecked(p, t)).collect(Collectors.toList());
@@ -252,11 +249,6 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     ready.stream().sequential().forEach(x -> {
       ElasticTransformer.pushToBulkProcessor(flightLog, bp, (DocWriteRequest<?>) x);
     });
-
-    // Arrays.stream(ElasticTransformer.buildElasticSearchPersons(t))
-    // .map(p -> prepareUpsertRequestNoChecked(p, t)).forEach(x -> { // NOSONAR
-    // ElasticTransformer.pushToBulkProcessor(flightLog, bp, x);
-    // });
   }
 
   /**
@@ -282,9 +274,9 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         fl.incrementBulkDeleted();
       } else {
         ret = prepareUpsertRequest(esp, t);
-        // fl.incrementBulkPrepared();
       }
     } catch (Exception e) {
+      fl.addWarning("FAILED TO BUILD UPSERT FOR PK " + t.getPrimaryKey());
       throw CheeseRay.runtime(LOGGER, e, "ERROR BUILDING UPSERT!: PK: {}", t.getPrimaryKey());
     }
 
@@ -354,7 +346,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         t.join();
       }
 
-      // WARN: threading practices. Prefer condition check or timed lock.
+      // WARN: bad threading practice. Prefer condition check or timed lock.
       Thread.sleep(NeutronIntegerDefaults.SLEEP_MILLIS.getValue());
       LOGGER.info("PROGRESS TRACK: {}", () -> this.getFlightLog().toString());
     } catch (Exception e) {
@@ -410,13 +402,19 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         con.commit();
       }
     } catch (Exception e) {
+      try {
+        if (con != null) {
+          con.rollback();
+        }
+      } catch (Exception e2) {
+        LOGGER.trace("ERROR ON SECONDARY ROLLBACK", e2);
+      }
       fail();
       throw CheeseRay.runtime(LOGGER, e, "BATCH ERROR! {}", e.getMessage());
     } finally {
       doneRetrieve();
+      LOGGER.info("DONE: jdbc thread");
     }
-
-    LOGGER.info("DONE: jdbc thread");
   }
 
   protected int normalizeLoop(final List<D> grpRecs, Object theLastId, int inCntr)
@@ -490,7 +488,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
     int cntr = 0;
 
     try {
-      while (!(isFailed() || (isRetrieveDone() && isTransformDone() && queueIndex.isEmpty()))) {
+      while (!(!isRunning() || (isRetrieveDone() && isTransformDone() && queueIndex.isEmpty()))) {
         cntr = bulkPrepare(bp, cntr);
       }
 
@@ -942,7 +940,7 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
         this.sessionFactory.close();
       }
 
-      catchYourBreath(); // a lock would be better
+      catchYourBreath(); // a lock or condition would be better
     }
   }
 
@@ -1092,11 +1090,13 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
   }
 
   /**
-   * Used for testing.
+   * Used by testing and by ManagedBlocker for Initial Load to prevent memory bloat from
+   * Elasticsearch indexing queue. Don't abuse this.
    * 
    * @return index queue implementation
    */
-  protected Queue<N> getQueueIndex() {
+  @Override
+  public Queue<N> getQueueIndex() {
     return queueIndex;
   }
 
@@ -1129,6 +1129,10 @@ public abstract class BasePersonRocket<N extends PersistentObject, D extends Api
 
   public AtomLaunchDirector getLaunchDirector() {
     return launchDirector;
+  }
+
+  public void setLaunchDirector(AtomLaunchDirector launchDirector) {
+    this.launchDirector = launchDirector;
   }
 
 }

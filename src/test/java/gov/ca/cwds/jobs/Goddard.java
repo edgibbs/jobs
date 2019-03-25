@@ -473,6 +473,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   }
 
   public Thread runKillThreadWait(final BasePersonRocket<T, M> target, long sleepMillis) {
+    markTestDone();
     final Thread t = new Thread(() -> {
       try {
         lock.lockInterruptibly();
@@ -490,6 +491,7 @@ public abstract class Goddard<T extends PersistentObject, M extends ApiGroupNorm
   }
 
   public Thread runKillThread(final BasePersonRocket<T, M> target, long sleepMillis) {
+    markTestDone();
     final Thread t = new Thread(() -> {
       try {
         lock.lockInterruptibly();

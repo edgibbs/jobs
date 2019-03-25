@@ -17,12 +17,19 @@ import org.hibernate.annotations.Type;
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
+@SuppressWarnings({"squid:S2160"})
 public class RawSafetyAlert extends ClientReference implements NeutronJdbcReader<RawSafetyAlert> {
 
   private static final long serialVersionUID = 1L;
 
   public enum ColumnPosition {
-    START, CLT_IDENTIFIER, SAL_THIRD_ID, SAL_ACTV_RNC, SAL_ACTV_DT, SAL_ACTV_GEC, SAL_ACTV_TXT, SAL_DACT_DT, SAL_DACT_GEC, SAL_DACT_TXT, SAL_LST_UPD_ID, SAL_LST_UPD_TS, SAL_IBMSNAP_LOGMARKER, SAL_IBMSNAP_OPERATION
+    START, CLT_IDENTIFIER, SAL_THIRD_ID, SAL_ACTV_RNC, SAL_ACTV_DT, SAL_ACTV_GEC, SAL_ACTV_TXT,
+
+    SAL_DACT_DT, SAL_DACT_GEC, SAL_DACT_TXT,
+
+    SAL_LST_UPD_ID, SAL_LST_UPD_TS,
+
+    SAL_IBMSNAP_LOGMARKER, SAL_IBMSNAP_OPERATION
   }
 
   // ================================

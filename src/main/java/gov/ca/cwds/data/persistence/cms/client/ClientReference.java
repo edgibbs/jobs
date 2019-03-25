@@ -17,7 +17,7 @@ import gov.ca.cwds.neutron.rocket.ClientSQLResource;
  * 
  * @author CWDS API Team
  */
-@SuppressWarnings({"squid:S1206"})
+@SuppressWarnings({"squid:S2160", "squid:S1206", "serial"})
 public abstract class ClientReference extends ApiObjectIdentity implements PersistentObject {
 
   private static final long serialVersionUID = 1L;

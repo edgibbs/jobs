@@ -2,7 +2,8 @@ package gov.ca.cwds.neutron.rocket;
 
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.CLEANUP_TEMP_CHG;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.DEL_OLD_TRACKS;
-import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_ALL;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_ALL_DYNAMIC;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_ALL_STATIC;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_KEY_BUNDLE;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_TRACK_CHANGES;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_IDS_LST_CHG;
@@ -239,8 +240,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(con);
 
       // SNAP-808: process changed records only once.
-      final Date overrideLastChgDate = rocket.getFlightPlan().getOverrideLastEndTime();
-      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(INS_LST_CHG_ALL,
+      final Date overrideLastChgDate = fp.getOverrideLastEndTime();
+      final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(
+          fp.isLastChangeDynamicSql() ? INS_LST_CHG_ALL_DYNAMIC : INS_LST_CHG_ALL_STATIC,
           rocket.determineLastSuccessfulRunTime(),
           overrideLastChgDate != null ? overrideLastChgDate : new Date());
 

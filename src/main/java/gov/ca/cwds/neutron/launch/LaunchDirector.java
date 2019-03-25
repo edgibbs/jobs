@@ -195,20 +195,14 @@ public class LaunchDirector implements AtomLaunchDirector {
   }
 
   @Override
-  public void markRocketAsInFlight(final TriggerKey key, NeutronRocket rocket) {
-    // rocketsInFlight.put(key, rocket);
-  }
+  public void markRocketAsInFlight(final TriggerKey key, NeutronRocket rocket) {}
 
   /**
    * QUESTION: is this needed?
    * 
    * @param key trigger key
    */
-  public void removeExecutingJob(final TriggerKey key) {
-    // if (rocketsInFlight.containsKey(key)) {
-    // rocketsInFlight.remove(key);
-    // }
-  }
+  public void removeExecutingJob(final TriggerKey key) {}
 
   public Map<TriggerKey, NeutronRocket> getRocketsInFlight() {
     return rocketsInFlight;

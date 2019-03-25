@@ -695,7 +695,6 @@ public class CaseRocket extends InitialLoadJdbcRocket<ReplicatedPersonCases, EsC
 
     // Retrieve records.
     try (final Connection con = getConnection()) {
-      final String schema = getDBSchemaName();
       NeutronJdbcUtils.enableBatchSettings(con);
 
       final String sqlAffectedClients = buildAffectedClientsSQL();

@@ -58,12 +58,13 @@ public class WorkPrepareWhatChanged extends NeutronWorkTotalImpl {
    * Set parameters and execute the Prepared Statement.
    * 
    * <p>
-   * <strong>WARNING!</strong>. DB2 may not optimize prepared statements in the same way as dynamic
-   * SQL and vice versa.
+   * <strong>WARNING!</strong> DB2 may not optimize prepared statements the same way as static SQL
+   * and vice versa. The DB2 dynamic statement cache must be enabled on the database itself.
+   * Furthermore, you may need to run stats on affected tables.
    * </p>
    * 
    * @param con database connection
-   * @see ClientSQLResource#INS_LST_CHG_ALL
+   * @see ClientSQLResource#INS_LST_CHG_ALL_DYNAMIC
    */
   @Override
   public void execute(Connection con) throws SQLException {
@@ -71,6 +72,7 @@ public class WorkPrepareWhatChanged extends NeutronWorkTotalImpl {
 
     try (final PreparedStatement stmt = createPreparedStatement(con)) {
       stmt.setInt(1, runId);
+
       final int totalParams = StringUtils.countMatches(sql, "?") - 1;
       for (int i = 2; i <= totalParams; i++) {
         stmt.setTimestamp(i++, startTs);

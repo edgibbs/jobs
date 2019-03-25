@@ -21,21 +21,18 @@ import javax.persistence.Enumerated;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.ca.cwds.data.persistence.cms.PlacementHomeAddress;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 import gov.ca.cwds.data.persistence.cms.rep.ReplicatedClient;
 import gov.ca.cwds.data.std.ApiGroupNormalizer;
 
+@SuppressWarnings({"squid:S2160"})
 public class RawClient extends ClientReference
     implements NeutronJdbcReader<RawClient>, ApiGroupNormalizer<ReplicatedClient>,
     Comparable<RawClient>, Comparator<RawClient>, NeutronReplicatedTime {
 
   private static final long serialVersionUID = 1L;
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(RawClient.class);
 
   private Map<String, RawClientAddress> clientAddress = new LinkedHashMap<>();
 

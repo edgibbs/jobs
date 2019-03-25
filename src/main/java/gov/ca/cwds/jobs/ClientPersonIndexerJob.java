@@ -172,13 +172,18 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
     return " ORDER BY CLT_IDENTIFIER ";
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * <p>
+   * Return no records from the obsolete MQT. Real work in {@link PeopleSummaryThreadHandler}.
+   * </p>
+   */
   @Override
   public String getInitialLoadQuery(String dbSchemaName) {
     String ret = null;
     final StringBuilder buf = new StringBuilder();
 
-    // Return no records from the obsolete MQT.
-    // Real work in PeopleSummaryThreadHandler.
     buf.append(
         "SELECT '1234567abc' AS CLT_IDENTIFIER FROM SYSIBM.SYSDUMMY1 X WHERE 1=2 AND '0' BETWEEN ':fromId' AND ':toId'")
         .append(getJdbcOrderBy()).append(" FOR READ ONLY WITH UR ");
@@ -382,9 +387,12 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
    * Both modes. Set this thread's handler to null.
    */
   public void deallocateThreadHandler() {
-    if (handler != null && handler.get() != null) {
-      handler.get().setRocket(null);
-      handler.get().clear();
+    // Oh no! SonarQube is worried sick about calling the same method multiple times!
+    // You know, that enormous cost of dereferencing a pointer ... OMG!
+    final PeopleSummaryThreadHandler h = handler != null ? handler.get() : null;
+    if (h != null) {
+      h.setRocket(null);
+      h.clear();
       handler.set(null);
     }
   }

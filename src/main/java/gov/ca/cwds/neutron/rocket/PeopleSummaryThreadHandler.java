@@ -93,7 +93,7 @@ public class PeopleSummaryThreadHandler
   protected static final int TFO = TYPE_FORWARD_ONLY;
   protected static final int CRO = CONCUR_READ_ONLY;
 
-  public static enum STEP {
+  public enum STEP {
 
     START("Job start"),
 
@@ -533,35 +533,35 @@ public class PeopleSummaryThreadHandler
 
         // SNAP-735: missing addresses.
         step(STEP.SEL_CLIENT_ADDRESS);
-        LOGGER.trace("SEL_CLI_ADDR: \n\n{}\n", SEL_CLI_ADDR);
+        LOGGER.trace("SEL_CLI_ADDR:\n\n{}\n", SEL_CLI_ADDR);
         read(stmtSelCliAddr, rs -> readClientAddress(rs));
 
         step(STEP.SEL_ADDRESS);
-        LOGGER.trace("SEL_ADDR: \n\n{}\n", SEL_ADDR);
+        LOGGER.trace("SEL_ADDR:\n\n{}\n", SEL_ADDR);
         read(stmtSelAddress, rs -> readAddress(rs));
 
         step(STEP.SEL_CLIENT_COUNTY);
-        LOGGER.trace("SEL_CLI_COUNTY: \n\n{}\n", SEL_CLI_COUNTY);
+        LOGGER.trace("SEL_CLI_COUNTY:\n\n{}\n", SEL_CLI_COUNTY);
         read(stmtSelCliCnty, rs -> readClientCounty(rs));
 
         step(STEP.SEL_AKA);
-        LOGGER.trace("SEL_AKA: \n{}", SEL_AKA);
+        LOGGER.trace("SEL_AKA:\n{}", SEL_AKA);
         read(stmtSelAka, rs -> readAka(rs));
 
         step(STEP.SEL_CASE);
-        LOGGER.trace("SEL_CASE: \n{}", SEL_CASE);
+        LOGGER.trace("SEL_CASE:\n{}", SEL_CASE);
         read(stmtSelCase, rs -> readCase(rs));
 
         step(STEP.SEL_CSEC);
-        LOGGER.trace("SEL_CSEC: \n{}", SEL_CSEC);
+        LOGGER.trace("SEL_CSEC:\n{}", SEL_CSEC);
         read(stmtSelCsec, rs -> readCsec(rs));
 
         step(STEP.SEL_ETHNIC);
-        LOGGER.trace("SEL_ETHNIC: \n{}", SEL_ETHNIC);
+        LOGGER.trace("SEL_ETHNIC:\n{}", SEL_ETHNIC);
         read(stmtSelEthnicity, rs -> readEthnicity(rs));
 
         step(STEP.SEL_SAFETY);
-        LOGGER.trace("SEL_SAFETY: \n{}", SEL_SAFETY);
+        LOGGER.trace("SEL_SAFETY:\n{}", SEL_SAFETY);
         read(stmtSelSafety, rs -> readSafetyAlert(rs));
 
         step(STEP.SET_PLACEMENT_KEY);

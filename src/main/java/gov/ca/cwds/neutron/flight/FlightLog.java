@@ -1,5 +1,6 @@
 package gov.ca.cwds.neutron.flight;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -127,7 +128,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
 
   private final Map<String, Long> timings = Collections.synchronizedMap(new LinkedHashMap<>(31));
 
-  private final Map<String, Object> otherMetrics =
+  private final Map<String, Serializable> otherMetrics =
       Collections.synchronizedMap(new LinkedHashMap<>(11));
 
   private boolean initialLoad;
@@ -800,7 +801,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
   }
 
   public void addOtherMetrics(FlightLog fl) {
-    final Map<String, Object> otherTimings = fl.getOtherMetrics();
+    final Map<String, Serializable> otherTimings = fl.getOtherMetrics();
     if (otherTimings != null && !otherTimings.isEmpty()) {
       otherMetrics.putAll(otherTimings);
     }
@@ -814,7 +815,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     timings.put(event, val);
   }
 
-  public void addOtherMetric(String event, Object val) {
+  public void addOtherMetric(String event, Serializable val) {
     otherMetrics.put(event, val);
   }
 
@@ -841,7 +842,7 @@ public class FlightLog implements ApiMarker, AtomRocketControl {
     new NeutronNewRelicNotifier().notifyMonitor(this, eventType);;
   }
 
-  public Map<String, Object> getOtherMetrics() {
+  public Map<String, Serializable> getOtherMetrics() {
     return otherMetrics;
   }
 

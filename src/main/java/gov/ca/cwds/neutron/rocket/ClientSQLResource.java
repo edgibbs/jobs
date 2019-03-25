@@ -3,7 +3,8 @@ package gov.ca.cwds.neutron.rocket;
 import gov.ca.cwds.data.std.ApiMarker;
 import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 
-@SuppressWarnings({"squid:S1192", "findbugs:HSC_HUGE_SHARED_STRING_CONSTANT"})
+@SuppressWarnings({"squid:S1192", "squid:S2160", "squid:S1206", "serial",
+    "findbugs:HSC_HUGE_SHARED_STRING_CONSTANT"})
 public class ClientSQLResource implements ApiMarker {
 
   private static final long serialVersionUID = 1L;
@@ -40,7 +41,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:off
   public static final String INS_TRACK_CHANGES =
         "INSERT INTO LC_TRK_CHG (CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP)\n"
-      + "SELECT CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP\n"
+      + "SELECT DISTINCT CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP\n"
       + "FROM TMP_LC_TRK_CHG \n"
       + "WHERE RUN_ID = ?";
   //@formatter:on
@@ -343,7 +344,7 @@ public class ClientSQLResource implements ApiMarker {
   //@formatter:on
 
   //@formatter:off
-  public static final String INS_LST_CHG_ALL =
+  public static final String INS_LST_CHG_ALL_DYNAMIC =
       "INSERT INTO TMP_LC_TRK_CHG (CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP, RUN_ID)\n"
     + "SELECT DISTINCT s1.CLIENT_ID, s1.OTHER_ID, s1.TBL, s1.IBMSNAP_LOGMARKER, s1.IBMSNAP_OPERATION, CAST(? AS INT) AS RUN_ID\n"
     + "FROM (\n"
@@ -401,6 +402,100 @@ public class ClientSQLResource implements ApiMarker {
     + "WHERE (s1.OTHER_ID, s1.TBL, s1.IBMSNAP_LOGMARKER, s1.IBMSNAP_OPERATION) NOT IN (\n"
     + "   SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
     + ")\n";
+  //@formatter:on
+
+  //@formatter:off
+  public static final String INS_LST_CHG_ALL_STATIC =
+      "INSERT INTO TMP_LC_TRK_CHG (CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP, RUN_ID)\n"
+        + "SELECT DISTINCT x.CLIENT_ID, x.OTHER_ID, x.TBL, x.IBMSNAP_LOGMARKER, x.IBMSNAP_OPERATION, CAST(? AS INT) AS RUN_ID FROM (\n"
+        + "   SELECT CLT.IDENTIFIER AS CLIENT_ID, clt.IDENTIFIER AS OTHER_ID, 'CLT' AS TBL, clt.IBMSNAP_LOGMARKER, clt.IBMSNAP_OPERATION\n"
+        + "   FROM CLIENT_T clt\n"
+        + "   WHERE CLT.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (clt.IDENTIFIER, 'CLT', clt.IBMSNAP_LOGMARKER, clt.IBMSNAP_OPERATION) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT cla.FKCLIENT_T AS CLIENT_ID, cla.IDENTIFIER AS OTHER_ID, 'CLA' AS TBL, cla.IBMSNAP_LOGMARKER, cla.IBMSNAP_OPERATION\n"
+        + "   FROM CL_ADDRT cla\n"
+        + "   WHERE CLA.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (cla.IDENTIFIER, 'CLA', cla.IBMSNAP_LOGMARKER, cla.IBMSNAP_OPERATION) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT cla.FKCLIENT_T AS CLIENT_ID, adr.IDENTIFIER AS OTHER_ID, 'ADR' AS TBL, adr.IBMSNAP_LOGMARKER, adr.IBMSNAP_OPERATION\n"
+        + "   FROM CL_ADDRT cla\n"
+        + "   JOIN ADDRS_T  adr ON cla.FKADDRS_T  = adr.IDENTIFIER\n"
+        + "   WHERE ADR.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "         AND (adr.IDENTIFIER, 'ADR', adr.IBMSNAP_LOGMARKER, adr.IBMSNAP_OPERATION) NOT IN (\n"
+        + "       SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "   )\n"
+        + " UNION ALL\n"
+        + "   SELECT eth.ESTBLSH_ID AS CLIENT_ID, eth.IDENTIFIER AS OTHER_ID, 'ETH' AS TBL, eth.IBMSNAP_LOGMARKER, eth.IBMSNAP_OPERATION\n"
+        + "   FROM CLSCP_ET eth\n"
+        + "   WHERE ETH.ESTBLSH_CD = 'C'\n"
+        + "     AND ETH.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (eth.IDENTIFIER, 'ETH', eth.IBMSNAP_LOGMARKER, eth.IBMSNAP_OPERATION) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT sal.FKCLIENT_T AS CLIENT_ID, sal.THIRD_ID AS OTHER_ID, 'SAL' AS TBL, sal.IBMSNAP_LOGMARKER, sal.IBMSNAP_OPERATION\n"
+        + "   FROM SAF_ALRT sal\n"
+        + "   WHERE sal.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (sal.THIRD_ID, 'SAL', sal.IBMSNAP_LOGMARKER, sal.IBMSNAP_OPERATION) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT csh.FKCHLD_CLT AS CLIENT_ID, csh.THIRD_ID AS OTHER_ID, 'CSH' AS TBL, csh.IBMSNAP_LOGMARKER, csh.IBMSNAP_OPERATION\n"
+        + "   FROM CSECHIST csh\n"
+        + "   WHERE csh.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (csh.THIRD_ID, 'CSH', csh.IBMSNAP_LOGMARKER, csh.IBMSNAP_OPERATION) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT cas.FKCHLD_CLT AS CLIENT_ID, cas.IDENTIFIER AS OTHER_ID, 'CAS' AS TBL, cas.IBMSNAP_LOGMARKER, cas.IBMSNAP_OPERATION\n"
+        + "   FROM CASE_T cas\n"
+        + "   WHERE cas.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (cas.IDENTIFIER, 'CAS', cas.IBMSNAP_LOGMARKER, cas.IBMSNAP_OPERATION) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT onm.FKCLIENT_T AS CLIENT_ID, onm.THIRD_ID AS OTHER_ID, 'ONM' AS TBL, onm.IBMSNAP_LOGMARKER, onm.IBMSNAP_OPERATION\n"
+        + "   FROM OCL_NM_T onm\n"
+        + "   WHERE onm.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (onm.THIRD_ID, 'ONM', onm.IBMSNAP_LOGMARKER, onm.IBMSNAP_OPERATION) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT cc.CLIENT_ID, cc.CLIENT_ID AS OTHER_ID, 'CC' AS TBL, cc.LST_UPD_TS AS IBMSNAP_LOGMARKER, cc.LST_UPD_OP AS IBMSNAP_OPERATION\n"
+        + "   FROM CLIENT_CNTY cc\n"
+        + "   WHERE cc.LST_UPD_TS BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "     AND (cc.CLIENT_ID, 'CC', cc.LST_UPD_TS, cc.LST_UPD_OP) NOT IN (\n"
+        + "         SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "     )\n"
+        + " UNION ALL\n"
+        + "   SELECT pe.FKCLIENT_T AS CLIENT_ID, pe.THIRD_ID AS OTHER_ID, 'PE' AS TBL, pe.IBMSNAP_LOGMARKER, pe.IBMSNAP_OPERATION\n"
+        + "   FROM PLC_EPST pe\n"
+        + "   WHERE pe.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "   AND (pe.THIRD_ID, 'PE', pe.IBMSNAP_LOGMARKER, pe.IBMSNAP_OPERATION) NOT IN (\n"
+        + "      SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "   )\n"
+        + " UNION ALL\n"
+        + "   SELECT ohp.FKPLC_EPST AS CLIENT_ID, ph.IDENTIFIER AS OTHER_ID, 'PH' AS TBL, ph.IBMSNAP_LOGMARKER, ph.IBMSNAP_OPERATION\n"
+        + "   FROM O_HM_PLT ohp\n"
+        + "   JOIN PLC_HM_T ph ON ph.IDENTIFIER = ohp.FKPLC_HM_T\n"
+        + "   WHERE ph.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "   AND DATE('LAST_RUN_END') BETWEEN OHP.START_DT AND NVL(OHP.END_DT, DATE('LAST_RUN_END'))\n"
+        + "   AND (ph.IDENTIFIER, 'PH', ph.IBMSNAP_LOGMARKER, ph.IBMSNAP_OPERATION) NOT IN (\n"
+        + "      SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "   )\n"
+        + " UNION ALL\n"
+        + "   SELECT ohp.FKPLC_EPST AS CLIENT_ID, ohp.IDENTIFIER AS OTHER_ID, 'OHP' AS TBL, ohp.IBMSNAP_LOGMARKER, ohp.IBMSNAP_OPERATION\n"
+        + "   FROM O_HM_PLT ohp\n"
+        + "   WHERE ohp.IBMSNAP_LOGMARKER BETWEEN 'LAST_RUN_START' AND 'LAST_RUN_END'\n"
+        + "   AND (ohp.IDENTIFIER, 'OHP', ohp.IBMSNAP_LOGMARKER, ohp.IBMSNAP_OPERATION) NOT IN (\n"
+        + "      SELECT z.OTHER_ID, z.TBL, z.REP_TS, z.REP_OP FROM LC_TRK_CHG z\n"
+        + "  )\n"
+        + ") x";
   //@formatter:on
 
   //@formatter:off

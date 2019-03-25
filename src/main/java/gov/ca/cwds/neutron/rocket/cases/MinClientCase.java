@@ -10,6 +10,7 @@ import gov.ca.cwds.data.std.ApiObjectIdentity;
  * 
  * @author CWDS API Team
  */
+@SuppressWarnings({"squid:S2160"})
 public class MinClientCase extends ApiObjectIdentity {
 
   private static final long serialVersionUID = 1L;

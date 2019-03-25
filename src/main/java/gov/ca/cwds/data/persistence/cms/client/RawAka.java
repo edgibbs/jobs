@@ -18,12 +18,19 @@ import org.hibernate.annotations.Type;
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
+@SuppressWarnings({"squid:S2160"})
 public class RawAka extends ClientReference implements NeutronJdbcReader<RawAka> {
 
   private static final long serialVersionUID = 1L;
 
   public enum ColumnPosition {
-    START, CLT_IDENTIFIER, ONM_THIRD_ID, ONM_FIRST_NM, ONM_LAST_NM, ONM_MIDDLE_NM, ONM_NMPRFX_DSC, ONM_NAME_TPC, ONM_SUFX_TLDSC, ONM_LST_UPD_ID, ONM_LST_UPD_TS, ONM_IBMSNAP_OPERATION, ONM_IBMSNAP_LOGMARKER
+    START, CLT_IDENTIFIER, ONM_THIRD_ID, ONM_FIRST_NM, ONM_LAST_NM, ONM_MIDDLE_NM,
+
+    ONM_NMPRFX_DSC, ONM_NAME_TPC, ONM_SUFX_TLDSC,
+
+    ONM_LST_UPD_ID, ONM_LST_UPD_TS,
+
+    ONM_IBMSNAP_OPERATION, ONM_IBMSNAP_LOGMARKER
   }
 
   // =====================================

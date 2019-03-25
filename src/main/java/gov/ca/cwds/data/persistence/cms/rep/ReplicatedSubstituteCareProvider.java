@@ -5,8 +5,6 @@ import java.util.Map;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.NamedNativeQuery;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -84,6 +82,7 @@ import gov.ca.cwds.rest.api.domain.cms.LegacyTable;
 @Table(name = "SB_PVDRT")
 @JsonPropertyOrder(alphabetic = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@SuppressWarnings({"squid:S2160", "serial"})
 public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
     implements CmsReplicatedEntity, ApiGroupNormalizer<ReplicatedSubstituteCareProvider> {
 
@@ -130,16 +129,6 @@ public class ReplicatedSubstituteCareProvider extends BaseSubstituteCareProvider
   public ElasticSearchLegacyDescriptor getLegacyDescriptor() {
     return ElasticTransformer.createLegacyDescriptor(getId(), getLastUpdatedTime(),
         LegacyTable.SUBSTITUTE_CARE_PROVIDER);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this, false);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj, false);
   }
 
 }

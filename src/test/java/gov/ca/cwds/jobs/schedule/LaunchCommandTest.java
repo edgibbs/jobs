@@ -128,17 +128,6 @@ public class LaunchCommandTest extends Goddard<TestNormalizedEntity, TestDenorma
     assertThat(actual, is(equalTo(expected)));
   }
 
-  // @Test
-  // public void getEsDao_Args__() throws Exception {
-  // ElasticsearchDao actual = target.getEsDao();
-  // assertThat(actual, is(notNullValue()));
-  // }
-  //
-  // @Test
-  // public void setEsDao_Args__ElasticsearchDao() throws Exception {
-  // target.setEsDao(esDao);
-  // }
-
   @Test
   public void instantiation() throws Exception {
     assertThat(target, notNullValue());

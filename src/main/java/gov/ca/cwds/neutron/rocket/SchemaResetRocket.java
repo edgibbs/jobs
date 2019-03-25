@@ -161,14 +161,14 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       } catch (InterruptedException e) {
         fail();
         Thread.currentThread().interrupt();
-        throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
+        throw CheeseRay.runtime(LOGGER, e,
+            "schemaRefreshCompleted(): DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
       } finally {
         lock.unlock();
       }
     }
 
     if (!isRunning()) {
-      LOGGER.warn("WTF schemaRefreshCompleted: #1");
       throw new NeutronRuntimeException("SCHEMA RESET: FLIGHT ABORTED!");
     }
 
@@ -219,7 +219,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
     } catch (InterruptedException e) {
       fail();
       Thread.currentThread().interrupt();
-      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "done(): DB2 SCHEMA RESET INTERRUPTED! {}",
+          e.getMessage());
     }
   }
 
@@ -237,7 +238,8 @@ public class SchemaResetRocket extends BasePersonRocket<DatabaseResetEntry, Data
       }
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      throw CheeseRay.runtime(LOGGER, e, "DB2 SCHEMA RESET INTERRUPTED! {}", e.getMessage());
+      throw CheeseRay.runtime(LOGGER, e, "fail(): DB2 SCHEMA RESET INTERRUPTED! {}",
+          e.getMessage());
     }
   }
 

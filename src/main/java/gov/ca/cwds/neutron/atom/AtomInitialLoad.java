@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 
@@ -26,6 +27,7 @@ import gov.ca.cwds.neutron.exception.NeutronCheckedException;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.rocket.NeutronManagedBlocker;
 import gov.ca.cwds.neutron.util.NeutronThreadUtils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 
@@ -141,7 +143,7 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     final String query = StringUtils.isNotBlank(sql) ? sql.trim()
         : getInitialLoadQuery(getDBSchemaName()).replaceAll(":fromId", range.getLeft())
             .replaceAll(":toId", range.getRight());
-    log.info("query: {}", query);
+    log.debug("query: {}", query);
 
     // SNAP-709: Connection is closed. ERRORCODE=-4470, SQLSTATE=08003.
     try {
@@ -184,6 +186,15 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
 
       // Done reading data. Process data, like cleansing and normalizing.
       handleJdbcDone(range);
+
+      // Don't start next range, until Elasticsearch has indexed all documents.
+      if (flightLog.isInitialLoad()) {
+        log.debug("Check ES indexing queue");
+        // NEXT: soft-code ES index queue threshold size.
+        ForkJoinPool.managedBlock(new NeutronManagedBlocker<N>(getQueueIndex(), 50000));
+        log.debug("ES indexing queue ok. Next bundle.");
+      }
+
       log.info("RANGE COMPLETED SUCCESSFULLY! {}-{}", range.getLeft(), range.getRight());
       return getResults();
     } catch (Exception e) {
@@ -215,9 +226,15 @@ public interface AtomInitialLoad<N extends PersistentObject, D extends ApiGroupN
     // Implement marker.
   }
 
+  Queue<N> getQueueIndex();
+
   /**
    * The "extract" part of ETL. Single producer, chained consumers. This rocket normalizes
    * <strong>without the transform thread</strong>.
+   * 
+   * <p>
+   * Typically used for multi-thread Initial Load, not Last Change mode.
+   * </p>
    */
   default void pullMultiThreadJdbc() {
     nameThread("extract_main");

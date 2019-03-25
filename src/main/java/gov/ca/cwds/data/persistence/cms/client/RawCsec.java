@@ -16,6 +16,7 @@ import org.hibernate.annotations.Type;
 import gov.ca.cwds.data.persistence.cms.VarargPrimaryKey;
 import gov.ca.cwds.data.persistence.cms.rep.CmsReplicationOperation;
 
+@SuppressWarnings({"squid:S2160"})
 public class RawCsec extends ClientReference implements NeutronJdbcReader<RawCsec> {
 
   private static final long serialVersionUID = 1L;

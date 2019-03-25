@@ -43,7 +43,7 @@ public class NeutronNewRelicNotifierTest extends Goddard {
   @Test
   public void append_A$StringBuilder$MapEntry() throws Exception {
     final StringBuilder buf = new StringBuilder();
-    Map.Entry e = mock(Map.Entry.class);
+    final Map.Entry e = mock(Map.Entry.class);
     target.append(buf, e);
   }
 

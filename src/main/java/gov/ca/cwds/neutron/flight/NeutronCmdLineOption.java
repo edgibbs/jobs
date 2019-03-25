@@ -121,6 +121,13 @@ public enum NeutronCmdLineOption {
       "Debug mode. Monitor database connections", false, 0, Boolean.class, ',')),
 
   /**
+   * Last change mode. Use <strong>dynamic</strong> SQL for DB2 "what changed" query.
+   */
+  LAST_CHG_DYNAMIC_SQL(
+      NeutronCmdLineParser.makeOpt("d", NeutronLongCmdLineName.CMD_LINE_DYNAMIC_SQL,
+          "Last change mode: use dynamic DB2 SQL", false, 0, Boolean.class, ',')),
+
+  /**
    * Drop index before running full (initial) load.
    */
   LEGACY_PEOPLE_MAPPING(

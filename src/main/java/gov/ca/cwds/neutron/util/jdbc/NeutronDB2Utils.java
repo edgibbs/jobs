@@ -149,8 +149,6 @@ public class NeutronDB2Utils {
       mon.stop();
       final StringBuilder buf = new StringBuilder();
 
-      // mon.moreData(NUMBER_NETWORK_TRIPS)); // WHERE THIS DB2 CONSTANT DEFINED??
-
       //@formatter:off
       buf.append("\n\tServer      elapsed time (microseconds): ").append(mon.getServerTimeMicros())
          .append("\n\tNetwork I/O elapsed time (microseconds): ").append(mon.getNetworkIOTimeMicros())
@@ -163,7 +161,7 @@ public class NeutronDB2Utils {
           buf.append("\n\tmonitor.moreData: ").append(i).append(":                     ")
               .append(mon.moreData(i));
         } catch (Exception e) {
-          LOGGER.warn("UNKNOWN DB2 MONITOR KEY: {}", i);
+          LOGGER.warn("UNKNOWN DB2 MONITOR KEY: {}", i, e);
           break;
         }
       }

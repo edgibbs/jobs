@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<msg xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="mqcap.xsd" version="1.0.0" dbName="DB1">
+       <trans isLast="1" segmentNum="1" cmitLSN="0000:0000:0000:06d6:87ab:0000:0000"
+            cmitTime="2003-10-31T12:12:12.000122">
+              <updateRow subName="S1" srcOwner="USER1" srcName="T1">
+                     <col name="COL1" isKey="1">
+                            <integer>
+                                   <afterVal>222</afterVal>
+                            </integer>
+                     </col>
+                     <col name="COL2">
+                            <varchar>
+                                   <beforeVal>Hello</beforeVal>
+                                   <afterVal xsi:nil="1"/>
+                            </varchar>
+                     </col>
+              </updateRow> 
+       </trans>
+</msg>
