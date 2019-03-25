@@ -685,8 +685,10 @@ public class FlightLogTest extends Goddard<ReplicatedClient, RawClient> {
 
   @Test
   public void getStartTimeAsDate_A$() throws Exception {
+    final Date now = new Date();
+    target.setStartTime(now.getTime());
     final Date actual = target.getStartTimeAsDate();
-    final Date expected = new Date();
+    final Date expected = now;
     assertThat(actual, is(greaterThanOrEqualTo(expected)));
   }
 
