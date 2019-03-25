@@ -23,7 +23,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'jacoco'
  
 project.ext {
-  coreApiVersion = "1.19.1_916-RC"
+  coreApiVersion = "1.19.1_927-RC"
   log4jVersion = "2.8"
   elasticsearchVersion = "5.5.0"
   personIndexerJob = "gov.ca.cwds.jobs.PersonIndexerJob"
