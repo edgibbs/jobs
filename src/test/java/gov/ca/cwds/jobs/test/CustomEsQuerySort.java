@@ -26,11 +26,11 @@ public class CustomEsQuerySort {
     protected JSONObject map; // raw hit
 
     @SuppressWarnings("unchecked")
-    protected HitSorter(final JSONObject map) {
-      this.map = map;
-      this.id = (String) map.get("_id");
-      this.lastName = (String) ((Map) map.get("_source")).get("last_name");
-      final JSONArray matchedQueries = (JSONArray) map.get("matched_queries");
+    protected HitSorter(final JSONObject hit) {
+      this.map = hit;
+      this.id = (String) hit.get("_id");
+      this.lastName = (String) ((Map) hit.get("_source")).get("last_name");
+      final JSONArray matchedQueries = (JSONArray) hit.get("matched_queries");
 
       matchedQueries.sort((o1, o2) -> {
         return StringUtils.trimToEmpty((String) o1).compareTo(StringUtils.trimToEmpty((String) o2));
