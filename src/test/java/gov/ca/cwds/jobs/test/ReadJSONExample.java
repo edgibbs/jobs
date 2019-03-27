@@ -29,15 +29,13 @@ public class ReadJSONExample {
     protected HitSorter(final Map map) {
       this.id = (String) map.get("_id");
       this.lastName = (String) map.get("last_name");
+
       final JSONArray matchedQueries = (JSONArray) map.get("matched_queries");
 
       matchedQueries.sort((o1, o2) -> {
-        final String s1 = (String) o1;
-        final String s2 = (String) o2;
-        return StringUtils.trimToEmpty(s1).compareTo(StringUtils.trimToEmpty(s2));
+        return StringUtils.trimToEmpty((String) o1).compareTo(StringUtils.trimToEmpty((String) o2));
       });
 
-      // System.out.println(matchedQueries);
       firstMatch = (String) matchedQueries.get(0);
     }
 
