@@ -29,7 +29,7 @@ public class CustomEsQuerySort {
     protected HitSorter(final JSONObject hit) {
       this.map = hit;
       this.id = (String) hit.get("_id");
-      this.lastName = (String) ((Map) hit.get("_source")).get("last_name");
+      this.lastName = StringUtils.trimToEmpty((String) ((Map) hit.get("_source")).get("last_name"));
       final JSONArray matchedQueries = (JSONArray) hit.get("matched_queries");
 
       matchedQueries.sort((o1, o2) -> {
