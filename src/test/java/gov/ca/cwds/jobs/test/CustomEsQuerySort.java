@@ -13,7 +13,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 // ${workspace_loc}/jobs/src/test/resources/fixtures/arbitrary.json
-public class ReadJSONExample {
+public class CustomEsQuerySort {
 
   protected static class HitSorter
       implements Serializable, Comparable<HitSorter>, Comparator<HitSorter> {
