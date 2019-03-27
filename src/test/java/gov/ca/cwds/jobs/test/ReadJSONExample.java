@@ -3,7 +3,6 @@ package gov.ca.cwds.jobs.test;
 import java.io.FileReader;
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -24,12 +23,13 @@ public class ReadJSONExample {
     protected String id;
     protected String lastName;
     protected String firstMatch;
+    protected JSONObject map; // raw hit
 
     @SuppressWarnings("unchecked")
-    protected HitSorter(final Map map) {
+    protected HitSorter(final JSONObject map) {
+      this.map = map;
       this.id = (String) map.get("_id");
       this.lastName = (String) ((Map) map.get("_source")).get("last_name");
-
       final JSONArray matchedQueries = (JSONArray) map.get("matched_queries");
 
       matchedQueries.sort((o1, o2) -> {
@@ -106,17 +106,20 @@ public class ReadJSONExample {
     final JSONObject jo = (JSONObject) obj;
     final JSONObject outerHits = (JSONObject) jo.get("hits");
     final JSONArray hits = (JSONArray) outerHits.get("hits");
-    // System.out.println(hits);
 
     final SortedSet<HitSorter> sortedHits = new TreeSet<>();
-
-    // Iterate hits:
-    for (Iterator iter = hits.iterator(); iter.hasNext();) {
-      final Map map = (Map) iter.next();
-      sortedHits.add(new HitSorter(map));
+    for (Object object : hits) {
+      final JSONObject o = (JSONObject) object;
+      sortedHits.add(new HitSorter(o));
     }
 
-    System.out.println(sortedHits);
+    final JSONArray newHits = new JSONArray();
+    for (HitSorter hs : sortedHits) {
+      newHits.add(hs.map);
+    }
+
+    outerHits.put("hits", newHits);
+    System.out.println(jo);
   }
 
 }
