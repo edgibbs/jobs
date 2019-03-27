@@ -25,7 +25,7 @@ public class CustomEsQuerySort {
     protected String firstMatch;
     protected JSONObject map; // raw hit
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected HitSorter(final JSONObject hit) {
       this.map = hit;
       this.id = (String) hit.get("_id");
