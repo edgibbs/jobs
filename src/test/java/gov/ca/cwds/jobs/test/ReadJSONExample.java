@@ -28,7 +28,7 @@ public class ReadJSONExample {
     @SuppressWarnings("unchecked")
     protected HitSorter(final Map map) {
       this.id = (String) map.get("_id");
-      this.lastName = (String) map.get("last_name");
+      this.lastName = (String) ((Map) map.get("_source")).get("last_name");
 
       final JSONArray matchedQueries = (JSONArray) map.get("matched_queries");
 
