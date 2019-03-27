@@ -159,6 +159,10 @@ public class NeutronPlayground {
 
   }
 
+  public void readJson(String raw) {
+
+  }
+
   public static class Foo implements Lame {
 
     @Override
@@ -183,7 +187,6 @@ public class NeutronPlayground {
     } catch (Exception e) {
       LOGGER.error("DIED", e);
     }
-
   }
 
   public static void main(String[] args) throws Exception {
@@ -199,7 +202,6 @@ public class NeutronPlayground {
     }
 
     System.out.print("releasable: " + blocker.isReleasable());
-
   }
 
 }
