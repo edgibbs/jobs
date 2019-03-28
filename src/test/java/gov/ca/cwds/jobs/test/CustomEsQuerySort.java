@@ -136,7 +136,7 @@ public class CustomEsQuerySort {
       outerHits.put("hits", newHits);
       System.out.println(jo);
     } finally {
-      // TODO: handle finally clause
+      // Reader closes automatically
     }
 
   }
