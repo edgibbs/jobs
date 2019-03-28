@@ -16,6 +16,10 @@ plugins {
     id 'com.github.jk1.dependency-license-report' version '0.3.14'
 }
 
+configurations {
+    jaxb
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
@@ -67,6 +71,10 @@ repositories {
 }
 
 dependencies {
+    jaxb (
+            'com.sun.xml.bind:jaxb-xjc:2.2.7',
+            'com.sun.xml.bind:jaxb-impl:2.2.7'
+    )
     // Elasticsearch:
     compile group: 'org.elasticsearch', name: 'elasticsearch', version: elasticsearchVersion
     compile group: 'org.elasticsearch.client', name: 'transport', version: elasticsearchVersion
@@ -174,6 +182,27 @@ publishing {
     }
   }
 }
+
+task jaxb {
+    System.setProperty('javax.xml.accessExternalSchema', 'all')
+    def jaxbTargetDir = file("${buildDir}/generated-sources/jaxb/")
+    doLast {
+        jaxbTargetDir.mkdirs()
+        ant.taskdef(
+                name: 'xjc',
+                classname: 'com.sun.tools.xjc.XJCTask',
+                classpath: configurations.jaxb.asPath
+        )
+        ant.jaxbTargetDir = jaxbTargetDir
+        ant.xjc(
+                destdir: '${jaxbTargetDir}',
+                package: 'mqcap.xsd',
+                schema: 'src/main/resources/qrep/mqcap/mqcap.xsd'
+        )
+    }
+}
+sourceSets.main.java.srcDirs "${buildDir}/generated-sources/jaxb"
+compileJava.dependsOn jaxb
 
 task printProps << {
     println System.properties['DB_CMS_JDBC_URL']
