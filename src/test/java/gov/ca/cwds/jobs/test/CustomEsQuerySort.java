@@ -1,5 +1,7 @@
 package gov.ca.cwds.jobs.test;
 
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+
 import java.io.FileReader;
 import java.io.Serializable;
 import java.util.Comparator;
@@ -7,7 +9,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,31 +23,36 @@ public class CustomEsQuerySort {
 
     protected String id;
     protected String lastName;
-    protected String firstMatch;
+    protected String firstName;
+
+    protected String matchCategory;
     protected JSONObject map; // raw hit
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected HitSorter(final JSONObject hit) {
       this.map = hit;
       this.id = (String) hit.get("_id");
-      this.lastName = StringUtils.trimToEmpty((String) ((Map) hit.get("_source")).get("last_name"));
+      this.lastName = trimToEmpty((String) ((Map) hit.get("_source")).get("last_name"));
+      this.firstName = trimToEmpty((String) ((Map) hit.get("_source")).get("first_name"));
       final JSONArray matchedQueries = (JSONArray) hit.get("matched_queries");
 
       matchedQueries.sort((o1, o2) -> {
-        return StringUtils.trimToEmpty((String) o1).compareTo(StringUtils.trimToEmpty((String) o2));
+        return trimToEmpty((String) o1).compareTo(trimToEmpty((String) o2));
       });
 
-      firstMatch = (String) matchedQueries.get(0);
+      matchCategory = (String) matchedQueries.get(0);
     }
 
     @Override
     public int compare(HitSorter h1, HitSorter h2) {
       int ret = 0;
 
-      ret =
-          StringUtils.trimToEmpty(h1.firstMatch).compareTo(StringUtils.trimToEmpty(h2.firstMatch));
+      ret = trimToEmpty(h1.matchCategory).compareTo(trimToEmpty(h2.matchCategory));
       if (ret == 0) {
-        ret = StringUtils.trimToEmpty(h1.lastName).compareTo(StringUtils.trimToEmpty(h2.lastName));
+        ret = trimToEmpty(h1.lastName).compareTo(trimToEmpty(h2.lastName));
+      }
+      if (ret == 0) {
+        ret = trimToEmpty(h1.firstName).compareTo(trimToEmpty(h2.firstName));
       }
 
       return ret;
@@ -61,7 +67,7 @@ public class CustomEsQuerySort {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((firstMatch == null) ? 0 : firstMatch.hashCode());
+      result = prime * result + ((matchCategory == null) ? 0 : matchCategory.hashCode());
       result = prime * result + ((id == null) ? 0 : id.hashCode());
       result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
       return result;
@@ -76,10 +82,10 @@ public class CustomEsQuerySort {
       if (getClass() != obj.getClass())
         return false;
       HitSorter other = (HitSorter) obj;
-      if (firstMatch == null) {
-        if (other.firstMatch != null)
+      if (matchCategory == null) {
+        if (other.matchCategory != null)
           return false;
-      } else if (!firstMatch.equals(other.firstMatch))
+      } else if (!matchCategory.equals(other.matchCategory))
         return false;
       if (id == null) {
         if (other.id != null)
@@ -96,7 +102,7 @@ public class CustomEsQuerySort {
 
     @Override
     public String toString() {
-      return "HitSorter [id=" + id + ", lastName=" + lastName + ", firstMatch=" + firstMatch + "]";
+      return "HitSorter [id=" + id + ", lastName=" + lastName + ", firstMatch=" + matchCategory + "]";
     }
 
   }
