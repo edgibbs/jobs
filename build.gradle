@@ -204,6 +204,10 @@ task jaxb {
 sourceSets.main.java.srcDirs "${buildDir}/generated-sources/jaxb"
 compileJava.dependsOn jaxb
 
+javadoc {
+    exclude "**/mqcap/xsd/**"
+}
+
 task printProps << {
     println System.properties['DB_CMS_JDBC_URL']
 }
