@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.test;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import java.io.FileReader;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
@@ -102,30 +103,36 @@ public class CustomEsQuerySort {
 
     @Override
     public String toString() {
-      return "HitSorter [id=" + id + ", lastName=" + lastName + ", firstMatch=" + matchCategory + "]";
+      return "HitSorter [id=" + id + ", lastName=" + lastName + ", firstMatch=" + matchCategory
+          + "]";
     }
 
   }
 
   public static void main(String[] args) throws Exception {
-    final Object obj = new JSONParser().parse(new FileReader(args[0]));
-    final JSONObject jo = (JSONObject) obj;
-    final JSONObject outerHits = (JSONObject) jo.get("hits");
-    final JSONArray hits = (JSONArray) outerHits.get("hits");
+    try (final Reader r = new FileReader(args[0])) {
+      final Object obj = new JSONParser().parse(r);
+      final JSONObject jo = (JSONObject) obj;
+      final JSONObject outerHits = (JSONObject) jo.get("hits");
+      final JSONArray hits = (JSONArray) outerHits.get("hits");
 
-    final SortedSet<HitSorter> sortedHits = new TreeSet<>();
-    for (Object object : hits) {
-      final JSONObject o = (JSONObject) object;
-      sortedHits.add(new HitSorter(o));
+      final SortedSet<HitSorter> sortedHits = new TreeSet<>();
+      for (Object object : hits) {
+        final JSONObject o = (JSONObject) object;
+        sortedHits.add(new HitSorter(o));
+      }
+
+      final JSONArray newHits = new JSONArray();
+      for (HitSorter hs : sortedHits) {
+        newHits.add(hs.map);
+      }
+
+      outerHits.put("hits", newHits);
+      System.out.println(jo);
+    } finally {
+      // TODO: handle finally clause
     }
 
-    final JSONArray newHits = new JSONArray();
-    for (HitSorter hs : sortedHits) {
-      newHits.add(hs.map);
-    }
-
-    outerHits.put("hits", newHits);
-    System.out.println(jo);
   }
 
 }
