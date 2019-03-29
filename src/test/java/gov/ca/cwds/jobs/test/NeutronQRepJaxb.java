@@ -11,11 +11,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.JAXBIntrospector;
 import javax.xml.bind.Marshaller;
 
+import mqcap.xsd.ObjectFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import mqcap.xsd.MsgType;
-import mqcap.xsd.TransType;
 
 /**
  * JAXB facilitator class for DB2 Q replication XML messages.
@@ -40,12 +40,12 @@ public class NeutronQRepJaxb {
   }
 
   public void write(MsgType msg, PrintStream out) throws JAXBException, IOException {
-    final JAXBContext jc = JAXBContext.newInstance(TransType.class.getPackage().getName());
+    final JAXBContext jc = JAXBContext.newInstance(MsgType.class.getPackage().getName());
     final Marshaller m = jc.createMarshaller();
 
     m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-    m.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "/qrep/mqcap/mqcap.xsd");
-    m.marshal(msg, out);
+    m.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "mqcap.xsd");
+    m.marshal(new ObjectFactory().createMsg(msg), out);
   }
 
   public static void main(String[] args) throws Exception {
