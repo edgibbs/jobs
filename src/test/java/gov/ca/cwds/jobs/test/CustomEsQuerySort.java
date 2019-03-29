@@ -115,6 +115,7 @@ public class CustomEsQuerySort {
 
   }
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     try (final Reader r = new FileReader(args[0])) {
       final Object obj = new JSONParser().parse(r);
