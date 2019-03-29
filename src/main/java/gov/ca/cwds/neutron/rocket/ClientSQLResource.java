@@ -42,8 +42,16 @@ public class ClientSQLResource implements ApiMarker {
   public static final String INS_TRACK_CHANGES =
         "INSERT INTO LC_TRK_CHG (CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP)\n"
       + "SELECT DISTINCT CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP\n"
-      + "FROM TMP_LC_TRK_CHG \n"
-      + "WHERE RUN_ID = ?";
+      + "FROM TMP_LC_TRK_CHG x\n"
+      + "WHERE RUN_ID = ?\n"
+      + "  AND NOT EXISTS (\n"
+      + "  SELECT 1 FROM LC_TRK_CHG y\n"
+      + "  WHERE y.CLIENT_ID = x.CLIENT_ID\n"
+      + "    AND y.OTHER_ID  = x.OTHER_ID\n"
+      + "    AND y.TBL       = x.TBL\n"
+      + "    AND y.REP_TS    = x.REP_TS\n"
+      + "    AND y.REP_OP    = x.REP_OP\n"
+      + ")";
   //@formatter:on
 
   //@formatter:off

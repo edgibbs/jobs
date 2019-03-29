@@ -46,6 +46,7 @@
 		"middle_name": {
 			"type": "text",
 			"store": true,
+			"fielddata": true,
 			"fields": {
 				"phonetic": {
 					"type": "text",
