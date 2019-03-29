@@ -37,7 +37,7 @@ public class ClientSQLResource implements ApiMarker {
   // SNAP-915: process changed records once.
   // =========================================
 
-  // Record changed records permanently after successful run.
+  // Store changed records after successful run.
   //@formatter:off
   public static final String INS_TRACK_CHANGES =
         "INSERT INTO LC_TRK_CHG (CLIENT_ID, OTHER_ID, TBL, REP_TS, REP_OP)\n"
