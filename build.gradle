@@ -206,6 +206,7 @@ compileJava.dependsOn jaxb
 
 javadoc {
     exclude "**/mqcap/xsd/**"
+    source = sourceSets.main.allJava
 }
 
 task printProps << {
