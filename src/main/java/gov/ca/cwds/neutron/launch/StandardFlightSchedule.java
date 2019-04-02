@@ -117,7 +117,7 @@ public enum StandardFlightSchedule {
   REPLICATION_TIME(ReplicationLagRocket.class, // rocket class
       "replication_time", // rocket name
       6, // start delay seconds.
-      3, // execute every N seconds.
+      2, // execute every N seconds.
       6000, // last run priority.. Highest wins.
       null, // N/A
       true, // run in Last Change mode
