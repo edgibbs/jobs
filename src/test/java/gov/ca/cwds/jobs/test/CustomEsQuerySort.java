@@ -14,7 +14,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-// ${workspace_loc}/jobs/src/test/resources/fixtures/arbitrary.json
 public class CustomEsQuerySort {
 
   protected static class HitSorter
@@ -115,6 +114,7 @@ public class CustomEsQuerySort {
 
   }
 
+  // ${workspace_loc}/jobs/src/test/resources/fixtures/arbitrary.json
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     try (final Reader r = new FileReader(args[0])) {
