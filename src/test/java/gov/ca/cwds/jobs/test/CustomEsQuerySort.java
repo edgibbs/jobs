@@ -14,6 +14,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+/**
+ * Prototype custom Elasticsearch result sorting class for SNAP-
+ * 
+ * @author CWDS API Team
+ */
 public class CustomEsQuerySort {
 
   protected static class HitSorter
