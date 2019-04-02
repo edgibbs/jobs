@@ -246,12 +246,12 @@ public class ClientSQLResource implements ApiMarker {
         "SELECT\n"
       + "     gt.IDENTIFIER        AS CLT_IDENTIFIER,\n"
       + "    onm.THIRD_ID          AS ONM_THIRD_ID,\n"
-      + "    onm.FIRST_NM          AS ONM_FIRST_NM,\n"
-      + "    onm.LAST_NM           AS ONM_LAST_NM,\n"
-      + "    onm.MIDDLE_NM         AS ONM_MIDDLE_NM,\n"
-      + "    onm.NMPRFX_DSC        AS ONM_NMPRFX_DSC,\n"
+      + "    TRIM(onm.FIRST_NM)    AS ONM_FIRST_NM,\n"
+      + "    TRIM(onm.LAST_NM)     AS ONM_LAST_NM,\n"
+      + "    TRIM(onm.MIDDLE_NM)   AS ONM_MIDDLE_NM,\n"
+      + "    TRIM(onm.NMPRFX_DSC)  AS ONM_NMPRFX_DSC,\n"
       + "    onm.NAME_TPC          AS ONM_NAME_TPC,\n"
-      + "    onm.SUFX_TLDSC        AS ONM_SUFX_TLDSC,\n"
+      + "    TRIM(onm.SUFX_TLDSC)  AS ONM_SUFX_TLDSC,\n"
       + "    onm.LST_UPD_ID        AS ONM_LST_UPD_ID,\n"
       + "    onm.LST_UPD_TS        AS ONM_LST_UPD_TS,\n"
       + "    onm.IBMSNAP_OPERATION AS ONM_IBMSNAP_OPERATION,\n"
@@ -348,7 +348,8 @@ public class ClientSQLResource implements ApiMarker {
         "INSERT INTO GT_ID (IDENTIFIER)\n" 
       + "SELECT DISTINCT pe.FKCLIENT_T\n"
       + "FROM PLC_EPST pe\n" 
-      + "WHERE pe.FKCLIENT_T BETWEEN ? AND ? AND pe.IBMSNAP_OPERATION IN ('I','U')";
+      + "WHERE pe.FKCLIENT_T BETWEEN ? AND ?\n"
+      + "  AND pe.IBMSNAP_OPERATION IN ('I','U')";
   //@formatter:on
 
   //@formatter:off
@@ -538,7 +539,7 @@ public class ClientSQLResource implements ApiMarker {
       + "   , MIN(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_min\n"
       + "   , MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
       + " FROM ADDRS_T\n"
-      + " WHERE IBMSNAP_LOGMARKER > (CAST(? AS TIMESTAMP) - 30 SECOND)\n"
+      + " WHERE IBMSNAP_LOGMARKER > (CAST(? AS TIMESTAMP) - 3 SECOND)\n"
       + " UNION ALL\n"
       + " SELECT \n"
       + "    'CLIENT_T'                         AS tbl\n"
@@ -546,7 +547,7 @@ public class ClientSQLResource implements ApiMarker {
       + "   , MIN(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_min\n"
       + "   , MAX(ADDED_TS - IBMSNAP_LOGMARKER) AS rep_max\n"
       + " FROM CLIENT_T\n"
-      + " WHERE IBMSNAP_LOGMARKER > (CAST(? AS TIMESTAMP) - 30 SECOND)\n"
+      + " WHERE IBMSNAP_LOGMARKER > (CAST(? AS TIMESTAMP) - 3 SECOND)\n"
       + ") x\n"
       + "ORDER BY REP_MAX DESC\n"
       + "FETCH FIRST 1 ROWS ONLY\n"
