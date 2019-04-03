@@ -76,6 +76,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   private int runId = 0;
 
+  private Float lastReplSecs = 0.0F;
+
   /**
    * Preferred ctor.
    * 
@@ -228,11 +230,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
         con.rollback();
 
         if (lag != null) {
-          // lastReplicationSeconds = lag.avgTime;
+          lastReplSecs = lag.avgTime;
           fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lag.avgTime);
           fl.addOtherMetric(STEP.REPLICATION_TIME_MIN_SECS.name().toLowerCase(), lag.minTime);
           fl.addOtherMetric(STEP.REPLICATION_TIME_MAX_SECS.name().toLowerCase(), lag.maxTime);
           fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(), lag.avgTime * 1000F);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lastReplSecs);
+          fl.addOtherMetric("blue_line_secs", lastReplSecs); // blue = replication
+          fl.addOtherMetric("blue_line_millis", lastReplSecs * 1000);
         }
       } finally {
         // Auto-close statements.
@@ -423,6 +428,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   public void setRunId(int runId) {
     this.runId = runId;
+  }
+
+  public Float getLastReplicationSeconds() {
+    return lastReplSecs;
+  }
+
+  public void setLastReplicationSeconds(Float lastReplicationSeconds) {
+    this.lastReplSecs = lastReplicationSeconds;
   }
 
 }

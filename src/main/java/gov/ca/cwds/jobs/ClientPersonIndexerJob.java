@@ -43,8 +43,6 @@ import gov.ca.cwds.neutron.rocket.ClientSQLResource;
 import gov.ca.cwds.neutron.rocket.InitialLoadJdbcRocket;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryLastChangeHandler;
 import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler;
-import gov.ca.cwds.neutron.rocket.PeopleSummaryThreadHandler.STEP;
-import gov.ca.cwds.neutron.rocket.ReplicationLagRocket;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
 import gov.ca.cwds.neutron.util.transform.EntityNormalizer;
@@ -120,14 +118,6 @@ public class ClientPersonIndexerJob extends InitialLoadJdbcRocket<ReplicatedClie
       // AR-325: replication metrics.
       lastEndTime = new Date();
       fl.setLastEndTime(lastEndTime.getTime());
-
-      final Float lastReplicationSecs = ReplicationLagRocket.getLastReplicationSeconds();
-      if (lastReplicationSecs != null) {
-        fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lastReplicationSecs);
-        fl.addOtherMetric("blue_line_secs", lastReplicationSecs); // blue = replication
-        fl.addOtherMetric("blue_line_millis", lastReplicationSecs * 1000);
-      }
-
     } finally {
       deallocateThreadHandler(); // SNAP-877: free memory no matter what
     }
