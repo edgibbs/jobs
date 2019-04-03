@@ -120,7 +120,7 @@ public enum StandardFlightSchedule {
       3, // execute every N seconds.
       6000, // last run priority.. Highest wins.
       null, // N/A
-      true, // run in Last Change mode
+      false, // run in Last Change mode
       false, // run in Initial Load
       false // People index
   ),
@@ -146,43 +146,43 @@ public enum StandardFlightSchedule {
   /**
    * Document root: Reporter.
    */
-  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 30, 25, 950, null, true, true, false),
+  REPORTER_S(ReporterSIndexerJob.class, "ps_reporter", 30, 25, 950, null, false, true, false),
 
   /**
    * Document root: Collateral Individual.
    */
   COLLATERAL_INDIVIDUAL_S(CollateralIndividualSIndexerJob.class, "ps_collateral_individual", 40, 30,
-      90, null, true, true, false),
+      90, null, false, true, false),
 
   /**
    * Document root: Service Provider.
    */
   SERVICE_PROVIDER_S(ServiceProviderSIndexerJob.class, "ps_service_provider", 65, 120, 85, null,
-      true, true, false),
+      false, true, false),
 
   /**
    * Document root: Substitute Care Provider.
    */
   SUBSTITUTE_CARE_PROVIDER_S(SubstituteCareProviderSIndexJob.class, "ps_substitute_care_provider",
-      30, 25, 80, null, true, true, false),
+      30, 25, 80, null, false, true, false),
 
   /**
    * Document root: Education Provider.
    */
   EDUCATION_PROVIDER_S(EducationProviderContactSIndexerJob.class, "ps_education_provider", 42, 120,
-      75, null, true, true, false),
+      75, null, false, true, false),
 
   /**
    * Document root: Other Adult in Home.
    */
   OTHER_ADULT_IN_HOME_S(OtherAdultInPlacemtHomeSIndexerJob.class, "ps_other_adult", 50, 120, 70,
-      null, true, true, false),
+      null, false, true, false),
 
   /**
    * Document root: Other Child in Home.
    */
   OTHER_CHILD_IN_HOME_S(OtherChildInPlacemtHomeSIndexerJob.class, "ps_other_child", 55, 120, 65,
-      null, true, true, false),
+      null, false, true, false),
 
   // ===============================
   // PEOPLE INDEX ROCKETS:
@@ -191,37 +191,37 @@ public enum StandardFlightSchedule {
   /**
    * Document root: Reporter.
    */
-  REPORTER(ReporterIndexerJob.class, "reporter", 14, 30, 950, null, true, true, true),
+  REPORTER(ReporterIndexerJob.class, "reporter", 14, 30, 950, null, false, true, true),
 
   /**
    * Document root: Collateral Individual.
    */
   COLLATERAL_INDIVIDUAL(CollateralIndividualIndexerJob.class, "collateral_individual", 20, 30, 90,
-      null, true, true, true),
+      null, false, true, true),
 
   /**
    * Document root: Service Provider.
    */
-  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 25, 120, 85, null, true,
+  SERVICE_PROVIDER(ServiceProviderIndexerJob.class, "service_provider", 25, 120, 85, null, false,
       true, true),
 
   /**
    * Document root: Substitute Care Provider.
    */
   SUBSTITUTE_CARE_PROVIDER(SubstituteCareProviderIndexJob.class, "substitute_care_provider", 30, 25,
-      80, null, true, true, true),
+      80, null, false, true, true),
 
   /**
    * Document root: Education Provider.
    */
   EDUCATION_PROVIDER(EducationProviderContactIndexerJob.class, "education_provider", 42, 120, 75,
-      null, true, true, true),
+      null, false, true, true),
 
   OTHER_ADULT_IN_HOME(OtherAdultInPlacemtHomeIndexerJob.class, "other_adult", 50, 120, 70, null,
-      true, true, true),
+      false, true, true),
 
   OTHER_CHILD_IN_HOME(OtherChildInPlacemtHomeIndexerJob.class, "other_child", 55, 120, 65, null,
-      true, true, true),
+      false, true, true),
 
   //
   // Nested JSON elements, inside a people/person document.
@@ -230,18 +230,19 @@ public enum StandardFlightSchedule {
   /**
    * Combines child and parent case.
    */
-  CASES(CaseRocket.class, "case", 70, 30, 550, "cases", true, true, true),
+  CASES(CaseRocket.class, "case", 70, 30, 550, "cases", false, true, true),
 
   /**
    * Relationships.
    */
-  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 90, 30, 600, "relationships", true,
+  RELATIONSHIP(RelationshipIndexerJob.class, "relationship", 90, 30, 600, "relationships", false,
       true, true),
 
   /**
    * Referrals.
    */
-  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 45, 30, 700, "referrals", true, true, true),
+  REFERRAL(ReferralHistoryIndexerJob.class, "referral", 45, 30, 700, "referrals", false, true,
+      true),
 
   // ===============================
   // SCREENINGS:
@@ -250,7 +251,7 @@ public enum StandardFlightSchedule {
   /**
    * Screenings in People index, <strong>NOT</strong> the separate Screenings index.
    */
-  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 90, 20, 900, "screenings", true,
+  INTAKE_SCREENING(IntakeScreeningJob.class, "intake_screening", 90, 20, 900, "screenings", false,
       true, true),
 
   // ===============================
