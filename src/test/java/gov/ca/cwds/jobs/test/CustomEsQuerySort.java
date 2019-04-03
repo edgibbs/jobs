@@ -3,6 +3,7 @@ package gov.ca.cwds.jobs.test;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.Comparator;
@@ -13,13 +14,16 @@ import java.util.TreeSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
- * Prototype custom Elasticsearch result sorting class for SNAP-
+ * Prototype custom Elasticsearch result sorting class for SNAP-1022.
  * 
  * @author CWDS API Team
  */
 public class CustomEsQuerySort {
+
+  private static final String HITS = "hits";
 
   protected static class HitSorter
       implements Serializable, Comparable<HitSorter>, Comparator<HitSorter> {
@@ -119,14 +123,12 @@ public class CustomEsQuerySort {
 
   }
 
-  // ${workspace_loc}/jobs/src/test/resources/fixtures/arbitrary.json
-  @SuppressWarnings("unchecked")
-  public static void main(String[] args) throws Exception {
-    try (final Reader r = new FileReader(args[0])) {
+  public void parse(String fileLocation) throws IOException, ParseException {
+    try (final Reader r = new FileReader(fileLocation)) {
       final Object obj = new JSONParser().parse(r);
       final JSONObject jo = (JSONObject) obj;
-      final JSONObject outerHits = (JSONObject) jo.get("hits");
-      final JSONArray hits = (JSONArray) outerHits.get("hits");
+      final JSONObject outerHits = (JSONObject) jo.get(HITS);
+      final JSONArray hits = (JSONArray) outerHits.get(HITS);
 
       final SortedSet<HitSorter> sortedHits = new TreeSet<>();
       for (Object object : hits) {
@@ -139,12 +141,18 @@ public class CustomEsQuerySort {
         newHits.add(hs.map);
       }
 
-      outerHits.put("hits", newHits);
+      outerHits.put(HITS, newHits);
       System.out.println(jo);
     } finally {
       // Reader closes automatically
     }
+  }
 
+  // ${workspace_loc}/jobs/src/test/resources/fixtures/arbitrary.json
+  @SuppressWarnings("unchecked")
+  public static void main(String[] args) throws Exception {
+    final CustomEsQuerySort sorter = new CustomEsQuerySort();
+    sorter.parse(args[0]);
   }
 
 }
