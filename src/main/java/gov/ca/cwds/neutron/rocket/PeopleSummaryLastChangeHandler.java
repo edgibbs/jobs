@@ -8,11 +8,13 @@ import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_LST_CHG_KEY_BUNDL
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.INS_TRACK_CHANGES;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_CLI_IDS_LST_CHG;
 import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_NEXT_RUN_ID;
+import static gov.ca.cwds.neutron.rocket.ClientSQLResource.SEL_REPL_TIME_REAL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Deque;
@@ -36,6 +38,7 @@ import gov.ca.cwds.neutron.enums.NeutronIntegerDefaults;
 import gov.ca.cwds.neutron.flight.FlightLog;
 import gov.ca.cwds.neutron.flight.FlightPlan;
 import gov.ca.cwds.neutron.jetpack.CheeseRay;
+import gov.ca.cwds.neutron.rocket.ReplicationLagRocket.ReplicationTimeMetric;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Monitor;
 import gov.ca.cwds.neutron.util.jdbc.NeutronDB2Utils;
 import gov.ca.cwds.neutron.util.jdbc.NeutronJdbcUtils;
@@ -72,6 +75,8 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
   private int rangeEnd = 0;
 
   private int runId = 0;
+
+  private Float lastReplSecs = 0.0F;
 
   /**
    * Preferred ctor.
@@ -212,6 +217,54 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
     return false;
   }
 
+  protected void measureReplicationLag(final Connection con, final Date lastRun) {
+    ReplicationTimeMetric lag = null;
+    final FlightLog fl = getRocket().getFlightLog();
+
+    try {
+      try (final PreparedStatement stmtSel = con.prepareStatement(SEL_REPL_TIME_REAL)) {
+        final Timestamp lastRunTs = new Timestamp(lastRun.getTime());
+        stmtSel.setTimestamp(1, lastRunTs);
+        stmtSel.setTimestamp(2, lastRunTs);
+        lag = pullReplicationMetrics(stmtSel.executeQuery());
+        con.rollback();
+
+        if (lag != null) {
+          lastReplSecs = lag.avgTime;
+          fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lag.avgTime);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MIN_SECS.name().toLowerCase(), lag.minTime);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MAX_SECS.name().toLowerCase(), lag.maxTime);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_MILLIS.name().toLowerCase(), lag.avgTime * 1000F);
+          fl.addOtherMetric(STEP.REPLICATION_TIME_SECS.name().toLowerCase(), lastReplSecs);
+          fl.addOtherMetric("blue_line_secs", lastReplSecs); // blue = replication
+          fl.addOtherMetric("blue_line_millis", lastReplSecs * 1000);
+        }
+      } finally {
+        // Auto-close statements.
+        try {
+          con.rollback();
+        } catch (Exception e) {
+          // eat it
+        }
+      }
+    } catch (Exception e) {
+      throw CheeseRay.runtime(LOGGER, e, "ERROR CHECKING REPLICATION LAG! {}", e.getMessage());
+    } finally {
+      // Auto-close session/connection.
+    }
+  }
+
+  protected ReplicationTimeMetric pullReplicationMetrics(final ResultSet rs) throws SQLException {
+    ReplicationTimeMetric ret = null;
+    while (getRocket().isRunning() && rs.next()) {
+      ret = new ReplicationTimeMetric(rs.getString(1), rs.getFloat(2), rs.getFloat(3),
+          rs.getFloat(4));
+      break;
+    }
+
+    return ret;
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -240,11 +293,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
       NeutronJdbcUtils.enableBatchSettings(con);
 
       // SNAP-808: process changed records only once.
+      final Date lastSuccessfulRun = rocket.determineLastSuccessfulRunTime();
       final Date overrideLastChgDate = fp.getOverrideLastEndTime();
       final String sqlChangedClients = NeutronDB2Utils.prepLastChangeSQL(
           fp.isLastChangeDynamicSql() ? INS_LST_CHG_ALL_DYNAMIC : INS_LST_CHG_ALL_STATIC,
-          rocket.determineLastSuccessfulRunTime(),
-          overrideLastChgDate != null ? overrideLastChgDate : new Date());
+          lastSuccessfulRun, overrideLastChgDate != null ? overrideLastChgDate : new Date());
+
+      step(STEP.REPLICATION_TIME_SECS);
+      measureReplicationLag(con, lastSuccessfulRun);
 
       // Get list of changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
@@ -375,6 +431,14 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
 
   public void setRunId(int runId) {
     this.runId = runId;
+  }
+
+  public Float getLastReplicationSeconds() {
+    return lastReplSecs;
+  }
+
+  public void setLastReplicationSeconds(Float lastReplicationSeconds) {
+    this.lastReplSecs = lastReplicationSeconds;
   }
 
 }

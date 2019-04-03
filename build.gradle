@@ -149,8 +149,9 @@ dependencies {
 	testCompile 'io.exemplary.guice:guice-behave:1.0.0'
 
 	testCompile 'com.github.tlrx:elasticsearch-test:1.2.1'
-
-	// LOCAL ANALYSIS:
+    testCompile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+  
+	// LOCAL ANALYSIS ONLY:
 	// testCompile group: 'org.elasticsearch.test', name: 'framework', version: 'elasticsearchVersion'
     // testCompile 'org.jacoco:jacoco:0.8.0'
 }
