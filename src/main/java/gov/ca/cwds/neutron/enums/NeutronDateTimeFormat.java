@@ -3,6 +3,11 @@ package gov.ca.cwds.neutron.enums;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+/**
+ * Common formats for date and timestamp.
+ * 
+ * @author CWDS API Team
+ */
 public enum NeutronDateTimeFormat {
 
   /**

@@ -299,6 +299,9 @@ public class PeopleSummaryLastChangeHandler extends PeopleSummaryThreadHandler {
           fp.isLastChangeDynamicSql() ? INS_LST_CHG_ALL_DYNAMIC : INS_LST_CHG_ALL_STATIC,
           lastSuccessfulRun, overrideLastChgDate != null ? overrideLastChgDate : new Date());
 
+      step(STEP.REPLICATION_TIME_SECS);
+      measureReplicationLag(con, lastSuccessfulRun);
+
       // Get list of changed clients and process in bundles of BUNDLE_KEY_SIZE.
       LOGGER.info("LAST CHANGE: Get changed client keys");
       step(STEP.FIND_CHANGED_CLIENT);
