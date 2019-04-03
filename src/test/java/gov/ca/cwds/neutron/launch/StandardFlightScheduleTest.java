@@ -76,26 +76,26 @@ public class StandardFlightScheduleTest extends Goddard {
 
     final List<StandardFlightSchedule> expected = new ArrayList<>();
     expected.add(StandardFlightSchedule.VOX_ROCKET);
-    expected.add(StandardFlightSchedule.REPLICATION_TIME);
+    // expected.add(StandardFlightSchedule.REPLICATION_TIME);
     expected.add(StandardFlightSchedule.PEOPLE_SUMMARY);
-    expected.add(StandardFlightSchedule.REPORTER_S);
-    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL_S);
-    expected.add(StandardFlightSchedule.SERVICE_PROVIDER_S);
-    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER_S);
-    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER_S);
-    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME_S);
-    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME_S);
-    expected.add(StandardFlightSchedule.REPORTER);
-    expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
-    expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
-    expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER);
-    expected.add(StandardFlightSchedule.EDUCATION_PROVIDER);
-    expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
-    expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
-    expected.add(StandardFlightSchedule.CASES);
-    expected.add(StandardFlightSchedule.RELATIONSHIP);
-    expected.add(StandardFlightSchedule.REFERRAL);
-    expected.add(StandardFlightSchedule.INTAKE_SCREENING);
+    // expected.add(StandardFlightSchedule.REPORTER_S);
+    // expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL_S);
+    // expected.add(StandardFlightSchedule.SERVICE_PROVIDER_S);
+    // expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER_S);
+    // expected.add(StandardFlightSchedule.EDUCATION_PROVIDER_S);
+    // expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME_S);
+    // expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME_S);
+    // expected.add(StandardFlightSchedule.REPORTER);
+    // expected.add(StandardFlightSchedule.COLLATERAL_INDIVIDUAL);
+    // expected.add(StandardFlightSchedule.SERVICE_PROVIDER);
+    // expected.add(StandardFlightSchedule.SUBSTITUTE_CARE_PROVIDER);
+    // expected.add(StandardFlightSchedule.EDUCATION_PROVIDER);
+    // expected.add(StandardFlightSchedule.OTHER_ADULT_IN_HOME);
+    // expected.add(StandardFlightSchedule.OTHER_CHILD_IN_HOME);
+    // expected.add(StandardFlightSchedule.CASES);
+    // expected.add(StandardFlightSchedule.RELATIONSHIP);
+    // expected.add(StandardFlightSchedule.REFERRAL);
+    // expected.add(StandardFlightSchedule.INTAKE_SCREENING);
 
     assertThat(actual, is(equalTo(expected)));
   }
